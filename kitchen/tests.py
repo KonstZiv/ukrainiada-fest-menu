@@ -1,8 +1,11 @@
+from datetime import timedelta
 from decimal import Decimal
 from typing import Any
+from unittest.mock import patch
 
 import pytest
 from django.test import Client
+from django.utils import timezone
 
 from kitchen.models import KitchenAssignment, KitchenTicket
 from kitchen.services import (
@@ -12,6 +15,7 @@ from kitchen.services import (
     take_ticket,
 )
 from kitchen.stats import get_dish_queue_stats
+from kitchen.tasks import escalate_pending_tickets
 from menu.models import Category, Dish
 from orders.models import Order, OrderItem
 
@@ -438,3 +442,67 @@ def test_stats_counts_done_recently(django_user_model: Any) -> None:
 def test_stats_empty_for_no_tickets() -> None:
     stats = get_dish_queue_stats()
     assert stats == {}
+
+
+# --- Escalation task tests ---
+
+
+def test_escalate_task_is_callable() -> None:
+    assert callable(escalate_pending_tickets)
+
+
+@pytest.mark.django_db
+def test_escalate_to_supervisor() -> None:
+    _, _, item = _make_dish_and_order()
+    ticket = KitchenTicket.objects.create(order_item=item)
+
+    # 7 min ago: past KITCHEN_TIMEOUT (5) but before MANAGER_TIMEOUT (5+5=10)
+    old_time = timezone.now() - timedelta(minutes=7)
+    KitchenTicket.objects.filter(pk=ticket.pk).update(created_at=old_time)
+
+    with patch("kitchen.tasks.settings") as mock_settings:
+        mock_settings.KITCHEN_TIMEOUT = 5
+        mock_settings.MANAGER_TIMEOUT = 5
+        result = escalate_pending_tickets()
+
+    ticket.refresh_from_db()
+    assert ticket.escalation_level == KitchenTicket.EscalationLevel.SUPERVISOR
+    assert result["supervisor"] >= 1
+
+
+@pytest.mark.django_db
+def test_escalate_to_manager() -> None:
+    _, _, item = _make_dish_and_order()
+    ticket = KitchenTicket.objects.create(order_item=item)
+
+    old_time = timezone.now() - timedelta(minutes=15)
+    KitchenTicket.objects.filter(pk=ticket.pk).update(created_at=old_time)
+
+    with patch("kitchen.tasks.settings") as mock_settings:
+        mock_settings.KITCHEN_TIMEOUT = 5
+        mock_settings.MANAGER_TIMEOUT = 5
+        result = escalate_pending_tickets()
+
+    ticket.refresh_from_db()
+    assert ticket.escalation_level == KitchenTicket.EscalationLevel.MANAGER
+    assert result["manager"] >= 1
+
+
+@pytest.mark.django_db
+def test_taken_tickets_not_escalated(django_user_model: Any) -> None:
+    cook = django_user_model.objects.create_user(
+        email="c@test.com", username="cook", password="testpass123", role="kitchen"
+    )
+    _, _, item = _make_dish_and_order()
+    ticket = KitchenTicket.objects.create(
+        order_item=item,
+        status=KitchenTicket.Status.TAKEN,
+        assigned_to=cook,
+    )
+    old_time = timezone.now() - timedelta(minutes=20)
+    KitchenTicket.objects.filter(pk=ticket.pk).update(created_at=old_time)
+
+    escalate_pending_tickets()
+
+    ticket.refresh_from_db()
+    assert ticket.escalation_level == KitchenTicket.EscalationLevel.NONE

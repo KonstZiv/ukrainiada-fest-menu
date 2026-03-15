@@ -135,6 +135,12 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+CELERY_BEAT_SCHEDULE = {
+    "escalate-kitchen-tickets": {
+        "task": "kitchen.escalate_pending_tickets",
+        "schedule": 60.0,
+    },
+}
 
 # ---------------------------------------------------------------------------
 # Channels (SSE via django-eventstream)
