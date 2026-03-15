@@ -12,7 +12,7 @@ from PIL import Image
 from menu.models import Category, Dish
 from orders.cart import add_to_cart, cart_item_count, get_cart, remove_from_cart
 from orders.models import Order, OrderItem
-from orders.services import confirm_cash_payment
+from orders.services import confirm_cash_payment, confirm_online_payment_stub
 
 
 class _FakeSession(dict):  # type: ignore[type-arg]
@@ -467,3 +467,34 @@ def test_confirm_payment_view(client: Client, django_user_model: Any) -> None:
     assert response.status_code == 302
     order.refresh_from_db()
     assert order.payment_status == Order.PaymentStatus.PAID
+
+
+# --- Online payment tests ---
+
+
+@pytest.mark.django_db
+def test_online_payment_stub_marks_paid() -> None:
+    order = Order.objects.create(payment_status=Order.PaymentStatus.UNPAID)
+    result = confirm_online_payment_stub(order)
+
+    assert result.payment_status == Order.PaymentStatus.PAID
+    assert result.payment_method == Order.PaymentMethod.ONLINE
+    assert result.payment_confirmed_at is not None
+
+
+@pytest.mark.django_db
+def test_online_payment_page_get(client: Client) -> None:
+    order = Order.objects.create(status=Order.Status.DRAFT)
+    response = client.get(f"/order/{order.id}/pay/")
+    assert response.status_code == 200
+    assert "Демо-режим" in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_online_payment_page_post(client: Client) -> None:
+    order = Order.objects.create(status=Order.Status.APPROVED)
+    response = client.post(f"/order/{order.id}/pay/")
+    assert response.status_code == 302
+    order.refresh_from_db()
+    assert order.payment_status == Order.PaymentStatus.PAID
+    assert order.payment_method == Order.PaymentMethod.ONLINE

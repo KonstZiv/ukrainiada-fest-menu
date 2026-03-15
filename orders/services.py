@@ -104,3 +104,28 @@ def confirm_cash_payment(order: Order, waiter: User) -> Order:
         ]
     )
     return order
+
+
+def confirm_online_payment_stub(order: Order) -> Order:
+    """Stub for online payment — always succeeds.
+
+    WARNING: This is a stub. Real payment gateway (Stripe/Revolut/PayPal)
+    will be integrated later. Current behavior: always confirms payment.
+    """
+    if order.payment_status == Order.PaymentStatus.PAID:
+        msg = "Order is already paid"
+        raise ValueError(msg)
+
+    order.payment_status = Order.PaymentStatus.PAID
+    order.payment_method = Order.PaymentMethod.ONLINE
+    order.payment_confirmed_at = timezone.now()
+    order.payment_escalation_level = 0
+    order.save(
+        update_fields=[
+            "payment_status",
+            "payment_method",
+            "payment_confirmed_at",
+            "payment_escalation_level",
+        ]
+    )
+    return order

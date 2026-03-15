@@ -15,7 +15,7 @@ from django.urls import reverse
 from menu.models import Dish
 from orders.cart import add_to_cart, get_cart, remove_from_cart
 from orders.models import Order
-from orders.services import submit_order_from_cart
+from orders.services import confirm_online_payment_stub, submit_order_from_cart
 
 
 class _EnrichedItem(TypedDict):
@@ -102,3 +102,18 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
         pk=order_id,
     )
     return render(request, "orders/order_detail.html", {"order": order})
+
+
+def order_pay_online(request: HttpRequest, order_id: int) -> HttpResponse:
+    """Online payment page (stub — always succeeds)."""
+    order = get_object_or_404(Order, pk=order_id)
+
+    if request.method == "POST":
+        try:
+            confirm_online_payment_stub(order)
+            messages.success(request, "Оплату підтверджено!")
+            return redirect("orders:order_detail", order_id=order_id)
+        except ValueError as e:
+            messages.error(request, str(e))
+
+    return render(request, "orders/pay_online.html", {"order": order})
