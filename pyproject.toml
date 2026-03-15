@@ -1,0 +1,114 @@
+[project]
+name = "ukrainiada-fest-menu"
+version = "0.1.0"
+description = "Festival menu management system for Ukrainiada festival"
+requires-python = ">=3.14"
+dependencies = [
+    "django>=6.0.1",
+    "pillow>=12.1.0",
+    "psycopg[binary]>=3.0",
+    "python-decouple>=3.8",
+    "celery>=5.4",
+    "redis>=5.0",
+    "django-celery-beat>=2.6",
+    "django-eventstream>=5.0",
+    "channels>=4.0",
+    "channels-redis>=4.0",
+    "uvicorn[standard]>=0.30",
+]
+
+[dependency-groups]
+dev = [
+    "django-debug-toolbar>=6.2.0",
+    "django-stubs>=5.2.9",
+    "mypy>=1.19.1",
+    "pre-commit>=4.0",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "pytest-django>=4.12.0",
+    "ruff>=0.14.14",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+exclude = [
+    "migrations",
+    "__pycache__",
+    ".venv",
+    "static",
+    "doc",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+line-ending = "lf"
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "D", "UP", "DJ", "B", "RUF"]
+ignore = [
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D105",
+    "D106",
+    "D107",
+    "D203", # конфліктує з D211
+    "D213", # конфліктує з D212
+    "F401",
+    "RUF100",
+    "I001",
+    "DJ001",
+    "RUF012",
+    # --- Дозволяємо кирилицю в коментарях, рядках та ідентифікаторах ---
+    # RUF001: неоднозначні Unicode-символи в рядках (кирилиця)
+    "RUF001",
+    # RUF002: неоднозначні Unicode-символи в docstrings
+    "RUF002",
+    # RUF003: неоднозначні Unicode-символи в коментарях
+    "RUF003",
+    # --- Довжина рядка ---
+    # E501: контроль довжини рядка делегуємо ruff format,
+    # а текстові описи (українською) часто перевищують 88 символів
+    "E501",
+]
+
+# ---------------------------------------------------------------------------
+# pytest — конфігурація тестового фреймворку
+# Документація: https://docs.pytest.org/en/stable/reference/customize.html
+# Інтеграція з Django: https://pytest-django.readthedocs.io/en/latest/
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+# Вказуємо Django settings-модуль, щоб pytest міг ініціалізувати Django
+DJANGO_SETTINGS_MODULE = "core_settings.settings.dev"
+# Які файли pytest розглядає як тестові
+python_files = ["tests.py", "test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+# --tb=short — скорочений traceback; -q — менше виводу
+addopts = "--tb=short -q"
+
+# ---------------------------------------------------------------------------
+# mypy — статичний аналізатор типів
+# Документація: https://mypy.readthedocs.io/en/stable/config_file.html
+# Плагін django-stubs: https://github.com/typeddjango/django-stubs
+# ---------------------------------------------------------------------------
+[tool.mypy]
+# Плагін для коректної типізації Django ORM, QuerySet, Manager тощо
+plugins = ["mypy_django_plugin.main"]
+python_version = "3.14"
+# Попереджувати, коли функція повертає Any
+warn_return_any = true
+# Попереджувати про невикористані налаштування mypy
+warn_unused_configs = true
+# Не падати на відсутніх стабах сторонніх бібліотек
+ignore_missing_imports = true
+# Виключаємо з перевірки міграції та документацію
+exclude = ["migrations", "doc"]
+
+# Налаштування плагіну django-stubs
+[tool.django-stubs]
+django_settings_module = "core_settings.settings.dev"

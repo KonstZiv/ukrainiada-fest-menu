@@ -1,0 +1,55 @@
+{# --------------------------------------------------------------------------- #}
+{# profile_edit.html — Редагування профілю користувача                        #}
+{#                                                                             #}
+{# Контекст (від view edit_profile):                                          #}
+{#   form — ProfileEditForm (first_name, last_name, email, avatar)            #}
+{#                                                                             #}
+{# Документація:                                                               #}
+{#   https://docs.djangoproject.com/en/stable/topics/forms/modelforms/         #}
+{# --------------------------------------------------------------------------- #}
+
+{% extends "base.html" %}
+
+{% block title %}
+  Jadran Sun — Редагувати профіль
+{% endblock %}
+
+{% block content %}
+<div class="container mt-3" style="max-width: 600px;">
+
+  <h2 class="mb-4">
+    <i class="bi bi-pencil"></i> Редагувати профіль
+  </h2>
+
+  {# --- Поточний аватар --- #}
+  {% if user.avatar %}
+    <div class="mb-3 text-center">
+      <img src="{{ user.avatar.url }}" alt="Поточний аватар"
+           style="width: 96px; height: 96px; object-fit: cover; border-radius: var(--radius-precise);">
+      <div class="text-muted small mt-1">Поточний аватар</div>
+    </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    {{ form.as_div }}
+
+    <div class="mt-4 d-flex gap-2">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check-lg"></i> Зберегти
+      </button>
+      <a href="{% url 'user:profile' %}" class="btn btn-outline-secondary">
+        Скасувати
+      </a>
+    </div>
+  </form>
+
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{# --------------------------------------------------------------------------- #}
+{# dish_list.html — Список усіх страв                                         #}
+{#                                                                             #}
+{# Використовує спільний компонент _dish_card.html для відображення страви.    #}
+{#                                                                             #}
+{# Контекст (від view dish_list):                                             #}
+{#   dishes — QuerySet усіх страв                                             #}
+{# --------------------------------------------------------------------------- #}
+
+{% extends "base.html" %}
+
+{% block title %}Jadran Sun — Страви{% endblock %}
+
+{% block content %}
+<div class="container mt-3" style="max-width: 800px;">
+
+  <h2 class="mb-4">Усі страви</h2>
+
+  {% for dish in dishes %}
+    {% include "components/_dish_card.html" with dish=dish %}
+  {% empty %}
+    <div class="text-center text-muted py-5">
+      <p>Страв поки немає.</p>
+    </div>
+  {% endfor %}
+
+</div>
+{% endblock %}

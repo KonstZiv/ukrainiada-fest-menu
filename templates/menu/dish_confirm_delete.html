@@ -1,0 +1,76 @@
+{# --------------------------------------------------------------------------- #}
+{# dish_confirm_delete.html — Підтвердження видалення страви (таска 2.7)      #}
+{#                                                                             #}
+{# При видаленні страви каскадно видаляються:                                 #}
+{#   - DishMainImage (OneToOne, CASCADE) — головне зображення                 #}
+{#   - DishPicture (ForeignKey, CASCADE) — всі додаткові зображення           #}
+{#   - Записи у проміжній таблиці Dish-Tag (M2M)                              #}
+{#                                                                             #}
+{# Контекст (від DishDeleteView):                                              #}
+{#   dish — об'єкт Dish, який буде видалено                                   #}
+{# --------------------------------------------------------------------------- #}
+
+{% extends "base.html" %}
+
+{% block title %}Jadran Sun — Видалити страву{% endblock %}
+
+{% block content %}
+<div class="container mt-3" style="max-width: 600px;">
+
+  <h2 class="mb-4 text-danger">
+    <i class="bi bi-exclamation-triangle"></i> Видалити страву
+  </h2>
+
+  {# --- Попередження --- #}
+  <div class="alert alert-danger">
+    <strong>Увага!</strong> Ви збираєтесь видалити страву
+    <strong>«{{ dish.title }}»</strong> ({{ dish.price }} EUR).
+  </div>
+
+  {# --- Що буде видалено --- #}
+  <div class="card mb-3">
+    <div class="card-body">
+      <h6 class="card-title">Разом зі стравою буде видалено:</h6>
+      <ul class="mb-0">
+        {# --- Головне зображення --- #}
+        {% if dish.main_image %}
+          <li>Головне зображення: «{{ dish.main_image.title }}»</li>
+        {% endif %}
+
+        {# --- Додаткові зображення --- #}
+        {% with additional=dish.additional_images.all %}
+          {% if additional %}
+            <li>
+              {{ additional|length }}
+              {% if additional|length == 1 %}додаткове зображення{% elif additional|length < 5 %}додаткових зображення{% else %}додаткових зображень{% endif %}:
+              <ul>
+                {% for pic in additional %}
+                  <li>{{ pic.title }}</li>
+                {% endfor %}
+              </ul>
+            </li>
+          {% endif %}
+        {% endwith %}
+
+        <li class="text-muted">
+          Зв'язки з тегами будуть видалені, але самі теги залишаться.
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  {# --- Форма підтвердження --- #}
+  <form method="post">
+    {% csrf_token %}
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-danger">
+        <i class="bi bi-trash"></i> Так, видалити
+      </button>
+      <a href="{% url 'menu:dish_list' %}" class="btn btn-outline-secondary">
+        Скасувати
+      </a>
+    </div>
+  </form>
+
+</div>
+{% endblock %}
