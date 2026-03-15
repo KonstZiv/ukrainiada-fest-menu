@@ -28,7 +28,7 @@
 
   <div class="card mb-3">
     <div class="card-header bg-warning text-dark">
-      <i class="bi bi-hourglass-split"></i> Черга ({{ pending|length }})
+      <i class="bi bi-hourglass-split"></i> Черга (<span id="pending-count">{{ pending|length }}</span>)
     </div>
     <ul class="list-group list-group-flush">
       {% for ticket in pending %}
