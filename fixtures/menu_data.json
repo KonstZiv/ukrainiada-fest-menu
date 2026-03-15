@@ -1,0 +1,1582 @@
+[
+{
+  "model": "menu.category",
+  "pk": 1,
+  "fields": {
+    "title": "Перші страви",
+    "description": "Традиційні та авторські супи, що зігрівають душу та дарують енергію.",
+    "number_in_line": 2
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 2,
+  "fields": {
+    "title": "М'ясні страви",
+    "description": "Соковиті стейки, ніжне філе та майстерно приготована дичина для справжніх гурманів.",
+    "number_in_line": 3
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 3,
+  "fields": {
+    "title": "Морепродукти",
+    "description": "Свіжий вилов, що пахне морем: від вишуканих креветок до ніжної морської риби.",
+    "number_in_line": 4
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 4,
+  "fields": {
+    "title": "Салати",
+    "description": "Хрусткі мікси свіжих овочів, зелені та авторських заправок для легкості та здоров'я.",
+    "number_in_line": 1
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 5,
+  "fields": {
+    "title": "Гарніри",
+    "description": "Ідеальне доповнення до основних страв: ароматна картопля, розсипчасті крупи та овочі гриль.",
+    "number_in_line": 5
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 6,
+  "fields": {
+    "title": "Випічка",
+    "description": "Домашній затишок у кожному шматочку: свіжоспечений хліб, булочки та пироги з печі.",
+    "number_in_line": 6
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 7,
+  "fields": {
+    "title": "Десерти",
+    "description": "Солодкі шедеври, що стануть ідеальним фіналом вашої трапези.",
+    "number_in_line": 7
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 8,
+  "fields": {
+    "title": "Холодні напої",
+    "description": "Освіжаючі лимонади, фреші та коктейлі, що дарують прохолоду в спекотний день.",
+    "number_in_line": 8
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 9,
+  "fields": {
+    "title": "Гарячі напої",
+    "description": "Ароматна кава та добірні сорти чаю для теплих розмов та бадьорого ранку.",
+    "number_in_line": 9
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 10,
+  "fields": {
+    "title": "Пиво",
+    "description": "Крафтові та класичні сорти пінного з найкращих броварень світу.",
+    "number_in_line": 10
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 11,
+  "fields": {
+    "title": "Вина",
+    "description": "Вишукана колекція вин, що розкривають смак кожної страви по-новому.",
+    "number_in_line": 11
+  }
+},
+{
+  "model": "menu.category",
+  "pk": 12,
+  "fields": {
+    "title": "Міцні напої",
+    "description": "Благородний вибір для поціновувачів міцного характеру та чистого смаку.",
+    "number_in_line": 12
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 1,
+  "fields": {
+    "title": "Український борщ",
+    "description": "Наваристий борщ із телятиною, подається зі сметаною та зеленню.",
+    "price": "8.00",
+    "weight": 400,
+    "calorie": 320,
+    "category": 1,
+    "availability": "available",
+    "tags": [
+      1
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 2,
+  "fields": {
+    "title": "Рибна чорба",
+    "description": "Традиційна густа чорногорська юшка з морської риби.",
+    "price": "7.50",
+    "weight": 350,
+    "calorie": 210,
+    "category": 1,
+    "availability": "available",
+    "tags": [
+      2,
+      4,
+      12
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 3,
+  "fields": {
+    "title": "Гарбузовий крем-суп",
+    "description": "Ніжний суп на кокосових вершках із насінням гарбуза.",
+    "price": "6.50",
+    "weight": 300,
+    "calorie": 180,
+    "category": 1,
+    "availability": "available",
+    "tags": [
+      7,
+      9,
+      12
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 4,
+  "fields": {
+    "title": "Бокельський бродет",
+    "description": "Вишуканий рибний суп-рагу з томатами та вином.",
+    "price": "9.50",
+    "weight": 400,
+    "calorie": 340,
+    "category": 1,
+    "availability": "available",
+    "tags": [
+      3,
+      15
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 5,
+  "fields": {
+    "title": "Овочевий мінестроне",
+    "description": "Легкий італійський суп із сезонних овочів.",
+    "price": "6.00",
+    "weight": 350,
+    "calorie": 120,
+    "category": 1,
+    "availability": "available",
+    "tags": [
+      6,
+      8,
+      11
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 6,
+  "fields": {
+    "title": "Курячий бульйон",
+    "description": "Прозорий бульйон із домашньою локшиною та морквою.",
+    "price": "5.50",
+    "weight": 300,
+    "calorie": 150,
+    "category": 1,
+    "availability": "available",
+    "tags": [
+      7
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 7,
+  "fields": {
+    "title": "Чевапі",
+    "description": "Балканські гриль-ковбаски з яловичини та свинини.",
+    "price": "11.00",
+    "weight": 350,
+    "calorie": 580,
+    "category": 2,
+    "availability": "available",
+    "tags": [
+      2
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 8,
+  "fields": {
+    "title": "Плескавиця",
+    "description": "Велика м'ясна котлета з сиром всередині, обсмажена на грилі.",
+    "price": "13.50",
+    "weight": 400,
+    "calorie": 620,
+    "category": 2,
+    "availability": "available",
+    "tags": [
+      2,
+      14
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 9,
+  "fields": {
+    "title": "Котлета по-київськи",
+    "description": "Куряче філе з ароматним вершковим маслом всередині.",
+    "price": "14.00",
+    "weight": 300,
+    "calorie": 490,
+    "category": 2,
+    "availability": "available",
+    "tags": [
+      1,
+      5
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 10,
+  "fields": {
+    "title": "Телячі медальйони",
+    "description": "Ніжна телятина під соусом із білих грибів.",
+    "price": "21.00",
+    "weight": 320,
+    "calorie": 450,
+    "category": 2,
+    "availability": "available",
+    "tags": [
+      5,
+      15
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 11,
+  "fields": {
+    "title": "Баранина під сачем",
+    "description": "Томлена баранина з овочами за традиційним рецептом.",
+    "price": "19.00",
+    "weight": 450,
+    "calorie": 710,
+    "category": 2,
+    "availability": "available",
+    "tags": [
+      2
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 12,
+  "fields": {
+    "title": "Грілована дорада",
+    "description": "Ціла риба на вугіллі з лимоном та розмарином.",
+    "price": "24.00",
+    "weight": 400,
+    "calorie": 280,
+    "category": 3,
+    "availability": "available",
+    "tags": [
+      4,
+      11,
+      15
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 13,
+  "fields": {
+    "title": "Кальмари на грилі",
+    "description": "Ніжні кальмари з часниковим соусом та зеленню.",
+    "price": "16.50",
+    "weight": 300,
+    "calorie": 220,
+    "category": 3,
+    "availability": "available",
+    "tags": [
+      3,
+      12
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 14,
+  "fields": {
+    "title": "Мідії в білому вині",
+    "description": "Свіжі мідії, приготовані з часником, петрушкою та сухим вином.",
+    "price": "18.00",
+    "weight": 500,
+    "calorie": 310,
+    "category": 3,
+    "availability": "available",
+    "tags": [
+      4,
+      15
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 15,
+  "fields": {
+    "title": "Креветки саганакі",
+    "description": "Запечені креветки в томатному соусі з сиром фета.",
+    "price": "20.00",
+    "weight": 280,
+    "calorie": 380,
+    "category": 3,
+    "availability": "available",
+    "tags": [
+      4,
+      5
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 16,
+  "fields": {
+    "title": "Шопський салат",
+    "description": "Свіжі овочі з тертою бринзою.",
+    "price": "6.50",
+    "weight": 300,
+    "calorie": 190,
+    "category": 4,
+    "availability": "available",
+    "tags": [
+      2,
+      9
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 17,
+  "fields": {
+    "title": "Салат з морепродуктами",
+    "description": "Мікс салатів, мідії, креветки та оливкова олія.",
+    "price": "14.50",
+    "weight": 250,
+    "calorie": 230,
+    "category": 4,
+    "availability": "available",
+    "tags": [
+      4,
+      12
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 18,
+  "fields": {
+    "title": "Цезар з куркою",
+    "description": "Класичний салат із гріл-куркою та соусом анчоус.",
+    "price": "10.00",
+    "weight": 320,
+    "calorie": 410,
+    "category": 4,
+    "availability": "available",
+    "tags": []
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 19,
+  "fields": {
+    "title": "Вінегрет",
+    "description": "Традиційний салат із печених овочів.",
+    "price": "5.50",
+    "weight": 250,
+    "calorie": 160,
+    "category": 4,
+    "availability": "available",
+    "tags": [
+      1,
+      8,
+      10
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 20,
+  "fields": {
+    "title": "Картопля по-селянськи",
+    "description": "Запечена картопля з часником та розмарином.",
+    "price": "4.50",
+    "weight": 250,
+    "calorie": 280,
+    "category": 5,
+    "availability": "available",
+    "tags": [
+      8,
+      11
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 21,
+  "fields": {
+    "title": "Блітва з картоплею",
+    "description": "Традиційний гарнір до риби з мангольду та картоплі.",
+    "price": "5.00",
+    "weight": 300,
+    "calorie": 150,
+    "category": 5,
+    "availability": "available",
+    "tags": [
+      2,
+      8,
+      12
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 22,
+  "fields": {
+    "title": "Овочі гриль",
+    "description": "Цукіні, баклажан, перець та грилі.",
+    "price": "7.00",
+    "weight": 250,
+    "calorie": 110,
+    "category": 5,
+    "availability": "available",
+    "tags": [
+      6,
+      8,
+      10
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 23,
+  "fields": {
+    "title": "Домашній хліб",
+    "description": "Свіжоспечений пшеничний хліб із хрусткою скоринкою.",
+    "price": "2.00",
+    "weight": 200,
+    "calorie": 450,
+    "category": 6,
+    "availability": "available",
+    "tags": [
+      9
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 24,
+  "fields": {
+    "title": "Бурек з м'ясом",
+    "description": "Традиційний листковий пиріг із соковитою начинкою.",
+    "price": "4.50",
+    "weight": 250,
+    "calorie": 520,
+    "category": 6,
+    "availability": "available",
+    "tags": [
+      2
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 25,
+  "fields": {
+    "title": "Пампушки з часником",
+    "description": "Маленькі пухкі булочки, ідеальні до борщу.",
+    "price": "3.00",
+    "weight": 150,
+    "calorie": 310,
+    "category": 6,
+    "availability": "available",
+    "tags": [
+      1
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 26,
+  "fields": {
+    "title": "Медовик",
+    "description": "Класичний багатошаровий торт із медом та сметанним кремом.",
+    "price": "6.50",
+    "weight": 150,
+    "calorie": 420,
+    "category": 7,
+    "availability": "available",
+    "tags": [
+      1
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 27,
+  "fields": {
+    "title": "Чорногорська палачинка",
+    "description": "Великий млинець із шоколадом та горіхами.",
+    "price": "5.00",
+    "weight": 200,
+    "calorie": 380,
+    "category": 7,
+    "availability": "available",
+    "tags": [
+      2
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 28,
+  "fields": {
+    "title": "Фруктовий салат",
+    "description": "Сезонні фрукти з м'ятою.",
+    "price": "6.00",
+    "weight": 200,
+    "calorie": 120,
+    "category": 7,
+    "availability": "available",
+    "tags": [
+      7,
+      8,
+      10
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 29,
+  "fields": {
+    "title": "Чіа-пудинг",
+    "description": "Корисний десерт на рослинному молоці з ягодами.",
+    "price": "7.00",
+    "weight": 180,
+    "calorie": 190,
+    "category": 7,
+    "availability": "available",
+    "tags": [
+      8,
+      10,
+      12
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 30,
+  "fields": {
+    "title": "Лимонад класичний",
+    "description": "Свіжий лимонний сік, м'ята та трішки цукру.",
+    "price": "4.00",
+    "weight": 350,
+    "calorie": 90,
+    "category": 8,
+    "availability": "available",
+    "tags": [
+      7
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 31,
+  "fields": {
+    "title": "Узвар",
+    "description": "Традиційний український напій із сухофруктів.",
+    "price": "3.50",
+    "weight": 300,
+    "calorie": 60,
+    "category": 8,
+    "availability": "available",
+    "tags": [
+      1,
+      10
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 32,
+  "fields": {
+    "title": "Свіжий апельсиновий сік",
+    "description": "100% натуральний сік.",
+    "price": "5.50",
+    "weight": 250,
+    "calorie": 110,
+    "category": 8,
+    "availability": "available",
+    "tags": [
+      10,
+      12
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 33,
+  "fields": {
+    "title": "Домашня кава",
+    "description": "Міцна чорна кава, приготовлена в джезві.",
+    "price": "2.50",
+    "weight": 100,
+    "calorie": 5,
+    "category": 9,
+    "availability": "available",
+    "tags": [
+      2
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 34,
+  "fields": {
+    "title": "Карпатський чай",
+    "description": "Збір трав із гірських схилів.",
+    "price": "4.50",
+    "weight": 400,
+    "calorie": 2,
+    "category": 9,
+    "availability": "available",
+    "tags": [
+      1,
+      10
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 35,
+  "fields": {
+    "title": "Капучино",
+    "description": "Класичний напій із пишною пінкою.",
+    "price": "3.50",
+    "weight": 200,
+    "calorie": 120,
+    "category": 9,
+    "availability": "available",
+    "tags": [
+      9
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 36,
+  "fields": {
+    "title": "Niksicko",
+    "description": "Найвідоміше чорногорське світле пиво.",
+    "price": "4.00",
+    "weight": 500,
+    "calorie": 210,
+    "category": 10,
+    "availability": "available",
+    "tags": [
+      2
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 37,
+  "fields": {
+    "title": "Львівське 1715",
+    "description": "Класичне українське світле пиво.",
+    "price": "4.50",
+    "weight": 500,
+    "calorie": 215,
+    "category": 10,
+    "availability": "available",
+    "tags": [
+      1
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 38,
+  "fields": {
+    "title": "Vranac Plantaze",
+    "description": "Класичне чорногорське червоне сухе вино.",
+    "price": "22.00",
+    "weight": 750,
+    "calorie": 600,
+    "category": 11,
+    "availability": "available",
+    "tags": [
+      2,
+      15
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 39,
+  "fields": {
+    "title": "Krstac White",
+    "description": "Унікальне чорногорське біле вино.",
+    "price": "24.00",
+    "weight": 750,
+    "calorie": 580,
+    "category": 11,
+    "availability": "available",
+    "tags": [
+      2,
+      15
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 40,
+  "fields": {
+    "title": "Лоза (Loza)",
+    "description": "Традиційна чорногорська виноградна ракія.",
+    "price": "4.00",
+    "weight": 50,
+    "calorie": 115,
+    "category": 12,
+    "availability": "available",
+    "tags": [
+      2
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 41,
+  "fields": {
+    "title": "Горілка медова",
+    "description": "Українська горілка з перцем та медом.",
+    "price": "4.50",
+    "weight": 50,
+    "calorie": 120,
+    "category": 12,
+    "availability": "available",
+    "tags": [
+      1,
+      14
+    ]
+  }
+},
+{
+  "model": "menu.dish",
+  "pk": 42,
+  "fields": {
+    "title": "яблуко",
+    "description": "сочне спіле яблуко",
+    "price": "2.00",
+    "weight": 250,
+    "calorie": 100,
+    "category": 7,
+    "availability": "available",
+    "tags": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      8,
+      9,
+      11,
+      13
+    ]
+  }
+},
+{
+  "model": "menu.tag",
+  "pk": 1,
+  "fields": {
+    "title": "Українська кухня",
+    "description": "Рідні смаки, що зігрівають серце: від духмяного борщу до золотистих вареників."
+  }
+},
+{
+  "model": "menu.tag",
+  "pk": 2,
+  "fields": {
+    "title": "Чорногорська кухня",
+    "description": "Справжній смак гір та полонин: традиційні м'ясні та сирні шедеври за старовинними рецептами."
+  }
+},
+{
+  "model": "menu.tag",
+  "pk": 3,
+  "fields": {
+    "title": "Бокельська кухня",
+    "description": "Унікальний міст між морем та історією — вишукане поєднання адріатичних традицій Которської затоки."
+  }
+},
+{
+  "model": "menu.tag",
+  "pk": 4,
+  "fields": {
+    "title": "Середземноморська кухня",
+    "description": "Сонце у кожній тарілці: легкість оливкової олії, свіжість трав та багатство морепродуктів."
+  }
+},
+{
+  "model": "menu.tag",
+  "pk": 5,
+  "fields": {
+    "title": "Вибір Шефа",
+    "description": "Наша гордість та рекомендація: страви, в які шеф-кухар вклав свій талант та натхнення."
+  }
+},
+{
+  "model": "menu.tag",
+  "pk": 6,
+  "fields": {
+    "title": "Сезонна страва",
+    "description": "Найкраще від природи саме зараз: готуємо з найсвіжіших продуктів поточного сезону."
+  }
+},
+{
+  "model": "menu.tag",
+  "pk": 7,
+  "fields": {
+    "title": "Дитяче меню",
+    "description": "Здорово, корисно та весело: спеціально розроблені страви, що неодмінно сподобаються малечі."
+  }
+},
+{
+  "model": "menu.tag",
+  "pk": 8,
+  "fields": {
+    "title": "Веганська страва",
+    "description": "Абсолютна гармонія рослинних інгредієнтів без жодного продукту тваринного походження."
+  }
+},
+{
+  "model": "menu.tag",
+  "pk": 9,
+  "fields": {
+    "title": "Вегетаріанська страва",
+    "description": "Збалансоване поєднання овочів, злаків та молочних продуктів для вашої енергії."
+  }
+},
+{
+  "model": "menu.tag",
+  "pk": 10,
+  "fields": {
+    "title": "Без цукру",
+    "description": "Природна насолода без шкоди для здоров'я — ідеальний вибір для тих, хто дбає про себе."
+  }
+},
+{
+  "model": "menu.tag",
+  "pk": 11,
+  "fields": {
+    "title": "Без глютену",
+    "description": "Безпечне та повноцінне харчування для тих, хто обирає життя без клейковини."
+  }
+},
+{
+  "model": "menu.tag",
+  "pk": 12,
+  "fields": {
+    "title": "Без лактози",
+    "description": "Легкість у кожному шматочку: ми дбаємо про ваш комфорт та особливості раціону."
+  }
+},
+{
+  "model": "menu.tag",
+  "pk": 13,
+  "fields": {
+    "title": "Без горіхів",
+    "description": "Безпечний вибір: гарантуємо відсутність горіхів у складі для вашого спокою."
+  }
+},
+{
+  "model": "menu.tag",
+  "pk": 14,
+  "fields": {
+    "title": "Гостро",
+    "description": "Для любителів яскравих вражень: пікантний смак із характером та вогником."
+  }
+},
+{
+  "model": "menu.tag",
+  "pk": 15,
+  "fields": {
+    "title": "Пасує до вина",
+    "description": "Ідеальний гастрономічний тандем, що розкриває найкращі ноти вашого напою."
+  }
+},
+{
+  "model": "menu.categorylogo",
+  "pk": 1,
+  "fields": {
+    "title": "Logo Перші страви",
+    "image": "category_logos/first-course2cd59f7e-b07b-4473-bd7a-2cc887c10e75.svg",
+    "category": 1
+  }
+},
+{
+  "model": "menu.categorylogo",
+  "pk": 2,
+  "fields": {
+    "title": "Logo М'ясні страви",
+    "image": "category_logos/meat-dishes06d92554-c317-4d62-b893-5fecefbafe72.svg",
+    "category": 2
+  }
+},
+{
+  "model": "menu.categorylogo",
+  "pk": 3,
+  "fields": {
+    "title": "Logo Морепродукти",
+    "image": "category_logos/sea-food9b4e5780-721b-45aa-9f5d-2c2e5028afd8.svg",
+    "category": 3
+  }
+},
+{
+  "model": "menu.categorylogo",
+  "pk": 4,
+  "fields": {
+    "title": "Logo Салати",
+    "image": "category_logos/saladbfd04364-e1b1-4231-98ec-2734d030d3ba.svg",
+    "category": 4
+  }
+},
+{
+  "model": "menu.categorylogo",
+  "pk": 5,
+  "fields": {
+    "title": "Logo Гарніри",
+    "image": "category_logos/side-dish9b0ea503-23ac-4058-9f36-f24a1af3eddc.svg",
+    "category": 5
+  }
+},
+{
+  "model": "menu.categorylogo",
+  "pk": 6,
+  "fields": {
+    "title": "Logo Випічка",
+    "image": "category_logos/bakingd6aecf84-f3fe-42b2-bae5-17ca59a24bbc.svg",
+    "category": 6
+  }
+},
+{
+  "model": "menu.categorylogo",
+  "pk": 7,
+  "fields": {
+    "title": "Logo Десерти",
+    "image": "category_logos/dessertc9dc23ac-39ab-4659-9a88-fe662becae08.svg",
+    "category": 7
+  }
+},
+{
+  "model": "menu.categorylogo",
+  "pk": 8,
+  "fields": {
+    "title": "Logo Холодні напої",
+    "image": "category_logos/cold-drink5e006054-ea92-4c07-9138-18a1b4b32653.svg",
+    "category": 8
+  }
+},
+{
+  "model": "menu.categorylogo",
+  "pk": 9,
+  "fields": {
+    "title": "Logo Гарячі напої",
+    "image": "category_logos/hot-drinks0b63b61a-dd49-43b3-8e06-759e0ce4352f.svg",
+    "category": 9
+  }
+},
+{
+  "model": "menu.categorylogo",
+  "pk": 10,
+  "fields": {
+    "title": "Logo Пиво",
+    "image": "category_logos/beer1e5e4b02-fc32-4848-98a1-f9448cc753bc.svg",
+    "category": 10
+  }
+},
+{
+  "model": "menu.categorylogo",
+  "pk": 11,
+  "fields": {
+    "title": "Logo Вина",
+    "image": "category_logos/wine2efb581c-400d-4027-a40d-149eea8b434d.svg",
+    "category": 11
+  }
+},
+{
+  "model": "menu.categorylogo",
+  "pk": 12,
+  "fields": {
+    "title": "Logo Міцні напої",
+    "image": "category_logos/spirt-drink82111b62-04b8-4269-bcc5-91a8d60e549a.svg",
+    "category": 12
+  }
+},
+{
+  "model": "menu.taglogo",
+  "pk": 1,
+  "fields": {
+    "title": "Logo Українська кухня",
+    "image": "tag_logos/ukrainian-cuisine4104aa01-ea29-4f7c-9a81-7cd909c1c48b.svg",
+    "tag": 1
+  }
+},
+{
+  "model": "menu.taglogo",
+  "pk": 2,
+  "fields": {
+    "title": "Logo Чорногорська кухня",
+    "image": "tag_logos/montenegrin-cuisined9942a92-2456-4600-8bd5-a4e994c67fb9.svg",
+    "tag": 2
+  }
+},
+{
+  "model": "menu.taglogo",
+  "pk": 3,
+  "fields": {
+    "title": "Logo Бокельська кухня",
+    "image": "tag_logos/bokel-cousinec3a98a8d-eb31-49ce-a737-fb74bf15ff71.svg",
+    "tag": 3
+  }
+},
+{
+  "model": "menu.taglogo",
+  "pk": 4,
+  "fields": {
+    "title": "Logo Середземноморська кухня",
+    "image": "tag_logos/miditerranean-cuisine446c156f-f46b-4f6c-be86-63b8fc4c801c.svg",
+    "tag": 4
+  }
+},
+{
+  "model": "menu.taglogo",
+  "pk": 5,
+  "fields": {
+    "title": "Logo Сезонна страва",
+    "image": "tag_logos/seasonal-dish7d7ba99a-4c25-47aa-b679-d093d298a511.svg",
+    "tag": 6
+  }
+},
+{
+  "model": "menu.taglogo",
+  "pk": 6,
+  "fields": {
+    "title": "Logo Дитяче меню",
+    "image": "tag_logos/for-kids-28ddf4371-38eb-4fe2-b152-de48076bd8bd.svg",
+    "tag": 7
+  }
+},
+{
+  "model": "menu.taglogo",
+  "pk": 7,
+  "fields": {
+    "title": "Logo Веганська страва",
+    "image": "tag_logos/vegan14a80abd-7e1f-40c8-8d1c-fcac5da297eb.svg",
+    "tag": 8
+  }
+},
+{
+  "model": "menu.taglogo",
+  "pk": 8,
+  "fields": {
+    "title": "Logo Вегетаріанська страва",
+    "image": "tag_logos/vegetarianea875f35-7302-4f48-b4d1-4ca9ebf22f35.svg",
+    "tag": 9
+  }
+},
+{
+  "model": "menu.taglogo",
+  "pk": 9,
+  "fields": {
+    "title": "Logo Без цукру",
+    "image": "tag_logos/sugar-freeeb08394b-5f85-4369-8c14-aa8dac2922bd.svg",
+    "tag": 10
+  }
+},
+{
+  "model": "menu.taglogo",
+  "pk": 10,
+  "fields": {
+    "title": "Logo Без глютену",
+    "image": "tag_logos/gluten-free60929fa5-83ac-4ab5-80ae-9e2eb49c7660.svg",
+    "tag": 11
+  }
+},
+{
+  "model": "menu.taglogo",
+  "pk": 11,
+  "fields": {
+    "title": "Logo Без лактози",
+    "image": "tag_logos/lactose-free28183049-c4e0-40bd-8afe-cc0c70df3581.svg",
+    "tag": 12
+  }
+},
+{
+  "model": "menu.taglogo",
+  "pk": 12,
+  "fields": {
+    "title": "Logo Без горіхів",
+    "image": "tag_logos/without-nuts72ae4359-1808-4e28-b650-8770fc464b59.svg",
+    "tag": 13
+  }
+},
+{
+  "model": "menu.taglogo",
+  "pk": 13,
+  "fields": {
+    "title": "Logo Гостро",
+    "image": "tag_logos/spicydf0c0b4b-a502-4141-a743-99d5cefa3bb3.svg",
+    "tag": 14
+  }
+},
+{
+  "model": "menu.taglogo",
+  "pk": 14,
+  "fields": {
+    "title": "Logo Пасує до вина",
+    "image": "tag_logos/goes-well-with-wine64a437f9-303b-46cd-a313-4ef07b45aa05.svg",
+    "tag": 15
+  }
+},
+{
+  "model": "menu.taglogo",
+  "pk": 15,
+  "fields": {
+    "title": "Логотип \"Вибір шефа\"",
+    "image": "tag_logos/cieff-recomendationff110fb0-1a0e-4718-9070-e5f1829bc939.svg",
+    "tag": 5
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 1,
+  "fields": {
+    "title": "Горілка медова з перцем, фото",
+    "image": "dish_main_images/honey-pepper-vodka01278fd3-9ed4-43cf-8c7a-0e330b2a39fa.jpg",
+    "dish": 41
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 2,
+  "fields": {
+    "title": "Ракія виноградна, фото",
+    "image": "dish_main_images/loza-rakiaadbfadea-ad83-438e-bd87-6bed47d3b68d.avif",
+    "dish": 40
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 3,
+  "fields": {
+    "title": "Krstac White, фото",
+    "image": "dish_main_images/krstacvinebbb628c9-fa1c-4063-a4d5-ca1bdfa9a380.webp",
+    "dish": 39
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 4,
+  "fields": {
+    "title": "Vranac Plantaze",
+    "image": "dish_main_images/13-plantaze-vranac-pro-corde-75cl6e5cf4a5-94fe-4143-8ecd-930ac6eeccaf.jpg",
+    "dish": 38
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 5,
+  "fields": {
+    "title": "Львівське 1715, фото",
+    "image": "dish_main_images/lvivske-1715e42d07c9-0139-4eb2-b86f-c103892e3fbb.jpg",
+    "dish": 37
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 6,
+  "fields": {
+    "title": "Капучино, фото",
+    "image": "dish_main_images/capuchinoda97f0a8-641c-4d61-ac5b-e85c75f987af.jpg",
+    "dish": 35
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 7,
+  "fields": {
+    "title": "Карпатський чай, фото",
+    "image": "dish_main_images/tea-karpaty5c209c60-f270-40cb-90ad-4bb0cea8a4d5.jpg",
+    "dish": 34
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 8,
+  "fields": {
+    "title": "Домашня кава, фото",
+    "image": "dish_main_images/home-coffeb28fdf66-9cf8-4d65-8f4b-fc2282432733.jpg",
+    "dish": 33
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 9,
+  "fields": {
+    "title": "Свіжий апельсиновий сік, фото",
+    "image": "dish_main_images/orange-fresh-juicef514601e-64c2-414b-831c-da1d86104be2.jpg",
+    "dish": 32
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 10,
+  "fields": {
+    "title": "Узвар, фото",
+    "image": "dish_main_images/uzvarafd406fc-ab73-466b-8f19-345c999c24fc.jpg",
+    "dish": 31
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 11,
+  "fields": {
+    "title": "Лимонад класичний, фото",
+    "image": "dish_main_images/firmovij-limonad-950x750w2257dff5-f884-430a-87a9-2905b3d0d23b.jpg",
+    "dish": 30
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 12,
+  "fields": {
+    "title": "Чіа-пудинг, фото",
+    "image": "dish_main_images/chia-puddingf59ce340-9b83-409e-865a-56cc742194c5.jpg",
+    "dish": 29
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 13,
+  "fields": {
+    "title": "Фруктовий салат, фото",
+    "image": "dish_main_images/fruits-salad75237ef3-b427-4ad3-9a63-a1e8d68acd48.jpg",
+    "dish": 28
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 14,
+  "fields": {
+    "title": "Чорногорська палачинка, фото",
+    "image": "dish_main_images/monte-palachinki0ca706c7-930a-41e5-8f97-7c4a6008b72a.jpeg",
+    "dish": 27
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 15,
+  "fields": {
+    "title": "Медовик, фото",
+    "image": "dish_main_images/honey-cake4abf8fc0-48d5-4281-acc7-161efa91d494.jpg",
+    "dish": 26
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 16,
+  "fields": {
+    "title": "Пампушки з часником, фото",
+    "image": "dish_main_images/garlic-breadb1c820c3-31eb-4045-bc6a-893cf0f87ac9.jpg",
+    "dish": 25
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 17,
+  "fields": {
+    "title": "Бурек з м'ясом, фото",
+    "image": "dish_main_images/sddefaulta777d3ae-7685-46ce-bb34-a6006c19e503.jpg",
+    "dish": 24
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 18,
+  "fields": {
+    "title": "Домашній хліб, фото",
+    "image": "dish_main_images/homemade-bread16e5e86c-1542-40e5-a4da-7dbfcf3f5d68.webp",
+    "dish": 23
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 19,
+  "fields": {
+    "title": "Овочі гриль, фото",
+    "image": "dish_main_images/ovoshi-v-tanda123bcd0-0fd9-409c-9983-9843635de385.jpg",
+    "dish": 22
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 20,
+  "fields": {
+    "title": "Блітва з картоплею, фото",
+    "image": "dish_main_images/blitva1920-1-1300x7321b2e0a72-8a49-4407-9b75-d017d4f92a45.jpg",
+    "dish": 21
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 21,
+  "fields": {
+    "title": "Картопля по-селянськиб, фото",
+    "image": "dish_main_images/kartoplya-po-selyanski-500x500ba5e92cf-cda1-45c3-b011-e445ba86c415.jpg",
+    "dish": 20
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 22,
+  "fields": {
+    "title": "Вінегрет, фото",
+    "image": "dish_main_images/big8b9bd6ab-aa4e-48bf-bc5f-8c9e0b14a834.webp",
+    "dish": 19
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 23,
+  "fields": {
+    "title": "Цезар з куркою, фото",
+    "image": "dish_main_images/cezar-chicken433f33d1-bbf2-4b10-b2a6-fa4ed5d12b95.jpg",
+    "dish": 18
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 24,
+  "fields": {
+    "title": "Салат з морепродуктами, фото",
+    "image": "dish_main_images/seafood-salad9798c543-c531-4f78-a0d0-f67d5878aba5.jpg",
+    "dish": 17
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 25,
+  "fields": {
+    "title": "Шопський салат, фото",
+    "image": "dish_main_images/schopsky-saladac70fc58-153d-4233-8f4d-ef02e1b39618.jpg",
+    "dish": 16
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 26,
+  "fields": {
+    "title": "Креветки саганакі, фото",
+    "image": "dish_main_images/saganaky-schrimps3041864b-6576-4053-8c43-2281fd473161.jpg",
+    "dish": 15
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 27,
+  "fields": {
+    "title": "Мідії в білому вині, фото",
+    "image": "dish_main_images/790-midii-v-belom-vine9095cd84-d10a-439c-9833-26dbc26bbef5.jpg",
+    "dish": 14
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 28,
+  "fields": {
+    "title": "Кальмари на грилі, фото",
+    "image": "dish_main_images/grilled-calamary41ad5fbc-b952-4dba-8a50-7decc3863f78.jpg",
+    "dish": 13
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 29,
+  "fields": {
+    "title": "Грілована дорада, фото",
+    "image": "dish_main_images/grilled-orado93225c53-580c-4807-8ab4-9c14afb3f49e.png",
+    "dish": 12
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 30,
+  "fields": {
+    "title": "Баранина під сачем, фото",
+    "image": "dish_main_images/sach-2e7c6bdd6-5300-44f2-948e-c818d0c5af5a.jpeg",
+    "dish": 11
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 31,
+  "fields": {
+    "title": "Телячі медальйони, фото",
+    "image": "dish_main_images/shutterstock_713037091d8f2f3b8-4c6a-4e42-b747-9e37bb4a8503.jpg",
+    "dish": 10
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 32,
+  "fields": {
+    "title": "Котлета по-київськи, фото",
+    "image": "dish_main_images/kyivskyi677f6c73-62a7-4e77-bdec-8e0b9ab3b74a.webp",
+    "dish": 9
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 33,
+  "fields": {
+    "title": "Плескавиця, фото",
+    "image": "dish_main_images/pleskavitsa4f7b363e-e691-4878-a4a5-af47d30757e4.jpeg",
+    "dish": 8
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 34,
+  "fields": {
+    "title": "Чевапі, фото",
+    "image": "dish_main_images/cevapi222f186481-88ef-41e7-8ad2-d37348c84897.jpg",
+    "dish": 7
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 35,
+  "fields": {
+    "title": "Курячий бульйон, фото",
+    "image": "dish_main_images/chicken-soupedd3e352f-9068-40f2-9a56-0eabf7f9f32c.jpg",
+    "dish": 6
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 36,
+  "fields": {
+    "title": "Овочевий мінестроне, фото",
+    "image": "dish_main_images/minestrone-vegetablea423a493-203a-4530-97a6-a2f11c5cf091.jpg",
+    "dish": 5
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 37,
+  "fields": {
+    "title": "Бокельський бродет, фото",
+    "image": "dish_main_images/bedro-indeiki-v-aerogrile_1746990412_0_u79kf6g_maxf2e0d365-775b-4a39-8e_Z7yFUyA.jpg",
+    "dish": 4
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 38,
+  "fields": {
+    "title": "Гарбузовий крем-суп, фото",
+    "image": "dish_main_images/pumpkin-soupe631b0903-f2f1-4f9c-982f-34c9b2f8d156.jpg",
+    "dish": 3
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 39,
+  "fields": {
+    "title": "Рибна чорба, фото",
+    "image": "dish_main_images/cfad02c1-5b71-4281-9241-b48fd11373b9.jpg",
+    "dish": 2
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 40,
+  "fields": {
+    "title": "Український борщ, фото",
+    "image": "dish_main_images/borsch3d0987b3-104c-48b3-a7e2-0c3d31f37d2b.webp",
+    "dish": 1
+  }
+},
+{
+  "model": "menu.dishmainimage",
+  "pk": 41,
+  "fields": {
+    "title": "яблуко зелене",
+    "image": "dish_main_images/apple_main3cbde8f0-c460-42e7-9dee-dbb21bf84a78.jpeg",
+    "dish": 42
+  }
+},
+{
+  "model": "menu.dishpicture",
+  "pk": 1,
+  "fields": {
+    "title": "лимонад з собою, фото",
+    "image": "dish_pictures/lemo-additional1c7fed86a-56c5-4092-9dda-10d68a480df9.webp",
+    "dish": 30
+  }
+},
+{
+  "model": "menu.dishpicture",
+  "pk": 2,
+  "fields": {
+    "title": "кілька яблук",
+    "image": "dish_pictures/apple_additional3737249f-531f-4d84-a4be-d6437b3f78b9.jpg",
+    "dish": 42
+  }
+},
+{
+  "model": "menu.dishpicture",
+  "pk": 3,
+  "fields": {
+    "title": "яблука",
+    "image": "dish_pictures/apple_additiional_25804b700-9d2b-4b9c-8fbc-25b60e4b6766.jpg",
+    "dish": 42
+  }
+}
+]

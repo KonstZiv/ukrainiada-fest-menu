@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Django 6+ restaurant menu management system for the Ukrainiada festival ("Jadran Sun"). Features: menu CRUD (categories, tags, dishes with images), user auth via email, avatar processing, search. UI in Ukrainian, code in English.
+Django 6+ restaurant menu management system for the Ukrainiada festival ("Jadran Sun"). Features: menu CRUD (categories, tags, dishes with images), user auth via email, avatar processing, search, SSE notifications. UI in Ukrainian, code in English.
 
 ## Commands
 
@@ -12,17 +12,17 @@ Django 6+ restaurant menu management system for the Ukrainiada festival ("Jadran
 # Install dependencies
 uv sync --group dev
 
-# Run dev server
-uv run python manage.py runserver
+# Start dev infrastructure (PostgreSQL + Redis)
+docker compose -f compose.dev.yml --env-file .env-dev up -d
 
-# Migrations
-uv run python manage.py makemigrations
+# Run migrations
 uv run python manage.py migrate
 
-# Seed database (run in order)
-uv run python fill_categories.py
-uv run python fill_tags.py
-uv run python fill_full_menu.py
+# Load fixture data (categories, tags, dishes with images)
+uv run python manage.py loaddata fixtures/menu_data.json
+
+# Run dev server
+uv run python manage.py runserver
 
 # Tests
 uv run pytest                                          # all tests
@@ -33,14 +33,20 @@ uv run pytest menu/tests.py -k "test_name"             # single test
 uv run ruff check .
 uv run ruff format .
 uv run mypy .
+
+# Pre-commit (runs automatically on git commit)
+uv run pre-commit run --all-files
 ```
 
 ## Architecture
 
 **Django apps:**
-- `core_settings/` — project settings, root URL config, debug toolbar (auto-enabled when DEBUG=True)
+- `core_settings/` — project settings (split: base/dev/prod), root URL config, ASGI with SSE, Celery app, debug toolbar (auto-enabled when DEBUG=True)
 - `menu/` — categories, tags, dishes with image models (SVG for logos, ImageField for dishes)
-- `user/` — custom User model with email as USERNAME_FIELD, avatar crop/resize on save
+- `user/` — custom User model with email as USERNAME_FIELD, avatar crop/resize on save, role-based access (Manager, Kitchen, Waiter, Visitor)
+- `orders/` — order management (empty, Sprint 1+)
+- `kitchen/` — kitchen display system (empty, Sprint 1+)
+- `notifications/` — SSE channels and event helpers via django-eventstream
 
 **Key design decisions:**
 - Image models are separate (CategoryLogo, TagLogo, DishMainImage, DishPicture) linked via OneToOneField/ForeignKey — not fields on the parent model
@@ -50,16 +56,18 @@ uv run mypy .
 - SVG uploads validated by both FileExtensionValidator and custom `validate_svg_content` (checks for `<svg>` / `<?xml>` markers)
 - Avatar processing: crop to min aspect ratio 0.7, resize to max 256×256 (settings: USER_AVATAR_ASPECT_RATIO, USER_AVATAR_MAX_PIXELS)
 - QuerySet optimization: `select_related` for OneToOne joins, `Prefetch` objects for nested prefetching in category_list
+- Dish.availability (AVAILABLE/LOW/OUT) — OUT dishes hidden from visitors, visible to staff
+- Settings use explicit env file loader (`env.py`): dev reads `.env-dev`, prod reads `.env`, CI uses env vars
 
-**Database:** SQLite3 (db.sqlite3). AUTH_USER_MODEL = "user.User".
+**Database:** PostgreSQL 18 (via Docker Compose). AUTH_USER_MODEL = "user.User".
 
 **Templates:** Bootstrap 5.3 + Bootstrap Icons. Component includes: `_navbar.html`, `_dish_card.html`, `_nav_pills.html`, `_order_fab.html`. Custom template filter `highlight` in `menu/templatetags/menu_extras.py`.
 
 **Media uploads:** `upload_image()` helper generates UUID-based filenames. Directories: `category_logos/`, `tag_logos/`, `dish_main_images/`, `dish_pictures/`, `avatars/`.
 
-## CI/CD (.gitlab-ci.yml)
+## CI/CD (.github/workflows/ci.yml)
 
-Runs on MRs to dev/main: `ruff check` + `ruff format --check`, `mypy`, `pytest --cov`. AI review via Gemini on MRs only.
+Runs on PRs/pushes to dev/main: `ruff check` + `ruff format --check`, `mypy`, `pytest --cov` (PostgreSQL service). AI review via Gemini on PRs only. Required secrets: `SECRET_KEY`, `CI_DB_PASSWORD`.
 
 ## Python Version
 
