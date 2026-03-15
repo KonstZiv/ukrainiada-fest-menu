@@ -71,7 +71,7 @@ def approve_order(order: Order, waiter: User) -> Order:
         order.status = Order.Status.APPROVED
         order.waiter = waiter
         order.approved_at = timezone.now()
-        order.save(update_fields=["status", "waiter", "approved_at", "updated_at"])
+        order.save(update_fields=["status", "waiter", "approved_at"])
         create_tickets_for_order(order)
 
     return order
