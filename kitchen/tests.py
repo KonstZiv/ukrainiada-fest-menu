@@ -11,6 +11,7 @@ from kitchen.services import (
     mark_ticket_done,
     take_ticket,
 )
+from kitchen.stats import get_dish_queue_stats
 from menu.models import Category, Dish
 from orders.models import Order, OrderItem
 
@@ -396,3 +397,44 @@ def test_ticket_done_view_post(client: Client, django_user_model: Any) -> None:
     assert response.status_code == 302
     ticket.refresh_from_db()
     assert ticket.status == KitchenTicket.Status.DONE
+
+
+# --- Stats tests ---
+
+
+@pytest.mark.django_db
+def test_stats_counts_pending() -> None:
+    _, _, item1 = _make_dish_and_order()
+    order2 = Order.objects.create()
+    item2 = OrderItem.objects.create(order=order2, dish=item1.dish, quantity=1)
+
+    KitchenTicket.objects.create(order_item=item1, status=KitchenTicket.Status.PENDING)
+    KitchenTicket.objects.create(order_item=item2, status=KitchenTicket.Status.PENDING)
+
+    stats = get_dish_queue_stats()
+    assert stats[item1.dish_id]["pending"] == 2
+
+
+@pytest.mark.django_db
+def test_stats_counts_done_recently(django_user_model: Any) -> None:
+    from django.utils import timezone
+
+    dish, _, item = _make_dish_and_order()
+    cook = django_user_model.objects.create_user(
+        email="c@test.com", username="cook", password="testpass123", role="kitchen"
+    )
+    KitchenTicket.objects.create(
+        order_item=item,
+        status=KitchenTicket.Status.DONE,
+        assigned_to=cook,
+        done_at=timezone.now(),
+    )
+
+    stats = get_dish_queue_stats()
+    assert stats[dish.id]["done_recently"] == 1
+
+
+@pytest.mark.django_db
+def test_stats_empty_for_no_tickets() -> None:
+    stats = get_dish_queue_stats()
+    assert stats == {}

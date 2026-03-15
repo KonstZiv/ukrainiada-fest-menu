@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from core_settings.types import AuthenticatedHttpRequest
+from kitchen.stats import get_dish_queue_stats
 from orders.models import Order
 from orders.services import approve_order
 from user.decorators import role_required
@@ -25,7 +26,12 @@ def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
             Order.Status.READY,
         ]
     ).prefetch_related("items__dish")
-    return render(request, "orders/waiter_order_list.html", {"orders": orders})
+    dish_stats = get_dish_queue_stats()
+    return render(
+        request,
+        "orders/waiter_order_list.html",
+        {"orders": orders, "dish_stats": dish_stats},
+    )
 
 
 @role_required(*WAITER_ROLES)
