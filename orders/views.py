@@ -23,9 +23,12 @@ class _EnrichedItem(TypedDict):
 def cart_add(request: HttpRequest) -> HttpResponse:
     """Add a dish to the session cart (POST only)."""
     if request.method == "POST":
-        dish_id = int(request.POST.get("dish_id", 0))
-        quantity = int(request.POST.get("quantity", 1))
-        if dish_id:
+        try:
+            dish_id = int(request.POST.get("dish_id", 0))
+            quantity = int(request.POST.get("quantity", 1))
+        except (ValueError, TypeError):
+            return redirect("orders:cart")
+        if dish_id > 0 and quantity > 0:
             add_to_cart(request, dish_id, quantity)
     return redirect("orders:cart")
 
