@@ -21,6 +21,11 @@ class Order(models.Model):
         UNPAID = "unpaid", "Не оплачено"
         PAID = "paid", "Оплачено"
 
+    class PaymentMethod(models.TextChoices):
+        NOT_SET = "not_set", "Не визначено"
+        CASH = "cash", "Готівка"
+        ONLINE = "online", "Онлайн"
+
     visitor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -45,6 +50,15 @@ class Order(models.Model):
         max_length=10,
         choices=PaymentStatus.choices,
         default=PaymentStatus.UNPAID,
+        db_index=True,
+    )
+    payment_method = models.CharField(
+        max_length=10,
+        choices=PaymentMethod.choices,
+        default=PaymentMethod.NOT_SET,
+    )
+    payment_escalation_level = models.IntegerField(
+        default=0,
         db_index=True,
     )
     notes = models.TextField(blank=True)

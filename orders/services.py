@@ -75,3 +75,32 @@ def approve_order(order: Order, waiter: User) -> Order:
         create_tickets_for_order(order)
 
     return order
+
+
+def confirm_cash_payment(order: Order, waiter: User) -> Order:
+    """Waiter confirms cash payment received.
+
+    Raises:
+        ValueError: if order is already paid or waiter is not assigned.
+
+    """
+    if order.payment_status == Order.PaymentStatus.PAID:
+        msg = "Order is already paid"
+        raise ValueError(msg)
+    if order.waiter_id != waiter.id:
+        msg = "Only the assigned waiter can confirm payment"
+        raise ValueError(msg)
+
+    order.payment_status = Order.PaymentStatus.PAID
+    order.payment_method = Order.PaymentMethod.CASH
+    order.payment_confirmed_at = timezone.now()
+    order.payment_escalation_level = 0
+    order.save(
+        update_fields=[
+            "payment_status",
+            "payment_method",
+            "payment_confirmed_at",
+            "payment_escalation_level",
+        ]
+    )
+    return order
