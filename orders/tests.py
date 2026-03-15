@@ -1,10 +1,12 @@
 import io
+from datetime import timedelta
 from decimal import Decimal
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from django.db import IntegrityError
+from django.utils import timezone
 from django.db.models import ProtectedError
 from django.test import Client
 from PIL import Image
@@ -13,6 +15,7 @@ from menu.models import Category, Dish
 from orders.cart import add_to_cart, cart_item_count, get_cart, remove_from_cart
 from orders.models import Order, OrderItem
 from orders.services import confirm_cash_payment, confirm_online_payment_stub
+from orders.tasks import escalate_unpaid_orders
 
 
 class _FakeSession(dict):  # type: ignore[type-arg]
@@ -498,3 +501,93 @@ def test_online_payment_page_post(client: Client) -> None:
     order.refresh_from_db()
     assert order.payment_status == Order.PaymentStatus.PAID
     assert order.payment_method == Order.PaymentMethod.ONLINE
+
+
+# --- Payment escalation tests ---
+
+
+def test_escalate_task_is_callable() -> None:
+    assert callable(escalate_unpaid_orders)
+
+
+@pytest.mark.django_db
+def test_escalate_to_senior_waiter(django_user_model: Any) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.UNPAID,
+    )
+    # 12 min ago: past PAY_TIMEOUT (10) but before 2*PAY_TIMEOUT (20)
+    old_time = timezone.now() - timedelta(minutes=12)
+    Order.objects.filter(pk=order.pk).update(delivered_at=old_time)
+
+    with patch("orders.tasks.settings") as mock_settings:
+        mock_settings.PAY_TIMEOUT = 10
+        result = escalate_unpaid_orders()
+
+    order.refresh_from_db()
+    assert order.payment_escalation_level == 1
+    assert result["senior_waiter"] >= 1
+
+
+@pytest.mark.django_db
+def test_escalate_to_manager(django_user_model: Any) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.UNPAID,
+    )
+    # 25 min ago: past 2*PAY_TIMEOUT (20)
+    old_time = timezone.now() - timedelta(minutes=25)
+    Order.objects.filter(pk=order.pk).update(delivered_at=old_time)
+
+    with patch("orders.tasks.settings") as mock_settings:
+        mock_settings.PAY_TIMEOUT = 10
+        result = escalate_unpaid_orders()
+
+    order.refresh_from_db()
+    assert order.payment_escalation_level == 2
+    assert result["manager"] >= 1
+
+
+@pytest.mark.django_db
+def test_paid_orders_not_escalated(django_user_model: Any) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.PAID,
+    )
+    old_time = timezone.now() - timedelta(minutes=30)
+    Order.objects.filter(pk=order.pk).update(delivered_at=old_time)
+
+    escalate_unpaid_orders()
+
+    order.refresh_from_db()
+    assert order.payment_escalation_level == 0
+
+
+@pytest.mark.django_db
+def test_not_delivered_orders_not_escalated(django_user_model: Any) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.READY,
+        payment_status=Order.PaymentStatus.UNPAID,
+    )
+
+    escalate_unpaid_orders()
+
+    order = Order.objects.first()
+    assert order is not None
+    assert order.payment_escalation_level == 0
