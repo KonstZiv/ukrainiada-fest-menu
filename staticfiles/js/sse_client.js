@@ -8,7 +8,7 @@
 
   if (typeof EventSource === 'undefined') return;
 
-  var source = new EventSource('/events/stream/');
+  var source = new EventSource(window.SSE_STREAM_URL || '/events/stream/');
 
   source.addEventListener('message', function (e) {
     var data;
