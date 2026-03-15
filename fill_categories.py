@@ -1,5 +1,6 @@
-import os
 from pathlib import Path
+
+import os
 
 import django
 
@@ -77,14 +78,12 @@ categories_data = [
     },
 ]
 
-print("--- Починаємо заповнення категорій ---")
+print("--- Starting categories population ---")
 
-# Використовуємо atomic, щоб або все збереглось, або нічого (якщо буде помилка)
 with transaction.atomic():
     for item in categories_data:
-        file_path = os.path.join(LOGOS_DIR, item["file"])
+        file_path = LOGOS_DIR / item["file"]
 
-        # 1. Створюємо/оновлюємо категорію
         category, created = Category.objects.get_or_create(
             title=item["title"], defaults={"description": item["desc"]}
         )
@@ -93,19 +92,15 @@ with transaction.atomic():
             category.description = item["desc"]
             category.save()
 
-        # 2. Обробка логотипу
-        if os.path.exists(file_path):
+        if file_path.exists():
             with open(file_path, "rb") as f:
-                # OneToOneField: get_or_create за категорією
                 logo_obj, logo_created = CategoryLogo.objects.get_or_create(
                     category=category, defaults={"title": f"Logo {item['title']}"}
                 )
-
-                # Зберігаємо файл
                 logo_obj.image.save(item["file"], File(f), save=True)
 
-            print(f"✅ Категорія '{item['title']}' готова.")
+            print(f"  OK: {item['title']}")
         else:
-            print(f"⚠️ Файл не знайдено: {file_path}")
+            print(f"  WARN: file not found: {file_path}")
 
-print("--- Заповнення завершено! Перевіряйте БД. ---")
+print("--- Categories population complete ---")

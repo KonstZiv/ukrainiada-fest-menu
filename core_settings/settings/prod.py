@@ -1,6 +1,6 @@
 """Production settings — deployed environment."""
 
-from .base import *  # noqa: F403, F401
+from .base import *  # noqa: F403
 from .env import config
 
 DEBUG = False

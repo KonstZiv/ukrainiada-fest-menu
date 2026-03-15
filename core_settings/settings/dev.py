@@ -1,6 +1,6 @@
 """Development settings — local machine with Docker infra services."""
 
-from .base import *  # noqa: F403, F401
+from .base import *  # noqa: F403
 from .env import config
 
 DEBUG = True

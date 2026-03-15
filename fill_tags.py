@@ -1,5 +1,6 @@
-import os
 from pathlib import Path
+
+import os
 
 import django
 
@@ -92,13 +93,12 @@ tags_data = [
     },
 ]
 
-print("--- Починаємо заповнення тегів ---")
+print("--- Starting tags population ---")
 
 with transaction.atomic():
     for item in tags_data:
-        file_path = os.path.join(LOGOS_DIR, item["file"])
+        file_path = LOGOS_DIR / item["file"]
 
-        # 1. Тег
         tag, created = Tag.objects.get_or_create(
             title=item["title"], defaults={"description": item["desc"]}
         )
@@ -106,15 +106,14 @@ with transaction.atomic():
             tag.description = item["desc"]
             tag.save()
 
-        # 2. Логотип тегу
-        if os.path.exists(file_path):
+        if file_path.exists():
             with open(file_path, "rb") as f:
                 logo_obj, logo_created = TagLogo.objects.get_or_create(
                     tag=tag, defaults={"title": f"Logo {item['title']}"}
                 )
                 logo_obj.image.save(item["file"], File(f), save=True)
-            print(f"✅ Тег '{item['title']}' додано.")
+            print(f"  OK: {item['title']}")
         else:
-            print(f"⚠️ Файл не знайдено: {file_path}")
+            print(f"  WARN: file not found: {file_path}")
 
-print("--- Заповнення тегів завершено! ---")
+print("--- Tags population complete ---")

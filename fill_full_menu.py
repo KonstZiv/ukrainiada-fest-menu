@@ -396,7 +396,7 @@ dishes_data = [
 
 
 def run_full_load():
-    print("--- Починаємо повне заповнення меню (60+ страв) ---")
+    print("--- Starting full menu population ---")
     with transaction.atomic():
         for d in dishes_data:
             category = Category.objects.filter(title=d["category"]).first()
@@ -418,7 +418,7 @@ def run_full_load():
                 tags_qs = Tag.objects.filter(title__in=d["tags"])
                 dish.tags.set(tags_qs)
 
-            print(f"✅ {'Створено' if created else 'Оновлено'}: {dish.title}")
+            print(f"  {'CREATED' if created else 'EXISTS'}: {dish.title}")
 
 
 if __name__ == "__main__":

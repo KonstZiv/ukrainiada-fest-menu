@@ -17,7 +17,7 @@ application = ProtocolTypeRouter(
         "http": URLRouter(
             [
                 *django_eventstream.routing.urlpatterns,
-                re_path(r"", django_asgi_app),  # type: ignore[arg-type]
+                re_path(r"^", django_asgi_app),  # type: ignore[arg-type]
             ]
         ),
     }
