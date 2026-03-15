@@ -5,7 +5,6 @@ from __future__ import annotations
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 
-from django_eventstream import send_event  # noqa: F401 — ensure app is loaded
 from django_eventstream.eventresponse import EventResponse
 
 from notifications.channels import channels_for_user
