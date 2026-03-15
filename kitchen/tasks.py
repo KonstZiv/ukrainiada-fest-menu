@@ -23,13 +23,11 @@ def escalate_pending_tickets() -> dict[str, int]:
     Returns count of escalated tickets per level for logging.
     """
     now = timezone.now()
-    manager_timeout = timedelta(
-        minutes=settings.KITCHEN_TIMEOUT + settings.MANAGER_TIMEOUT
-    )
-    kitchen_timeout = timedelta(minutes=settings.KITCHEN_TIMEOUT)
+    kitchen_delay = timedelta(minutes=settings.KITCHEN_TIMEOUT)
+    manager_delay = timedelta(minutes=settings.MANAGER_TIMEOUT)
 
     # Escalate to MANAGER (level 2) first — broader threshold
-    manager_threshold = now - manager_timeout
+    manager_threshold = now - (kitchen_delay + manager_delay)
     manager_count = KitchenTicket.objects.filter(
         status=KitchenTicket.Status.PENDING,
         escalation_level__lt=KitchenTicket.EscalationLevel.MANAGER,
@@ -37,7 +35,7 @@ def escalate_pending_tickets() -> dict[str, int]:
     ).update(escalation_level=KitchenTicket.EscalationLevel.MANAGER)
 
     # Escalate to SUPERVISOR (level 1) — only NONE level
-    supervisor_threshold = now - kitchen_timeout
+    supervisor_threshold = now - kitchen_delay
     supervisor_count = KitchenTicket.objects.filter(
         status=KitchenTicket.Status.PENDING,
         escalation_level=KitchenTicket.EscalationLevel.NONE,
