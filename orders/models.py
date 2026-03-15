@@ -53,7 +53,7 @@ class Order(models.Model):
         db_index=True,
     )
     payment_method = models.CharField(
-        max_length=10,
+        max_length=20,
         choices=PaymentMethod.choices,
         default=PaymentMethod.NOT_SET,
     )
