@@ -1,0 +1,14 @@
+.git
+.env
+.env-dev
+*.pyc
+__pycache__
+.pytest_cache
+.mypy_cache
+.ruff_cache
+db.sqlite3
+media/
+static_collected/
+.venv
+doc/
+plan/
