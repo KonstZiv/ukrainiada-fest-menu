@@ -12,6 +12,8 @@
 #   https://docs.djangoproject.com/en/stable/ref/class-based-views/generic-display/
 # ---------------------------------------------------------------------------
 
+from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.models import AnonymousUser
 from django.db import models, transaction
 from django.db.models import Prefetch, Q
 from django.http import HttpRequest, HttpResponse
@@ -29,6 +31,14 @@ from menu.forms import (
     TagLogoForm,
 )
 from menu.models import Category, Dish, Tag
+from user.roles import is_kitchen_staff, is_management, is_waiter_staff
+
+
+def _can_see_all_dishes(user: AbstractBaseUser | AnonymousUser) -> bool:
+    """Staff and authenticated non-visitors can see OUT-of-stock dishes."""
+    if not hasattr(user, "role"):
+        return False
+    return is_management(user) or is_kitchen_staff(user) or is_waiter_staff(user)  # type: ignore[arg-type]
 
 
 def index(request: HttpRequest) -> HttpResponse:
@@ -120,16 +130,14 @@ def category_list(request: HttpRequest) -> HttpResponse:
     # select_related("logo") — JOIN для OneToOne зв'язку CategoryLogo.
     # prefetch_related("dishes") — окремий запит для ForeignKey (зворотній).
     # Prefetch("dishes", queryset=...) — вкладений prefetch для тегів страв.
+    dish_qs = Dish.objects.prefetch_related(
+        Prefetch("tags", queryset=Tag.objects.select_related("logo"))
+    )
+    if not _can_see_all_dishes(request.user):
+        dish_qs = dish_qs.exclude(availability=Dish.Availability.OUT)
     categories = (
         Category.objects.select_related("logo")
-        .prefetch_related(
-            Prefetch(
-                "dishes",
-                queryset=Dish.objects.prefetch_related(
-                    Prefetch("tags", queryset=Tag.objects.select_related("logo"))
-                ),
-            )
-        )
+        .prefetch_related(Prefetch("dishes", queryset=dish_qs))
         .all()
     )
     return render(
@@ -337,6 +345,8 @@ def dish_list(request: HttpRequest) -> HttpResponse:
     dishes = Dish.objects.select_related("category__logo").prefetch_related(
         "tags__logo"
     )
+    if not _can_see_all_dishes(request.user):
+        dishes = dishes.exclude(availability=Dish.Availability.OUT)
     return render(request, "menu/dish_list.html", context={"dishes": dishes})
 
 

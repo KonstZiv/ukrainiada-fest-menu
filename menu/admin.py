@@ -53,4 +53,7 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Dish)
 class DishAdmin(admin.ModelAdmin):
+    list_display = ["title", "category", "price", "availability"]
+    list_filter = ["availability", "category"]
+    list_editable = ["availability"]
     inlines = [DishMainImageInline, DishPictureInline]

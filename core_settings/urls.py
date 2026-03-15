@@ -13,12 +13,9 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
-from core_settings.views import form_handler
-
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("menu/", include("menu.urls"), name="menu"),
-    path("form/", form_handler, name="form_handler"),
     path("user/", include("user.urls"), name="user"),
     path("accounts/", include("django.contrib.auth.urls")),
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),

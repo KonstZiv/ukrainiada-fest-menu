@@ -63,6 +63,13 @@ class Category(ModelWithTitle):
 
 
 class Dish(ModelWithTitle):
+    class Availability(models.TextChoices):
+        """Dish availability status for the menu."""
+
+        AVAILABLE = "available", "В наявності"
+        LOW = "low", "Закінчується — уточнюйте у офіціанта"
+        OUT = "out", "Немає"
+
     description = models.CharField(max_length=1024)
     price = models.DecimalField(max_digits=5, decimal_places=2)
     weight = models.PositiveIntegerField()
@@ -72,6 +79,13 @@ class Dish(ModelWithTitle):
     )
     tags: models.ManyToManyField[Tag, Dish] = models.ManyToManyField(
         "Tag", related_name="dishes", blank=True
+    )
+    availability = models.CharField(
+        max_length=16,
+        choices=Availability.choices,
+        default=Availability.AVAILABLE,
+        db_index=True,
+        verbose_name="Наявність",
     )
 
 
