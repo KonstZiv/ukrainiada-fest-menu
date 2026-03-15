@@ -1,5 +1,5 @@
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from django.test import Client
@@ -77,3 +77,49 @@ def test_visitor_gets_403(client: Client, django_user_model: Any) -> None:
     client.force_login(visitor)
     response = client.get("/events/stream/")
     assert response.status_code == 403
+
+
+# --- Push event tests ---
+
+
+def test_push_ticket_done_calls_send_event() -> None:
+    from notifications.events import push_ticket_done
+
+    with patch("notifications.events.send_event") as mock_send:
+        push_ticket_done(ticket_id=1, order_id=2, waiter_id=3, dish_title="Борщ")
+        mock_send.assert_called_once()
+        data = mock_send.call_args[0][2]
+        assert data["type"] == "ticket_done"
+        assert data["order_id"] == 2
+
+
+def test_push_does_not_raise_on_error() -> None:
+    from notifications.events import push_ticket_done
+
+    with patch("notifications.events.send_event", side_effect=Exception("Redis down")):
+        push_ticket_done(ticket_id=1, order_id=2, waiter_id=3, dish_title="Test")
+
+
+def test_dish_title_truncated_to_40_chars() -> None:
+    from notifications.events import push_ticket_done
+
+    with patch("notifications.events.send_event") as mock_send:
+        push_ticket_done(ticket_id=1, order_id=2, waiter_id=3, dish_title="A" * 100)
+        data = mock_send.call_args[0][2]
+        assert len(data["dish"]) <= 40
+
+
+def test_push_order_approved_channel() -> None:
+    from notifications.events import push_order_approved
+
+    with patch("notifications.events.send_event") as mock_send:
+        push_order_approved(order_id=42)
+        assert mock_send.call_args[0][0] == "kitchen-broadcast"
+
+
+def test_push_order_ready_channel() -> None:
+    from notifications.events import push_order_ready
+
+    with patch("notifications.events.send_event") as mock_send:
+        push_order_ready(order_id=7, waiter_id=3)
+        assert mock_send.call_args[0][0] == "waiter-3"
