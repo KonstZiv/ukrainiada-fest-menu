@@ -1,9 +1,13 @@
+import io
 from decimal import Decimal
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
 from django.db import IntegrityError
 from django.db.models import ProtectedError
+from django.test import Client
+from PIL import Image
 
 from menu.models import Category, Dish
 from orders.cart import add_to_cart, cart_item_count, get_cart, remove_from_cart
@@ -154,7 +158,7 @@ def test_cart_item_count() -> None:
 
 
 @pytest.mark.django_db
-def test_submit_order_creates_order_and_clears_cart(client) -> None:  # type: ignore[no-untyped-def]
+def test_submit_order_creates_order_and_clears_cart(client: Client) -> None:
     cat = Category.objects.create(title="Cat", description="", number_in_line=1)
     dish = Dish.objects.create(
         title="D",
@@ -176,7 +180,7 @@ def test_submit_order_creates_order_and_clears_cart(client) -> None:  # type: ig
 
 
 @pytest.mark.django_db
-def test_submit_excludes_out_of_stock_dishes(client) -> None:  # type: ignore[no-untyped-def]
+def test_submit_excludes_out_of_stock_dishes(client: Client) -> None:
     cat = Category.objects.create(title="Cat", description="", number_in_line=1)
     Dish.objects.create(
         title="Out",
@@ -196,6 +200,129 @@ def test_submit_excludes_out_of_stock_dishes(client) -> None:  # type: ignore[no
 
 
 @pytest.mark.django_db
-def test_cart_view_returns_200(client) -> None:  # type: ignore[no-untyped-def]
+def test_cart_view_returns_200(client: Client) -> None:
     response = client.get("/order/cart/")
     assert response.status_code == 200
+
+
+# --- QR tests ---
+
+
+@pytest.mark.django_db
+def test_order_qr_returns_png(client: Client) -> None:
+    order = Order.objects.create(status=Order.Status.DRAFT)
+    response = client.get(f"/order/{order.id}/qr/")
+    assert response.status_code == 200
+    assert response["Content-Type"] == "image/png"
+
+
+@pytest.mark.django_db
+def test_order_qr_not_available_for_approved(client: Client) -> None:
+    order = Order.objects.create(status=Order.Status.APPROVED)
+    response = client.get(f"/order/{order.id}/qr/")
+    assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_order_qr_is_valid_png(client: Client) -> None:
+    order = Order.objects.create(status=Order.Status.DRAFT)
+    response = client.get(f"/order/{order.id}/qr/")
+    img = Image.open(io.BytesIO(response.content))
+    assert img.format == "PNG"
+
+
+# --- Waiter flow tests ---
+
+
+@pytest.mark.django_db
+def test_waiter_order_list_requires_login(client: Client) -> None:
+    response = client.get("/waiter/orders/")
+    assert response.status_code == 302
+    assert "/accounts/login/" in response["Location"]
+
+
+@pytest.mark.django_db
+def test_waiter_order_list_forbidden_for_visitor(
+    client: Client,
+    django_user_model: Any,
+) -> None:
+    user = django_user_model.objects.create_user(
+        email="v@test.com", username="visitor", password="testpass123", role="visitor"
+    )
+    client.force_login(user)
+    response = client.get("/waiter/orders/")
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_waiter_order_list_accessible_for_waiter(
+    client: Client,
+    django_user_model: Any,
+) -> None:
+    user = django_user_model.objects.create_user(
+        email="w@test.com", username="waiter1", password="testpass123", role="waiter"
+    )
+    client.force_login(user)
+    response = client.get("/waiter/orders/")
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_approve_order_creates_kitchen_tickets(
+    client: Client,
+    django_user_model: Any,
+) -> None:
+    from kitchen.models import KitchenTicket
+
+    cat = Category.objects.create(title="Cat", description="", number_in_line=1)
+    dish = Dish.objects.create(
+        title="D",
+        description="",
+        price=Decimal("5.00"),
+        weight=100,
+        calorie=100,
+        category=cat,
+    )
+    order = Order.objects.create(status=Order.Status.SUBMITTED)
+    OrderItem.objects.create(order=order, dish=dish, quantity=2)
+
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="waiter1", password="testpass123", role="waiter"
+    )
+    client.force_login(waiter)
+    response = client.post(f"/waiter/order/{order.id}/approve/")
+
+    assert response.status_code == 302
+    order.refresh_from_db()
+    assert order.status == Order.Status.APPROVED
+    assert order.waiter == waiter
+    assert KitchenTicket.objects.filter(order_item__order=order).count() == 1
+
+
+@pytest.mark.django_db
+def test_approve_rejects_non_submitted_order(
+    client: Client,
+    django_user_model: Any,
+) -> None:
+    order = Order.objects.create(status=Order.Status.DRAFT)
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="waiter1", password="testpass123", role="waiter"
+    )
+    client.force_login(waiter)
+    client.post(f"/waiter/order/{order.id}/approve/")
+    order.refresh_from_db()
+    assert order.status == Order.Status.DRAFT
+
+
+@pytest.mark.django_db
+def test_kitchen_role_cannot_approve(
+    client: Client,
+    django_user_model: Any,
+) -> None:
+    order = Order.objects.create(status=Order.Status.SUBMITTED)
+    user = django_user_model.objects.create_user(
+        email="k@test.com", username="cook", password="testpass123", role="kitchen"
+    )
+    client.force_login(user)
+    response = client.post(f"/waiter/order/{order.id}/approve/")
+    assert response.status_code == 403
