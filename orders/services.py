@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from django.db import transaction
 from django.http import HttpRequest
 from django.utils import timezone
 
 from kitchen.services import create_tickets_for_order
 from menu.models import Dish
+
+if TYPE_CHECKING:
+    from user.models import User
 from orders.cart import clear_cart, get_cart
 from orders.models import Order, OrderItem
 
@@ -51,7 +56,7 @@ def submit_order_from_cart(request: HttpRequest) -> Order | None:
     return order
 
 
-def approve_order(order: Order, waiter: object) -> Order:
+def approve_order(order: Order, waiter: User) -> Order:
     """Waiter approves an order — atomic status change + kitchen tickets.
 
     Raises:
@@ -64,7 +69,7 @@ def approve_order(order: Order, waiter: object) -> Order:
 
     with transaction.atomic():
         order.status = Order.Status.APPROVED
-        order.waiter = waiter  # type: ignore[assignment]
+        order.waiter = waiter
         order.approved_at = timezone.now()
         order.save(update_fields=["status", "waiter", "approved_at", "updated_at"])
         create_tickets_for_order(order)
