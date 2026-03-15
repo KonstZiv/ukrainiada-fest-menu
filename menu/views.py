@@ -12,7 +12,6 @@
 #   https://docs.djangoproject.com/en/stable/ref/class-based-views/generic-display/
 # ---------------------------------------------------------------------------
 
-from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser
 from django.db import models, transaction
 from django.db.models import Prefetch, Q
@@ -31,14 +30,17 @@ from menu.forms import (
     TagLogoForm,
 )
 from menu.models import Category, Dish, Tag
+from user.models import User
 from user.roles import is_kitchen_staff, is_management, is_waiter_staff
 
+_AnyUser = User | AnonymousUser
 
-def _can_see_all_dishes(user: AbstractBaseUser | AnonymousUser) -> bool:
+
+def _can_see_all_dishes(user: _AnyUser) -> bool:
     """Staff and authenticated non-visitors can see OUT-of-stock dishes."""
-    if not hasattr(user, "role"):
+    if not isinstance(user, User):
         return False
-    return is_management(user) or is_kitchen_staff(user) or is_waiter_staff(user)  # type: ignore[arg-type]
+    return is_management(user) or is_kitchen_staff(user) or is_waiter_staff(user)
 
 
 def index(request: HttpRequest) -> HttpResponse:
