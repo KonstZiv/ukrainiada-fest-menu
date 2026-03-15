@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import io
 from decimal import Decimal
 from typing import TypedDict
 
+import qrcode
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -64,6 +66,32 @@ def order_submit(request: HttpRequest) -> HttpResponse:
             return redirect("orders:order_detail", order_id=order.id)
         messages.error(request, "Кошик порожній або страви недоступні.")
     return redirect("orders:cart")
+
+
+def order_qr(request: HttpRequest, order_id: int) -> HttpResponse:
+    """Generate QR code PNG for a DRAFT order.
+
+    QR contains the URL for waiter to scan and review the order.
+    Only available for DRAFT orders (not yet picked up by waiter).
+    """
+    order = get_object_or_404(Order, pk=order_id, status=Order.Status.DRAFT)
+    scan_url = request.build_absolute_uri(f"/waiter/order/{order.id}/scan/")
+
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        box_size=8,
+        border=4,
+    )
+    qr.add_data(scan_url)
+    qr.make(fit=True)
+
+    img = qr.make_image(fill_color="black", back_color="white")
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+
+    return HttpResponse(buffer.getvalue(), content_type="image/png")
 
 
 def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:

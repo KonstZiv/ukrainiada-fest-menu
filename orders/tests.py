@@ -1,9 +1,11 @@
+import io
 from decimal import Decimal
 from unittest.mock import MagicMock
 
 import pytest
 from django.db import IntegrityError
 from django.db.models import ProtectedError
+from PIL import Image
 
 from menu.models import Category, Dish
 from orders.cart import add_to_cart, cart_item_count, get_cart, remove_from_cart
@@ -199,3 +201,29 @@ def test_submit_excludes_out_of_stock_dishes(client) -> None:  # type: ignore[no
 def test_cart_view_returns_200(client) -> None:  # type: ignore[no-untyped-def]
     response = client.get("/order/cart/")
     assert response.status_code == 200
+
+
+# --- QR tests ---
+
+
+@pytest.mark.django_db
+def test_order_qr_returns_png(client) -> None:  # type: ignore[no-untyped-def]
+    order = Order.objects.create(status=Order.Status.DRAFT)
+    response = client.get(f"/order/{order.id}/qr/")
+    assert response.status_code == 200
+    assert response["Content-Type"] == "image/png"
+
+
+@pytest.mark.django_db
+def test_order_qr_not_available_for_approved(client) -> None:  # type: ignore[no-untyped-def]
+    order = Order.objects.create(status=Order.Status.APPROVED)
+    response = client.get(f"/order/{order.id}/qr/")
+    assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_order_qr_is_valid_png(client) -> None:  # type: ignore[no-untyped-def]
+    order = Order.objects.create(status=Order.Status.DRAFT)
+    response = client.get(f"/order/{order.id}/qr/")
+    img = Image.open(io.BytesIO(response.content))
+    assert img.format == "PNG"
