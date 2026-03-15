@@ -49,6 +49,11 @@ class KitchenTicket(models.Model):
         TAKEN = "taken", "Готується"
         DONE = "done", "Готово"
 
+    class EscalationLevel(models.IntegerChoices):
+        NONE = 0, "Немає"
+        SUPERVISOR = 1, "Старший кухні"
+        MANAGER = 2, "Менеджер"
+
     order_item = models.OneToOneField(
         "orders.OrderItem",
         on_delete=models.CASCADE,
@@ -68,6 +73,11 @@ class KitchenTicket(models.Model):
         max_length=10,
         choices=Status.choices,
         default=Status.PENDING,
+        db_index=True,
+    )
+    escalation_level = models.IntegerField(
+        choices=EscalationLevel.choices,
+        default=EscalationLevel.NONE,
         db_index=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)

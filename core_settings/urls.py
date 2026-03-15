@@ -21,6 +21,7 @@ urlpatterns = [
     path("accounts/", include("django.contrib.auth.urls")),
     path("order/", include("orders.urls")),
     path("waiter/", include("orders.waiter_urls")),
+    path("kitchen/", include("kitchen.urls")),
     path(
         "events/<str:channel>/",
         include(django_eventstream.urls),

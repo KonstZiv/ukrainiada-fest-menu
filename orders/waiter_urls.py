@@ -12,4 +12,10 @@ urlpatterns = [
         waiter_views.order_approve,
         name="order_approve",
     ),
+    path("dashboard/", waiter_views.waiter_dashboard, name="dashboard"),
+    path(
+        "order/<int:order_id>/delivered/",
+        waiter_views.order_mark_delivered,
+        name="order_delivered",
+    ),
 ]
