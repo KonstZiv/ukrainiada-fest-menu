@@ -108,4 +108,4 @@ def _check_order_ready(ticket: KitchenTicket) -> None:
     if all_done:
         order.status = Order.Status.READY
         order.ready_at = timezone.now()
-        order.save(update_fields=["status", "ready_at", "updated_at"])
+        order.save(update_fields=["status", "ready_at"])
