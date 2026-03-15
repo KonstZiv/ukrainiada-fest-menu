@@ -158,5 +158,28 @@
   {#   {% block extra_js %}<script>...</script>{% endblock %}                  #}
   {% block extra_js %}{% endblock %}
 
+  {% if user.is_authenticated %}
+  <script>
+  (function() {
+    if (typeof EventSource === 'undefined') return;
+    var source = new EventSource("{% url 'notifications:user_events' %}");
+    source.onopen = function() {
+      console.log('[SSE] Connected');
+    };
+    source.onerror = function() {
+      console.warn('[SSE] Connection error, will retry...');
+    };
+    source.addEventListener('message', function(e) {
+      try {
+        var data = JSON.parse(e.data);
+        window.dispatchEvent(new CustomEvent('sse:' + data.type, { detail: data }));
+      } catch(err) {
+        console.error('[SSE] Parse error', err);
+      }
+    });
+  })();
+  </script>
+  {% endif %}
+
 </body>
 </html>

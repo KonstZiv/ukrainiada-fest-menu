@@ -1,4 +1,8 @@
+from typing import Any
 from unittest.mock import MagicMock
+
+import pytest
+from django.test import Client
 
 from notifications.channels import (
     channels_for_user,
@@ -53,3 +57,23 @@ def test_channels_for_manager() -> None:
     user = MagicMock(spec=User)
     user.role = User.Role.MANAGER
     assert channels_for_user(user) == ["manager"]
+
+
+# --- SSE view tests ---
+
+
+@pytest.mark.django_db
+def test_sse_requires_auth(client: Client) -> None:
+    response = client.get("/events/stream/")
+    assert response.status_code == 302
+    assert "/accounts/login/" in response["Location"]
+
+
+@pytest.mark.django_db
+def test_visitor_gets_403(client: Client, django_user_model: Any) -> None:
+    visitor = django_user_model.objects.create_user(
+        email="v@test.com", username="visitor", password="testpass123", role="visitor"
+    )
+    client.force_login(visitor)
+    response = client.get("/events/stream/")
+    assert response.status_code == 403
