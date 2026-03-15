@@ -28,7 +28,11 @@
   {% if order.status == 'draft' %}
     <div class="text-center">
       <p class="text-muted">Покажіть QR-код або назвіть номер замовлення офіціанту</p>
-      <p class="display-4 fw-bold">#{{ order.id }}</p>
+      <img src="{% url 'orders:order_qr' order.id %}"
+           alt="QR замовлення #{{ order.id }}"
+           width="256" height="256"
+           loading="eager">
+      <p class="display-4 fw-bold mt-2">#{{ order.id }}</p>
     </div>
   {% endif %}
 </div>

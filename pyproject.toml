@@ -15,6 +15,7 @@ dependencies = [
     "channels>=4.0",
     "channels-redis>=4.0",
     "uvicorn[standard]>=0.30",
+    "qrcode[pil]>=8.0",
 ]
 
 [dependency-groups]
