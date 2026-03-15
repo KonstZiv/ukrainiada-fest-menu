@@ -157,10 +157,7 @@ def senior_waiter_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
     return render(
         request,
         "orders/senior_waiter_dashboard.html",
-        {
-            "orders_with_age": orders_with_age,
-            "pay_timeout": settings.PAY_TIMEOUT,
-        },
+        {"orders_with_age": orders_with_age},
     )
 
 
@@ -177,14 +174,17 @@ def senior_confirm_payment(
         pk=order_id,
         payment_status=Order.PaymentStatus.UNPAID,
     )
-    payment_type = request.POST.get("payment_type", "cash")
+    payment_type = request.POST.get("payment_type")
+    if payment_type == "cash":
+        method = Order.PaymentMethod.CASH
+    elif payment_type == "online":
+        method = Order.PaymentMethod.ONLINE
+    else:
+        messages.error(request, "Невідомий тип оплати.")
+        return redirect("waiter:senior_dashboard")
 
     order.payment_status = Order.PaymentStatus.PAID
-    order.payment_method = (
-        Order.PaymentMethod.CASH
-        if payment_type == "cash"
-        else Order.PaymentMethod.ONLINE
-    )
+    order.payment_method = method
     order.payment_confirmed_at = timezone.now()
     order.payment_escalation_level = 0
     order.save(
