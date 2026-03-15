@@ -79,7 +79,7 @@
   function onOrderApproved(data) {
     var counter = document.getElementById('pending-count');
     if (counter) {
-      counter.textContent = parseInt(counter.textContent || '0') + 1;
+      counter.textContent = parseInt(counter.textContent || '0', 10) + 1;
     }
     showFlash('Нове замовлення #' + data.order_id, 'info');
   }
@@ -101,7 +101,7 @@
       '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
     container.prepend(el);
     setTimeout(function () {
-      el.remove();
+      if (el.parentNode) el.remove();
     }, 8000);
   }
 })();
