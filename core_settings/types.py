@@ -14,4 +14,5 @@ class AuthenticatedHttpRequest(HttpRequest):
     or role_required) to avoid type: ignore for request.user.
     """
 
+    # django-stubs types user as User | AnonymousUser; we narrow to User
     user: User  # type: ignore[assignment]

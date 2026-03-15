@@ -13,28 +13,26 @@ from user.models import User
 
 _P = ParamSpec("_P")
 _R = TypeVar("_R", bound=HttpResponse)
+_Req = TypeVar("_Req", bound=HttpRequest)
 
 
 def role_required(
     *roles: str,
 ) -> Callable[
-    [Callable[Concatenate[HttpRequest, _P], _R]],
-    Callable[Concatenate[HttpRequest, _P], HttpResponse],
+    [Callable[Concatenate[_Req, _P], _R]],
+    Callable[Concatenate[_Req, _P], HttpResponse],
 ]:
     """Restrict view access to users with specific roles.
 
-    Usage:
-        @role_required("waiter", "senior_waiter", "manager")
-        def my_view(request): ...
+    Views decorated with this should type request as
+    AuthenticatedHttpRequest for proper request.user typing.
     """
 
     def decorator(
-        view_func: Callable[Concatenate[HttpRequest, _P], _R],
-    ) -> Callable[Concatenate[HttpRequest, _P], HttpResponse]:
+        view_func: Callable[Concatenate[_Req, _P], _R],
+    ) -> Callable[Concatenate[_Req, _P], HttpResponse]:
         @wraps(view_func)
-        def wrapper(
-            request: HttpRequest, *args: _P.args, **kwargs: _P.kwargs
-        ) -> HttpResponse:
+        def wrapper(request: _Req, *args: _P.args, **kwargs: _P.kwargs) -> HttpResponse:
             if not request.user.is_authenticated:
                 return redirect_to_login(request.get_full_path())
             user = cast(User, request.user)
