@@ -10,6 +10,7 @@ import qrcode
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from menu.models import Dish
 from orders.cart import add_to_cart, get_cart, remove_from_cart
@@ -75,7 +76,7 @@ def order_qr(request: HttpRequest, order_id: int) -> HttpResponse:
     Only available for DRAFT orders (not yet picked up by waiter).
     """
     order = get_object_or_404(Order, pk=order_id, status=Order.Status.DRAFT)
-    scan_url = request.build_absolute_uri(f"/waiter/order/{order.id}/scan/")
+    scan_url = request.build_absolute_uri(reverse("waiter:order_scan", args=[order.id]))
 
     qr = qrcode.QRCode(
         version=1,
