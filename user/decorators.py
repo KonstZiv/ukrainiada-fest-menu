@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from functools import wraps
-from typing import Concatenate, ParamSpec, TypeVar
+from typing import Concatenate, ParamSpec, TypeVar, cast
 
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpRequest, HttpResponse, HttpResponseForbidden
+
+from user.models import User
 
 _P = ParamSpec("_P")
 _R = TypeVar("_R", bound=HttpResponse)
@@ -35,7 +37,8 @@ def role_required(
         ) -> HttpResponse:
             if not request.user.is_authenticated:
                 return redirect_to_login(request.get_full_path())
-            if request.user.role not in roles:  # type: ignore[union-attr]
+            user = cast(User, request.user)
+            if user.role not in roles:
                 return HttpResponseForbidden("Доступ заборонено")
             return view_func(request, *args, **kwargs)
 

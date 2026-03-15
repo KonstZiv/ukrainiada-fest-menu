@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -9,6 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from orders.models import Order
 from orders.services import approve_order
 from user.decorators import role_required
+from user.models import User
 
 WAITER_ROLES = ("waiter", "senior_waiter", "manager")
 
@@ -40,7 +43,7 @@ def order_approve(request: HttpRequest, order_id: int) -> HttpResponse:
     order = get_object_or_404(Order, pk=order_id)
     if request.method == "POST":
         try:
-            approve_order(order, request.user)  # type: ignore[arg-type]
+            approve_order(order, cast(User, request.user))
             messages.success(request, f"Замовлення #{order.id} підтверджено.")
         except ValueError as e:
             messages.error(request, str(e))
