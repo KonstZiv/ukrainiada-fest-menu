@@ -161,3 +161,115 @@ def test_escalation_level_choices() -> None:
     assert KitchenTicket.EscalationLevel.NONE == 0
     assert KitchenTicket.EscalationLevel.SUPERVISOR == 1
     assert KitchenTicket.EscalationLevel.MANAGER == 2
+
+
+def _make_dish_and_order() -> tuple[Dish, Order, OrderItem]:
+    """Create a dish with an order item for testing."""
+    cat = Category.objects.create(title="Cat", description="", number_in_line=1)
+    dish = Dish.objects.create(
+        title="TestDish",
+        description="",
+        price=Decimal("5.00"),
+        weight=100,
+        calorie=100,
+        category=cat,
+    )
+    order = Order.objects.create()
+    item = OrderItem.objects.create(order=order, dish=dish, quantity=1)
+    return dish, order, item
+
+
+@pytest.mark.django_db
+def test_supervisor_sees_escalated_tickets(
+    client: Client, django_user_model: Any
+) -> None:
+    supervisor = django_user_model.objects.create_user(
+        email="s@test.com",
+        username="supervisor",
+        password="testpass123",
+        role="kitchen_supervisor",
+    )
+    client.force_login(supervisor)
+
+    _, _, item1 = _make_dish_and_order()
+    KitchenTicket.objects.create(
+        order_item=item1,
+        escalation_level=KitchenTicket.EscalationLevel.SUPERVISOR,
+    )
+
+    response = client.get("/kitchen/")
+    assert response.status_code == 200
+    assert b"TestDish" in response.content
+
+
+@pytest.mark.django_db
+def test_kitchen_sees_only_assigned_pending(
+    client: Client, django_user_model: Any
+) -> None:
+    cook = django_user_model.objects.create_user(
+        email="c@test.com", username="cook", password="testpass123", role="kitchen"
+    )
+    client.force_login(cook)
+
+    dish_mine, _, item_mine = _make_dish_and_order()
+    KitchenAssignment.objects.create(dish=dish_mine, kitchen_user=cook)
+    KitchenTicket.objects.create(order_item=item_mine)
+
+    # Unassigned dish — should not appear
+    cat2 = Category.objects.create(title="Cat2", description="", number_in_line=2)
+    dish_other = Dish.objects.create(
+        title="OtherDish",
+        description="",
+        price=Decimal("3.00"),
+        weight=100,
+        calorie=100,
+        category=cat2,
+    )
+    order2 = Order.objects.create()
+    item_other = OrderItem.objects.create(order=order2, dish=dish_other, quantity=1)
+    KitchenTicket.objects.create(order_item=item_other)
+
+    response = client.get("/kitchen/")
+    content = response.content.decode()
+    assert "TestDish" in content
+    assert "OtherDish" not in content
+
+
+@pytest.mark.django_db
+def test_my_taken_shows_only_mine(client: Client, django_user_model: Any) -> None:
+    cook = django_user_model.objects.create_user(
+        email="c@test.com", username="cook", password="testpass123", role="kitchen"
+    )
+    other = django_user_model.objects.create_user(
+        email="o@test.com", username="other", password="testpass123", role="kitchen"
+    )
+    client.force_login(cook)
+
+    _, _, item1 = _make_dish_and_order()
+    KitchenTicket.objects.create(
+        order_item=item1,
+        status=KitchenTicket.Status.TAKEN,
+        assigned_to=cook,
+    )
+
+    cat2 = Category.objects.create(title="Cat2", description="", number_in_line=2)
+    dish2 = Dish.objects.create(
+        title="OtherTaken",
+        description="",
+        price=Decimal("3.00"),
+        weight=100,
+        calorie=100,
+        category=cat2,
+    )
+    order2 = Order.objects.create()
+    item2 = OrderItem.objects.create(order=order2, dish=dish2, quantity=1)
+    KitchenTicket.objects.create(
+        order_item=item2,
+        status=KitchenTicket.Status.TAKEN,
+        assigned_to=other,
+    )
+
+    response = client.get("/kitchen/")
+    content = response.content.decode()
+    assert "TestDish" in content
+    assert "OtherTaken" not in content

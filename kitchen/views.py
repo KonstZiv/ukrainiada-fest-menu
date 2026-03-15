@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import datetime
+
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
@@ -47,7 +49,9 @@ def kitchen_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
     ).select_related("order_item__dish", "order_item__order")
 
     # My done today
-    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_start = timezone.make_aware(
+        datetime.datetime.combine(timezone.localdate(), datetime.time.min)
+    )
     my_done = (
         KitchenTicket.objects.filter(
             status=KitchenTicket.Status.DONE,
