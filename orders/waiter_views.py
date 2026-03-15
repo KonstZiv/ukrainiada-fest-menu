@@ -11,7 +11,11 @@ from django.utils import timezone
 from core_settings.types import AuthenticatedHttpRequest
 from kitchen.stats import get_dish_queue_stats
 from orders.models import Order
-from orders.services import approve_order, confirm_cash_payment
+from orders.services import (
+    approve_order,
+    confirm_cash_payment,
+    confirm_payment_by_senior,
+)
 from user.decorators import role_required
 
 WAITER_ROLES = ("waiter", "senior_waiter", "manager")
@@ -174,26 +178,10 @@ def senior_confirm_payment(
         pk=order_id,
         payment_status=Order.PaymentStatus.UNPAID,
     )
-    payment_type = request.POST.get("payment_type")
-    if payment_type == "cash":
-        method = Order.PaymentMethod.CASH
-    elif payment_type == "online":
-        method = Order.PaymentMethod.ONLINE
-    else:
-        messages.error(request, "Невідомий тип оплати.")
-        return redirect("waiter:senior_dashboard")
-
-    order.payment_status = Order.PaymentStatus.PAID
-    order.payment_method = method
-    order.payment_confirmed_at = timezone.now()
-    order.payment_escalation_level = 0
-    order.save(
-        update_fields=[
-            "payment_status",
-            "payment_method",
-            "payment_confirmed_at",
-            "payment_escalation_level",
-        ]
-    )
-    messages.success(request, f"Оплату замовлення #{order_id} підтверджено.")
+    payment_type = request.POST.get("payment_type", "")
+    try:
+        confirm_payment_by_senior(order, method=payment_type)
+        messages.success(request, f"Оплату замовлення #{order_id} підтверджено.")
+    except ValueError as e:
+        messages.error(request, str(e))
     return redirect("waiter:senior_dashboard")
