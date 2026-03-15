@@ -1,11 +1,18 @@
-"""Kitchen business logic — ticket creation and retrieval."""
+"""Kitchen business logic — ticket creation, actions, retrieval."""
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+from django.db import transaction
 from django.db.models import QuerySet
+from django.utils import timezone
 
 from kitchen.models import KitchenAssignment, KitchenTicket
 from orders.models import Order
+
+if TYPE_CHECKING:
+    from user.models import User
 
 
 def create_tickets_for_order(order: Order) -> list[KitchenTicket]:
@@ -35,3 +42,70 @@ def get_pending_tickets_for_user(kitchen_user_id: int) -> QuerySet[KitchenTicket
         status=KitchenTicket.Status.PENDING,
         order_item__dish_id__in=assigned_dish_ids,
     ).select_related("order_item__dish", "order_item__order")
+
+
+def take_ticket(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket:
+    """Kitchen staff picks up a ticket.
+
+    Uses select_for_update to prevent race conditions.
+
+    Raises:
+        ValueError: if ticket is not PENDING or already taken.
+
+    """
+    if ticket.status != KitchenTicket.Status.PENDING:
+        msg = f"Cannot take ticket in status '{ticket.status}'"
+        raise ValueError(msg)
+
+    with transaction.atomic():
+        ticket = KitchenTicket.objects.select_for_update().get(pk=ticket.pk)
+        if ticket.status != KitchenTicket.Status.PENDING:
+            msg = "Ticket was already taken by another cook"
+            raise ValueError(msg)
+
+        ticket.status = KitchenTicket.Status.TAKEN
+        ticket.assigned_to = kitchen_user
+        ticket.taken_at = timezone.now()
+        ticket.save(update_fields=["status", "assigned_to", "taken_at"])
+
+    return ticket
+
+
+def mark_ticket_done(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket:
+    """Kitchen staff marks a ticket as done.
+
+    Automatically checks if all tickets for the order are done
+    and updates Order.status to READY.
+
+    Raises:
+        ValueError: if ticket is not TAKEN or assigned to another cook.
+
+    """
+    if ticket.status != KitchenTicket.Status.TAKEN:
+        msg = f"Cannot mark done ticket in status '{ticket.status}'"
+        raise ValueError(msg)
+    if ticket.assigned_to_id != kitchen_user.id:
+        msg = "Cannot mark done ticket assigned to another cook"
+        raise ValueError(msg)
+
+    ticket.status = KitchenTicket.Status.DONE
+    ticket.done_at = timezone.now()
+    ticket.save(update_fields=["status", "done_at"])
+
+    _check_order_ready(ticket)
+    return ticket
+
+
+def _check_order_ready(ticket: KitchenTicket) -> None:
+    """If all KitchenTickets for the order are DONE, set Order to READY."""
+    order = ticket.order_item.order
+    all_done = not (
+        KitchenTicket.objects.filter(order_item__order=order)
+        .exclude(status=KitchenTicket.Status.DONE)
+        .exists()
+    )
+
+    if all_done:
+        order.status = Order.Status.READY
+        order.ready_at = timezone.now()
+        order.save(update_fields=["status", "ready_at", "updated_at"])

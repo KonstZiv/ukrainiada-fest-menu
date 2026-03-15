@@ -38,7 +38,15 @@
             <span class="text-muted ms-1">x{{ ticket.order_item.quantity }}</span>
             <small class="text-muted ms-2">Замовлення #{{ ticket.order_item.order.id }}</small>
           </div>
-          <small class="text-muted">{{ ticket.created_at|timesince }} тому</small>
+          <div class="d-flex align-items-center gap-2">
+            <small class="text-muted">{{ ticket.created_at|timesince }} тому</small>
+            <form method="post" action="{% url 'kitchen:ticket_take' ticket.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-primary">
+                <i class="bi bi-hand-index"></i> Взяти
+              </button>
+            </form>
+          </div>
         </li>
       {% empty %}
         <li class="list-group-item text-muted">Черга порожня</li>
@@ -57,7 +65,15 @@
             <strong>{{ ticket.order_item.dish.title }}</strong>
             <span class="text-muted ms-1">x{{ ticket.order_item.quantity }}</span>
           </div>
-          <small class="text-muted">{{ ticket.taken_at|timesince }} тому</small>
+          <div class="d-flex align-items-center gap-2">
+            <small class="text-muted">{{ ticket.taken_at|timesince }} тому</small>
+            <form method="post" action="{% url 'kitchen:ticket_done' ticket.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-success">
+                <i class="bi bi-check-lg"></i> Готово
+              </button>
+            </form>
+          </div>
         </li>
       {% empty %}
         <li class="list-group-item text-muted">Нічого в роботі</li>

@@ -5,7 +5,12 @@ import pytest
 from django.test import Client
 
 from kitchen.models import KitchenAssignment, KitchenTicket
-from kitchen.services import create_tickets_for_order, get_pending_tickets_for_user
+from kitchen.services import (
+    create_tickets_for_order,
+    get_pending_tickets_for_user,
+    mark_ticket_done,
+    take_ticket,
+)
 from menu.models import Category, Dish
 from orders.models import Order, OrderItem
 
@@ -273,3 +278,121 @@ def test_my_taken_shows_only_mine(client: Client, django_user_model: Any) -> Non
     content = response.content.decode()
     assert "TestDish" in content
     assert "OtherTaken" not in content
+
+
+# --- Ticket action tests ---
+
+
+@pytest.mark.django_db
+def test_take_ticket_success(django_user_model: Any) -> None:
+    cook = django_user_model.objects.create_user(
+        email="c@test.com", username="cook", password="testpass123", role="kitchen"
+    )
+    _, _, item = _make_dish_and_order()
+    ticket = KitchenTicket.objects.create(order_item=item)
+
+    result = take_ticket(ticket, kitchen_user=cook)
+
+    assert result.status == KitchenTicket.Status.TAKEN
+    assert result.assigned_to == cook
+    assert result.taken_at is not None
+
+
+@pytest.mark.django_db
+def test_take_ticket_race_condition(django_user_model: Any) -> None:
+    k1 = django_user_model.objects.create_user(
+        email="k1@test.com", username="k1", password="testpass123", role="kitchen"
+    )
+    k2 = django_user_model.objects.create_user(
+        email="k2@test.com", username="k2", password="testpass123", role="kitchen"
+    )
+    _, _, item = _make_dish_and_order()
+    ticket = KitchenTicket.objects.create(order_item=item)
+
+    take_ticket(ticket, kitchen_user=k1)
+
+    # k2 tries to take the same ticket — must fail
+    ticket2 = KitchenTicket.objects.get(pk=ticket.pk)
+    with pytest.raises(ValueError, match="Cannot take ticket"):
+        take_ticket(ticket2, kitchen_user=k2)
+
+
+@pytest.mark.django_db
+def test_mark_done_success(django_user_model: Any) -> None:
+    cook = django_user_model.objects.create_user(
+        email="c@test.com", username="cook", password="testpass123", role="kitchen"
+    )
+    _, _, item = _make_dish_and_order()
+    ticket = KitchenTicket.objects.create(order_item=item)
+
+    ticket = take_ticket(ticket, kitchen_user=cook)
+    result = mark_ticket_done(ticket, kitchen_user=cook)
+
+    assert result.status == KitchenTicket.Status.DONE
+    assert result.done_at is not None
+
+
+@pytest.mark.django_db
+def test_mark_done_wrong_cook(django_user_model: Any) -> None:
+    cook = django_user_model.objects.create_user(
+        email="c@test.com", username="cook", password="testpass123", role="kitchen"
+    )
+    other = django_user_model.objects.create_user(
+        email="o@test.com", username="other", password="testpass123", role="kitchen"
+    )
+    _, _, item = _make_dish_and_order()
+    ticket = KitchenTicket.objects.create(order_item=item)
+
+    ticket = take_ticket(ticket, kitchen_user=cook)
+    with pytest.raises(ValueError, match="another cook"):
+        mark_ticket_done(ticket, kitchen_user=other)
+
+
+@pytest.mark.django_db
+def test_all_tickets_done_sets_order_ready(django_user_model: Any) -> None:
+    cook = django_user_model.objects.create_user(
+        email="c@test.com", username="cook", password="testpass123", role="kitchen"
+    )
+    _, order, item = _make_dish_and_order()
+    order.status = Order.Status.APPROVED
+    order.save()
+    ticket = KitchenTicket.objects.create(order_item=item)
+
+    ticket = take_ticket(ticket, kitchen_user=cook)
+    mark_ticket_done(ticket, kitchen_user=cook)
+
+    order.refresh_from_db()
+    assert order.status == Order.Status.READY
+    assert order.ready_at is not None
+
+
+@pytest.mark.django_db
+def test_ticket_take_view_post(client: Client, django_user_model: Any) -> None:
+    cook = django_user_model.objects.create_user(
+        email="c@test.com", username="cook", password="testpass123", role="kitchen"
+    )
+    client.force_login(cook)
+    _, _, item = _make_dish_and_order()
+    ticket = KitchenTicket.objects.create(order_item=item)
+
+    response = client.post(f"/kitchen/ticket/{ticket.id}/take/")
+    assert response.status_code == 302
+    ticket.refresh_from_db()
+    assert ticket.status == KitchenTicket.Status.TAKEN
+
+
+@pytest.mark.django_db
+def test_ticket_done_view_post(client: Client, django_user_model: Any) -> None:
+    cook = django_user_model.objects.create_user(
+        email="c@test.com", username="cook", password="testpass123", role="kitchen"
+    )
+    client.force_login(cook)
+    _, _, item = _make_dish_and_order()
+    ticket = KitchenTicket.objects.create(
+        order_item=item, status=KitchenTicket.Status.TAKEN, assigned_to=cook
+    )
+
+    response = client.post(f"/kitchen/ticket/{ticket.id}/done/")
+    assert response.status_code == 302
+    ticket.refresh_from_db()
+    assert ticket.status == KitchenTicket.Status.DONE
