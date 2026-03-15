@@ -65,14 +65,14 @@ class Order(models.Model):
 
     @property
     def total_price(self) -> Decimal:
-        """Calculate total price from all order items."""
-        return sum(
-            (
-                item.dish.price * item.quantity
-                for item in self.items.select_related("dish")
-            ),
-            Decimal("0"),
-        )
+        """Calculate total price using DB aggregation."""
+        result = self.items.aggregate(
+            total=models.Sum(
+                models.F("dish__price") * models.F("quantity"),
+                output_field=models.DecimalField(),
+            )
+        )["total"]
+        return result or Decimal("0")
 
 
 class OrderItem(models.Model):
