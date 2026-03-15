@@ -4,6 +4,7 @@ import os
 
 from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
+from django.urls import path
 
 import django_eventstream.routing
 
@@ -16,7 +17,7 @@ application = ProtocolTypeRouter(
         "http": URLRouter(
             [
                 *django_eventstream.routing.urlpatterns,
-                django_asgi_app,  # type: ignore[list-item]
+                path("", django_asgi_app),  # type: ignore[arg-type]
             ]
         ),
     }

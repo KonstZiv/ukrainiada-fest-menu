@@ -3,6 +3,7 @@
 import os
 
 from celery import Celery
+from celery import Task
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core_settings.settings.dev")
 
@@ -12,6 +13,6 @@ app.autodiscover_tasks()
 
 
 @app.task(bind=True, ignore_result=True)
-def debug_task(self: Celery) -> None:  # type: ignore[type-arg]
+def debug_task(self: Task) -> None:
     """Test task to verify Celery is working."""
     print(f"Request: {self.request!r}")

@@ -1,7 +1,14 @@
 import os
 from decimal import Decimal
-from django.db import transaction
-from menu.models import Category, Tag, Dish
+
+import django
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core_settings.settings.dev")
+django.setup()
+
+from django.db import transaction  # noqa: E402
+
+from menu.models import Category, Dish, Tag  # noqa: E402
 
 dishes_data = [
     # 1. ПЕРШІ СТРАВИ

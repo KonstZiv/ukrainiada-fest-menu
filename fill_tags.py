@@ -1,10 +1,15 @@
 import os
 from pathlib import Path
 
-from django.core.files import File
-from django.db import transaction
+import django
 
-from menu.models import Tag, TagLogo
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core_settings.settings.dev")
+django.setup()
+
+from django.core.files import File  # noqa: E402
+from django.db import transaction  # noqa: E402
+
+from menu.models import Tag, TagLogo  # noqa: E402
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 LOGOS_DIR = SCRIPT_DIR / "doc" / "design" / "tag-logo-svg"
