@@ -61,6 +61,7 @@ class KitchenTicket(models.Model):
         null=True,
         blank=True,
         related_name="kitchen_tickets",
+        limit_choices_to={"role__in": ["kitchen", "kitchen_supervisor"]},
         verbose_name="Кухар",
     )
     status = models.CharField(

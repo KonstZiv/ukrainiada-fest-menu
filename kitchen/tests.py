@@ -104,3 +104,21 @@ def test_kitchen_assignment_str(
     assignment = KitchenAssignment.objects.create(dish=dish, kitchen_user=user)
     assert "Борщ" in str(assignment)
     assert "chef@test.com" in str(assignment)
+
+
+@pytest.mark.django_db
+def test_kitchen_ticket_str() -> None:
+    cat = Category.objects.create(title="Cat", description="", number_in_line=1)
+    dish = Dish.objects.create(
+        title="D",
+        description="",
+        price=Decimal("5.00"),
+        weight=100,
+        calorie=100,
+        category=cat,
+    )
+    order = Order.objects.create()
+    item = OrderItem.objects.create(order=order, dish=dish, quantity=1)
+    ticket = KitchenTicket.objects.create(order_item=item)
+    assert f"Ticket #{ticket.pk}" in str(ticket)
+    assert "pending" in str(ticket)
