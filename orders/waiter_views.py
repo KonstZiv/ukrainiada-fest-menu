@@ -1,7 +1,8 @@
-"""Waiter-facing views: order list, scan, approve, dashboard, deliver."""
+"""Waiter-facing views: order list, scan, approve, dashboard, deliver, senior."""
 
 from __future__ import annotations
 
+from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -120,3 +121,79 @@ def order_confirm_payment(
         messages.error(request, str(e))
 
     return redirect("waiter:dashboard")
+
+
+SENIOR_ROLES = ("senior_waiter", "manager")
+
+
+@role_required(*SENIOR_ROLES)
+def senior_waiter_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
+    """Senior waiter dashboard — escalated unpaid orders."""
+    escalated_orders = (
+        Order.objects.filter(
+            status=Order.Status.DELIVERED,
+            payment_status=Order.PaymentStatus.UNPAID,
+            payment_escalation_level__gte=1,
+        )
+        .select_related("waiter", "visitor")
+        .prefetch_related("items__dish")
+        .order_by("delivered_at")
+    )
+
+    now = timezone.now()
+    orders_with_age = [
+        {
+            "order": order,
+            "minutes_since_delivery": (
+                int((now - order.delivered_at).total_seconds() / 60)
+                if order.delivered_at
+                else None
+            ),
+            "escalation_level": order.payment_escalation_level,
+        }
+        for order in escalated_orders
+    ]
+
+    return render(
+        request,
+        "orders/senior_waiter_dashboard.html",
+        {
+            "orders_with_age": orders_with_age,
+            "pay_timeout": settings.PAY_TIMEOUT,
+        },
+    )
+
+
+@role_required(*SENIOR_ROLES)
+def senior_confirm_payment(
+    request: AuthenticatedHttpRequest, order_id: int
+) -> HttpResponse:
+    """Senior waiter confirms payment on behalf of assigned waiter."""
+    if request.method != "POST":
+        return redirect("waiter:senior_dashboard")
+
+    order = get_object_or_404(
+        Order,
+        pk=order_id,
+        payment_status=Order.PaymentStatus.UNPAID,
+    )
+    payment_type = request.POST.get("payment_type", "cash")
+
+    order.payment_status = Order.PaymentStatus.PAID
+    order.payment_method = (
+        Order.PaymentMethod.CASH
+        if payment_type == "cash"
+        else Order.PaymentMethod.ONLINE
+    )
+    order.payment_confirmed_at = timezone.now()
+    order.payment_escalation_level = 0
+    order.save(
+        update_fields=[
+            "payment_status",
+            "payment_method",
+            "payment_confirmed_at",
+            "payment_escalation_level",
+        ]
+    )
+    messages.success(request, f"Оплату замовлення #{order_id} підтверджено.")
+    return redirect("waiter:senior_dashboard")
