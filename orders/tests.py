@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 import pytest
 from django.db import IntegrityError
 from django.db.models import ProtectedError
+from PIL import Image
 
 from menu.models import Category, Dish
 from orders.cart import add_to_cart, cart_item_count, get_cart, remove_from_cart
@@ -222,8 +223,6 @@ def test_order_qr_not_available_for_approved(client) -> None:  # type: ignore[no
 
 @pytest.mark.django_db
 def test_order_qr_is_valid_png(client) -> None:  # type: ignore[no-untyped-def]
-    from PIL import Image
-
     order = Order.objects.create(status=Order.Status.DRAFT)
     response = client.get(f"/order/{order.id}/qr/")
     img = Image.open(io.BytesIO(response.content))
