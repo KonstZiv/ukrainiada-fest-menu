@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Jadran Sun — Кошик{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+  <h2><i class="bi bi-cart3"></i> Кошик</h2>
+
+  {% if items %}
+    <div class="list-group mb-3">
+      {% for entry in items %}
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <strong>{{ entry.dish.title }}</strong>
+            <span class="text-muted ms-2">x{{ entry.quantity }}</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <span>&euro;{{ entry.dish.price|floatformat:2 }}</span>
+            <a href="{% url 'orders:cart_remove' entry.dish.id %}"
+               class="btn btn-sm btn-outline-danger">
+              <i class="bi bi-trash"></i>
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0">Разом: <strong>&euro;{{ total|floatformat:2 }}</strong></h5>
+      <form method="post" action="{% url 'orders:order_submit' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">
+          <i class="bi bi-check-circle"></i> Оформити замовлення
+        </button>
+      </form>
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle"></i> Кошик порожній.
+      <a href="{% url 'menu:dish_list' %}">Перейти до меню</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
