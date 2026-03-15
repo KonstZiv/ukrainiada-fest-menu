@@ -591,3 +591,78 @@ def test_not_delivered_orders_not_escalated(django_user_model: Any) -> None:
     order = Order.objects.first()
     assert order is not None
     assert order.payment_escalation_level == 0
+
+
+# --- Senior waiter dashboard tests ---
+
+
+@pytest.mark.django_db
+def test_senior_dashboard_shows_escalated(
+    client: Client, django_user_model: Any
+) -> None:
+    senior = django_user_model.objects.create_user(
+        email="sw@test.com", username="sw", password="testpass123", role="senior_waiter"
+    )
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    escalated = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.UNPAID,
+        payment_escalation_level=1,
+    )
+    old_time = timezone.now() - timedelta(minutes=20)
+    Order.objects.filter(pk=escalated.pk).update(delivered_at=old_time)
+
+    not_escalated = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.UNPAID,
+        payment_escalation_level=0,
+    )
+
+    client.force_login(senior)
+    response = client.get("/waiter/senior/")
+    assert response.status_code == 200
+    orders_shown = [item["order"] for item in response.context["orders_with_age"]]
+    assert escalated in orders_shown
+    assert not_escalated not in orders_shown
+
+
+@pytest.mark.django_db
+def test_regular_waiter_cannot_access_senior_dashboard(
+    client: Client, django_user_model: Any
+) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    client.force_login(waiter)
+    response = client.get("/waiter/senior/")
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_senior_confirm_payment(client: Client, django_user_model: Any) -> None:
+    senior = django_user_model.objects.create_user(
+        email="sw@test.com", username="sw", password="testpass123", role="senior_waiter"
+    )
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.UNPAID,
+        payment_escalation_level=1,
+    )
+    client.force_login(senior)
+    response = client.post(
+        f"/waiter/senior/order/{order.id}/confirm-payment/",
+        {"payment_type": "cash"},
+    )
+    assert response.status_code == 302
+    order.refresh_from_db()
+    assert order.payment_status == Order.PaymentStatus.PAID
+    assert order.payment_method == Order.PaymentMethod.CASH
+    assert order.payment_escalation_level == 0
