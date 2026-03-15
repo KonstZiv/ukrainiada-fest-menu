@@ -10,7 +10,7 @@ from django.utils import timezone
 from core_settings.types import AuthenticatedHttpRequest
 from kitchen.stats import get_dish_queue_stats
 from orders.models import Order
-from orders.services import approve_order
+from orders.services import approve_order, confirm_cash_payment
 from user.decorators import role_required
 
 WAITER_ROLES = ("waiter", "senior_waiter", "manager")
@@ -99,4 +99,24 @@ def order_mark_delivered(
     order.delivered_at = timezone.now()
     order.save(update_fields=["status", "delivered_at"])
     messages.success(request, f"Замовлення #{order_id} видано відвідувачу.")
+    return redirect("waiter:dashboard")
+
+
+@role_required(*WAITER_ROLES)
+def order_confirm_payment(
+    request: AuthenticatedHttpRequest, order_id: int
+) -> HttpResponse:
+    """Waiter confirms cash payment for an order."""
+    if request.method != "POST":
+        return redirect("waiter:dashboard")
+
+    order = get_object_or_404(Order, pk=order_id, waiter=request.user)
+    try:
+        confirm_cash_payment(order, waiter=request.user)
+        messages.success(
+            request, f"Оплату замовлення #{order_id} підтверджено (готівка)."
+        )
+    except ValueError as e:
+        messages.error(request, str(e))
+
     return redirect("waiter:dashboard")

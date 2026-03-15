@@ -12,6 +12,7 @@ from PIL import Image
 from menu.models import Category, Dish
 from orders.cart import add_to_cart, cart_item_count, get_cart, remove_from_cart
 from orders.models import Order, OrderItem
+from orders.services import confirm_cash_payment
 
 
 class _FakeSession(dict):  # type: ignore[type-arg]
@@ -400,3 +401,69 @@ def test_waiter_cannot_deliver_others_order(
     client.force_login(w1)
     response = client.post(f"/waiter/order/{order.id}/delivered/")
     assert response.status_code == 404
+
+
+# --- Payment tests ---
+
+
+def test_payment_method_choices() -> None:
+    methods = {m.value for m in Order.PaymentMethod}
+    assert methods == {"cash", "online", "not_set"}
+
+
+@pytest.mark.django_db
+def test_confirm_cash_payment_success(django_user_model: Any) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.UNPAID,
+    )
+    result = confirm_cash_payment(order, waiter=waiter)
+
+    assert result.payment_status == Order.PaymentStatus.PAID
+    assert result.payment_method == Order.PaymentMethod.CASH
+    assert result.payment_confirmed_at is not None
+    assert result.payment_escalation_level == 0
+
+
+@pytest.mark.django_db
+def test_confirm_payment_already_paid(django_user_model: Any) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(waiter=waiter, payment_status=Order.PaymentStatus.PAID)
+    with pytest.raises(ValueError, match="already paid"):
+        confirm_cash_payment(order, waiter=waiter)
+
+
+@pytest.mark.django_db
+def test_confirm_payment_wrong_waiter(django_user_model: Any) -> None:
+    w1 = django_user_model.objects.create_user(
+        email="w1@test.com", username="w1", password="testpass123", role="waiter"
+    )
+    w2 = django_user_model.objects.create_user(
+        email="w2@test.com", username="w2", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(waiter=w1, payment_status=Order.PaymentStatus.UNPAID)
+    with pytest.raises(ValueError, match="assigned waiter"):
+        confirm_cash_payment(order, waiter=w2)
+
+
+@pytest.mark.django_db
+def test_confirm_payment_view(client: Client, django_user_model: Any) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.UNPAID,
+    )
+    client.force_login(waiter)
+    response = client.post(f"/waiter/order/{order.id}/confirm-payment/")
+    assert response.status_code == 302
+    order.refresh_from_db()
+    assert order.payment_status == Order.PaymentStatus.PAID
