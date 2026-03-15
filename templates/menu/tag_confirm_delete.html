@@ -1,0 +1,67 @@
+{# --------------------------------------------------------------------------- #}
+{# tag_confirm_delete.html — Підтвердження видалення тега (таска 2.7)         #}
+{#                                                                             #}
+{# DeleteView працює у два етапи:                                             #}
+{#   1. GET — показує цю сторінку підтвердження                               #}
+{#   2. POST — видаляє тег і робить redirect на tag_list                     #}
+{#                                                                             #}
+{# Django автоматично видаляє пов'язані об'єкти через CASCADE:               #}
+{#   - TagLogo (OneToOne, CASCADE) — видаляється разом з тегом               #}
+{#   - Dish.tags (M2M) — зв'язки видаляються, страви залишаються             #}
+{#                                                                             #}
+{# Контекст (від TagDeleteView):                                              #}
+{#   tag — об'єкт Tag, який буде видалено                                    #}
+{#                                                                             #}
+{# Документація DeleteView:                                                    #}
+{#   https://docs.djangoproject.com/en/stable/ref/class-based-views/generic-editing/#deleteview #}
+{# --------------------------------------------------------------------------- #}
+
+{% extends "base.html" %}
+
+{% block title %}Jadran Sun — Видалити тег{% endblock %}
+
+{% block content %}
+<div class="container mt-3" style="max-width: 600px;">
+
+  <h2 class="mb-4 text-danger">
+    <i class="bi bi-exclamation-triangle"></i> Видалити тег
+  </h2>
+
+  {# --- Попередження --- #}
+  <div class="alert alert-danger">
+    <strong>Увага!</strong> Ви збираєтесь видалити тег
+    <strong>«{{ tag.title }}»</strong>.
+  </div>
+
+  {# --- Що буде видалено --- #}
+  <div class="card mb-3">
+    <div class="card-body">
+      <h6 class="card-title">Разом з тегом буде видалено:</h6>
+      <ul class="mb-0">
+        {% if tag.logo %}
+          <li>Логотип тега: «{{ tag.logo.title }}»</li>
+        {% endif %}
+        <li class="text-muted">
+          Зв'язки зі стравами будуть видалені, але самі страви залишаться.
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  {# --- Форма підтвердження --- #}
+  {# POST на цей самий URL — DeleteView обробить і видалить об'єкт.         #}
+  {# Кнопка "Видалити" відправляє POST, "Скасувати" — повертає на tag_list. #}
+  <form method="post">
+    {% csrf_token %}
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-danger">
+        <i class="bi bi-trash"></i> Так, видалити
+      </button>
+      <a href="{% url 'menu:tag_list' %}" class="btn btn-outline-secondary">
+        Скасувати
+      </a>
+    </div>
+  </form>
+
+</div>
+{% endblock %}

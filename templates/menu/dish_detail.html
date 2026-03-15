@@ -1,0 +1,173 @@
+{# --------------------------------------------------------------------------- #}
+{# dish_detail.html — Повна інформація про страву (таска 1.9)                  #}
+{#                                                                             #}
+{# Демонструє:                                                                #}
+{#   1. Responsive layout: col-md-6 + col-md-6 (зображення + опис)            #}
+{#      Desktop/tablet (≥768px): зображення зліва, опис справа                #}
+{#      Mobile (<768px): зображення зверху, опис нижче                        #}
+{#   2. Умовні блоки: {% if dish.main_image %}, {% if dish.tags.all %}        #}
+{#   3. Carousel для додаткових зображень (DishPicture)                       #}
+{#   4. Кнопка "Назад" — javascript:history.back()                           #}
+{#                                                                             #}
+{# Контекст (від view dish_detail):                                           #}
+{#   dish — об'єкт Dish з select_related + prefetch_related                   #}
+{#                                                                             #}
+{# Документація Bootstrap Grid:                                               #}
+{#   https://getbootstrap.com/docs/5.3/layout/grid/                           #}
+{# --------------------------------------------------------------------------- #}
+
+{% extends "base.html" %}
+
+{% block title %}Jadran Sun — {{ dish.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+
+  {# --- Кнопка "Назад" --- #}
+  {# javascript:history.back() — повертає на попередню сторінку в історії браузера. #}
+  {# Працює з будь-якого джерела переходу (category_list, tag_list, search тощо).  #}
+  <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm mb-3">
+    <i class="bi bi-arrow-left"></i> Назад
+  </a>
+
+  {# ======================================================================= #}
+  {# Responsive row: зображення + інформація                                  #}
+  {# col-md-6 — на екранах ≥768px кожна колонка займає 50% ширини.           #}
+  {# На менших екранах — стандартний col-12 (100% ширини, одна під одною).    #}
+  {# Документація: https://getbootstrap.com/docs/5.3/layout/grid/            #}
+  {# ======================================================================= #}
+  <div class="row g-4">
+
+    {# --- Ліва колонка: головне зображення --- #}
+    <div class="col-md-6">
+      {% if dish.main_image %}
+        {# DishMainImage — OneToOne зв'язок (related_name="main_image").         #}
+        {# dish.main_image.image.url — URL завантаженого файлу (MEDIA_URL).     #}
+        <img src="{{ dish.main_image.image.url }}"
+             alt="{{ dish.title }}"
+             class="img-fluid rounded"
+             style="width: 100%; max-height: 400px; object-fit: cover;">
+      {% else %}
+        {# Заглушка якщо фото не завантажено — сірий блок з іконкою.            #}
+        <div class="d-flex align-items-center justify-content-center rounded"
+             style="width: 100%; height: 300px; background: var(--brand-bg-page); border: 1px dashed var(--brand-border);">
+          <i class="bi bi-image" style="font-size: 3rem; color: var(--brand-text-muted);"></i>
+        </div>
+      {% endif %}
+    </div>
+
+    {# --- Права колонка: інформація про страву --- #}
+    <div class="col-md-6">
+
+      {# Назва страви #}
+      <h2 class="mb-2">{{ dish.title }}</h2>
+
+      {# Категорія — посилання на список категорій #}
+      <p class="text-muted mb-3">
+        <i class="bi bi-folder2"></i>
+        {{ dish.category.title }}
+      </p>
+
+      {# Повний опис #}
+      <p>{{ dish.description }}</p>
+
+      {# --- Характеристики: ціна, вага, калорійність --- #}
+      {# Використовуємо Bootstrap grid для компактного відображення.             #}
+      <div class="row text-center my-3">
+        <div class="col-4">
+          <div class="fw-bold" style="font-size: 1.3rem; color: var(--brand-primary);">
+            &euro;{{ dish.price }}
+          </div>
+          <small class="text-muted">Ціна</small>
+        </div>
+        <div class="col-4">
+          <div class="fw-bold" style="font-size: 1.3rem;">
+            {{ dish.weight }}г
+          </div>
+          <small class="text-muted">Вага</small>
+        </div>
+        <div class="col-4">
+          <div class="fw-bold" style="font-size: 1.3rem;">
+            {{ dish.calorie }}
+          </div>
+          <small class="text-muted">ккал</small>
+        </div>
+      </div>
+
+      {# --- Теги страви --- #}
+      {# dish.tags.all — ManyToMany зв'язок (prefetch_related у view).          #}
+      {% if dish.tags.all %}
+        <div class="mt-3">
+          {% for tag in dish.tags.all %}
+            {# Bootstrap Badge — компактна мітка з округленими кутами.           #}
+            {# Клік відкриває модальне вікно з інформацією про тег.              #}
+            {# Документація: https://getbootstrap.com/docs/5.3/components/badge/ #}
+            <span class="badge rounded-pill text-bg-light border me-1 mb-1"
+                  role="button" title="{{ tag.title }}"
+                  data-tag-title="{{ tag.title }}"
+                  data-tag-desc="{{ tag.description }}"
+                  {% if tag.logo %}data-tag-logo="{{ tag.logo.image.url }}"{% endif %}>
+              {{ tag.title }}
+            </span>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {# --- Кнопка "Додати в замовлення" (заглушка) --- #}
+      <div class="mt-4 d-flex gap-2">
+        <button class="btn btn-primary" disabled>
+          <i class="bi bi-plus-circle"></i> Додати в замовлення
+        </button>
+
+        {# --- Кнопки Edit/Delete для страви (таска 2.8) --- #}
+        <a href="{% url 'menu:dish_update' dish.pk %}"
+           class="btn btn-outline-secondary" title="Редагувати">
+          <i class="bi bi-pencil"></i> Редагувати
+        </a>
+        <a href="{% url 'menu:dish_delete' dish.pk %}"
+           class="btn btn-outline-danger" title="Видалити">
+          <i class="bi bi-trash"></i> Видалити
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  {# ======================================================================= #}
+  {# Додаткові зображення — Bootstrap Carousel (якщо є)                       #}
+  {# DishPicture — ForeignKey reverse (related_name="additional_images").     #}
+  {# prefetch_related у view завантажує їх одним запитом.                     #}
+  {# ======================================================================= #}
+  {% if dish.additional_images.all %}
+    <div class="mt-4">
+      <h5>Додаткові фото</h5>
+      <div id="dishGallery" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          {% for img in dish.additional_images.all %}
+            {# carousel-item — один слайд каруселі.                              #}
+            {# Перший елемент отримує клас "active" (forloop.first).             #}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+              <img src="{{ img.image.url }}"
+                   alt="{{ img.title }}"
+                   class="d-block w-100 rounded"
+                   style="max-height: 350px; object-fit: cover;">
+            </div>
+          {% endfor %}
+        </div>
+        {# Стрілки навігації — показуємо тільки якщо більше 1 фото #}
+        {% if dish.additional_images.all|length > 1 %}
+          <button class="carousel-control-prev" type="button"
+                  data-bs-target="#dishGallery" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+          </button>
+          <button class="carousel-control-next" type="button"
+                  data-bs-target="#dishGallery" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+          </button>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

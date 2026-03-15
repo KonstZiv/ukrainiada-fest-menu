@@ -1,0 +1,75 @@
+{# --------------------------------------------------------------------------- #}
+{# search_results.html — Результати пошуку страв                              #}
+{#                                                                             #}
+{# Демонструє:                                                                #}
+{#   1. Q-objects — пошук по назві та описі страви (OR)                       #}
+{#   2. GET-параметри — ?q=борщ передається через форму пошуку                 #}
+{#   3. {% include %} — спільний компонент _dish_card.html                     #}
+{#   4. Custom filter |highlight — підсвічування збігів через <mark>           #}
+{#                                                                             #}
+{# Контекст (від dish_search view):                                            #}
+{#   query  — рядок пошуку, введений користувачем                              #}
+{#   dishes — QuerySet знайдених страв (порожній якщо query порожній)           #}
+{#                                                                             #}
+{# Документація Q-objects:                                                     #}
+{#   https://docs.djangoproject.com/en/stable/topics/db/queries/#complex-lookups-with-q-objects #}
+{# --------------------------------------------------------------------------- #}
+
+{% extends "base.html" %}
+
+{% block title %}Jadran Sun — Пошук{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+
+  {# --- Кнопка "Назад" --- #}
+  <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm mb-3">
+    <i class="bi bi-arrow-left"></i> Назад
+  </a>
+
+  {# --- Заголовок сторінки --- #}
+  <h4 class="mb-3">
+    {% if query %}
+      Результати пошуку: "{{ query }}"
+      <small class="text-muted fw-normal" style="font-size: 0.9rem;">
+        ({{ dishes|length }} {{ dishes|length|pluralize:"страва,страви,страв" }})
+      </small>
+    {% else %}
+      Пошук страв
+    {% endif %}
+  </h4>
+
+  {# --- Форма пошуку (inline на сторінці результатів) --- #}
+  {# method="get" — пошуковий запит передається як GET-параметр ?q=...          #}
+  <form method="get" action="{% url 'menu:dish_search' %}" class="mb-4">
+    <div class="input-group">
+      <input type="text" name="q" class="form-control"
+             placeholder="Назва страви або опис..."
+             value="{{ query }}"
+             aria-label="Пошук">
+      <button class="btn btn-primary" type="submit">
+        <i class="bi bi-search"></i> Знайти
+      </button>
+    </div>
+  </form>
+
+  {# --- Список результатів --- #}
+  {% if query %}
+    {% for dish in dishes %}
+      {% include "components/_dish_card.html" with dish=dish query=query %}
+    {% empty %}
+      <div class="text-center text-muted py-5">
+        <i class="bi bi-search" style="font-size: 2rem;"></i>
+        <p class="mt-2">За запитом "{{ query }}" нічого не знайдено.</p>
+        <p class="small">Спробуйте інший запит або перевірте правопис.</p>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="text-center text-muted py-5">
+      <i class="bi bi-search" style="font-size: 2rem;"></i>
+      <p class="mt-2">Введіть назву страви або опис для пошуку.</p>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

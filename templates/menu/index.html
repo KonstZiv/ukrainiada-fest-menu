@@ -1,0 +1,92 @@
+{# --------------------------------------------------------------------------- #}
+{# index.html — Головна сторінка ресторану /menu/                              #}
+{#                                                                             #}
+{# Демонструє:                                                                #}
+{#   1. {% extends "base.html" %} — наслідування базового шаблону              #}
+{#   2. Bootstrap Carousel — автоматична карусель зі слайдами                  #}
+{#   3. {% for %} — цикл по списку слайдів з контексту                         #}
+{#   4. forloop.first — визначення першого елемента для класу "active"          #}
+{#   5. {% include %} — підключення компонента nav_pills                       #}
+{#                                                                             #}
+{# Контекст (від view index):                                                  #}
+{#   slides   — список словників {image, title, text}                          #}
+{#   cat_num  — кількість категорій                                            #}
+{#   tag_num  — кількість тегів                                                #}
+{#   dish_num — кількість страв                                                #}
+{#                                                                             #}
+{# Документація {% extends %}:                                                 #}
+{#   https://docs.djangoproject.com/en/stable/ref/templates/builtins/#extends  #}
+{# Документація Bootstrap Carousel:                                            #}
+{#   https://getbootstrap.com/docs/5.3/components/carousel/                    #}
+{# --------------------------------------------------------------------------- #}
+
+{# --- Наслідуємо базовий шаблон --- #}
+{# Всі блоки (header, content, footer тощо) доступні для перевизначення.       #}
+{# Те, що не перевизначено — береться з base.html за замовчуванням.             #}
+{% extends "base.html" %}
+
+{% block title %}Jadran Sun — Головна{% endblock %}
+
+{# ======================================================================= #}
+{# Блок content — основний вміст головної сторінки                          #}
+{# ======================================================================= #}
+{% block content %}
+<div class="container mt-3 px-0">
+
+  {# --- Bootstrap Carousel --- #}
+  {# id="mainCarousel" — унікальний ідентифікатор для JS-управління.           #}
+  {# data-bs-ride="carousel" — автоматичне гортання слайдів.                   #}
+  {# Документація: https://getbootstrap.com/docs/5.3/components/carousel/      #}
+  {# data-bs-interval="15000" — інтервал зміни слайдів 15 секунд (за замовчуванням 5000 мс). #}
+  <div id="mainCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="15000">
+
+    {# --- Слайди каруселі --- #}
+    {# {% for slide in slides %} — перебираємо список слайдів з контексту view. #}
+    {# Кожен слайд містить зображення (70% висоти) та текст (30%).             #}
+    <div class="carousel-inner" style="border-radius: var(--radius-precise);">
+      {% for slide in slides %}
+        {# carousel-item — один слайд. Перший має клас "active" для показу.      #}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+          <img src="{{ slide.image }}"
+               class="d-block w-100"
+               alt="{{ slide.title }}"
+               style="height: 600px; object-fit: cover;">
+          {# Текстовий блок під зображенням #}
+          <div class="p-3 bg-white">
+            <h5 class="fw-bold mb-1">{{ slide.title }}</h5>
+            <p class="text-muted small mb-0">{{ slide.text }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    {# --- Стрілки навігації (вліво/вправо) --- #}
+    <button class="carousel-control-prev" type="button"
+            data-bs-target="#mainCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Попередній</span>
+    </button>
+    <button class="carousel-control-next" type="button"
+            data-bs-target="#mainCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Наступний</span>
+    </button>
+
+  </div>
+
+  {# --- Блок "Наше меню" зі статистикою --- #}
+  {# Показує кількість страв, категорій, тегів та кнопки навігації.            #}
+  <div class="p-3 mt-3">
+    <h5 class="fw-bold mb-2">Наше меню</h5>
+    <p class="text-muted small">
+      {{ dish_num }} страв у {{ cat_num }} категоріях,
+      класифікованих {{ tag_num }} тегами.
+    </p>
+
+    {# Підключаємо nav-pills для переходу на категорії/теги.                    #}
+    {# Жодна кнопка не active — ми на головній сторінці, а не на списку.         #}
+    {% include "components/_nav_pills.html" %}
+  </div>
+
+</div>
+{% endblock %}

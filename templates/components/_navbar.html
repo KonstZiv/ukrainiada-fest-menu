@@ -1,0 +1,148 @@
+{# --------------------------------------------------------------------------- #}
+{# _navbar.html — Компонент навігаційної панелі (navbar)                       #}
+{#                                                                             #}
+{# Це ізольований компонент, який підключається в base.html через              #}
+{# {% include "components/_navbar.html" %}.                                    #}
+{#                                                                             #}
+{# Префікс "_" в назві файлу — конвенція Django, що означає:                   #}
+{# цей шаблон НЕ є самостійною сторінкою, а підключається через include.       #}
+{#                                                                             #}
+{# Компонент містить:                                                          #}
+{#   - Логотип бренду (квадрат з іконкою bi-sun-fill)                          #}
+{#   - Назву ресторану "Jadran Sun"                                            #}
+{#   - Кнопку мови "UA" (поки заглушка)                                        #}
+{#   - Кнопку "УВІЙТИ" (поки заглушка, {% url %} додамо у фазі 4 — Auth)       #}
+{#   - Вертикальний розділювач між мовою та входом                              #}
+{#                                                                             #}
+{# Навбар "прилипає" зверху при скролі завдяки класу .sticky-header            #}
+{# (стилі визначені в staticfiles/css/brand.css).                              #}
+{#                                                                             #}
+{# Референс макету: doc/design/mobile_layout.html (рядки 135-164)             #}
+{# Документація {% include %}:                                                 #}
+{#   https://docs.djangoproject.com/en/stable/ref/templates/builtins/#include  #}
+{# --------------------------------------------------------------------------- #}
+
+{# --- Sticky Header --- #}
+{# position: sticky — елемент "прилипає" до верху вікна при скролі.            #}
+{# Стилі .sticky-header визначені в brand.css.                                 #}
+<div class="sticky-header">
+
+  {# --- Верхній рядок: Логотип + Дії (мова, вхід) --- #}
+  {# d-flex — Bootstrap flexbox для горизонтального розташування.               #}
+  {# justify-content-between — розводить елементи по краях.                     #}
+  {# https://getbootstrap.com/docs/5.3/utilities/flex/                         #}
+  <div class="d-flex justify-content-between align-items-center">
+
+    {# --- Ліва частина: Логотип + Назва --- #}
+    <a href="{% url 'menu:index' %}" class="d-flex align-items-center gap-2 text-decoration-none text-body">
+      {# Логотип — квадрат 34x34px з іконкою сонця.                              #}
+      {# Стилі .brand-logo визначені в brand.css.                                #}
+      {# Іконка bi-sun-fill з Bootstrap Icons: https://icons.getbootstrap.com/   #}
+      <div class="brand-logo">
+        <i class="bi bi-sun-fill"></i>
+      </div>
+      {# Назва ресторану — жирний текст (fw-700 = font-weight: 700) #}
+      <span class="fw-bold">Jadran Sun</span>
+    </a>
+
+    {# --- Права частина: Адмін dropdown + Мова + Розділювач + Вхід --- #}
+    <div class="d-flex align-items-center">
+
+      {# --- Dropdown "Адміністрування" (таска 2.8) --- #}
+      {# Bootstrap Dropdown — меню з посиланнями на створення об'єктів.          #}
+      {# Документація:                                                           #}
+      {#   https://getbootstrap.com/docs/5.3/components/dropdowns/               #}
+      <div class="dropdown me-2">
+        <button class="btn btn-sm text-primary fw-semibold p-0 dropdown-toggle"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                style="font-size: 0.8rem; letter-spacing: 0.05em;">
+          АДМІНІСТРУВАННЯ
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><h6 class="dropdown-header">Створити</h6></li>
+          <li>
+            <a class="dropdown-item" href="{% url 'menu:category_create' %}">
+              <i class="bi bi-plus-circle me-1"></i> Нова категорія
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{% url 'menu:tag_create' %}">
+              <i class="bi bi-plus-circle me-1"></i> Новий тег
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{% url 'menu:dish_create' %}">
+              <i class="bi bi-plus-circle me-1"></i> Нова страва
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      {# Кнопка мови — поки заглушка, функціональність i18n буде додана пізніше. #}
+      {# text-primary — використовує --brand-primary для кольору тексту.         #}
+      <button class="btn btn-sm text-primary fw-semibold p-0"
+              style="font-size: 0.8rem; letter-spacing: 0.05em;">
+        UA
+      </button>
+
+      {# Вертикальний розділювач між кнопками.                                   #}
+      {# Стилі .vr-custom визначені в brand.css.                                 #}
+      <div class="vr-custom"></div>
+
+      {# Кнопка входу / ім'я користувача (таска 4.1)                              #}
+      {# Якщо користувач автентифікований — показуємо username з посиланням       #}
+      {# на профіль. Якщо ні — кнопку "УВІЙТИ" з посиланням на реєстрацію.       #}
+      {# Документація:                                                            #}
+      {#   https://docs.djangoproject.com/en/stable/topics/auth/default/#authentication-in-web-requests #}
+      {% if user.is_authenticated %}
+        <a href="{% url 'user:profile' %}" class="d-flex align-items-center gap-1 btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
+           style="font-size: 0.8rem; letter-spacing: 0.05em;">
+          {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" alt=""
+                 style="width: 22px; height: 22px; object-fit: cover; border-radius: var(--radius-sm);">
+          {% endif %}
+          {{ user.username|upper }}
+        </a>
+
+        {# Вертикальний розділювач між кнопками.                                   #}
+        {# Стилі .vr-custom визначені в brand.css.                                 #}
+        <div class="vr-custom"></div>
+
+        {% include "registration/_logout.html" %}
+
+      {% else %}
+        <a href="{% url 'login' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
+           style="font-size: 0.8rem; letter-spacing: 0.05em;">
+          УВІЙТИ
+        </a>
+        <div class="vr-custom"></div>
+        <a href="{% url 'user:sign_up' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
+           style="font-size: 0.8rem; letter-spacing: 0.05em;">
+          ЗАРЕЄСТРУВАТИСЬ
+        </a>
+      {% endif %}
+    </div>
+
+  </div>
+
+  {# --- Рядок пошуку (таска 3.1) --- #}
+  {# GET-форма: ?q=... передається як URL-параметр.                              #}
+  {# Це дозволяє ділитися посиланням та оновлювати сторінку без POST.            #}
+  {# input-group — Bootstrap компонент для поля з кнопкою.                       #}
+  {# Документація:                                                               #}
+  {#   https://getbootstrap.com/docs/5.3/forms/input-group/                      #}
+  <form method="get" action="{% url 'menu:dish_search' %}" class="mt-2">
+    <div class="input-group input-group-sm">
+      <input type="text" name="q" class="form-control"
+             placeholder="Пошук страв..."
+             value="{{ request.GET.q|default:'' }}"
+             aria-label="Пошук">
+      <button class="btn btn-outline-secondary" type="submit">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </form>
+
+</div>
