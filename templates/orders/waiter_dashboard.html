@@ -57,16 +57,28 @@
           </tbody>
         </table>
       </div>
-      {% if order.status == 'ready' %}
-        <div class="card-footer">
+      <div class="card-footer d-flex gap-2">
+        {% if order.status == 'ready' %}
           <form method="post" action="{% url 'waiter:order_delivered' order.id %}">
             {% csrf_token %}
-            <button type="submit" class="btn btn-success w-100">
+            <button type="submit" class="btn btn-success">
               <i class="bi bi-check-circle"></i> Передав відвідувачу
             </button>
           </form>
-        </div>
-      {% endif %}
+        {% endif %}
+        {% if order.payment_status == 'unpaid' %}
+          <form method="post" action="{% url 'waiter:confirm_payment' order.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-warning">
+              <i class="bi bi-cash-coin"></i> Прийняв готівку
+            </button>
+          </form>
+        {% else %}
+          <span class="badge bg-success align-self-center">
+            <i class="bi bi-check"></i> Оплачено ({{ order.get_payment_method_display }})
+          </span>
+        {% endif %}
+      </div>
     </div>
   {% empty %}
     <div class="alert alert-info">

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Jadran Sun — Оплата #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+  <h2>Оплата замовлення #{{ order.id }}</h2>
+  <p class="fs-4">Сума: <strong>&euro;{{ order.total_price|floatformat:2 }}</strong></p>
+
+  {% if order.payment_status == 'unpaid' %}
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle"></i>
+      <strong>Демо-режим:</strong>
+      Реальна оплата ще не підключена. Кнопка симулює успішну оплату.
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="bi bi-credit-card"></i> Оплатити онлайн (демо)
+      </button>
+    </form>
+  {% else %}
+    <div class="alert alert-success">
+      <i class="bi bi-check-circle"></i>
+      Замовлення оплачено ({{ order.get_payment_method_display }})
+    </div>
+    <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-outline-primary">
+      <i class="bi bi-arrow-left"></i> До замовлення
+    </a>
+  {% endif %}
+</div>
+{% endblock %}

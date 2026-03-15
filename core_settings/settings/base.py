@@ -140,6 +140,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "kitchen.escalate_pending_tickets",
         "schedule": 60.0,
     },
+    "escalate-unpaid-orders": {
+        "task": "orders.escalate_unpaid_orders",
+        "schedule": 60.0,
+    },
 }
 
 # ---------------------------------------------------------------------------

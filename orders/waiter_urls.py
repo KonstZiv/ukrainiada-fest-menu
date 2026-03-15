@@ -18,4 +18,15 @@ urlpatterns = [
         waiter_views.order_mark_delivered,
         name="order_delivered",
     ),
+    path(
+        "order/<int:order_id>/confirm-payment/",
+        waiter_views.order_confirm_payment,
+        name="confirm_payment",
+    ),
+    path("senior/", waiter_views.senior_waiter_dashboard, name="senior_dashboard"),
+    path(
+        "senior/order/<int:order_id>/confirm-payment/",
+        waiter_views.senior_confirm_payment,
+        name="senior_confirm_payment",
+    ),
 ]

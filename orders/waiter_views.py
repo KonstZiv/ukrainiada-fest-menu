@@ -1,7 +1,8 @@
-"""Waiter-facing views: order list, scan, approve, dashboard, deliver."""
+"""Waiter-facing views: order list, scan, approve, dashboard, deliver, senior."""
 
 from __future__ import annotations
 
+from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -10,7 +11,11 @@ from django.utils import timezone
 from core_settings.types import AuthenticatedHttpRequest
 from kitchen.stats import get_dish_queue_stats
 from orders.models import Order
-from orders.services import approve_order
+from orders.services import (
+    approve_order,
+    confirm_cash_payment,
+    confirm_payment_by_senior,
+)
 from user.decorators import role_required
 
 WAITER_ROLES = ("waiter", "senior_waiter", "manager")
@@ -100,3 +105,83 @@ def order_mark_delivered(
     order.save(update_fields=["status", "delivered_at"])
     messages.success(request, f"Замовлення #{order_id} видано відвідувачу.")
     return redirect("waiter:dashboard")
+
+
+@role_required(*WAITER_ROLES)
+def order_confirm_payment(
+    request: AuthenticatedHttpRequest, order_id: int
+) -> HttpResponse:
+    """Waiter confirms cash payment for an order."""
+    if request.method != "POST":
+        return redirect("waiter:dashboard")
+
+    order = get_object_or_404(Order, pk=order_id, waiter=request.user)
+    try:
+        confirm_cash_payment(order, waiter=request.user)
+        messages.success(
+            request, f"Оплату замовлення #{order_id} підтверджено (готівка)."
+        )
+    except ValueError as e:
+        messages.error(request, str(e))
+
+    return redirect("waiter:dashboard")
+
+
+SENIOR_ROLES = ("senior_waiter", "manager")
+
+
+@role_required(*SENIOR_ROLES)
+def senior_waiter_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
+    """Senior waiter dashboard — escalated unpaid orders."""
+    escalated_orders = (
+        Order.objects.filter(
+            status=Order.Status.DELIVERED,
+            payment_status=Order.PaymentStatus.UNPAID,
+            payment_escalation_level__gte=1,
+        )
+        .select_related("waiter", "visitor")
+        .prefetch_related("items__dish")
+        .order_by("delivered_at")
+    )
+
+    now = timezone.now()
+    orders_with_age = [
+        {
+            "order": order,
+            "minutes_since_delivery": (
+                int((now - order.delivered_at).total_seconds() / 60)
+                if order.delivered_at
+                else None
+            ),
+            "escalation_level": order.payment_escalation_level,
+        }
+        for order in escalated_orders
+    ]
+
+    return render(
+        request,
+        "orders/senior_waiter_dashboard.html",
+        {"orders_with_age": orders_with_age},
+    )
+
+
+@role_required(*SENIOR_ROLES)
+def senior_confirm_payment(
+    request: AuthenticatedHttpRequest, order_id: int
+) -> HttpResponse:
+    """Senior waiter confirms payment on behalf of assigned waiter."""
+    if request.method != "POST":
+        return redirect("waiter:senior_dashboard")
+
+    order = get_object_or_404(
+        Order,
+        pk=order_id,
+        payment_status=Order.PaymentStatus.UNPAID,
+    )
+    payment_type = request.POST.get("payment_type", "")
+    try:
+        confirm_payment_by_senior(order, method=payment_type)
+        messages.success(request, f"Оплату замовлення #{order_id} підтверджено.")
+    except ValueError as e:
+        messages.error(request, str(e))
+    return redirect("waiter:senior_dashboard")

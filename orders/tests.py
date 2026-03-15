@@ -1,10 +1,12 @@
 import io
+from datetime import timedelta
 from decimal import Decimal
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from django.db import IntegrityError
+from django.utils import timezone
 from django.db.models import ProtectedError
 from django.test import Client
 from PIL import Image
@@ -12,6 +14,8 @@ from PIL import Image
 from menu.models import Category, Dish
 from orders.cart import add_to_cart, cart_item_count, get_cart, remove_from_cart
 from orders.models import Order, OrderItem
+from orders.services import confirm_cash_payment, confirm_online_payment_stub
+from orders.tasks import escalate_unpaid_orders
 
 
 class _FakeSession(dict):  # type: ignore[type-arg]
@@ -400,3 +404,265 @@ def test_waiter_cannot_deliver_others_order(
     client.force_login(w1)
     response = client.post(f"/waiter/order/{order.id}/delivered/")
     assert response.status_code == 404
+
+
+# --- Payment tests ---
+
+
+def test_payment_method_choices() -> None:
+    methods = {m.value for m in Order.PaymentMethod}
+    assert methods == {"cash", "online", "not_set"}
+
+
+@pytest.mark.django_db
+def test_confirm_cash_payment_success(django_user_model: Any) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.UNPAID,
+    )
+    result = confirm_cash_payment(order, waiter=waiter)
+
+    assert result.payment_status == Order.PaymentStatus.PAID
+    assert result.payment_method == Order.PaymentMethod.CASH
+    assert result.payment_confirmed_at is not None
+    assert result.payment_escalation_level == 0
+
+
+@pytest.mark.django_db
+def test_confirm_payment_already_paid(django_user_model: Any) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(waiter=waiter, payment_status=Order.PaymentStatus.PAID)
+    with pytest.raises(ValueError, match="already paid"):
+        confirm_cash_payment(order, waiter=waiter)
+
+
+@pytest.mark.django_db
+def test_confirm_payment_wrong_waiter(django_user_model: Any) -> None:
+    w1 = django_user_model.objects.create_user(
+        email="w1@test.com", username="w1", password="testpass123", role="waiter"
+    )
+    w2 = django_user_model.objects.create_user(
+        email="w2@test.com", username="w2", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(waiter=w1, payment_status=Order.PaymentStatus.UNPAID)
+    with pytest.raises(ValueError, match="assigned waiter"):
+        confirm_cash_payment(order, waiter=w2)
+
+
+@pytest.mark.django_db
+def test_confirm_payment_view(client: Client, django_user_model: Any) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.UNPAID,
+    )
+    client.force_login(waiter)
+    response = client.post(f"/waiter/order/{order.id}/confirm-payment/")
+    assert response.status_code == 302
+    order.refresh_from_db()
+    assert order.payment_status == Order.PaymentStatus.PAID
+
+
+# --- Online payment tests ---
+
+
+@pytest.mark.django_db
+def test_online_payment_stub_marks_paid() -> None:
+    order = Order.objects.create(payment_status=Order.PaymentStatus.UNPAID)
+    result = confirm_online_payment_stub(order)
+
+    assert result.payment_status == Order.PaymentStatus.PAID
+    assert result.payment_method == Order.PaymentMethod.ONLINE
+    assert result.payment_confirmed_at is not None
+
+
+@pytest.mark.django_db
+def test_online_payment_page_get(client: Client) -> None:
+    order = Order.objects.create(status=Order.Status.DRAFT)
+    response = client.get(f"/order/{order.id}/pay/")
+    assert response.status_code == 200
+    assert "Демо-режим" in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_online_payment_page_post(client: Client) -> None:
+    order = Order.objects.create(status=Order.Status.APPROVED)
+    response = client.post(f"/order/{order.id}/pay/")
+    assert response.status_code == 302
+    order.refresh_from_db()
+    assert order.payment_status == Order.PaymentStatus.PAID
+    assert order.payment_method == Order.PaymentMethod.ONLINE
+
+
+# --- Payment escalation tests ---
+
+
+def test_escalate_task_is_callable() -> None:
+    assert callable(escalate_unpaid_orders)
+
+
+@pytest.mark.django_db
+def test_escalate_to_senior_waiter(django_user_model: Any) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.UNPAID,
+    )
+    # 12 min ago: past PAY_TIMEOUT (10) but before 2*PAY_TIMEOUT (20)
+    old_time = timezone.now() - timedelta(minutes=12)
+    Order.objects.filter(pk=order.pk).update(delivered_at=old_time)
+
+    with patch("orders.tasks.settings") as mock_settings:
+        mock_settings.PAY_TIMEOUT = 10
+        result = escalate_unpaid_orders()
+
+    order.refresh_from_db()
+    assert order.payment_escalation_level == 1
+    assert result["senior_waiter"] >= 1
+
+
+@pytest.mark.django_db
+def test_escalate_to_manager(django_user_model: Any) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.UNPAID,
+    )
+    # 25 min ago: past 2*PAY_TIMEOUT (20)
+    old_time = timezone.now() - timedelta(minutes=25)
+    Order.objects.filter(pk=order.pk).update(delivered_at=old_time)
+
+    with patch("orders.tasks.settings") as mock_settings:
+        mock_settings.PAY_TIMEOUT = 10
+        result = escalate_unpaid_orders()
+
+    order.refresh_from_db()
+    assert order.payment_escalation_level == 2
+    assert result["manager"] >= 1
+
+
+@pytest.mark.django_db
+def test_paid_orders_not_escalated(django_user_model: Any) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.PAID,
+    )
+    old_time = timezone.now() - timedelta(minutes=30)
+    Order.objects.filter(pk=order.pk).update(delivered_at=old_time)
+
+    escalate_unpaid_orders()
+
+    order.refresh_from_db()
+    assert order.payment_escalation_level == 0
+
+
+@pytest.mark.django_db
+def test_not_delivered_orders_not_escalated(django_user_model: Any) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.READY,
+        payment_status=Order.PaymentStatus.UNPAID,
+    )
+
+    escalate_unpaid_orders()
+
+    order = Order.objects.first()
+    assert order is not None
+    assert order.payment_escalation_level == 0
+
+
+# --- Senior waiter dashboard tests ---
+
+
+@pytest.mark.django_db
+def test_senior_dashboard_shows_escalated(
+    client: Client, django_user_model: Any
+) -> None:
+    senior = django_user_model.objects.create_user(
+        email="sw@test.com", username="sw", password="testpass123", role="senior_waiter"
+    )
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    escalated = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.UNPAID,
+        payment_escalation_level=1,
+    )
+    old_time = timezone.now() - timedelta(minutes=20)
+    Order.objects.filter(pk=escalated.pk).update(delivered_at=old_time)
+
+    not_escalated = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.UNPAID,
+        payment_escalation_level=0,
+    )
+
+    client.force_login(senior)
+    response = client.get("/waiter/senior/")
+    assert response.status_code == 200
+    orders_shown = [item["order"] for item in response.context["orders_with_age"]]
+    assert escalated in orders_shown
+    assert not_escalated not in orders_shown
+
+
+@pytest.mark.django_db
+def test_regular_waiter_cannot_access_senior_dashboard(
+    client: Client, django_user_model: Any
+) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    client.force_login(waiter)
+    response = client.get("/waiter/senior/")
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_senior_confirm_payment(client: Client, django_user_model: Any) -> None:
+    senior = django_user_model.objects.create_user(
+        email="sw@test.com", username="sw", password="testpass123", role="senior_waiter"
+    )
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.UNPAID,
+        payment_escalation_level=1,
+    )
+    client.force_login(senior)
+    response = client.post(
+        f"/waiter/senior/order/{order.id}/confirm-payment/",
+        {"payment_type": "cash"},
+    )
+    assert response.status_code == 302
+    order.refresh_from_db()
+    assert order.payment_status == Order.PaymentStatus.PAID
+    assert order.payment_method == Order.PaymentMethod.CASH
+    assert order.payment_escalation_level == 0

@@ -11,4 +11,5 @@ urlpatterns = [
     path("submit/", views.order_submit, name="order_submit"),
     path("<int:order_id>/", views.order_detail, name="order_detail"),
     path("<int:order_id>/qr/", views.order_qr, name="order_qr"),
+    path("<int:order_id>/pay/", views.order_pay_online, name="order_pay"),
 ]

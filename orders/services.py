@@ -75,3 +75,94 @@ def approve_order(order: Order, waiter: User) -> Order:
         create_tickets_for_order(order)
 
     return order
+
+
+def confirm_cash_payment(order: Order, waiter: User) -> Order:
+    """Waiter confirms cash payment received.
+
+    Raises:
+        ValueError: if order is already paid or waiter is not assigned.
+
+    """
+    if order.payment_status == Order.PaymentStatus.PAID:
+        msg = "Order is already paid"
+        raise ValueError(msg)
+    if order.waiter_id != waiter.id:
+        msg = "Only the assigned waiter can confirm payment"
+        raise ValueError(msg)
+
+    order.payment_status = Order.PaymentStatus.PAID
+    order.payment_method = Order.PaymentMethod.CASH
+    order.payment_confirmed_at = timezone.now()
+    order.payment_escalation_level = 0
+    order.save(
+        update_fields=[
+            "payment_status",
+            "payment_method",
+            "payment_confirmed_at",
+            "payment_escalation_level",
+        ]
+    )
+    return order
+
+
+def confirm_online_payment_stub(order: Order) -> Order:
+    """Stub for online payment — always succeeds.
+
+    WARNING: This is a stub. Real payment gateway (Stripe/Revolut/PayPal)
+    will be integrated later. Current behavior: always confirms payment.
+    """
+    if order.payment_status == Order.PaymentStatus.PAID:
+        msg = "Order is already paid"
+        raise ValueError(msg)
+
+    order.payment_status = Order.PaymentStatus.PAID
+    order.payment_method = Order.PaymentMethod.ONLINE
+    order.payment_confirmed_at = timezone.now()
+    order.payment_escalation_level = 0
+    order.save(
+        update_fields=[
+            "payment_status",
+            "payment_method",
+            "payment_confirmed_at",
+            "payment_escalation_level",
+        ]
+    )
+    return order
+
+
+def confirm_payment_by_senior(order: Order, method: str) -> Order:
+    """Senior waiter/manager confirms payment for any order.
+
+    Unlike confirm_cash_payment, does not check waiter ownership —
+    senior staff can close payment for any waiter's order.
+
+    Raises:
+        ValueError: if order is already paid or method is invalid.
+
+    """
+    if order.payment_status == Order.PaymentStatus.PAID:
+        msg = "Order is already paid"
+        raise ValueError(msg)
+
+    valid_methods = {
+        "cash": Order.PaymentMethod.CASH,
+        "online": Order.PaymentMethod.ONLINE,
+    }
+    if method not in valid_methods:
+        msg = f"Invalid payment method: {method}"
+        raise ValueError(msg)
+
+    order.payment_status = Order.PaymentStatus.PAID
+    order.payment_method = valid_methods[method]
+    order.payment_confirmed_at = timezone.now()
+    order.payment_escalation_level = 0
+    order.save(
+        update_fields=[
+            "payment_status",
+            "payment_method",
+            "payment_confirmed_at",
+            "payment_escalation_level",
+        ]
+    )
+    return order
