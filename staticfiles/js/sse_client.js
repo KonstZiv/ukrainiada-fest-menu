@@ -8,6 +8,7 @@
 
   if (typeof EventSource === 'undefined') return;
 
+  var reconnectAttempts = 0;
   var source = new EventSource(window.SSE_STREAM_URL || '/events/stream/');
 
   source.addEventListener('message', function (e) {
@@ -21,9 +22,28 @@
     handleEvent(data);
   });
 
-  source.onerror = function () {
-    console.warn('[SSE] Connection lost, reconnecting...');
+  source.onopen = function () {
+    reconnectAttempts = 0;
+    setConnectionStatus(true);
   };
+
+  source.onerror = function () {
+    reconnectAttempts++;
+    setConnectionStatus(false);
+    console.warn('[SSE] Connection lost, attempt ' + reconnectAttempts);
+  };
+
+  function setConnectionStatus(connected) {
+    var indicator = document.getElementById('connection-indicator');
+    if (!indicator) return;
+    if (connected) {
+      indicator.className = 'badge bg-success';
+      indicator.textContent = 'Live';
+    } else {
+      indicator.className = 'badge bg-danger';
+      indicator.textContent = 'Offline';
+    }
+  }
 
   function handleEvent(data) {
     switch (data.type) {
