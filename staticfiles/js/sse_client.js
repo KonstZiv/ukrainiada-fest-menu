@@ -84,9 +84,15 @@
     showFlash('Нове замовлення #' + data.order_id, 'info');
   }
 
+  var escalationLabels = {
+    kitchen_escalation: 'Кухня',
+    payment_escalation: 'Оплата',
+  };
+
   function onEscalation(data) {
     var id = data.ticket_id || data.order_id;
-    showFlash('Ескалація! ' + data.type + ' #' + id, 'danger');
+    var label = escalationLabels[data.type] || data.type;
+    showFlash('Ескалація! ' + label + ' #' + id, 'danger');
     var badge = document.getElementById('escalation-badge');
     if (badge) badge.style.display = 'inline';
   }
