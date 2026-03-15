@@ -1,15 +1,22 @@
 # Production image — multistage build with uv.
+# Based on https://docs.astral.sh/uv/guides/integration/docker/
 
 FROM python:3.14-slim AS builder
 
-COPY --from=ghcr.io/astral-sh/uv:0.9 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.9.25 /uv /uvx /bin/
 
 WORKDIR /app
 
-COPY pyproject.toml uv.lock ./
-RUN uv sync --no-dev --frozen
+# Install dependencies first (cached layer, no source code needed).
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-install-project --no-editable --no-dev
 
-COPY . .
+# Copy source and install project itself.
+COPY . /app
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-editable --no-dev
 
 # --- Runtime stage ---
 FROM python:3.14-slim
