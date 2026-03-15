@@ -123,3 +123,25 @@ def test_push_order_ready_channel() -> None:
     with patch("notifications.events.send_event") as mock_send:
         push_order_ready(order_id=7, waiter_id=3)
         assert mock_send.call_args[0][0] == "waiter-3"
+
+
+# --- JS file tests ---
+
+
+def test_sse_js_file_exists() -> None:
+    import os
+
+    js_path = os.path.join("staticfiles", "js", "sse_client.js")
+    assert os.path.exists(js_path), f"JS file not found: {js_path}"
+
+
+def test_sse_js_contains_event_handlers() -> None:
+    import os
+
+    js_path = os.path.join("staticfiles", "js", "sse_client.js")
+    with open(js_path) as f:
+        content = f.read()
+    assert "handleEvent" in content
+    assert "onTicketDone" in content
+    assert "onOrderReady" in content
+    assert "showFlash" in content
