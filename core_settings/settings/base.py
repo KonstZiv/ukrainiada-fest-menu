@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "django.middleware.gzip.GZipMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -158,6 +159,8 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+EVENTSTREAM_KEEPALIVE = 15  # seconds — less than typical 30s proxy timeout
 
 # ---------------------------------------------------------------------------
 # Festival business constants (minutes)

@@ -145,3 +145,28 @@ def test_sse_js_contains_event_handlers() -> None:
     assert "onTicketDone" in content
     assert "onOrderReady" in content
     assert "showFlash" in content
+    assert "setConnectionStatus" in content
+
+
+def test_keepalive_setting_exists() -> None:
+    from django.conf import settings
+
+    assert hasattr(settings, "EVENTSTREAM_KEEPALIVE")
+    assert settings.EVENTSTREAM_KEEPALIVE == 15
+
+
+def test_gzip_middleware_enabled() -> None:
+    from django.conf import settings
+
+    assert "django.middleware.gzip.GZipMiddleware" in settings.MIDDLEWARE
+
+
+@pytest.mark.django_db
+def test_staff_page_is_lightweight(client: Client, django_user_model: Any) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    client.force_login(waiter)
+    response = client.get("/waiter/dashboard/")
+    assert response.status_code == 200
+    assert len(response.content) < 50 * 1024
