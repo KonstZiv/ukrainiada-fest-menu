@@ -1,10 +1,12 @@
 import io
 from decimal import Decimal
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
 from django.db import IntegrityError
 from django.db.models import ProtectedError
+from django.test import Client
 from PIL import Image
 
 from menu.models import Category, Dish
@@ -156,7 +158,7 @@ def test_cart_item_count() -> None:
 
 
 @pytest.mark.django_db
-def test_submit_order_creates_order_and_clears_cart(client) -> None:  # type: ignore[no-untyped-def]
+def test_submit_order_creates_order_and_clears_cart(client: Client) -> None:
     cat = Category.objects.create(title="Cat", description="", number_in_line=1)
     dish = Dish.objects.create(
         title="D",
@@ -178,7 +180,7 @@ def test_submit_order_creates_order_and_clears_cart(client) -> None:  # type: ig
 
 
 @pytest.mark.django_db
-def test_submit_excludes_out_of_stock_dishes(client) -> None:  # type: ignore[no-untyped-def]
+def test_submit_excludes_out_of_stock_dishes(client: Client) -> None:
     cat = Category.objects.create(title="Cat", description="", number_in_line=1)
     Dish.objects.create(
         title="Out",
@@ -198,7 +200,7 @@ def test_submit_excludes_out_of_stock_dishes(client) -> None:  # type: ignore[no
 
 
 @pytest.mark.django_db
-def test_cart_view_returns_200(client) -> None:  # type: ignore[no-untyped-def]
+def test_cart_view_returns_200(client: Client) -> None:
     response = client.get("/order/cart/")
     assert response.status_code == 200
 
@@ -207,7 +209,7 @@ def test_cart_view_returns_200(client) -> None:  # type: ignore[no-untyped-def]
 
 
 @pytest.mark.django_db
-def test_order_qr_returns_png(client) -> None:  # type: ignore[no-untyped-def]
+def test_order_qr_returns_png(client: Client) -> None:
     order = Order.objects.create(status=Order.Status.DRAFT)
     response = client.get(f"/order/{order.id}/qr/")
     assert response.status_code == 200
@@ -215,14 +217,14 @@ def test_order_qr_returns_png(client) -> None:  # type: ignore[no-untyped-def]
 
 
 @pytest.mark.django_db
-def test_order_qr_not_available_for_approved(client) -> None:  # type: ignore[no-untyped-def]
+def test_order_qr_not_available_for_approved(client: Client) -> None:
     order = Order.objects.create(status=Order.Status.APPROVED)
     response = client.get(f"/order/{order.id}/qr/")
     assert response.status_code == 404
 
 
 @pytest.mark.django_db
-def test_order_qr_is_valid_png(client) -> None:  # type: ignore[no-untyped-def]
+def test_order_qr_is_valid_png(client: Client) -> None:
     order = Order.objects.create(status=Order.Status.DRAFT)
     response = client.get(f"/order/{order.id}/qr/")
     img = Image.open(io.BytesIO(response.content))
@@ -233,16 +235,16 @@ def test_order_qr_is_valid_png(client) -> None:  # type: ignore[no-untyped-def]
 
 
 @pytest.mark.django_db
-def test_waiter_order_list_requires_login(client) -> None:  # type: ignore[no-untyped-def]
+def test_waiter_order_list_requires_login(client: Client) -> None:
     response = client.get("/waiter/orders/")
     assert response.status_code == 302
-    assert "/accounts/login/" in response.url
+    assert "/accounts/login/" in response["Location"]
 
 
 @pytest.mark.django_db
 def test_waiter_order_list_forbidden_for_visitor(
-    client,  # type: ignore[no-untyped-def]
-    django_user_model,  # type: ignore[no-untyped-def]
+    client: Client,
+    django_user_model: Any,
 ) -> None:
     user = django_user_model.objects.create_user(
         email="v@test.com", username="visitor", password="testpass123", role="visitor"
@@ -254,8 +256,8 @@ def test_waiter_order_list_forbidden_for_visitor(
 
 @pytest.mark.django_db
 def test_waiter_order_list_accessible_for_waiter(
-    client,  # type: ignore[no-untyped-def]
-    django_user_model,  # type: ignore[no-untyped-def]
+    client: Client,
+    django_user_model: Any,
 ) -> None:
     user = django_user_model.objects.create_user(
         email="w@test.com", username="waiter1", password="testpass123", role="waiter"
@@ -267,8 +269,8 @@ def test_waiter_order_list_accessible_for_waiter(
 
 @pytest.mark.django_db
 def test_approve_order_creates_kitchen_tickets(
-    client,  # type: ignore[no-untyped-def]
-    django_user_model,  # type: ignore[no-untyped-def]
+    client: Client,
+    django_user_model: Any,
 ) -> None:
     from kitchen.models import KitchenTicket
 
@@ -299,8 +301,8 @@ def test_approve_order_creates_kitchen_tickets(
 
 @pytest.mark.django_db
 def test_approve_rejects_non_submitted_order(
-    client,  # type: ignore[no-untyped-def]
-    django_user_model,  # type: ignore[no-untyped-def]
+    client: Client,
+    django_user_model: Any,
 ) -> None:
     order = Order.objects.create(status=Order.Status.DRAFT)
     waiter = django_user_model.objects.create_user(
@@ -314,8 +316,8 @@ def test_approve_rejects_non_submitted_order(
 
 @pytest.mark.django_db
 def test_kitchen_role_cannot_approve(
-    client,  # type: ignore[no-untyped-def]
-    django_user_model,  # type: ignore[no-untyped-def]
+    client: Client,
+    django_user_model: Any,
 ) -> None:
     order = Order.objects.create(status=Order.Status.SUBMITTED)
     user = django_user_model.objects.create_user(

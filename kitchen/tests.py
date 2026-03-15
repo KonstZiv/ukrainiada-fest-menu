@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import Any
 
 import pytest
 
@@ -50,7 +51,7 @@ def test_create_tickets_for_order() -> None:
 
 @pytest.mark.django_db
 def test_get_pending_tickets_filtered_by_assignment(
-    django_user_model,  # type: ignore[no-untyped-def]
+    django_user_model: Any,
 ) -> None:
     cat = Category.objects.create(title="Cat", description="", number_in_line=1)
     dish_mine = Dish.objects.create(
@@ -87,7 +88,7 @@ def test_get_pending_tickets_filtered_by_assignment(
 
 @pytest.mark.django_db
 def test_kitchen_assignment_str(
-    django_user_model,  # type: ignore[no-untyped-def]
+    django_user_model: Any,
 ) -> None:
     cat = Category.objects.create(title="Cat", description="", number_in_line=1)
     dish = Dish.objects.create(
