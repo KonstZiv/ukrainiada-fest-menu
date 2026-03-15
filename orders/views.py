@@ -26,7 +26,7 @@ def cart_add(request: HttpRequest) -> HttpResponse:
         try:
             dish_id = int(request.POST.get("dish_id", 0))
             quantity = int(request.POST.get("quantity", 1))
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             return redirect("orders:cart")
         if dish_id > 0 and quantity > 0:
             add_to_cart(request, dish_id, quantity)
