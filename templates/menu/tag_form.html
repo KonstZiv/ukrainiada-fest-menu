@@ -1,0 +1,89 @@
+{# --------------------------------------------------------------------------- #}
+{# tag_form.html — Форма створення/редагування тега (таски 2.2, 2.5)         #}
+{#                                                                             #}
+{# Закріплення патерну з category_form.html (таска 2.3):                      #}
+{#   - Дві Django-форми в одній HTML-формі (TagForm + TagLogoForm)            #}
+{#   - enctype="multipart/form-data" для завантаження файлів                  #}
+{#   - prefix="logo" для розділення однойменних полів                          #}
+{#                                                                             #}
+{# Різниця з category_form.html:                                              #}
+{#   - View: CBV (TagCreateView) замість FBV (category_create)                #}
+{#   - logo_form передається через get_context_data() замість вручну          #}
+{#   - Решта — ідентична (DRY на рівні шаблону)                              #}
+{#                                                                             #}
+{# Контекст (від TagCreateView або TagUpdateView):                            #}
+{#   form — TagForm (порожній для create, заповнений для update)              #}
+{#   logo_form — TagLogoForm (порожній або з існуючим логотипом)              #}
+{# --------------------------------------------------------------------------- #}
+
+{% extends "base.html" %}
+
+{% block title %}
+  {% if form.instance.pk %}
+    Jadran Sun — Редагувати тег
+  {% else %}
+    Jadran Sun — Новий тег
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-3" style="max-width: 600px;">
+
+  <h2 class="mb-4">
+    {% if form.instance.pk %}
+      Редагувати тег
+    {% else %}
+      Створити тег
+    {% endif %}
+  </h2>
+
+  {# enctype="multipart/form-data" — ОБОВ'ЯЗКОВИЙ для файлів (таска 2.3).    #}
+  <form method="post" enctype="multipart/form-data">
+
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    {# --- Поля основної форми (TagForm) --- #}
+    {{ form.as_div }}
+
+    {# --- Секція логотипу (TagLogoForm з prefix="logo") --- #}
+    {# Аналогічно до category_form.html — закріплення патерну.                #}
+    {% if logo_form %}
+      <hr class="my-4">
+      <h5 class="mb-3">
+        <i class="bi bi-image"></i> Логотип тега
+        <small class="text-muted">(необов'язково)</small>
+      </h5>
+
+      {% if logo_form.non_field_errors %}
+        <div class="alert alert-danger">
+          {{ logo_form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      {{ logo_form.as_div }}
+
+      <small class="text-muted d-block mt-1">
+        Завантажте SVG-файл з логотипом тега. Валідатор перевірить
+        не лише розширення, а й вміст файлу.
+      </small>
+    {% endif %}
+
+    <div class="mt-4 d-flex gap-2">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check-lg"></i> Зберегти
+      </button>
+      <a href="{% url 'menu:tag_list' %}" class="btn btn-outline-secondary">
+        Скасувати
+      </a>
+    </div>
+
+  </form>
+
+</div>
+{% endblock %}

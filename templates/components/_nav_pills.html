@@ -1,0 +1,42 @@
+{# --------------------------------------------------------------------------- #}
+{# _nav_pills.html — Компонент перемикача режимів "Категорії" / "Теги"         #}
+{#                                                                             #}
+{# Підключається через {% include %} з параметром active:                      #}
+{#   {% include "components/_nav_pills.html" with active="categories" %}        #}
+{#   {% include "components/_nav_pills.html" with active="tags" %}              #}
+{#                                                                             #}
+{# Параметр active визначає, яка кнопка буде підсвічена (клас .active).        #}
+{# Це приклад передачі змінних у include-компонент.                            #}
+{#                                                                             #}
+{# URL menu:category_list доступний з таски 1.5.                               #}
+{# URL menu:tag_list з'явиться у тасці 1.8 — поки "#" як заглушка.            #}
+{#                                                                             #}
+{# Стилі .nav-pills-custom визначені в staticfiles/css/brand.css.             #}
+{# Референс макету: doc/design/mobile_layout.html (рядки 159-163)             #}
+{#                                                                             #}
+{# Документація {% include %} з with:                                          #}
+{#   https://docs.djangoproject.com/en/stable/ref/templates/builtins/#include  #}
+{# --------------------------------------------------------------------------- #}
+
+{# --- Перемикач режимів --- #}
+{# nav-pills-custom — кастомний стиль кнопок (brand.css).                      #}
+{# Кожна кнопка — посилання на відповідну сторінку списку.                     #}
+{# Клас "active" додається умовно через порівняння змінної active.             #}
+<nav class="nav nav-pills nav-pills-custom px-3">
+
+  {# Кнопка "Категорії" — активна, коли active == "categories" #}
+  {# {% url "menu:category_list" %} — реверсивне розіменування URL за name.     #}
+  {# Документація: https://docs.djangoproject.com/en/stable/ref/templates/builtins/#url #}
+  <a href="{% url 'menu:category_list' %}"
+     class="nav-link text-center {% if active == 'categories' %}active{% endif %}">
+    Категорії
+  </a>
+
+  {# Кнопка "Теги" — активна, коли active == "tags" #}
+  {# URL menu:tag_list — створено в тасці 1.8 (TagListView).                   #}
+  <a href="{% url 'menu:tag_list' %}"
+     class="nav-link text-center {% if active == 'tags' %}active{% endif %}">
+    Теги
+  </a>
+
+</nav>

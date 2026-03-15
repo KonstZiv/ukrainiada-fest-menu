@@ -1,0 +1,77 @@
+{# --------------------------------------------------------------------------- #}
+{# category_confirm_delete.html — Підтвердження видалення категорії (таска 2.7) #}
+{#                                                                             #}
+{# НЕБЕЗПЕЧНА ОПЕРАЦІЯ: видалення категорії каскадно видаляє:                 #}
+{#   - CategoryLogo (OneToOne, CASCADE)                                       #}
+{#   - ВСІ страви у цій категорії (Dish, ForeignKey CASCADE)                 #}
+{#   - Зображення кожної страви (DishMainImage, DishPicture — CASCADE)       #}
+{#                                                                             #}
+{# Тому показуємо список страв, які будуть видалені — щоб користувач         #}
+{# розумів наслідки і міг прийняти обґрунтоване рішення.                     #}
+{#                                                                             #}
+{# Контекст (від CategoryDeleteView):                                         #}
+{#   category — об'єкт Category, який буде видалено                          #}
+{#   dishes — QuerySet страв у цій категорії                                  #}
+{# --------------------------------------------------------------------------- #}
+
+{% extends "base.html" %}
+
+{% block title %}Jadran Sun — Видалити категорію{% endblock %}
+
+{% block content %}
+<div class="container mt-3" style="max-width: 600px;">
+
+  <h2 class="mb-4 text-danger">
+    <i class="bi bi-exclamation-triangle"></i> Видалити категорію
+  </h2>
+
+  {# --- Попередження --- #}
+  <div class="alert alert-danger">
+    <strong>Увага!</strong> Ви збираєтесь видалити категорію
+    <strong>«{{ category.title }}»</strong>.
+    Це видалить також <strong>усі страви</strong> цієї категорії та їхні зображення!
+  </div>
+
+  {# --- Що буде видалено --- #}
+  <div class="card mb-3">
+    <div class="card-body">
+      <h6 class="card-title">Разом з категорією буде видалено:</h6>
+      <ul class="mb-0">
+        {# --- Логотип категорії --- #}
+        {% if category.logo %}
+          <li>Логотип категорії: «{{ category.logo.title }}»</li>
+        {% endif %}
+
+        {# --- Список страв --- #}
+        {% if dishes %}
+          <li class="mt-2">
+            <strong>{{ dishes|length }}
+              {% if dishes|length == 1 %}страва{% elif dishes|length < 5 %}страви{% else %}страв{% endif %}:</strong>
+            <ul>
+              {% for dish in dishes %}
+                <li>{{ dish.title }} — {{ dish.price }} EUR</li>
+              {% endfor %}
+            </ul>
+          </li>
+        {% else %}
+          <li class="text-muted">Страв у цій категорії немає.</li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+
+  {# --- Форма підтвердження --- #}
+  <form method="post">
+    {% csrf_token %}
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-danger">
+        <i class="bi bi-trash"></i> Так, видалити
+      </button>
+      <a href="{% url 'menu:category_list' %}" class="btn btn-outline-secondary">
+        Скасувати
+      </a>
+    </div>
+  </form>
+
+</div>
+{% endblock %}

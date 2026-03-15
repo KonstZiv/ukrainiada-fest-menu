@@ -1,0 +1,185 @@
+{# --------------------------------------------------------------------------- #}
+{# category_list.html — Список категорій меню з accordion                      #}
+{#                                                                             #}
+{# Демонструє:                                                                #}
+{#   1. {% extends "base.html" %} — наслідування базового шаблону              #}
+{#   2. {% include %} з with — передача параметра active для nav_pills         #}
+{#   3. {% for %} — перебір категорій і вкладених страв                        #}
+{#   4. forloop.first — визначення першої категорії для class "show"           #}
+{#   5. forloop.counter — унікальні id для accordion collapse                  #}
+{#   6. {{ dish.description|truncatewords:8 }} — обрізка тексту                #}
+{#   7. Вкладені цикли: {% for dish in category.dishes.all %}                  #}
+{#      ← Це і є N+1 проблема! (виправлення в тасці 1.6)                      #}
+{#                                                                             #}
+{# Контекст (від view category_list):                                          #}
+{#   categories — QuerySet усіх категорій                                      #}
+{#                                                                             #}
+{# Документація {% extends %}:                                                 #}
+{#   https://docs.djangoproject.com/en/stable/ref/templates/builtins/#extends  #}
+{# Документація Bootstrap Accordion:                                           #}
+{#   https://getbootstrap.com/docs/5.3/components/collapse/#accordion          #}
+{# Документація truncatewords:                                                 #}
+{#   https://docs.djangoproject.com/en/stable/ref/templates/builtins/#truncatewords #}
+{# --------------------------------------------------------------------------- #}
+
+{# --- Наслідуємо базовий шаблон --- #}
+{% extends "base.html" %}
+
+{% block title %}Jadran Sun — Категорії{% endblock %}
+
+{# ======================================================================= #}
+{# Блок nav_pills — перемикач "Категорії" / "Теги"                          #}
+{# Передаємо active="categories" — кнопка "Категорії" буде підсвічена.     #}
+{# ======================================================================= #}
+{% block nav_pills %}
+  {% include "components/_nav_pills.html" with active="categories" %}
+{% endblock %}
+
+{# ======================================================================= #}
+{# Блок content — Bootstrap Accordion зі списком категорій                  #}
+{# ======================================================================= #}
+{% block content %}
+<div class="container mt-3 px-0">
+
+  {# --- Bootstrap Accordion --- #}
+  {# accordion-flush — без зовнішніх рамок (рамки в .accordion-item).          #}
+  {# id="accMenu" — унікальний ідентифікатор для JS-управління                 #}
+  {# (відкриття одного елемента автоматично закриває попередній).               #}
+  {# Документація: https://getbootstrap.com/docs/5.3/components/collapse/#accordion #}
+  <div class="accordion accordion-flush" id="accMenu">
+
+    {# --- Перебираємо всі категорії --- #}
+    {# forloop.counter — порядковий номер ітерації (починаючи з 1).             #}
+    {# Використовуємо його для генерації унікальних id: #cat1, #cat2, ...       #}
+    {% for category in categories %}
+      <div class="accordion-item">
+
+        {# --- Заголовок accordion-item --- #}
+        {# accordion-button — стандартний Bootstrap клас для розкриття/закриття. #}
+        {# data-bs-toggle="collapse" — активує JS-поведінку toggle.            #}
+        {# data-bs-target="#cat{{ forloop.counter }}" — id цільового блоку.    #}
+        {# collapsed — клас для закритого стану (Bootstrap додає/знімає його).  #}
+        {# forloop.first: перша категорія без "collapsed" — відкрита.          #}
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#cat{{ forloop.counter }}">
+
+            {# --- Колонка 1: Лого категорії (фіксована ширина) --- #}
+            {# hasattr перевіряє наявність OneToOne зв'язку без помилки.           #}
+            {% if category.logo %}
+              <div class="me-3 flex-shrink-0" style="width: 30px; height: 30px;">
+                <img src="{{ category.logo.image.url }}"
+                     alt="{{ category.title }}"
+                     style="width: 100%; height: 100%; object-fit: contain;">
+              </div>
+            {% endif %}
+
+            {# --- Колонка 2: Назва категорії (займає весь вільний простір) --- #}
+            <span class="flex-grow-1">{{ category.title }}</span>
+
+            {# --- Колонка 3: Кнопки CRUD (фіксована ширина, таска 2.8) --- #}
+            {# me-3 — відступ від стрілки розкриття accordion.                     #}
+            {# stopPropagation — клік на кнопку НЕ відкриває/закриває accordion.   #}
+            <span class="d-inline-flex gap-1 flex-shrink-0 me-3"
+                  onclick="event.stopPropagation();">
+              <a href="{% url 'menu:category_update' category.pk %}"
+                 class="btn btn-outline-secondary btn-sm" title="Редагувати">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <a href="{% url 'menu:category_delete' category.pk %}"
+                 class="btn btn-outline-danger btn-sm" title="Видалити">
+                <i class="bi bi-trash"></i>
+              </a>
+            </span>
+          </button>
+        </h2>
+
+        {# --- Тіло accordion-item (список страв) --- #}
+        {# collapse — Bootstrap клас для анімації розкриття/закриття.           #}
+        {# show — клас для початково відкритого стану (тільки перша категорія). #}
+        {# data-bs-parent="#accMenu" — при відкритті одного, інші закриваються. #}
+        <div id="cat{{ forloop.counter }}"
+             class="accordion-collapse collapse"
+             data-bs-parent="#accMenu">
+          <div class="accordion-body p-0">
+            <div class="dish-nest-list">
+
+              {# --- Перебираємо страви поточної категорії --- #}
+              {# category.dishes.all — зворотній зв'язок ForeignKey             #}
+              {# (related_name="dishes" у моделі Dish).                        #}
+              {# УВАГА: Кожен виклик .dishes.all робить окремий SQL-запит!      #}
+              {# Це N+1 проблема — буде виправлено в тасці 1.6.               #}
+              {% for dish in category.dishes.all %}
+                <div class="dish-row">
+
+                  {# --- Ліва частина: назва, опис, теги --- #}
+                  <div class="flex-grow-1">
+                    {# Назва страви — посилання на деталі (таска 1.9) #}
+                    {# {% url "menu:dish_detail" dish.pk %} — реверсивне розіменування з pk. #}
+                    <a href="{% url 'menu:dish_detail' dish.pk %}"
+                       class="fw-500 text-decoration-none text-body">
+                      {{ dish.title }}
+                    </a>
+
+                    {# Опис — обрізаний до 8 слів для компактності #}
+                    {# truncatewords — вбудований фільтр Django.                  #}
+                    {# Документація: https://docs.djangoproject.com/en/stable/ref/templates/builtins/#truncatewords #}
+                    <div class="text-muted small d-block"
+                         style="font-size: 0.8rem; line-height: 1.3;">
+                      {{ dish.description|truncatewords:8 }}
+                    </div>
+
+                    {# --- Теги страви (квадратні мітки) --- #}
+                    {# dish.tags.all — ManyToMany зв'язок.                        #}
+                    {# УВАГА: Ще один вкладений запит на кожну страву!            #}
+                    {# Буде оптимізовано разом з N+1 у тасці 1.6.                #}
+                    {% if dish.tags.all %}
+                      <div class="tag-group">
+                        {% for tag in dish.tags.all %}
+                          {# tag-sq — квадратна мітка 28x28px з абревіатурою тега #}
+                          <div class="tag-sq" role="button" title="{{ tag.title }}"
+                               data-tag-title="{{ tag.title }}"
+                               data-tag-desc="{{ tag.description }}"
+                               {% if tag.logo %}data-tag-logo="{{ tag.logo.image.url }}"{% endif %}>
+                            {# Показуємо лого тега #}
+                            {% if tag.logo %}
+                              <img src="{{ tag.logo.image.url }}" alt="{{ tag.title }}"
+                                   style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                            {% else %}
+                              <span class="tag-label">{{ tag.title|truncatechars:3 }}</span>
+                            {% endif %}
+                          </div>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  {# --- Права частина: ціна та кнопка "+" --- #}
+                  <div class="text-end">
+                    {# Ціна з символом євро #}
+                    <div class="fw-bold small mb-1">&euro;{{ dish.price }}</div>
+                    {# Кнопка "+" — заглушка для додавання в замовлення #}
+                    <button class="btn btn-outline-primary btn-sm rounded-circle p-0"
+                            style="width: 28px; height: 28px;">
+                      <i class="bi bi-plus"></i>
+                    </button>
+                  </div>
+
+                </div>
+              {% empty %}
+                {# Повідомлення якщо в категорії немає страв #}
+                <div class="p-3 text-muted small">Страв у цій категорії поки немає.</div>
+              {% endfor %}
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    {% endfor %}
+
+  </div>
+</div>
+{% endblock %}

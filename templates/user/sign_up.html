@@ -1,0 +1,59 @@
+{# --------------------------------------------------------------------------- #}
+{# sign_up.html — Сторінка реєстрації нового користувача (таска 4.1)          #}
+{#                                                                             #}
+{# Контекст (від view sign_up):                                               #}
+{#   form — SignUpForm (email, first_name, last_name, password1, password2)   #}
+{#                                                                             #}
+{# Документація Django Authentication:                                         #}
+{#   https://docs.djangoproject.com/en/stable/topics/auth/default/             #}
+{# --------------------------------------------------------------------------- #}
+
+{% extends "base.html" %}
+
+{% block title %}
+  Jadran Sun — Реєстрація
+{% endblock %}
+
+{% block content %}
+<div class="container mt-3" style="max-width: 600px;">
+
+  {# --- Заголовок сторінки --- #}
+  <h2 class="mb-4">
+    <i class="bi bi-person-plus"></i> Реєстрація
+  </h2>
+
+  {# --- Форма реєстрації --- #}
+  <form method="post">
+
+    {% csrf_token %}
+
+    {# --- Помилки форми --- #}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    {# --- Поля форми (SignUpForm) --- #}
+    {{ form.as_div }}
+
+    {# --- Кнопки --- #}
+    <div class="mt-4 d-flex gap-2">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check-lg"></i> Зареєструватись
+      </button>
+      <a href="{% url 'menu:index' %}" class="btn btn-outline-secondary">
+        Скасувати
+      </a>
+    </div>
+
+  </form>
+
+  {# --- Посилання на вхід --- #}
+  <p class="mt-3 text-muted">
+    Вже маєте акаунт?
+    <a href="{% url 'login' %}">Увійти</a>
+  </p>
+
+</div>
+{% endblock %}

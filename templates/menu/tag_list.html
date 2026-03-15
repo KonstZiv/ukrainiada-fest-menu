@@ -1,0 +1,156 @@
+{# --------------------------------------------------------------------------- #}
+{# tag_list.html — Список тегів меню з accordion + regroup                    #}
+{#                                                                             #}
+{# Демонструє:                                                                #}
+{#   1. Generic ListView (CBV) — мінімум коду у view, максимум від Django      #}
+{#   2. {% regroup %} — групування страв по категоріях всередині кожного тега  #}
+{#      ВАЖЛИВО: regroup працює коректно ТІЛЬКИ якщо дані вже відсортовані     #}
+{#      по полю групування (category). Це забезпечується в get_queryset().     #}
+{#   3. Вкладені цикли: теги → групи по категоріях → страви                   #}
+{#   4. forloop.first — визначення першого тега для class "show"              #}
+{#                                                                             #}
+{# Контекст (від TagListView):                                                #}
+{#   tags — QuerySet усіх тегів (context_object_name = "tags")                #}
+{#                                                                             #}
+{# Документація {% regroup %}:                                                 #}
+{#   https://docs.djangoproject.com/en/stable/ref/templates/builtins/#regroup #}
+{# Документація Bootstrap Accordion:                                           #}
+{#   https://getbootstrap.com/docs/5.3/components/collapse/#accordion          #}
+{# --------------------------------------------------------------------------- #}
+
+{# --- Наслідуємо базовий шаблон --- #}
+{% extends "base.html" %}
+
+{% block title %}Jadran Sun — Теги{% endblock %}
+
+{# ======================================================================= #}
+{# Блок nav_pills — перемикач "Категорії" / "Теги"                          #}
+{# Передаємо active="tags" — кнопка "Теги" буде підсвічена.               #}
+{# ======================================================================= #}
+{% block nav_pills %}
+  {% include "components/_nav_pills.html" with active="tags" %}
+{% endblock %}
+
+{# ======================================================================= #}
+{# Блок content — Bootstrap Accordion зі списком тегів                      #}
+{# ======================================================================= #}
+{% block content %}
+<div class="container mt-3 px-0">
+
+  {# --- Bootstrap Accordion --- #}
+  <div class="accordion accordion-flush" id="accTags">
+
+    {# --- Перебираємо всі теги --- #}
+    {% for tag in tags %}
+      <div class="accordion-item">
+
+        {# --- Заголовок accordion-item --- #}
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#tag{{ forloop.counter }}">
+
+              {# --- Колонка 1: Лого тега (фіксована ширина) --- #}
+              {% if tag.logo %}
+                <div class="me-3 flex-shrink-0" style="width: 58.5px; height: 58.5px;">
+                  <img src="{{ tag.logo.image.url }}"
+                       alt="{{ tag.title }}"
+                       style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+              {% endif %}
+
+              {# --- Колонка 2: Назва тега та опис (займає весь вільний простір) --- #}
+              <span class="flex-grow-1">
+                {{ tag.title }}<br><small class="text-muted" style="font-size: 0.75rem;">{{ tag.description }}</small>
+              </span>
+
+            {# --- Колонка 3: Кнопки CRUD (фіксована ширина, таска 2.8) --- #}
+            {# me-3 — відступ від стрілки розкриття accordion.                     #}
+            {# stopPropagation — клік на кнопку НЕ відкриває/закриває accordion.   #}
+            <span class="d-inline-flex gap-1 flex-shrink-0 me-3"
+                  onclick="event.stopPropagation();">
+              <a href="{% url 'menu:tag_update' tag.pk %}"
+                 class="btn btn-outline-secondary btn-sm" title="Редагувати">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <a href="{% url 'menu:tag_delete' tag.pk %}"
+                 class="btn btn-outline-danger btn-sm" title="Видалити">
+                <i class="bi bi-trash"></i>
+              </a>
+            </span>
+            </button>
+          </h2>
+
+        {# --- Тіло accordion-item (страви, згруповані по категоріях) --- #}
+        <div id="tag{{ forloop.counter }}"
+             class="accordion-collapse collapse"
+             data-bs-parent="#accTags">
+          <div class="accordion-body p-0">
+            <div class="dish-nest-list">
+
+              {# --- {% regroup %} — групування страв по категоріях --- #}
+              {# regroup створює список груп, кожна з яких має:                 #}
+              {#   group.grouper — значення поля (тут: об'єкт Category)         #}
+              {#   group.list   — список елементів у цій групі (страви)        #}
+              {# ВАЖЛИВО: дані ПОВИННІ бути відсортовані по полю групування!    #}
+              {# Якщо ні — regroup створить дублікати груп.                     #}
+              {# Ми забезпечуємо це в get_queryset():                           #}
+              {#   order_by("category__number_in_line", "title")                #}
+              {# Документація:                                                  #}
+              {#   https://docs.djangoproject.com/en/stable/ref/templates/builtins/#regroup #}
+              {% regroup tag.dishes.all by category as dishes_by_cat %}
+
+              {% for group in dishes_by_cat %}
+                {# --- Підзаголовок категорії --- #}
+                <div class="px-3 pt-3 pb-1">
+                  <h6 class="text-muted mb-0" style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                    {{ group.grouper.title }}
+                  </h6>
+                </div>
+
+                {# --- Страви цієї категорії --- #}
+                {% for dish in group.list %}
+                  <div class="dish-row">
+
+                    {# --- Ліва частина: назва, опис --- #}
+                    <div class="flex-grow-1">
+                      {# Назва страви — посилання на деталі (таска 1.9) #}
+                      <a href="{% url 'menu:dish_detail' dish.pk %}"
+                         class="fw-500 text-decoration-none text-body">
+                        {{ dish.title }}
+                      </a>
+                      <div class="text-muted small d-block"
+                           style="font-size: 0.8rem; line-height: 1.3;">
+                        {{ dish.description|truncatewords:8 }}
+                      </div>
+                    </div>
+
+                    {# --- Права частина: ціна та кнопка "+" --- #}
+                    <div class="text-end">
+                      <div class="fw-bold small mb-1">&euro;{{ dish.price }}</div>
+                      <button class="btn btn-outline-primary btn-sm rounded-circle p-0"
+                              style="width: 28px; height: 28px;">
+                        <i class="bi bi-plus"></i>
+                      </button>
+                    </div>
+
+                  </div>
+                {% endfor %}
+              {% endfor %}
+
+              {# Повідомлення якщо до тега не прив'язано жодної страви #}
+              {% if not dishes_by_cat %}
+                <div class="p-3 text-muted small">Страв з цим тегом поки немає.</div>
+              {% endif %}
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    {% endfor %}
+
+  </div>
+</div>
+{% endblock %}

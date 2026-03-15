@@ -1,0 +1,238 @@
+{# --------------------------------------------------------------------------- #}
+{# dish_form.html — Форма створення/редагування страви (таски 2.6, 2.6.1)    #}
+{#                                                                             #}
+{# Найскладніша форма у спринті — демонструє:                                #}
+{#   1. FK dropdown — category відображається як <select>                     #}
+{#   2. M2M checkboxes — tags як список <input type="checkbox"> (мінімум 1)  #}
+{#   3. Inline form — DishMainImageForm для головного зображення (обов'язк.) #}
+{#   4. Inline formset — DishPictureFormSet для додаткових зображень          #}
+{#   5. enctype="multipart/form-data" — обов'язково для файлів               #}
+{#   6. prefix — розділяє поля різних форм ("main_image", "pictures")        #}
+{#                                                                             #}
+{# Контекст (від DishCreateView):                                            #}
+{#   form — DishForm (основна форма страви)                                  #}
+{#   image_form — DishMainImageForm (головне зображення, обов'язкове)        #}
+{#   picture_formset — DishPictureFormSet (додаткові зображення, опціонально)#}
+{#                                                                             #}
+{# Документація FormSet:                                                      #}
+{#   https://docs.djangoproject.com/en/stable/topics/forms/formsets/           #}
+{# Документація file uploads:                                                 #}
+{#   https://docs.djangoproject.com/en/stable/topics/http/file-uploads/       #}
+{# --------------------------------------------------------------------------- #}
+
+{% extends "base.html" %}
+
+{% block title %}
+  {% if form.instance.pk %}
+    Jadran Sun — Редагувати страву
+  {% else %}
+    Jadran Sun — Нова страва
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-3" style="max-width: 600px;">
+
+  {# --- Заголовок сторінки --- #}
+  <h2 class="mb-4">
+    {% if form.instance.pk %}
+      Редагувати страву
+    {% else %}
+      Створити страву
+    {% endif %}
+  </h2>
+
+  {# --- HTML-форма --- #}
+  {# enctype="multipart/form-data" — ОБОВ'ЯЗКОВИЙ для завантаження файлів.    #}
+  <form method="post" enctype="multipart/form-data">
+
+    {% csrf_token %}
+
+    {# --- Помилки основної форми --- #}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    {# --- Поля основної форми (DishForm) --- #}
+    {# form.as_div рендерить усі поля: title, description, price, weight,    #}
+    {# calorie, category (як <select>), tags (як checkboxes).                #}
+    {# clean_tags() (таска 2.6.1) вимагає мінімум 1 тег — помилка            #}
+    {# відображається біля поля tags автоматично.                             #}
+    {{ form.as_div }}
+
+    {# --- Секція головного зображення (DishMainImageForm) --- #}
+    {# ОБОВ'ЯЗКОВЕ (таска 2.6.1) — без зображення форма не пройде валідацію.  #}
+    {# prefix="main_image" — HTML-імена: "main_image-title", "main_image-image" #}
+    {% if image_form %}
+      <hr class="my-4">
+      <h5 class="mb-3">
+        <i class="bi bi-camera"></i> Головне зображення
+        <small class="text-danger">(обов'язково)</small>
+      </h5>
+
+      {# Помилки форми зображення --- #}
+      {% if image_form.non_field_errors %}
+        <div class="alert alert-danger">
+          {{ image_form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      {{ image_form.as_div }}
+
+      <small class="text-muted d-block mt-1">
+        Завантажте зображення страви (JPEG, PNG або WebP).
+        Рекомендований розмір: 640×480 пікселів.
+      </small>
+    {% endif %}
+
+    {# --- Секція додаткових зображень (DishPictureFormSet) (таска 2.6.1) --- #}
+    {# FormSet — набір однакових форм, кожна = один DishPicture.              #}
+    {# management_form — ОБОВ'ЯЗКОВІ приховані поля для Django:               #}
+    {#   TOTAL_FORMS — скільки форм відправлено                               #}
+    {#   INITIAL_FORMS — скільки форм вже мають дані (0 при створенні)        #}
+    {# Без management_form Django кине ManagementForm data is missing.        #}
+    {# Документація:                                                          #}
+    {#   https://docs.djangoproject.com/en/stable/topics/forms/formsets/#understanding-the-managementform #}
+    {% if picture_formset %}
+      <hr class="my-4">
+      <h5 class="mb-3">
+        <i class="bi bi-images"></i> Додаткові зображення
+        <small class="text-muted">(необов'язково)</small>
+      </h5>
+
+      {# ManagementForm — приховані поля TOTAL_FORMS, INITIAL_FORMS тощо.    #}
+      {# Django потребує їх щоб знати скільки форм обробляти при POST.       #}
+      {# ВАЖЛИВО: JavaScript оновлює TOTAL_FORMS при додаванні нових форм.   #}
+      {{ picture_formset.management_form }}
+
+      {# Помилки formset (non_form_errors — помилки на рівні набору) --- #}
+      {% if picture_formset.non_form_errors %}
+        <div class="alert alert-danger">
+          {{ picture_formset.non_form_errors }}
+        </div>
+      {% endif %}
+
+      {# --- Контейнер для форм formset --- #}
+      {# id="picture-formset" — JavaScript додає нові форми сюди.            #}
+      <div id="picture-formset">
+        {# --- Перебираємо кожну форму у formset --- #}
+        {# Кожна форма має prefix з індексом: "pictures-0", "pictures-1".    #}
+        {# HTML-імена полів: "pictures-0-title", "pictures-0-image".         #}
+        {% for picture_form in picture_formset %}
+          <div class="card mb-2 p-3 picture-form">
+            <h6 class="text-muted mb-2">Зображення <span class="picture-number">{{ forloop.counter }}</span></h6>
+
+            {% if picture_form.non_field_errors %}
+              <div class="alert alert-danger">
+                {{ picture_form.non_field_errors }}
+              </div>
+            {% endif %}
+
+            {{ picture_form.as_div }}
+          </div>
+        {% endfor %}
+      </div>
+
+      {# --- Кнопка "Додати ще зображення" (таска 2.6.1) --- #}
+      {# JavaScript клонує порожню форму, оновлює індекси полів             #}
+      {# та збільшує TOTAL_FORMS у ManagementForm.                           #}
+      <button type="button" class="btn btn-outline-secondary btn-sm mt-2"
+              id="add-picture-btn">
+        <i class="bi bi-plus-circle"></i> Додати ще зображення
+      </button>
+
+      <small class="text-muted d-block mt-2">
+        Завантажте додаткові фото страви. Порожні форми будуть пропущені.
+      </small>
+    {% endif %}
+
+    {# --- Кнопки --- #}
+    <div class="mt-4 d-flex gap-2">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check-lg"></i> Зберегти
+      </button>
+      <a href="{% url 'menu:dish_list' %}" class="btn btn-outline-secondary">
+        Скасувати
+      </a>
+    </div>
+
+  </form>
+
+</div>
+{% endblock %}
+
+{# ======================================================================= #}
+{# JavaScript: динамічне додавання форм у FormSet (таска 2.6.1)            #}
+{#                                                                         #}
+{# Як Django FormSet працює з JavaScript:                                  #}
+{#   1. ManagementForm містить приховане поле TOTAL_FORMS (кількість форм) #}
+{#   2. Кожна форма має prefix з індексом: "pictures-0", "pictures-1"     #}
+{#   3. При додаванні нової форми JS повинен:                              #}
+{#      a) Клонувати HTML першої (порожньої) форми                        #}
+{#      b) Замінити індекс "0" на новий номер у всіх атрибутах            #}
+{#      c) Збільшити TOTAL_FORMS на 1                                     #}
+{#   4. При POST Django побачить нове значення TOTAL_FORMS і обробить     #}
+{#      відповідну кількість форм                                         #}
+{#                                                                         #}
+{# Документація:                                                           #}
+{#   https://docs.djangoproject.com/en/stable/topics/forms/formsets/#understanding-the-managementform #}
+{# ======================================================================= #}
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // --- Елементи DOM --- //
+  const addBtn = document.getElementById("add-picture-btn");
+  const container = document.getElementById("picture-formset");
+  // TOTAL_FORMS — приховане поле ManagementForm.
+  // Django використовує його щоб знати скільки форм обробляти при POST.
+  // Ми оновлюємо його значення кожного разу коли додаємо нову форму.
+  const totalFormsInput = document.getElementById("id_pictures-TOTAL_FORMS");
+
+  // Якщо кнопка або контейнер не знайдені — нічого не робимо.
+  if (!addBtn || !container || !totalFormsInput) return;
+
+  // --- Шаблон порожньої форми --- //
+  // Зберігаємо HTML першої форми як шаблон для клонування.
+  // Перша форма (pictures-0) завжди є, бо extra=1 у formset.
+  const templateForm = container.querySelector(".picture-form");
+  if (!templateForm) return;
+  const templateHTML = templateForm.outerHTML;
+
+  addBtn.addEventListener("click", function () {
+    // Поточна кількість форм (з ManagementForm)
+    const currentTotal = parseInt(totalFormsInput.value, 10);
+
+    // --- Клонуємо шаблон та замінюємо індекси --- //
+    // Замінюємо "pictures-0" на "pictures-N" у всіх атрибутах:
+    //   name="pictures-0-title"  →  name="pictures-N-title"
+    //   id="id_pictures-0-title" →  id="id_pictures-N-title"
+    let newFormHTML = templateHTML.replace(
+      /pictures-0/g, "pictures-" + currentTotal
+    );
+
+    // Оновлюємо номер зображення у заголовку
+    newFormHTML = newFormHTML.replace(
+      /<span class="picture-number">\d+<\/span>/,
+      '<span class="picture-number">' + (currentTotal + 1) + "</span>"
+    );
+
+    // --- Додаємо нову форму у DOM --- //
+    container.insertAdjacentHTML("beforeend", newFormHTML);
+
+    // Очищаємо значення полів у щойно доданій формі
+    const newForm = container.lastElementChild;
+    newForm.querySelectorAll("input").forEach(function (input) {
+      if (input.type !== "hidden") {
+        input.value = "";
+      }
+    });
+
+    // --- Оновлюємо TOTAL_FORMS --- //
+    // Django побачить нове значення при POST і обробить відповідну кількість форм.
+    totalFormsInput.value = currentTotal + 1;
+  });
+});
+</script>
+{% endblock %}

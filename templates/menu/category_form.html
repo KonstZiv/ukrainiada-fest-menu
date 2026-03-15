@@ -1,0 +1,112 @@
+{# --------------------------------------------------------------------------- #}
+{# category_form.html — Форма створення/редагування категорії (таски 2.1, 2.3) #}
+{#                                                                             #}
+{# Демонструє:                                                                #}
+{#   1. <form method="post" enctype="multipart/form-data"> — для файлів       #}
+{#   2. {% csrf_token %} — захист від CSRF                                    #}
+{#   3. ДВІ Django-форми в одній HTML-формі:                                  #}
+{#      - form (CategoryForm) — основні дані категорії                        #}
+{#      - logo_form (CategoryLogoForm) — завантаження SVG-логотипу            #}
+{#   4. prefix="logo" — розділяє однойменні поля (title vs logo-title)        #}
+{#   5. Перевикористання: один шаблон для create (2.1) та update (2.7)        #}
+{#                                                                             #}
+{# Контекст (від view category_create або CategoryUpdateView):                #}
+{#   form — CategoryForm (порожній для create, заповнений для update)          #}
+{#   logo_form — CategoryLogoForm (порожній або з існуючим логотипом)          #}
+{#                                                                             #}
+{# ВАЖЛИВО: enctype="multipart/form-data"                                     #}
+{#   Без цього атрибуту браузер НЕ відправляє файли, і request.FILES          #}
+{#   буде порожнім! Це найчастіша помилка при роботі з file uploads.          #}
+{#   Документація:                                                             #}
+{#     https://docs.djangoproject.com/en/stable/topics/http/file-uploads/      #}
+{# --------------------------------------------------------------------------- #}
+
+{% extends "base.html" %}
+
+{% block title %}
+  {% if form.instance.pk %}
+    Jadran Sun — Редагувати категорію
+  {% else %}
+    Jadran Sun — Нова категорія
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-3" style="max-width: 600px;">
+
+  {# --- Заголовок сторінки --- #}
+  <h2 class="mb-4">
+    {% if form.instance.pk %}
+      Редагувати категорію
+    {% else %}
+      Створити категорію
+    {% endif %}
+  </h2>
+
+  {# --- HTML-форма --- #}
+  {# enctype="multipart/form-data" — ОБОВ'ЯЗКОВИЙ для завантаження файлів.    #}
+  {# Без нього браузер відправить лише текстові дані, а request.FILES          #}
+  {# залишиться порожнім. Це стандарт HTML, не специфіка Django.              #}
+  {# Документація:                                                             #}
+  {#   https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form#enctype  #}
+  <form method="post" enctype="multipart/form-data">
+
+    {% csrf_token %}
+
+    {# --- Помилки основної форми --- #}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    {# --- Поля основної форми (CategoryForm) --- #}
+    {# form.as_div рендерить поля: title, description, number_in_line.         #}
+    {# Ці поля НЕ мають prefix — їхні HTML-імена: "title", "description" тощо. #}
+    {{ form.as_div }}
+
+    {# --- Секція логотипу (CategoryLogoForm з prefix="logo") --- #}
+    {# Ця форма є ДРУГОЮ Django-формою в тій самій HTML-формі.                #}
+    {# prefix="logo" змінює HTML-імена полів:                                  #}
+    {#   "title" → "logo-title"                                                #}
+    {#   "image" → "logo-image"                                                #}
+    {# Це дозволяє Django розрізнити CategoryForm.title та                     #}
+    {# CategoryLogoForm.title при обробці POST-запиту.                         #}
+    {# Документація prefix:                                                    #}
+    {#   https://docs.djangoproject.com/en/stable/ref/forms/api/#prefixes-for-forms #}
+    {% if logo_form %}
+      <hr class="my-4">
+      <h5 class="mb-3">
+        <i class="bi bi-image"></i> Логотип категорії
+        <small class="text-muted">(необов'язково)</small>
+      </h5>
+
+      {# Помилки форми логотипу --- #}
+      {% if logo_form.non_field_errors %}
+        <div class="alert alert-danger">
+          {{ logo_form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      {{ logo_form.as_div }}
+
+      <small class="text-muted d-block mt-1">
+        Завантажте SVG-файл з логотипом категорії. Формат SVG дозволяє
+        масштабування без втрати якості.
+      </small>
+    {% endif %}
+
+    {# --- Кнопки --- #}
+    <div class="mt-4 d-flex gap-2">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check-lg"></i> Зберегти
+      </button>
+      <a href="{% url 'menu:category_list' %}" class="btn btn-outline-secondary">
+        Скасувати
+      </a>
+    </div>
+
+  </form>
+
+</div>
+{% endblock %}
