@@ -2,6 +2,7 @@ from decimal import Decimal
 from typing import Any
 
 import pytest
+from django.test import Client
 
 from kitchen.models import KitchenAssignment, KitchenTicket
 from kitchen.services import create_tickets_for_order, get_pending_tickets_for_user
@@ -123,3 +124,40 @@ def test_kitchen_ticket_str() -> None:
     ticket = KitchenTicket.objects.create(order_item=item)
     assert f"Ticket #{ticket.pk}" in str(ticket)
     assert "pending" in str(ticket)
+
+
+# --- Dashboard tests ---
+
+
+@pytest.mark.django_db
+def test_kitchen_dashboard_requires_auth(client: Client) -> None:
+    response = client.get("/kitchen/")
+    assert response.status_code == 302
+    assert "/accounts/login/" in response["Location"]
+
+
+@pytest.mark.django_db
+def test_visitor_cannot_access_kitchen(client: Client, django_user_model: Any) -> None:
+    visitor = django_user_model.objects.create_user(
+        email="v@test.com", username="visitor", password="testpass123", role="visitor"
+    )
+    client.force_login(visitor)
+    response = client.get("/kitchen/")
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_kitchen_user_sees_dashboard(client: Client, django_user_model: Any) -> None:
+    kitchen = django_user_model.objects.create_user(
+        email="k@test.com", username="cook", password="testpass123", role="kitchen"
+    )
+    client.force_login(kitchen)
+    response = client.get("/kitchen/")
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_escalation_level_choices() -> None:
+    assert KitchenTicket.EscalationLevel.NONE == 0
+    assert KitchenTicket.EscalationLevel.SUPERVISOR == 1
+    assert KitchenTicket.EscalationLevel.MANAGER == 2
