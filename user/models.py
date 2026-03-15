@@ -62,8 +62,9 @@ class User(AbstractUser):
         """User roles within the restaurant system."""
 
         MANAGER = "manager", "Менеджер"
-        PRODUCTION = "production", "Виробництво"
-        FINANCE = "finance", "Фінанси"
+        KITCHEN_SUPERVISOR = "kitchen_supervisor", "Старший кухні"
+        KITCHEN = "kitchen", "Виробництво"
+        SENIOR_WAITER = "senior_waiter", "Старший офіціант"
         WAITER = "waiter", "Офіціант"
         VISITOR = "visitor", "Відвідувач"
 
