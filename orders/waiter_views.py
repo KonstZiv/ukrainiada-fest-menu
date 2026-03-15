@@ -1,10 +1,11 @@
-"""Waiter-facing views: order list, scan, approve."""
+"""Waiter-facing views: order list, scan, approve, dashboard, deliver."""
 
 from __future__ import annotations
 
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from core_settings.types import AuthenticatedHttpRequest
 from kitchen.stats import get_dish_queue_stats
@@ -52,3 +53,50 @@ def order_approve(request: AuthenticatedHttpRequest, order_id: int) -> HttpRespo
         except ValueError as e:
             messages.error(request, str(e))
     return redirect("waiter:order_scan", order_id=order.id)
+
+
+@role_required(*WAITER_ROLES)
+def waiter_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
+    """Waiter dashboard — own active orders with kitchen ticket status."""
+    active_statuses = [
+        Order.Status.SUBMITTED,
+        Order.Status.APPROVED,
+        Order.Status.IN_PROGRESS,
+        Order.Status.READY,
+    ]
+    orders = (
+        Order.objects.filter(waiter=request.user, status__in=active_statuses)
+        .prefetch_related(
+            "items__dish",
+            "items__kitchen_ticket",
+            "items__kitchen_ticket__assigned_to",
+        )
+        .order_by("created_at")
+    )
+    dish_stats = get_dish_queue_stats()
+    return render(
+        request,
+        "orders/waiter_dashboard.html",
+        {"orders": orders, "dish_stats": dish_stats},
+    )
+
+
+@role_required(*WAITER_ROLES)
+def order_mark_delivered(
+    request: AuthenticatedHttpRequest, order_id: int
+) -> HttpResponse:
+    """Waiter marks a READY order as delivered to visitor."""
+    if request.method != "POST":
+        return redirect("waiter:dashboard")
+
+    order = get_object_or_404(Order, pk=order_id, waiter=request.user)
+
+    if order.status != Order.Status.READY:
+        messages.error(request, f"Замовлення #{order_id} ще не готове.")
+        return redirect("waiter:dashboard")
+
+    order.status = Order.Status.DELIVERED
+    order.delivered_at = timezone.now()
+    order.save(update_fields=["status", "delivered_at"])
+    messages.success(request, f"Замовлення #{order_id} видано відвідувачу.")
+    return redirect("waiter:dashboard")

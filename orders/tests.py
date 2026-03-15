@@ -326,3 +326,77 @@ def test_kitchen_role_cannot_approve(
     client.force_login(user)
     response = client.post(f"/waiter/order/{order.id}/approve/")
     assert response.status_code == 403
+
+
+# --- Waiter dashboard tests ---
+
+
+@pytest.mark.django_db
+def test_waiter_dashboard_shows_only_own_orders(
+    client: Client, django_user_model: Any
+) -> None:
+    w1 = django_user_model.objects.create_user(
+        email="w1@test.com", username="w1", password="testpass123", role="waiter"
+    )
+    w2 = django_user_model.objects.create_user(
+        email="w2@test.com", username="w2", password="testpass123", role="waiter"
+    )
+    Order.objects.create(waiter=w1, status=Order.Status.APPROVED)
+    Order.objects.create(waiter=w2, status=Order.Status.APPROVED)
+
+    client.force_login(w1)
+    response = client.get("/waiter/dashboard/")
+
+    assert response.status_code == 200
+    orders_ctx = response.context["orders"]
+    assert orders_ctx.count() == 1
+    assert orders_ctx.first().waiter == w1
+
+
+@pytest.mark.django_db
+def test_mark_delivered_changes_status(client: Client, django_user_model: Any) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(waiter=waiter, status=Order.Status.READY)
+
+    client.force_login(waiter)
+    response = client.post(f"/waiter/order/{order.id}/delivered/")
+
+    assert response.status_code == 302
+    order.refresh_from_db()
+    assert order.status == Order.Status.DELIVERED
+    assert order.delivered_at is not None
+
+
+@pytest.mark.django_db
+def test_cannot_mark_delivered_if_not_ready(
+    client: Client, django_user_model: Any
+) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(waiter=waiter, status=Order.Status.APPROVED)
+
+    client.force_login(waiter)
+    client.post(f"/waiter/order/{order.id}/delivered/")
+
+    order.refresh_from_db()
+    assert order.status == Order.Status.APPROVED
+
+
+@pytest.mark.django_db
+def test_waiter_cannot_deliver_others_order(
+    client: Client, django_user_model: Any
+) -> None:
+    w1 = django_user_model.objects.create_user(
+        email="w1@test.com", username="w1", password="testpass123", role="waiter"
+    )
+    w2 = django_user_model.objects.create_user(
+        email="w2@test.com", username="w2", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(waiter=w2, status=Order.Status.READY)
+
+    client.force_login(w1)
+    response = client.post(f"/waiter/order/{order.id}/delivered/")
+    assert response.status_code == 404
