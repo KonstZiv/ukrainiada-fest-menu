@@ -2,10 +2,8 @@
 {# FAB — visible only to visitors and anonymous users (controlled in base.html) #}
 <a href="{% url 'orders:cart' %}" class="btn-fab-order">
   <div class="d-flex align-items-center">
-    {% if cart_count > 0 %}
-    <div class="cart-pill me-3">{{ cart_count }}</div>
-    {% endif %}
+    <div class="cart-pill me-3" {% if cart_count == 0 %}style="display:none"{% endif %}>{{ cart_count }}</div>
     <span class="fw-semibold small" style="letter-spacing: 0.05em;">{% trans "ЗАМОВЛЕННЯ" %}</span>
   </div>
-  <span class="fw-bold">&euro;{{ cart_total|floatformat:2 }}</span>
+  <span class="fw-bold cart-total">&euro;{{ cart_total|floatformat:2 }}</span>
 </a>

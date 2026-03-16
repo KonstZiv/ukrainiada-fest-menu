@@ -33,9 +33,37 @@ class _EnrichedItem(TypedDict):
     quantity: int
 
 
+def _cart_json_response(request: HttpRequest, dish_id: int) -> HttpResponse:
+    """Return JSON with cart state for AJAX cart operations."""
+    from django.http import JsonResponse
+
+    from orders.cart import cart_item_count, get_cart
+
+    cart = get_cart(request)
+    quantities = {item["dish_id"]: item["quantity"] for item in cart}
+    dish_qty = quantities.get(dish_id, 0)
+
+    total = Decimal("0")
+    if quantities:
+        prices = dict(Dish.objects.filter(id__in=quantities).values_list("id", "price"))
+        total = sum(
+            (prices.get(did, Decimal("0")) * qty for did, qty in quantities.items()),
+            Decimal("0"),
+        )
+
+    return JsonResponse(
+        {
+            "dish_id": dish_id,
+            "dish_qty": dish_qty,
+            "cart_count": cart_item_count(request),
+            "cart_total": str(total),
+        }
+    )
+
+
 @require_POST
 def cart_add(request: HttpRequest) -> HttpResponse:
-    """Add a dish to the session cart. Redirects back to referring page."""
+    """Add a dish to the session cart. Returns JSON for AJAX, redirect otherwise."""
     try:
         dish_id = int(request.POST.get("dish_id", 0))
         quantity = int(request.POST.get("quantity", 1))
@@ -43,6 +71,8 @@ def cart_add(request: HttpRequest) -> HttpResponse:
         return redirect(request.META.get("HTTP_REFERER", "/order/cart/"))
     if dish_id > 0 and quantity > 0:
         add_to_cart(request, dish_id, quantity)
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return _cart_json_response(request, dish_id)
     return redirect(request.META.get("HTTP_REFERER", "/order/cart/"))
 
 
@@ -54,8 +84,10 @@ def cart_remove(request: HttpRequest, dish_id: int) -> HttpResponse:
 
 @require_POST
 def cart_decrease(request: HttpRequest, dish_id: int) -> HttpResponse:
-    """Decrease dish quantity by 1. Redirects back to referring page."""
+    """Decrease dish quantity by 1. Returns JSON for AJAX, redirect otherwise."""
     decrease_in_cart(request, dish_id)
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return _cart_json_response(request, dish_id)
     return redirect(request.META.get("HTTP_REFERER", "/order/cart/"))
 
 
