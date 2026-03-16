@@ -1,0 +1,117 @@
+/**
+ * OrderTracker — SSE client for live order tracking on order_detail page.
+ * Updates ticket statuses and progress bar without page reload.
+ * Uses textContent (not innerHTML) for XSS safety.
+ */
+(function () {
+    "use strict";
+
+    const STATUS_ORDER = ["draft", "submitted", "approved", "in_progress", "ready", "delivered"];
+
+    class OrderTracker {
+        constructor(orderId, sseUrl) {
+            this.orderId = orderId;
+            this.sseUrl = sseUrl;
+            this.source = null;
+            this.connect();
+        }
+
+        connect() {
+            this.source = new EventSource(this.sseUrl);
+            this.source.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    this.handleEvent(data);
+                } catch (e) {
+                    // Ignore non-JSON keepalive messages
+                }
+            };
+            this.source.onerror = () => {
+                // EventSource auto-reconnects
+            };
+        }
+
+        handleEvent(data) {
+            switch (data.type) {
+                case "ticket_taken":
+                    this.setTicketStatus(data.ticket_id, "taken", "\uD83D\uDC69\u200D\uD83C\uDF73", data.cook_label + " \u0433\u043E\u0442\u0443\u0454");
+                    this.updateProgress("in_progress");
+                    break;
+                case "ticket_done":
+                    this.setTicketStatus(data.ticket_id, "done", "\u2705", "\u0413\u043E\u0442\u043E\u0432\u043E");
+                    break;
+                case "dish_collecting":
+                    this.setTicketStatus(data.ticket_id, "collecting", "\uD83C\uDFC3", data.waiter_label);
+                    break;
+                case "order_approved":
+                    this.updateProgress("approved");
+                    this.showGlobalMessage("\uD83D\uDC4D " + (data.waiter_label || ""));
+                    break;
+                case "order_ready":
+                    this.updateProgress("ready");
+                    this.showGlobalMessage("\uD83C\uDF89 \u0412\u0441\u0456 \u0441\u0442\u0440\u0430\u0432\u0438 \u0433\u043E\u0442\u043E\u0432\u0456!");
+                    break;
+                case "order_delivered":
+                    this.updateProgress("delivered");
+                    this.showGlobalMessage("\u2705 \u0417\u0430\u043C\u043E\u0432\u043B\u0435\u043D\u043D\u044F \u0434\u043E\u0441\u0442\u0430\u0432\u043B\u0435\u043D\u043E! \u0421\u043C\u0430\u0447\u043D\u043E\u0433\u043E!");
+                    this.disconnect();
+                    break;
+            }
+        }
+
+        setTicketStatus(ticketId, status, icon, text) {
+            const row = document.querySelector('[data-ticket-id="' + ticketId + '"]');
+            if (!row) return;
+            const iconEl = row.querySelector(".ticket-icon");
+            const detailEl = row.querySelector(".ticket-detail");
+            if (iconEl) {
+                iconEl.textContent = icon;
+                iconEl.dataset.status = status;
+            }
+            if (detailEl) {
+                detailEl.textContent = text;
+            }
+            row.classList.add("status-updated");
+            setTimeout(() => row.classList.remove("status-updated"), 2000);
+        }
+
+        updateProgress(newStatus) {
+            const bar = document.querySelector(".order-progress");
+            if (!bar) return;
+            bar.dataset.status = newStatus;
+            const currentIdx = STATUS_ORDER.indexOf(newStatus);
+            const steps = bar.querySelectorAll(".progress-step");
+            steps.forEach((step, i) => {
+                step.classList.remove("done", "active");
+                if (i < currentIdx) step.classList.add("done");
+                if (i === currentIdx) step.classList.add("active");
+                if (i <= currentIdx) step.classList.add("done");
+            });
+        }
+
+        showGlobalMessage(text) {
+            const el = document.getElementById("order-global-status");
+            if (!el) return;
+            el.textContent = text;
+            el.classList.remove("d-none");
+        }
+
+        disconnect() {
+            if (this.source) {
+                this.source.close();
+                this.source = null;
+            }
+        }
+    }
+
+    // Auto-init from data attributes
+    document.addEventListener("DOMContentLoaded", () => {
+        const container = document.getElementById("order-tracker");
+        if (!container) return;
+        const orderId = parseInt(container.dataset.orderId, 10);
+        const sseUrl = container.dataset.sseUrl;
+        if (orderId && sseUrl) {
+            window.orderTracker = new OrderTracker(orderId, sseUrl);
+        }
+    });
+})();

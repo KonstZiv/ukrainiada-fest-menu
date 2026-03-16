@@ -365,3 +365,127 @@ body {
     display: block;
   }
 }
+
+
+/* =========================================================================== */
+/* Order progress bar — horizontal on tablet+, vertical on mobile              */
+/* =========================================================================== */
+.order-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+  margin-bottom: 1rem;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 48px;
+}
+
+.step-icon {
+  font-size: 1.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--brand-bg-page);
+  border: 2px solid var(--brand-border);
+  transition: all 0.3s;
+}
+
+.progress-step.done .step-icon {
+  background: #d1e7dd;
+  border-color: #198754;
+}
+
+.progress-step.active .step-icon {
+  background: #fff3cd;
+  border-color: #ffc107;
+  animation: pulse-soft 2s infinite;
+}
+
+.progress-line {
+  flex: 1;
+  height: 3px;
+  background: var(--brand-border);
+  min-width: 1rem;
+  max-width: 3.75rem;
+}
+
+.progress-step.done + .progress-line {
+  background: #198754;
+}
+
+.step-label {
+  font-size: 0.7rem;
+  margin-top: 0.25rem;
+  color: var(--brand-text-muted);
+}
+
+/* Mobile: vertical */
+@media (max-width: 575.98px) {
+  .order-progress {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .progress-step {
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+  .progress-line {
+    width: 3px;
+    height: 1.25rem;
+    min-width: 3px;
+    max-width: none;
+    margin-left: 1.125rem;
+  }
+  .step-label {
+    display: inline !important;
+  }
+}
+
+
+/* =========================================================================== */
+/* Ticket status rows — live tracking per dish                                 */
+/* =========================================================================== */
+.ticket-status-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--brand-border);
+  transition: background-color 0.3s;
+}
+
+.ticket-status-row:last-child {
+  border-bottom: none;
+}
+
+.ticket-icon {
+  font-size: 1.3rem;
+  width: 2rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.ticket-icon[data-status="taken"] {
+  animation: pulse-soft 2s infinite;
+}
+
+.ticket-dish {
+  font-weight: 500;
+}
+
+.status-updated {
+  background-color: rgba(25, 135, 84, 0.1);
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
