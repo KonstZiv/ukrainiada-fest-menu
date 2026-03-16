@@ -19,6 +19,7 @@ from orders.services import (
     approve_order,
     confirm_cash_payment,
     confirm_payment_by_senior,
+    deliver_order,
 )
 from user.decorators import role_required
 
@@ -82,11 +83,22 @@ def waiter_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
         )
         .order_by("created_at")
     )
+    # Delivered but unpaid — show payment reminder
+    unpaid_delivered = Order.objects.filter(
+        waiter=request.user,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.UNPAID,
+    ).order_by("delivered_at")
+
     dish_stats = get_dish_queue_stats()
     return render(
         request,
         "orders/waiter_dashboard.html",
-        {"orders": orders, "dish_stats": dish_stats},
+        {
+            "orders": orders,
+            "unpaid_delivered": unpaid_delivered,
+            "dish_stats": dish_stats,
+        },
     )
 
 
@@ -99,15 +111,12 @@ def order_mark_delivered(
         return redirect("waiter:dashboard")
 
     order = get_object_or_404(Order, pk=order_id, waiter=request.user)
+    try:
+        deliver_order(order, waiter=request.user)
+        messages.success(request, f"Замовлення #{order_id} передано відвідувачу.")
+    except ValueError as e:
+        messages.error(request, str(e))
 
-    if order.status != Order.Status.READY:
-        messages.error(request, f"Замовлення #{order_id} ще не готове.")
-        return redirect("waiter:dashboard")
-
-    order.status = Order.Status.DELIVERED
-    order.delivered_at = timezone.now()
-    order.save(update_fields=["status", "delivered_at"])
-    messages.success(request, f"Замовлення #{order_id} видано відвідувачу.")
     return redirect("waiter:dashboard")
 
 
