@@ -99,6 +99,13 @@
                class="btn btn-sm btn-outline-primary">
               <i class="bi bi-qr-code"></i> QR
             </a>
+            <form method="post" action="{% url 'kitchen:manual_handoff' ticket.id %}"
+                  class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-hand-index"></i> Вручну
+              </button>
+            </form>
           </div>
         </li>
       {% empty %}
