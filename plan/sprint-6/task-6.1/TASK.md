@@ -21,11 +21,14 @@ INSTALLED_APPS = [
     ...
 ]
 
-# Підтримувані мови
+# Підтримувані мови (7 мов, прапорці через |lang_flag template filter)
 LANGUAGES = [
     ("uk", "Українська"),
     ("en", "English"),
-    ("sr", "Crnogorski"),
+    ("cnr", "Crnogorski"),   # ISO 639-3 — чорногорська (не sr!)
+    ("hr", "Hrvatski"),
+    ("bs", "Bosanski"),
+    ("it", "Italiano"),
     ("de", "Deutsch"),
 ]
 
@@ -64,7 +67,7 @@ class TagTranslationOptions(TranslationOptions):
 ## Міграції
 
 ```bash
-# modeltranslation додає нові поля (title_uk, title_en, title_sr, title_de)
+# modeltranslation додає нові поля (title_uk, title_en, title_cnr, title_hr, title_bs, title_it, title_de)
 uv run python manage.py makemigrations menu --name="add_translation_fields"
 uv run python manage.py migrate
 
@@ -136,6 +139,6 @@ def test_dish_title_in_different_languages():
 
 - [ ] `modeltranslation` в INSTALLED_APPS перед `admin`
 - [ ] `menu/translation.py` з реєстрацією трьох моделей
-- [ ] Міграції застосовані: поля `title_uk`, `title_en`, `title_sr`, `title_de` в БД
+- [ ] Міграції застосовані: поля `title_uk`, `title_en`, `title_cnr`, `title_hr`, `title_bs`, `title_it`, `title_de` в БД
 - [ ] `update_translation_fields` виконано — існуючі дані скопійовані в `title_uk`
 - [ ] Тести зелені

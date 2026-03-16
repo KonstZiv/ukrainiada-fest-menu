@@ -76,3 +76,28 @@ def highlight(text: str, query: str) -> SafeString:
     # Документація:
     #   https://docs.djangoproject.com/en/stable/ref/utils/#django.utils.safestring.mark_safe
     return mark_safe(result)  # noqa: S308
+
+
+_LANG_FLAGS: dict[str, str] = {
+    "uk": "🇺🇦",
+    "en": "🇬🇧",
+    "cnr": "🇲🇪",
+    "hr": "🇭🇷",
+    "bs": "🇧🇦",
+    "it": "🇮🇹",
+    "de": "🇩🇪",
+}
+
+
+@register.filter(name="lang_flag")
+def lang_flag(lang_code: str) -> str:
+    """Return flag emoji for a language code.
+
+    Examples:
+        >>> lang_flag("uk")
+        '🇺🇦'
+        >>> lang_flag("unknown")
+        ''
+
+    """
+    return _LANG_FLAGS.get(lang_code, "")
