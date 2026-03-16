@@ -88,20 +88,29 @@
       </div>
       {% endif %}
 
-      <form action="{% url 'set_language' %}" method="post" class="d-inline">
-        {% csrf_token %}
-        <input name="next" type="hidden" value="{{ request.path }}">
-        {% get_available_languages as languages %}
-        {% get_current_language as current_lang %}
-        <select name="language" onchange="this.form.submit()"
-                class="form-select form-select-sm d-inline-block language-switcher-select">
+      {% get_available_languages as languages %}
+      {% get_current_language as current_lang %}
+      <div class="dropdown">
+        <button class="btn btn-sm text-primary fw-semibold p-0 dropdown-toggle"
+                type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                style="font-size: 0.8rem; letter-spacing: 0.05em;">
+          {{ current_lang|lang_flag }} {{ current_lang|upper }}
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
           {% for lang_code, lang_name in languages %}
-            <option value="{{ lang_code }}" {% if lang_code == current_lang %}selected{% endif %}>
-              {{ lang_code|lang_flag }} {{ lang_name }}
-            </option>
+          <li>
+            <form action="{% url 'set_language' %}" method="post">
+              {% csrf_token %}
+              <input name="next" type="hidden" value="{{ request.path }}">
+              <input name="language" type="hidden" value="{{ lang_code }}">
+              <button type="submit" class="dropdown-item {% if lang_code == current_lang %}active{% endif %}">
+                {{ lang_code|lang_flag }} {{ lang_name }}
+              </button>
+            </form>
+          </li>
           {% endfor %}
-        </select>
-      </form>
+        </ul>
+      </div>
 
       {# Вертикальний розділювач між кнопками.                                   #}
       {# Стилі .vr-custom визначені в brand.css.                                 #}

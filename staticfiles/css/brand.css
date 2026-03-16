@@ -229,13 +229,6 @@ body {
   font-weight: 800;
 }
 
-/* Language switcher select in navbar */
-.language-switcher-select {
-  width: auto;
-  font-size: 0.75rem;
-  padding: 0.1rem 1.5rem 0.1rem 0.3rem;
-}
-
 /* Allergen badge on dish card */
 .allergen-badge {
   font-size: 0.7rem;
