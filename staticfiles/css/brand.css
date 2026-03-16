@@ -266,9 +266,9 @@ body {
     padding: 12px 16px;
   }
 
-  /* Більші gap між кнопками */
-  .gap-touch {
-    gap: 10px !important;
+  /* Більші gap між кнопками — higher specificity to override Bootstrap gap-* */
+  .d-flex.gap-touch {
+    gap: 10px;
   }
 }
 

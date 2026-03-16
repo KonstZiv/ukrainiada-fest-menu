@@ -38,7 +38,7 @@
             <td>
               {% for item in order.items.all %}
                 {% if item.kitchen_ticket %}
-                  <span class="ticket-status badge bg-{% if item.kitchen_ticket.status == 'pending' %}warning text-dark{% elif item.kitchen_ticket.status == 'taken' %}info{% elif item.kitchen_ticket.status == 'done' %}success{% endif %}" style="font-size: 0.7rem;">
+                  <span class="ticket-status badge bg-{% if item.kitchen_ticket.status == 'pending' %}warning text-dark{% elif item.kitchen_ticket.status == 'taken' %}info{% elif item.kitchen_ticket.status == 'done' %}success{% endif %}" style="font-size: 0.8rem;">
                     {{ item.dish.title|truncatechars:10 }}: {{ item.kitchen_ticket.get_status_display }}
                   </span>
                 {% endif %}
