@@ -45,6 +45,7 @@ class CategoryAdmin(TabbedTranslationAdmin):
 class TagAdmin(TabbedTranslationAdmin):
     list_display = ["title"]
     search_fields = ["title_uk", "title_en"]
+    ordering = ["title"]
     inlines = [TagLogoInline]
 
 
@@ -54,4 +55,5 @@ class DishAdmin(TabbedTranslationAdmin):
     list_filter = ["availability", "category"]
     list_editable = ["availability"]
     search_fields = ["title_uk", "title_en"]
+    ordering = ["category", "title"]
     inlines = [DishMainImageInline, DishPictureInline]
