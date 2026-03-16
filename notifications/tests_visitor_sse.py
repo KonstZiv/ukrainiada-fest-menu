@@ -53,8 +53,7 @@ def test_visitor_sse_endpoint_with_token(client: Client) -> None:
         f"/events/visitor/{order.id}/?token={order.access_token}",
         HTTP_ACCEPT="text/event-stream",
     )
-    # EventResponse returns 200 for valid SSE
-    assert response.status_code in (200, 302)
+    assert response.status_code == 200
 
 
 @pytest.mark.django_db
