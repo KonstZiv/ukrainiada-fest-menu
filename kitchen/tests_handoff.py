@@ -199,6 +199,21 @@ def test_handoff_qr_404_for_other_cook(client: Client, django_user_model: Any) -
 
 
 @pytest.mark.django_db
+def test_handoff_qr_invalid_waiter_redirects(
+    client: Client, django_user_model: Any
+) -> None:
+    ticket, kitchen_user, _ = _make_done_ticket(django_user_model)
+
+    client.force_login(kitchen_user)
+    response = client.post(
+        f"/kitchen/ticket/{ticket.id}/handoff/",
+        {"waiter_id": 99999},
+    )
+    assert response.status_code == 302
+    assert f"/kitchen/ticket/{ticket.id}/handoff/" in response["Location"]
+
+
+@pytest.mark.django_db
 def test_handoff_str(django_user_model: Any) -> None:
     ticket, _, waiter = _make_done_ticket(django_user_model)
     handoff = create_handoff(ticket, target_waiter=waiter)

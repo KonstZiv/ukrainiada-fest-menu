@@ -127,12 +127,18 @@ def generate_handoff_qr(
     )
 
     if request.method == "POST":
-        waiter_id = request.POST.get("waiter_id")
-        target_waiter = get_object_or_404(
-            User,
-            pk=waiter_id,
-            role__in=[User.Role.WAITER, User.Role.SENIOR_WAITER],
-        )
+        waiter_id = request.POST.get("waiter_id", "")
+        try:
+            target_waiter = User.objects.get(
+                pk=int(waiter_id),
+                role__in=[User.Role.WAITER, User.Role.SENIOR_WAITER],
+            )
+        except (User.DoesNotExist, ValueError, TypeError):
+            messages.error(
+                request,
+                "Обраний офіціант не знайдений або не має відповідної ролі.",
+            )
+            return redirect(request.path)
 
         handoff = create_handoff(ticket, target_waiter=target_waiter)
 
