@@ -99,15 +99,77 @@ def order_qr(request: HttpRequest, order_id: int) -> HttpResponse:
     return HttpResponse(buffer.getvalue(), content_type="image/png")
 
 
+def _build_progress_steps(order_status: str) -> list[dict[str, object]]:
+    """Build progress bar steps for order detail template.
+
+    Returns a list of 5 step dicts with icon, label, done, active flags.
+    """
+    status_order = [
+        "draft",
+        "submitted",
+        "approved",
+        "in_progress",
+        "ready",
+        "delivered",
+    ]
+    current_idx = (
+        status_order.index(order_status) if order_status in status_order else 0
+    )
+    icons = ["📝", "👍", "👩\u200d🍳", "✅", "🍽️"]
+    labels = ["Створено", "Прийнято", "Готується", "Готово", "Доставлено"]
+    thresholds = [0, 2, 3, 4, 5]
+    return [
+        {
+            "icon": icons[i],
+            "label": labels[i],
+            "done": current_idx >= thresholds[i],
+            "active": current_idx == thresholds[i],
+        }
+        for i in range(5)
+    ]
+
+
 def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
-    """Display order details with items and QR code."""
+    """Display order details with live tracking timeline."""
     order = get_object_or_404(
-        Order.objects.prefetch_related("items__dish"),
+        Order.objects.prefetch_related(
+            "items__dish",
+            "items__kitchen_ticket",
+            "items__kitchen_ticket__assigned_to",
+        ),
         pk=order_id,
     )
     if not can_access_order(request, order):
         return render(request, "403.html", status=403)
-    return render(request, "orders/order_detail.html", {"order": order})
+
+    # Build ticket states for SSR (works without JS)
+    ticket_states = []
+    for item in order.items.all():
+        ticket = getattr(item, "kitchen_ticket", None)
+        ticket_states.append(
+            {
+                "item_id": item.id,
+                "dish_title": item.dish.title,
+                "quantity": item.quantity,
+                "ticket_id": ticket.pk if ticket else None,
+                "status": ticket.status if ticket else "pending",
+                "cook_label": (
+                    ticket.assigned_to.staff_label
+                    if ticket and ticket.assigned_to
+                    else None
+                ),
+            }
+        )
+
+    return render(
+        request,
+        "orders/order_detail.html",
+        {
+            "order": order,
+            "ticket_states": ticket_states,
+            "progress_steps": _build_progress_steps(order.status),
+        },
+    )
 
 
 def order_pay_online(request: HttpRequest, order_id: int) -> HttpResponse:

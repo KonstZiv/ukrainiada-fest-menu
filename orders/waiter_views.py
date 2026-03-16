@@ -14,6 +14,7 @@ from django.utils import timezone
 from core_settings.types import AuthenticatedHttpRequest
 from kitchen.models import KitchenHandoff
 from kitchen.stats import get_dish_queue_stats
+from notifications.events import push_visitor_event
 from orders.models import Order
 from orders.services import (
     approve_order,
@@ -172,6 +173,17 @@ def handoff_confirm_view(
 
         dish_title = handoff.ticket.order_item.dish.title
         messages.success(request, f"Прийом '{dish_title}' підтверджено.")
+
+        # Notify visitor: waiter collected the dish
+        push_visitor_event(
+            order_id=handoff.ticket.order_item.order_id,
+            event_type="dish_collecting",
+            data={
+                "ticket_id": handoff.ticket.pk,
+                "dish": dish_title[:40],
+                "waiter_label": request.user.staff_label,
+            },
+        )
         return redirect("waiter:dashboard")
 
     ttl_remaining = max(

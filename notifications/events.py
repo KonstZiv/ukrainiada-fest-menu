@@ -7,7 +7,11 @@ from typing import Any
 
 from django_eventstream import send_event
 
-from notifications.channels import manager_channel, waiter_channel
+from notifications.channels import (
+    manager_channel,
+    visitor_order_channel,
+    waiter_channel,
+)
 
 logger = logging.getLogger("notifications")
 
@@ -64,3 +68,8 @@ def push_payment_escalation(order_id: int, level: int) -> None:
     _push(
         manager_channel(), "payment_escalation", {"order_id": order_id, "level": level}
     )
+
+
+def push_visitor_event(order_id: int, event_type: str, data: dict[str, Any]) -> None:
+    """Push event to visitor watching this order."""
+    _push(visitor_order_channel(order_id), event_type, data)
