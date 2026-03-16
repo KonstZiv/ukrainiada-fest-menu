@@ -127,6 +127,15 @@ def order_confirm_payment(
     return redirect("waiter:dashboard")
 
 
+@role_required(*WAITER_ROLES)
+def handoff_confirm_view(request: AuthenticatedHttpRequest, token: str) -> HttpResponse:
+    """Waiter confirms dish handoff after scanning QR.
+
+    Placeholder — full implementation in Task 5.2.
+    """
+    return HttpResponse("Handoff confirm — not yet implemented", status=501)
+
+
 SENIOR_ROLES = ("senior_waiter", "manager")
 
 

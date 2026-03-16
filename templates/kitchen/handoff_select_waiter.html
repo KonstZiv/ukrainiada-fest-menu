@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Jadran Sun — Передача страви{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+  <h2><i class="bi bi-qr-code"></i> Передача страви</h2>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title">{{ ticket.order_item.dish.title }}</h5>
+      <p class="card-text text-muted">
+        x{{ ticket.order_item.quantity }}
+        &mdash; Замовлення #{{ ticket.order_item.order.id }}
+      </p>
+    </div>
+  </div>
+
+  <form method="post" action="{% url 'kitchen:handoff_qr' ticket.id %}">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="waiter_id" class="form-label">Оберіть офіціанта</label>
+      <select name="waiter_id" id="waiter_id" class="form-select" required>
+        <option value="" disabled selected>-- Офіціант --</option>
+        {% for w in waiters %}
+          <option value="{{ w.id }}">
+            {{ w.get_full_name|default:w.email }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary w-100">
+      <i class="bi bi-qr-code"></i> Згенерувати QR
+    </button>
+  </form>
+
+  <a href="{% url 'kitchen:dashboard' %}" class="btn btn-outline-secondary mt-3 w-100">
+    <i class="bi bi-arrow-left"></i> Повернутись
+  </a>
+</div>
+{% endblock %}
