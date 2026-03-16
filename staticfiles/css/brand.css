@@ -348,7 +348,7 @@ body {
     display: table;
   }
   .waiter-order-cards {
-    display: none !important;
+    display: none;
   }
 }
 

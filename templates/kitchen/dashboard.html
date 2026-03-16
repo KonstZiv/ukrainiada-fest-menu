@@ -110,13 +110,13 @@
                 </div>
                 <div class="d-flex gap-1 gap-touch">
                   <a href="{% url 'kitchen:handoff_qr' ticket.id %}"
-                     class="btn btn-sm btn-outline-primary btn-action">
+                     class="btn btn-outline-primary btn-kitchen-action">
                     <i class="bi bi-qr-code"></i> <span class="d-none d-md-inline">QR</span>
                   </a>
                   <form method="post" action="{% url 'kitchen:manual_handoff' ticket.id %}"
                         class="d-inline">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-sm btn-outline-secondary btn-action">
+                    <button type="submit" class="btn btn-outline-secondary btn-kitchen-action">
                       <i class="bi bi-hand-index"></i> <span class="d-none d-md-inline">Вручну</span>
                     </button>
                   </form>
