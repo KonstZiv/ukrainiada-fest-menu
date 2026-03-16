@@ -11,6 +11,7 @@ class GuestFeedbackAdmin(admin.ModelAdmin):
         "order",
         "is_published",
         "is_featured",
+        "language",
         "created_at",
     ]
     list_filter = ["mood", "is_published", "is_featured", "language"]
