@@ -13,6 +13,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from menu.models import Dish
 from orders.cart import add_to_cart, get_cart, remove_from_cart
@@ -207,20 +208,21 @@ def order_pay_online(request: HttpRequest, order_id: int) -> HttpResponse:
     return render(request, "orders/pay_online.html", {"order": order})
 
 
+@require_POST
 def create_escalation_view(request: HttpRequest, order_id: int) -> HttpResponse:
     """Visitor creates an escalation (POST only)."""
     order = get_object_or_404(Order, pk=order_id)
     if not can_access_order(request, order):
         return render(request, "403.html", status=403)
-    if request.method == "POST":
-        reason = request.POST.get("reason", "")
-        message = request.POST.get("message", "")
-        if reason not in VisitorEscalation.Reason.values:
-            messages.warning(request, "Будь ласка, оберіть дійсну причину звернення.")
-            return redirect("orders:order_detail", order_id=order_id)
-        try:
-            create_escalation(order, reason=reason, message=message)
-            messages.success(request, "Ваше звернення надіслано!")
-        except ValueError as e:
-            messages.warning(request, str(e))
+
+    reason = request.POST.get("reason", "")
+    message = request.POST.get("message", "")
+    if reason not in VisitorEscalation.Reason.values:
+        messages.warning(request, "Будь ласка, оберіть дійсну причину звернення.")
+        return redirect("orders:order_detail", order_id=order_id)
+    try:
+        create_escalation(order, reason=reason, message=message)
+        messages.success(request, "Ваше звернення надіслано!")
+    except ValueError as e:
+        messages.warning(request, str(e))
     return redirect("orders:order_detail", order_id=order_id)
