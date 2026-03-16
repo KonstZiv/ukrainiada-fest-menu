@@ -92,10 +92,13 @@ AUTH_PASSWORD_VALIDATORS = [
 # ---------------------------------------------------------------------------
 
 LANGUAGES = [
-    ("uk", "Українська"),
-    ("en", "English"),
-    ("sr", "Crnogorski"),
-    ("de", "Deutsch"),
+    ("uk", "🇺🇦 Українська"),
+    ("en", "🇬🇧 English"),
+    ("cnr", "🇲🇪 Crnogorski"),
+    ("hr", "🇭🇷 Hrvatski"),
+    ("bs", "🇧🇦 Bosanski"),
+    ("it", "🇮🇹 Italiano"),
+    ("de", "🇩🇪 Deutsch"),
 ]
 
 LANGUAGE_CODE = "uk"

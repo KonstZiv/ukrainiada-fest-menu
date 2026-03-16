@@ -133,7 +133,8 @@ def category_list(request: HttpRequest) -> HttpResponse:
     # prefetch_related("dishes") — окремий запит для ForeignKey (зворотній).
     # Prefetch("dishes", queryset=...) — вкладений prefetch для тегів страв.
     dish_qs = Dish.objects.prefetch_related(
-        Prefetch("tags", queryset=Tag.objects.select_related("logo"))  # type: ignore[arg-type]
+        Prefetch("tags", queryset=Tag.objects.select_related("logo")),  # type: ignore[arg-type]
+        "allergens",
     )
     if not _can_see_all_dishes(request.user):
         dish_qs = dish_qs.exclude(availability=Dish.Availability.OUT)
@@ -347,7 +348,7 @@ class CategoryDeleteView(generic.DeleteView):
 def dish_list(request: HttpRequest) -> HttpResponse:
     """Список всіх страв /menu/dishes/."""
     dishes = Dish.objects.select_related("category__logo").prefetch_related(
-        "tags__logo"
+        "tags__logo", "allergens"
     )
     if not _can_see_all_dishes(request.user):
         dishes = dishes.exclude(availability=Dish.Availability.OUT)
