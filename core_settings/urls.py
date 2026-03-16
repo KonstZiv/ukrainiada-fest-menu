@@ -14,8 +14,11 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from core_settings.views import offline_page
+
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
+    path("offline/", offline_page, name="offline"),
     path("admin/", admin.site.urls),
     path("menu/", include("menu.urls")),
     path("user/", include("user.urls")),
