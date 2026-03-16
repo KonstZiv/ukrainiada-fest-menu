@@ -321,6 +321,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/cb/d0/2c7b04fa864073cd8cb324f8674672162282d97540d56732cbd3a9ae5bca/django-grip-3.5.2.tar.gz", hash = "sha256:1ee1601492cd110256bd03e4a68797a9fbefa27c15f5a838bf245df97db0450c", size = 7626, upload-time = "2025-03-24T18:53:58.677Z" }
 
 [[package]]
+name = "django-modeltranslation"
+version = "0.20.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/62/aa/3492ab6250e0c87e26f2f4fd522e4c9b214da871bfe4089a13888a802c6e/django_modeltranslation-0.20.2.tar.gz", hash = "sha256:d687bdcae9305dcdc8d644b75f1d687f355073e82049f4b9c4ba0feb347a0980", size = 81589, upload-time = "2026-03-01T15:59:07.262Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/79/46/6c1edcab4233baa02cc6cfaf43e01ccc0c28757f9450171e54d790512e21/django_modeltranslation-0.20.2-py3-none-any.whl", hash = "sha256:964385c3cf3a584f564e995f2e9ff0e961d0297ef04ff51821ac529e12064290", size = 98257, upload-time = "2026-03-01T15:59:06.09Z" },
+]
+
+[[package]]
 name = "django-stubs"
 version = "5.2.9"
 source = { registry = "https://pypi.org/simple" }
@@ -989,6 +1002,7 @@ dependencies = [
     { name = "django" },
     { name = "django-celery-beat" },
     { name = "django-eventstream" },
+    { name = "django-modeltranslation" },
     { name = "pillow" },
     { name = "psycopg", extra = ["binary"] },
     { name = "python-decouple" },
@@ -1017,6 +1031,7 @@ requires-dist = [
     { name = "django", specifier = ">=6.0.1" },
     { name = "django-celery-beat", specifier = ">=2.6" },
     { name = "django-eventstream", specifier = ">=5.0" },
+    { name = "django-modeltranslation", specifier = ">=0.20.2" },
     { name = "pillow", specifier = ">=12.1.0" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.0" },
     { name = "python-decouple", specifier = ">=3.8" },

@@ -16,6 +16,7 @@ dependencies = [
     "channels-redis>=4.0",
     "uvicorn[standard]>=0.30",
     "qrcode[pil]>=8.0",
+    "django-modeltranslation>=0.20.2",
 ]
 
 [dependency-groups]
@@ -109,6 +110,11 @@ warn_unused_configs = true
 ignore_missing_imports = true
 # Виключаємо з перевірки міграції та документацію
 exclude = ["migrations", "doc"]
+
+# django-modeltranslation patches managers at runtime — django-stubs cannot resolve them
+[[tool.mypy.overrides]]
+module = "menu.models"
+disable_error_code = ["django-manager-missing"]
 
 # Налаштування плагіну django-stubs
 [tool.django-stubs]

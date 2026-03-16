@@ -355,7 +355,7 @@ class DishDetailViewTest(TestCase):
         response = self.client.get(f"/menu/dishes/{self.dish.pk}/")
         self.assertContains(response, "Цезар")
         self.assertContains(response, "Класичний салат Цезар з куркою")
-        self.assertContains(response, "12.50")
+        self.assertContains(response, "12,50")
 
     def test_dish_detail_shows_category(self) -> None:
         """Відповідь повинна містити назву категорії страви."""

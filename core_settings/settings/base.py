@@ -21,6 +21,7 @@ ALLOWED_HOSTS: list[str] = config(
 # ---------------------------------------------------------------------------
 
 INSTALLED_APPS = [
+    "modeltranslation",  # must be before django.contrib.admin
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -43,6 +44,7 @@ MIDDLEWARE = [
     "django.middleware.gzip.GZipMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -89,13 +91,26 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # ---------------------------------------------------------------------------
 
-LANGUAGE_CODE = "en-us"
+LANGUAGES = [
+    ("uk", "Українська"),
+    ("en", "English"),
+    ("sr", "Crnogorski"),
+    ("de", "Deutsch"),
+]
+
+LANGUAGE_CODE = "uk"
 
 TIME_ZONE = "UTC"
 
 USE_I18N = True
 
 USE_TZ = True
+
+LOCALE_PATHS = [BASE_DIR / "locale"]
+
+# django-modeltranslation — fallback to Ukrainian if translation is missing
+MODELTRANSLATION_DEFAULT_LANGUAGE = "uk"
+MODELTRANSLATION_FALLBACK_LANGUAGES: tuple[str, ...] = ("uk",)
 
 # ---------------------------------------------------------------------------
 # Static & media files
