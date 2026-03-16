@@ -489,3 +489,79 @@ body {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
+
+
+/* =========================================================================== */
+/* Mood selector — emoji radio buttons for feedback form                       */
+/* =========================================================================== */
+.mood-selector {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.mood-option { cursor: pointer; }
+
+.mood-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--brand-border);
+  border-radius: 2rem;
+  font-size: 1.1rem;
+  transition: all 0.2s;
+  min-height: 48px;
+}
+
+.mood-option input:checked + .mood-emoji {
+  border-color: #198754;
+  background: #d1e7dd;
+  transform: scale(1.1);
+}
+
+.mood-emoji:hover {
+  border-color: var(--brand-primary);
+}
+
+
+/* =========================================================================== */
+/* Feedback board — responsive grid                                            */
+/* =========================================================================== */
+.feedback-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .feedback-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (min-width: 992px) {
+  .feedback-grid { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+.feedback-card {
+  background: var(--brand-bg);
+  border: 1px solid var(--brand-border);
+  border-radius: 1rem;
+  padding: 1.25rem;
+}
+
+.feedback-card.featured {
+  border-color: #ffc107;
+  background: #fff3cd;
+}
+
+@media (min-width: 768px) {
+  .feedback-card.featured { grid-column: span 2; }
+}
+
+.feedback-mood { font-size: 1.5rem; margin-bottom: 0.5rem; }
+.feedback-message { font-style: italic; line-height: 1.5; margin-bottom: 0.5rem; }
+.feedback-meta { font-size: 0.85rem; display: flex; justify-content: space-between; }
+.feedback-author { font-weight: 500; }

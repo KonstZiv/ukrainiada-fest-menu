@@ -110,6 +110,47 @@
       </div>
       {% endif %}
 
+      {# --- Feedback form (post-delivery) --- #}
+      {% if order.status == 'delivered' and not has_feedback %}
+      <div class="card mt-4 border-success" id="feedback-form">
+        <div class="card-body text-center">
+          <h5>{% trans "Як вам сподобалось?" %}</h5>
+          <form method="post" action="{% url 'feedback:submit' order.id %}" class="form-needs-network">
+            {% csrf_token %}
+            <div class="mood-selector mb-3">
+              {% for value, label in mood_choices %}
+              <label class="mood-option">
+                <input type="radio" name="mood" value="{{ value }}" class="d-none"
+                       {% if forloop.first %}checked{% endif %}>
+                <span class="mood-emoji">{{ label }}</span>
+              </label>
+              {% endfor %}
+            </div>
+            {% trans "Ваше ім'я (необов'язково)" as name_placeholder %}
+            <div class="mb-3">
+              <input type="text" name="visitor_name" class="form-control"
+                     maxlength="50" placeholder="{{ name_placeholder }}">
+            </div>
+            {% trans "Напишіть щось приємне... або корисне" as msg_placeholder %}
+            <div class="mb-3">
+              <textarea name="message" class="form-control" rows="2"
+                        maxlength="500" placeholder="{{ msg_placeholder }}"></textarea>
+            </div>
+            <button type="submit" class="btn btn-success btn-action">
+              {% trans "Надіслати відгук" %}
+            </button>
+          </form>
+        </div>
+      </div>
+      {% elif has_feedback %}
+      <div class="alert alert-success mt-4 text-center">
+        <strong>{% trans "Дякуємо за відгук!" %}</strong> {{ feedback.get_mood_display }}
+        {% if feedback.message %}
+          <br><em>"{{ feedback.message|truncatechars:100 }}"</em>
+        {% endif %}
+      </div>
+      {% endif %}
+
       {% else %}
 
       {# --- Simple item list for draft orders --- #}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Дошка відгуків" %} — Ukrainiada{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-3 px-2 px-md-3">
+  <h2 class="text-center mb-4">{% trans "Що кажуть наші гості" %}</h2>
+
+  {% if not feedbacks %}
+  <p class="text-center text-muted">{% trans "Поки що відгуків немає. Будьте першим!" %}</p>
+  {% endif %}
+
+  <div class="feedback-grid">
+    {% for fb in feedbacks %}
+    <div class="feedback-card {% if fb.is_featured %}featured{% endif %}">
+      <div class="feedback-mood">{{ fb.get_mood_display }}</div>
+      {% if fb.message %}
+        <p class="feedback-message">{{ fb.message }}</p>
+      {% endif %}
+      <div class="feedback-meta">
+        {% if fb.visitor_name %}
+          <span class="feedback-author">— {{ fb.visitor_name }}</span>
+        {% endif %}
+        <span class="feedback-date text-muted">
+          {{ fb.created_at|timesince }} {% trans "тому" %}
+        </span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

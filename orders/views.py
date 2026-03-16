@@ -15,6 +15,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from feedback.models import GuestFeedback
 from menu.models import Dish
 from orders.cart import add_to_cart, get_cart, remove_from_cart
 from orders.escalation_services import create_escalation
@@ -177,6 +178,12 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
         status__in=["open", "acknowledged"],
     ).first()
 
+    # Feedback context
+    has_feedback = GuestFeedback.objects.filter(order=order).exists()
+    feedback_obj = None
+    if has_feedback:
+        feedback_obj = order.feedback  # type: ignore[attr-defined]
+
     return render(
         request,
         "orders/order_detail.html",
@@ -187,6 +194,9 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
             "show_escalation_button": can_escalate and not active_escalation,
             "active_escalation": active_escalation,
             "escalation_reasons": VisitorEscalation.Reason.choices,
+            "has_feedback": has_feedback,
+            "feedback": feedback_obj,
+            "mood_choices": GuestFeedback.Mood.choices if not has_feedback else [],
         },
     )
 

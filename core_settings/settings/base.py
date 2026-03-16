@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "orders",
     "kitchen",
     "notifications",
+    "feedback",
     # Third-party
     "django_celery_beat",
     "channels",

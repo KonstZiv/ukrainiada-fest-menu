@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Модерація відгуків" %} — Ukrainiada{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+  <h2>{% trans "Модерація відгуків" %}</h2>
+
+  <h4>{% trans "Очікують модерації" %} ({{ pending|length }})</h4>
+  {% for fb in pending %}
+  <div class="card mb-2">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+          <span class="fs-4">{{ fb.get_mood_display }}</span>
+          {% if fb.visitor_name %}<strong>{{ fb.visitor_name }}</strong>{% endif %}
+          — {% blocktrans with order_id=fb.order_id %}Замовлення #{{ order_id }}{% endblocktrans %}
+          <br>
+          {% if fb.message %}
+            <em>{{ fb.message }}</em>
+          {% else %}
+            <span class="text-muted">{% trans "(без повідомлення)" %}</span>
+          {% endif %}
+        </div>
+        <div class="d-flex gap-1">
+          <form method="post" action="{% url 'feedback:moderate_action' fb.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="publish">
+            <button class="btn btn-sm btn-success btn-action">{% trans "Опублікувати" %}</button>
+          </form>
+          <form method="post" action="{% url 'feedback:moderate_action' fb.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="feature">
+            <button class="btn btn-sm btn-warning btn-action">{% trans "Виділити" %}</button>
+          </form>
+          <form method="post" action="{% url 'feedback:moderate_action' fb.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="reject">
+            <button class="btn btn-sm btn-outline-danger btn-action">{% trans "Видалити" %}</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p class="text-muted">{% trans "Нових відгуків немає." %}</p>
+  {% endfor %}
+</div>
+{% endblock %}
