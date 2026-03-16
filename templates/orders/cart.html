@@ -1,10 +1,11 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}Jadran Sun — Кошик{% endblock %}
 
 {% block content %}
 <div class="container mt-3">
-  <h2><i class="bi bi-cart3"></i> Кошик</h2>
+  <h2><i class="bi bi-cart3"></i> {% trans "Кошик" %}</h2>
 
   {% if items %}
     <div class="list-group mb-3">
@@ -26,22 +27,23 @@
     </div>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <h5 class="mb-0">Разом: <strong>&euro;{{ total|floatformat:2 }}</strong></h5>
+      <h5 class="mb-0">{% trans "Разом:" %} <strong>&euro;{{ total|floatformat:2 }}</strong></h5>
       <form method="post" action="{% url 'orders:order_submit' %}" class="form-needs-network">
         {% csrf_token %}
         <div class="mb-2">
+          {% trans "Де вас знайти? (необов'язково)" as location_placeholder %}
           <input type="text" class="form-control form-control-sm" name="location_hint"
-                 maxlength="60" placeholder="Де вас знайти? (необов'язково)">
+                 maxlength="60" placeholder="{{ location_placeholder }}">
         </div>
         <button type="submit" class="btn btn-success btn-action">
-          <i class="bi bi-check-circle"></i> Оформити замовлення
+          <i class="bi bi-check-circle"></i> {% trans "Оформити замовлення" %}
         </button>
       </form>
     </div>
   {% else %}
     <div class="alert alert-info">
-      <i class="bi bi-info-circle"></i> Кошик порожній.
-      <a href="{% url 'menu:dish_list' %}">Перейти до меню</a>
+      <i class="bi bi-info-circle"></i> {% trans "Кошик порожній." %}
+      <a href="{% url 'menu:dish_list' %}">{% trans "Перейти до меню" %}</a>
     </div>
   {% endif %}
 </div>

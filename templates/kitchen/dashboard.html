@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}Jadran Sun — Кухня{% endblock %}
 
@@ -9,7 +10,7 @@
   {% if escalated %}
     <div class="card border-danger mb-3 ticket-card-escalated">
       <div class="card-header bg-danger text-white">
-        <i class="bi bi-exclamation-triangle"></i> Ескальовані ({{ escalated|length }})
+        <i class="bi bi-exclamation-triangle"></i> {% blocktrans with count=escalated|length %}Ескальовані ({{ count }}){% endblocktrans %}
       </div>
       <ul class="list-group list-group-flush">
         {% for ticket in escalated %}
@@ -17,7 +18,7 @@
             <div>
               <strong>{{ ticket.order_item.dish.title }}</strong>
               <span class="text-muted ms-1">x{{ ticket.order_item.quantity }}</span>
-              <small class="text-muted ms-2">Замовлення #{{ ticket.order_item.order.id }}</small>
+              <small class="text-muted ms-2">{% blocktrans with order_id=ticket.order_item.order.id %}Замовлення #{{ order_id }}{% endblocktrans %}</small>
             </div>
             <span class="badge bg-danger">{{ ticket.get_escalation_level_display }}</span>
           </li>
@@ -33,7 +34,7 @@
     <div class="kanban-col">
       <div class="card mb-3 h-100">
         <div class="card-header bg-warning text-dark">
-          <i class="bi bi-hourglass-split"></i> Черга (<span id="pending-count">{{ pending|length }}</span>)
+          <i class="bi bi-hourglass-split"></i> {% trans "Черга" %} (<span id="pending-count">{{ pending|length }}</span>)
         </div>
         <ul class="list-group list-group-flush">
           {% for ticket in pending %}
@@ -44,19 +45,19 @@
                   <span class="text-muted ms-1">x{{ ticket.order_item.quantity }}</span>
                   <br>
                   <small class="text-muted">#{{ ticket.order_item.order.id }}</small>
-                  <small class="text-muted detail-md ms-1">{{ ticket.created_at|timesince }} тому</small>
-                  <small class="text-muted detail-lg ms-1">Офіц: {{ ticket.order_item.order.waiter.get_full_name|default:"—" }}</small>
+                  <small class="text-muted detail-md ms-1">{% blocktrans with time=ticket.created_at|timesince %}{{ time }} тому{% endblocktrans %}</small>
+                  <small class="text-muted detail-lg ms-1">{% blocktrans with name=ticket.order_item.order.waiter.get_full_name|default:"—" %}Офіц: {{ name }}{% endblocktrans %}</small>
                 </div>
               </div>
               <form method="post" action="{% url 'kitchen:ticket_take' ticket.id %}" class="mt-2">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-primary btn-action btn-kitchen-action">
-                  <i class="bi bi-hand-index"></i> Взяти
+                  <i class="bi bi-hand-index"></i> {% trans "Взяти" %}
                 </button>
               </form>
             </li>
           {% empty %}
-            <li class="list-group-item text-muted text-center py-4">Черга порожня</li>
+            <li class="list-group-item text-muted text-center py-4">{% trans "Черга порожня" %}</li>
           {% endfor %}
         </ul>
       </div>
@@ -66,7 +67,7 @@
     <div class="kanban-col">
       <div class="card mb-3 h-100">
         <div class="card-header bg-info text-white">
-          <i class="bi bi-gear"></i> В роботі ({{ my_taken|length }})
+          <i class="bi bi-gear"></i> {% blocktrans with count=my_taken|length %}В роботі ({{ count }}){% endblocktrans %}
         </div>
         <ul class="list-group list-group-flush">
           {% for ticket in my_taken %}
@@ -75,17 +76,17 @@
                 <strong>{{ ticket.order_item.dish.title }}</strong>
                 <span class="text-muted ms-1">x{{ ticket.order_item.quantity }}</span>
                 <br>
-                <small class="text-muted">{{ ticket.taken_at|timesince }} тому</small>
+                <small class="text-muted">{% blocktrans with time=ticket.taken_at|timesince %}{{ time }} тому{% endblocktrans %}</small>
               </div>
               <form method="post" action="{% url 'kitchen:ticket_done' ticket.id %}" class="mt-2">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-success btn-action btn-kitchen-action">
-                  <i class="bi bi-check-lg"></i> Готово
+                  <i class="bi bi-check-lg"></i> {% trans "Готово" %}
                 </button>
               </form>
             </li>
           {% empty %}
-            <li class="list-group-item text-muted text-center py-4">Нічого в роботі</li>
+            <li class="list-group-item text-muted text-center py-4">{% trans "Нічого в роботі" %}</li>
           {% endfor %}
         </ul>
       </div>
@@ -95,7 +96,7 @@
     <div class="kanban-col">
       <div class="card mb-3 h-100">
         <div class="card-header bg-success text-white">
-          <i class="bi bi-check-circle"></i> Готово ({{ my_done|length }})
+          <i class="bi bi-check-circle"></i> {% blocktrans with count=my_done|length %}Готово ({{ count }}){% endblocktrans %}
         </div>
         <ul class="list-group list-group-flush">
           {% for ticket in my_done %}
@@ -111,20 +112,20 @@
                 <div class="d-flex gap-2">
                   <a href="{% url 'kitchen:handoff_qr' ticket.id %}"
                      class="btn btn-outline-primary btn-kitchen-action">
-                    <i class="bi bi-qr-code"></i> <span class="d-none d-md-inline">QR</span>
+                    <i class="bi bi-qr-code"></i> <span class="d-none d-md-inline">{% trans "QR" %}</span>
                   </a>
                   <form method="post" action="{% url 'kitchen:manual_handoff' ticket.id %}"
                         class="d-inline">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-outline-secondary btn-kitchen-action">
-                      <i class="bi bi-hand-index"></i> <span class="d-none d-md-inline">Вручну</span>
+                      <i class="bi bi-hand-index"></i> <span class="d-none d-md-inline">{% trans "Вручну" %}</span>
                     </button>
                   </form>
                 </div>
               </div>
             </li>
           {% empty %}
-            <li class="list-group-item text-muted text-center py-4">Ще нічого не приготовлено</li>
+            <li class="list-group-item text-muted text-center py-4">{% trans "Ще нічого не приготовлено" %}</li>
           {% endfor %}
         </ul>
       </div>

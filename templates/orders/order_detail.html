@@ -1,17 +1,18 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}Jadran Sun — Замовлення #{{ order.id }}{% endblock %}
 
 {% block content %}
 <div class="container mt-3">
-  <h2>Замовлення #{{ order.id }}</h2>
+  <h2>{% blocktrans with order_id=order.id %}Замовлення #{{ order_id }}{% endblocktrans %}</h2>
 
   <div class="card mb-3">
     <div class="card-body">
-      <p><strong>Статус:</strong> {{ order.get_status_display }}</p>
-      <p><strong>Створено:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+      <p><strong>{% trans "Статус:" %}</strong> {{ order.get_status_display }}</p>
+      <p><strong>{% trans "Створено:" %}</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
 
-      <h5 class="mt-3">Позиції</h5>
+      <h5 class="mt-3">{% trans "Позиції" %}</h5>
       <ul class="list-group mb-3">
         {% for item in order.items.all %}
           <li class="list-group-item d-flex justify-content-between">
@@ -21,13 +22,13 @@
         {% endfor %}
       </ul>
 
-      <h5>Разом: &euro;{{ order.total_price|floatformat:2 }}</h5>
+      <h5>{% trans "Разом:" %} &euro;{{ order.total_price|floatformat:2 }}</h5>
     </div>
   </div>
 
   {% if order.status == 'draft' %}
     <div class="text-center">
-      <p class="text-muted">Покажіть QR-код або назвіть номер замовлення офіціанту</p>
+      <p class="text-muted">{% trans "Покажіть QR-код або назвіть номер замовлення офіціанту" %}</p>
       <img src="{% url 'orders:order_qr' order.id %}"
            alt="QR замовлення #{{ order.id }}"
            width="256" height="256"

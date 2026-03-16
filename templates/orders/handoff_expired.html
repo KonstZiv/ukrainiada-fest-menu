@@ -1,15 +1,16 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}Jadran Sun — QR прострочений{% endblock %}
 
 {% block content %}
 <div class="container mt-3 text-center">
   <div class="alert alert-danger">
-    <h3><i class="bi bi-clock-history"></i> QR-код прострочений</h3>
-    <p>Попросіть кухаря згенерувати новий QR-код.</p>
-    <p>Або скористайтесь ручним підтвердженням.</p>
+    <h3><i class="bi bi-clock-history"></i> {% trans "QR-код прострочений" %}</h3>
+    <p>{% trans "Попросіть кухаря згенерувати новий QR-код." %}</p>
+    <p>{% trans "Або скористайтесь ручним підтвердженням." %}</p>
     <a href="{% url 'waiter:dashboard' %}" class="btn btn-primary mt-2">
-      <i class="bi bi-arrow-left"></i> Повернутись до dashboard
+      <i class="bi bi-arrow-left"></i> {% trans "Повернутись до dashboard" %}
     </a>
   </div>
 </div>

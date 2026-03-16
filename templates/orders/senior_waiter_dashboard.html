@@ -1,14 +1,15 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}Jadran Sun — Ескальовані замовлення{% endblock %}
 
 {% block content %}
 <div class="container mt-3">
-  <h2><i class="bi bi-exclamation-triangle"></i> Ескальовані несплачені замовлення</h2>
+  <h2><i class="bi bi-exclamation-triangle"></i> {% trans "Ескальовані несплачені замовлення" %}</h2>
 
   {% if not orders_with_age %}
     <div class="alert alert-success">
-      <i class="bi bi-check-circle"></i> Немає проблемних замовлень.
+      <i class="bi bi-check-circle"></i> {% trans "Немає проблемних замовлень." %}
     </div>
   {% endif %}
 
@@ -19,22 +20,22 @@
           <strong>#{{ item.order.id }}</strong>
           <span class="badge {% if item.escalation_level >= 2 %}bg-danger{% else %}bg-warning text-dark{% endif %} ms-2">
             {% if item.escalation_level >= 2 %}
-              Менеджер
+              {% trans "Менеджер" %}
             {% else %}
-              Старший офіціант
+              {% trans "Старший офіціант" %}
             {% endif %}
           </span>
         </div>
         <span class="text-muted">
-          Доставлено {{ item.minutes_since_delivery }} хв тому
+          {% blocktrans with minutes=item.minutes_since_delivery %}Доставлено {{ minutes }} хв тому{% endblocktrans %}
         </span>
       </div>
       <div class="card-body">
         <p>
-          <strong>Офіціант:</strong>
+          <strong>{% trans "Офіціант:" %}</strong>
           {{ item.order.waiter.get_full_name|default:item.order.waiter.email }}
         </p>
-        <p><strong>Сума:</strong> &euro;{{ item.order.total_price|floatformat:2 }}</p>
+        <p><strong>{% trans "Сума:" %}</strong> &euro;{{ item.order.total_price|floatformat:2 }}</p>
 
         <ul class="list-group list-group-flush mb-3">
           {% for order_item in item.order.items.all %}
@@ -48,11 +49,11 @@
         <form method="post" action="{% url 'waiter:senior_confirm_payment' item.order.id %}" class="d-flex gap-2">
           {% csrf_token %}
           <select name="payment_type" class="form-select form-select-sm" style="width: auto;">
-            <option value="cash">Готівка</option>
-            <option value="online">Онлайн</option>
+            <option value="cash">{% trans "Готівка" %}</option>
+            <option value="online">{% trans "Онлайн" %}</option>
           </select>
           <button type="submit" class="btn btn-success btn-sm">
-            <i class="bi bi-check-circle"></i> Підтвердити оплату
+            <i class="bi bi-check-circle"></i> {% trans "Підтвердити оплату" %}
           </button>
         </form>
       </div>
