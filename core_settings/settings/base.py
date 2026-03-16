@@ -95,6 +95,9 @@ LANGUAGES = [
     ("uk", "Українська"),
     ("en", "English"),
     ("sr", "Crnogorski"),
+    ("hr", "Hrvatski"),
+    ("bs", "Bosanski"),
+    ("it", "Italiano"),
     ("de", "Deutsch"),
 ]
 
