@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Jadran Sun — Доступ заборонено{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+  <div class="py-5">
+    <h1 class="display-6 mb-3"><i class="bi bi-lock"></i></h1>
+    <h2>Доступ заборонено</h2>
+    <p class="text-muted mt-3">У вас немає доступу до цього замовлення.</p>
+    <p class="text-muted">Якщо це ваше замовлення — скористайтесь посиланням з QR-коду або увійдіть до свого акаунту.</p>
+    <div class="d-flex justify-content-center gap-2 mt-4">
+      <a href="{% url 'menu:index' %}" class="btn btn-primary btn-action">
+        <i class="bi bi-house"></i> На головну
+      </a>
+      <a href="{% url 'login' %}" class="btn btn-outline-secondary btn-action">
+        <i class="bi bi-box-arrow-in-right"></i> Увійти
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

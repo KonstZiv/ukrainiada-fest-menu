@@ -106,7 +106,7 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
         pk=order_id,
     )
     if not can_access_order(request, order):
-        return HttpResponse("Доступ заборонено", status=403)
+        return render(request, "403.html", status=403)
     return render(request, "orders/order_detail.html", {"order": order})
 
 
@@ -114,7 +114,7 @@ def order_pay_online(request: HttpRequest, order_id: int) -> HttpResponse:
     """Online payment page (stub — always succeeds)."""
     order = get_object_or_404(Order, pk=order_id)
     if not can_access_order(request, order):
-        return HttpResponse("Доступ заборонено", status=403)
+        return render(request, "403.html", status=403)
 
     if request.method == "POST":
         try:
