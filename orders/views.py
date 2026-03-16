@@ -18,7 +18,7 @@ from django.views.decorators.http import require_POST
 
 from feedback.models import GuestFeedback
 from menu.models import Dish
-from orders.cart import add_to_cart, get_cart, remove_from_cart
+from orders.cart import add_to_cart, decrease_in_cart, get_cart, remove_from_cart
 from orders.escalation_services import create_escalation
 from orders.models import Order, VisitorEscalation
 from orders.services import (
@@ -35,21 +35,28 @@ class _EnrichedItem(TypedDict):
 
 @require_POST
 def cart_add(request: HttpRequest) -> HttpResponse:
-    """Add a dish to the session cart."""
+    """Add a dish to the session cart. Redirects back to referring page."""
     try:
         dish_id = int(request.POST.get("dish_id", 0))
         quantity = int(request.POST.get("quantity", 1))
     except ValueError, TypeError:
-        return redirect("orders:cart")
+        return redirect(request.META.get("HTTP_REFERER", "/order/cart/"))
     if dish_id > 0 and quantity > 0:
         add_to_cart(request, dish_id, quantity)
-    return redirect("orders:cart")
+    return redirect(request.META.get("HTTP_REFERER", "/order/cart/"))
 
 
 def cart_remove(request: HttpRequest, dish_id: int) -> HttpResponse:
     """Remove a dish from the session cart."""
     remove_from_cart(request, dish_id)
     return redirect("orders:cart")
+
+
+@require_POST
+def cart_decrease(request: HttpRequest, dish_id: int) -> HttpResponse:
+    """Decrease dish quantity by 1. Redirects back to referring page."""
+    decrease_in_cart(request, dish_id)
+    return redirect(request.META.get("HTTP_REFERER", "/order/cart/"))
 
 
 def cart_view(request: HttpRequest) -> HttpResponse:

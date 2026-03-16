@@ -33,6 +33,21 @@ def add_to_cart(request: HttpRequest, dish_id: int, quantity: int = 1) -> None:
     request.session.modified = True
 
 
+def decrease_in_cart(request: HttpRequest, dish_id: int) -> None:
+    """Decrease dish quantity by 1. Remove if quantity reaches 0."""
+    cart = get_cart(request)
+    new_cart = []
+    for item in cart:
+        if item["dish_id"] == dish_id:
+            item["quantity"] -= 1
+            if item["quantity"] > 0:
+                new_cart.append(item)
+        else:
+            new_cart.append(item)
+    request.session[CART_SESSION_KEY] = new_cart
+    request.session.modified = True
+
+
 def remove_from_cart(request: HttpRequest, dish_id: int) -> None:
     """Remove a dish from cart entirely."""
     cart = [item for item in get_cart(request) if item["dish_id"] != dish_id]

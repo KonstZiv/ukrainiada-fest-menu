@@ -101,3 +101,14 @@ def lang_flag(lang_code: str) -> str:
 
     """
     return _LANG_FLAGS.get(lang_code, "")
+
+
+@register.filter(name="dict_get")
+def dict_get(d: dict, key: object) -> object:  # type: ignore[type-arg]
+    """Lookup a key in a dictionary. Returns None if not found.
+
+    Usage: {{ my_dict|dict_get:key }}
+    """
+    if isinstance(d, dict):
+        return d.get(key)
+    return None
