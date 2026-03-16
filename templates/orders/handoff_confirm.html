@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Jadran Sun — Підтвердження прийому{% endblock %}
+
+{% block content %}
+<div class="container mt-3 text-center">
+  <h2><i class="bi bi-check2-square"></i> Підтвердження прийому страви</h2>
+
+  <div class="card my-4">
+    <div class="card-body">
+      <h4>{{ handoff.ticket.order_item.dish.title }}</h4>
+      <p>Кількість: <strong>{{ handoff.ticket.order_item.quantity }}</strong></p>
+      <p>Від: <strong>{{ handoff.ticket.assigned_to.get_full_name|default:handoff.ticket.assigned_to.email }}</strong></p>
+      <p>Замовлення: <strong>#{{ handoff.ticket.order_item.order.id }}</strong></p>
+    </div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-success btn-lg w-100">
+      <i class="bi bi-check-lg"></i> Підтверджую прийом
+    </button>
+  </form>
+
+  <p class="text-muted mt-3">
+    <small>QR дійсний ще ~{{ ttl_remaining }} секунд</small>
+  </p>
+</div>
+{% endblock %}

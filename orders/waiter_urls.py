@@ -23,6 +23,11 @@ urlpatterns = [
         waiter_views.order_confirm_payment,
         name="confirm_payment",
     ),
+    path(
+        "handoff/<uuid:token>/confirm/",
+        waiter_views.handoff_confirm_view,
+        name="handoff_confirm",
+    ),
     path("senior/", waiter_views.senior_waiter_dashboard, name="senior_dashboard"),
     path(
         "senior/order/<int:order_id>/confirm-payment/",
