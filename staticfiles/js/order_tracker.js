@@ -6,7 +6,15 @@
 (function () {
     "use strict";
 
-    const STATUS_ORDER = ["draft", "submitted", "approved", "in_progress", "ready", "delivered"];
+    // Maps order status → visual step index (must match _build_progress_steps in views.py)
+    const STATUS_TO_STEP = {
+        "draft": -1,
+        "submitted": 0,
+        "approved": 1,
+        "in_progress": 2,
+        "ready": 3,
+        "delivered": 4,
+    };
 
     class OrderTracker {
         constructor(orderId, sseUrl) {
@@ -78,14 +86,14 @@
         updateProgress(newStatus) {
             const bar = document.querySelector(".order-progress");
             if (!bar) return;
-            bar.dataset.status = newStatus;
-            const currentIdx = STATUS_ORDER.indexOf(newStatus);
-            const steps = bar.querySelectorAll(".progress-step");
-            steps.forEach((step, i) => {
+            const targetStep = STATUS_TO_STEP[newStatus];
+            if (targetStep === undefined) return;
+
+            bar.querySelectorAll(".progress-step").forEach((step) => {
+                const idx = parseInt(step.dataset.stepIndex, 10);
                 step.classList.remove("done", "active");
-                if (i < currentIdx) step.classList.add("done");
-                if (i === currentIdx) step.classList.add("active");
-                if (i <= currentIdx) step.classList.add("done");
+                if (idx <= targetStep) step.classList.add("done");
+                if (idx === targetStep) step.classList.add("active");
             });
         }
 

@@ -7,13 +7,14 @@
 <div class="container mt-3">
   <h2>{% blocktrans with order_id=order.id %}Замовлення #{{ order_id }}{% endblocktrans %}</h2>
 
-  {# --- Progress bar (Task 9.4) — built from progress_steps in view context --- #}
-  {% if order.status != 'draft' %}
+  {# --- Progress bar — visible for approved+ orders --- #}
+  {% if order.status != 'submitted' %}
   <div class="order-progress" data-status="{{ order.status }}">
     {% for step in progress_steps %}
-      <div class="progress-step {% if step.done %}done{% endif %} {% if step.active %}active{% endif %}">
+      <div class="progress-step {% if step.done %}done{% endif %} {% if step.active %}active{% endif %}"
+           data-step-index="{{ step.step_index }}">
         <span class="step-icon">{{ step.icon }}</span>
-        <span class="step-label d-none d-sm-inline">{% trans step.label %}</span>
+        <span class="step-label d-none d-sm-inline">{{ step.label }}</span>
       </div>
       {% if not forloop.last %}<div class="progress-line"></div>{% endif %}
     {% endfor %}
@@ -28,8 +29,8 @@
         <p><i class="bi bi-geo-alt"></i> {{ order.location_hint }}</p>
       {% endif %}
 
-      {# --- Ticket tracking (Task 9.3) --- #}
-      {% if ticket_states and order.status != 'draft' %}
+      {# --- Ticket tracking — visible after approve (when tickets exist) --- #}
+      {% if ticket_states and order.status != 'submitted' %}
       <h5 class="mt-3">{% trans "Статус вашого замовлення" %}</h5>
       <div id="order-tracker"
            data-order-id="{{ order.id }}"
@@ -153,7 +154,7 @@
 
       {% else %}
 
-      {# --- Simple item list for draft orders --- #}
+      {# --- Simple item list for submitted orders (waiting for waiter) --- #}
       <h5 class="mt-3">{% trans "Позиції" %}</h5>
       <ul class="list-group mb-3">
         {% for item in order.items.all %}
@@ -169,7 +170,7 @@
     </div>
   </div>
 
-  {% if order.status == 'draft' %}
+  {% if order.status == 'submitted' %}
     <div class="text-center">
       <p class="text-muted">{% trans "Покажіть QR-код або назвіть номер замовлення офіціанту" %}</p>
       <img src="{% url 'orders:order_qr' order.id %}"
@@ -183,7 +184,7 @@
 {% endblock %}
 
 {% block extra_js %}
-{% if order.status != 'draft' and order.status != 'delivered' %}
+{% if order.status != 'submitted' and order.status != 'delivered' %}
 <script src="{% static 'js/order_tracker.js' %}" defer></script>
 {% endif %}
 {% endblock %}

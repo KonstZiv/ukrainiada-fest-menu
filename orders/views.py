@@ -32,16 +32,16 @@ class _EnrichedItem(TypedDict):
     quantity: int
 
 
+@require_POST
 def cart_add(request: HttpRequest) -> HttpResponse:
-    """Add a dish to the session cart (POST only)."""
-    if request.method == "POST":
-        try:
-            dish_id = int(request.POST.get("dish_id", 0))
-            quantity = int(request.POST.get("quantity", 1))
-        except ValueError, TypeError:
-            return redirect("orders:cart")
-        if dish_id > 0 and quantity > 0:
-            add_to_cart(request, dish_id, quantity)
+    """Add a dish to the session cart."""
+    try:
+        dish_id = int(request.POST.get("dish_id", 0))
+        quantity = int(request.POST.get("quantity", 1))
+    except ValueError, TypeError:
+        return redirect("orders:cart")
+    if dish_id > 0 and quantity > 0:
+        add_to_cart(request, dish_id, quantity)
     return redirect("orders:cart")
 
 
@@ -68,23 +68,25 @@ def cart_view(request: HttpRequest) -> HttpResponse:
     return render(request, "orders/cart.html", {"items": enriched, "total": total})
 
 
+@require_POST
 def order_submit(request: HttpRequest) -> HttpResponse:
-    """Create an order from the cart (POST only)."""
-    if request.method == "POST":
-        order = submit_order_from_cart(request)
-        if order:
-            return redirect("orders:order_detail", order_id=order.id)
-        messages.error(request, "Кошик порожній або страви недоступні.")
+    """Create an order from the cart."""
+    order = submit_order_from_cart(request)
+    if order:
+        return redirect("orders:order_detail", order_id=order.id)
+    messages.error(request, "Кошик порожній або страви недоступні.")
     return redirect("orders:cart")
 
 
 def order_qr(request: HttpRequest, order_id: int) -> HttpResponse:
-    """Generate QR code PNG for a DRAFT order.
+    """Generate QR code PNG for a SUBMITTED order.
 
     QR contains the URL for waiter to scan and review the order.
-    Only available for DRAFT orders (not yet picked up by waiter).
+    Only available for SUBMITTED orders (not yet approved by waiter).
     """
-    order = get_object_or_404(Order, pk=order_id, status=Order.Status.DRAFT)
+    order = get_object_or_404(Order, pk=order_id, status=Order.Status.SUBMITTED)
+    if not can_access_order(request, order):
+        return render(request, "403.html", status=403)
     scan_url = request.build_absolute_uri(reverse("waiter:order_scan", args=[order.id]))
 
     qr = qrcode.QRCode(
@@ -107,30 +109,37 @@ def order_qr(request: HttpRequest, order_id: int) -> HttpResponse:
 def _build_progress_steps(order_status: str) -> list[dict[str, object]]:
     """Build progress bar steps for order detail template.
 
-    Returns a list of 5 step dicts with icon, label, done, active flags.
+    Maps 6 order statuses to 5 visual steps. submitted and approved
+    both map to step 1 ("Прийнято"). Uses gettext for i18n labels.
     """
-    status_order = [
-        "draft",
-        "submitted",
-        "approved",
-        "in_progress",
-        "ready",
-        "delivered",
+    from django.utils.translation import gettext as _
+
+    status_to_step: dict[str, int] = {
+        "draft": -1,
+        "submitted": 0,
+        "approved": 1,
+        "in_progress": 2,
+        "ready": 3,
+        "delivered": 4,
+    }
+    current_step = status_to_step.get(order_status, -1)
+
+    steps_config = [
+        ("📝", _("Створено")),
+        ("👍", _("Прийнято")),
+        ("👩\u200d🍳", _("Готується")),
+        ("✅", _("Готово")),
+        ("🍽️", _("Доставлено")),
     ]
-    current_idx = (
-        status_order.index(order_status) if order_status in status_order else 0
-    )
-    icons = ["📝", "👍", "👩\u200d🍳", "✅", "🍽️"]
-    labels = ["Створено", "Прийнято", "Готується", "Готово", "Доставлено"]
-    thresholds = [0, 2, 3, 4, 5]
     return [
         {
-            "icon": icons[i],
-            "label": labels[i],
-            "done": current_idx >= thresholds[i],
-            "active": current_idx == thresholds[i],
+            "icon": icon,
+            "label": label,
+            "done": i <= current_step,
+            "active": i == current_step,
+            "step_index": i,
         }
-        for i in range(5)
+        for i, (icon, label) in enumerate(steps_config)
     ]
 
 
@@ -146,6 +155,14 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
     )
     if not can_access_order(request, order):
         return render(request, "403.html", status=403)
+
+    # Persist token in session for subsequent POSTs (feedback, escalation)
+    url_token = request.GET.get("token", "")
+    if url_token and str(order.access_token) == url_token:
+        if "my_orders" not in request.session:
+            request.session["my_orders"] = {}
+        request.session["my_orders"][str(order.id)] = str(order.access_token)
+        request.session.modified = True
 
     # Build ticket states for SSR (works without JS)
     ticket_states = []
@@ -178,11 +195,9 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
         status__in=["open", "acknowledged"],
     ).first()
 
-    # Feedback context
-    has_feedback = GuestFeedback.objects.filter(order=order).exists()
-    feedback_obj = None
-    if has_feedback:
-        feedback_obj = order.feedback  # type: ignore[attr-defined]
+    # Feedback context — single query
+    feedback_obj = GuestFeedback.objects.filter(order=order).first()
+    has_feedback = feedback_obj is not None
 
     return render(
         request,
@@ -227,9 +242,6 @@ def create_escalation_view(request: HttpRequest, order_id: int) -> HttpResponse:
 
     reason = request.POST.get("reason", "")
     message = request.POST.get("message", "")
-    if reason not in VisitorEscalation.Reason.values:
-        messages.warning(request, "Будь ласка, оберіть дійсну причину звернення.")
-        return redirect("orders:order_detail", order_id=order_id)
     try:
         create_escalation(order, reason=reason, message=message)
         messages.success(request, "Ваше звернення надіслано!")
