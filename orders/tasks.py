@@ -8,8 +8,12 @@ from celery import shared_task
 from django.conf import settings
 from django.utils import timezone
 
-from notifications.events import push_payment_escalation
-from orders.models import Order
+from notifications.events import (
+    push_payment_escalation,
+    push_staff_escalation,
+    push_visitor_event,
+)
+from orders.models import Order, VisitorEscalation
 
 
 @shared_task(name="orders.escalate_unpaid_orders")
@@ -60,3 +64,64 @@ def escalate_unpaid_orders() -> dict[str, int]:
         push_payment_escalation(order_id=oid, level=1)
 
     return {"senior_waiter": senior_count, "manager": manager_count}
+
+
+@shared_task(name="orders.escalate_visitor_issues")
+def escalate_visitor_issues() -> dict[str, int]:
+    """Auto-escalate unacknowledged visitor escalations.
+
+    Logic:
+        created_at + ESCALATION_AUTO_LEVEL → level 1→2 (senior_waiter)
+        created_at + ESCALATION_AUTO_LEVEL*2 → level 2→3 (manager)
+
+    Runs via Celery Beat every minute.
+    """
+    now = timezone.now()
+    auto_delay = timedelta(minutes=settings.ESCALATION_AUTO_LEVEL)
+
+    # Level → 3 (manager): older than 2x delay, still unresolved
+    manager_threshold = now - (auto_delay * 2)
+    to_manager = VisitorEscalation.objects.filter(
+        status__in=["open", "acknowledged"],
+        level__lt=VisitorEscalation.Level.MANAGER,
+        created_at__lte=manager_threshold,
+    )
+    manager_ids = list(to_manager.values_list("id", flat=True))
+    manager_count = VisitorEscalation.objects.filter(id__in=manager_ids).update(
+        level=VisitorEscalation.Level.MANAGER,
+    )
+
+    # Level 1→2 (senior): OPEN only, older than 1x delay
+    senior_threshold = now - auto_delay
+    to_senior = VisitorEscalation.objects.filter(
+        status=VisitorEscalation.Status.OPEN,
+        level=VisitorEscalation.Level.WAITER,
+        created_at__lte=senior_threshold,
+    ).exclude(id__in=manager_ids)
+    senior_ids = list(to_senior.values_list("id", flat=True))
+    senior_count = VisitorEscalation.objects.filter(id__in=senior_ids).update(
+        level=VisitorEscalation.Level.SENIOR,
+    )
+
+    # SSE pushes — single query for all escalations to notify
+    all_ids = manager_ids + senior_ids
+    if all_ids:
+        manager_id_set = set(manager_ids)
+        for esc in VisitorEscalation.objects.select_related("order").filter(
+            id__in=all_ids
+        ):
+            level = 3 if esc.id in manager_id_set else 2
+            push_staff_escalation(
+                waiter_id=esc.order.waiter_id,
+                escalation_id=esc.pk,
+                order_id=esc.order_id,
+                reason=esc.reason,
+                level=level,
+            )
+            push_visitor_event(
+                order_id=esc.order_id,
+                event_type="escalation_level_up",
+                data={"level": level},
+            )
+
+    return {"to_senior": senior_count, "to_manager": manager_count}

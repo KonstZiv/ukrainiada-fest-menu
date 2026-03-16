@@ -55,6 +55,61 @@
 
       <div id="order-global-status" class="mt-3 text-center d-none alert alert-success">
       </div>
+
+      {% if show_escalation_button %}
+      <div class="text-center mt-4">
+        <button class="btn btn-outline-warning btn-action"
+                data-bs-toggle="modal" data-bs-target="#escalationModal">
+          {% trans "Є проблема з замовленням" %}
+        </button>
+      </div>
+      <div class="modal fade" id="escalationModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">{% trans "Що сталося?" %}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'orders:escalate' order.id %}" class="form-needs-network">
+              {% csrf_token %}
+              <div class="modal-body">
+                <div class="mb-3">
+                  {% for value, label in escalation_reasons %}
+                  <label class="btn btn-outline-secondary text-start d-block mb-2">
+                    <input type="radio" name="reason" value="{{ value }}" class="me-2"
+                           {% if forloop.first %}checked{% endif %}>
+                    {{ label }}
+                  </label>
+                  {% endfor %}
+                </div>
+                <div class="mb-3">
+                  {% trans "Опишіть ситуацію..." as esc_placeholder %}
+                  <textarea name="message" class="form-control" rows="2" maxlength="300"
+                            placeholder="{{ esc_placeholder }}"></textarea>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Скасувати" %}</button>
+                <button type="submit" class="btn btn-warning">{% trans "Надіслати" %}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if active_escalation %}
+      <div class="alert alert-info mt-3">
+        <strong>{% trans "Ваше звернення:" %}</strong>
+        {{ active_escalation.get_reason_display }}
+        {% if active_escalation.status == 'acknowledged' %}
+          — <span class="text-success">{% trans "побачено, працюємо" %}</span>
+        {% elif active_escalation.status == 'open' %}
+          — <span class="text-warning">{% trans "надіслано" %}</span>
+        {% endif %}
+      </div>
+      {% endif %}
+
       {% else %}
 
       {# --- Simple item list for draft orders --- #}

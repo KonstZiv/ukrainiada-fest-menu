@@ -28,6 +28,16 @@ urlpatterns = [
         waiter_views.handoff_confirm_view,
         name="handoff_confirm",
     ),
+    path(
+        "escalation/<int:escalation_id>/ack/",
+        waiter_views.escalation_acknowledge,
+        name="escalation_acknowledge",
+    ),
+    path(
+        "escalation/<int:escalation_id>/resolve/",
+        waiter_views.escalation_resolve,
+        name="escalation_resolve",
+    ),
     path("senior/", waiter_views.senior_waiter_dashboard, name="senior_dashboard"),
     path(
         "senior/order/<int:order_id>/confirm-payment/",
