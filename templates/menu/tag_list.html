@@ -68,6 +68,7 @@
             {# --- Колонка 3: Кнопки CRUD (фіксована ширина, таска 2.8) --- #}
             {# me-3 — відступ від стрілки розкриття accordion.                     #}
             {# stopPropagation — клік на кнопку НЕ відкриває/закриває accordion.   #}
+            {% if user.is_staff or user.role == 'manager' %}
             <span class="d-inline-flex gap-1 flex-shrink-0 me-3"
                   onclick="event.stopPropagation();">
               <a href="{% url 'menu:tag_update' tag.pk %}"
@@ -79,6 +80,7 @@
                 <i class="bi bi-trash"></i>
               </a>
             </span>
+            {% endif %}
             </button>
           </h2>
 

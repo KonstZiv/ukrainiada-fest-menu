@@ -83,10 +83,15 @@
 
       {# --- Колонка 3: Кнопка "+" та ціна (вертикально по центру) --- #}
       <div class="flex-shrink-0 d-flex align-items-center gap-2">
-        <button class="btn btn-outline-primary btn-sm rounded-circle p-0"
-                style="width: 28px; height: 28px;">
-          <i class="bi bi-plus"></i>
-        </button>
+        <form method="post" action="{% url 'orders:cart_add' %}" class="d-inline">
+          {% csrf_token %}
+          <input type="hidden" name="dish_id" value="{{ dish.id }}">
+          <input type="hidden" name="quantity" value="1">
+          <button type="submit" class="btn btn-outline-primary btn-sm rounded-circle p-0"
+                  style="width: 28px; height: 28px;">
+            <i class="bi bi-plus"></i>
+          </button>
+        </form>
         <span class="fw-bold text-nowrap" style="font-size: 1.25rem;">&euro;{{ dish.price }}</span>
       </div>
 
