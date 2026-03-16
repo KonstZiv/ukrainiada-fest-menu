@@ -124,3 +124,65 @@ class OrderItem(models.Model):
     def subtotal(self) -> Decimal:
         """Calculate subtotal for this item."""
         return self.dish.price * self.quantity
+
+
+class VisitorEscalation(models.Model):
+    """Visitor-initiated escalation for an order issue.
+
+    Lifecycle: OPEN → ACKNOWLEDGED → RESOLVED.
+    Auto-escalation: level 1→2→3 via Celery task.
+    """
+
+    class Reason(models.TextChoices):
+        SLOW = "slow", "Довго чекаю"
+        WRONG = "wrong", "Щось не те"
+        QUESTION = "question", "Маю питання"
+        OTHER = "other", "Інше"
+
+    class Level(models.IntegerChoices):
+        WAITER = 1, "Офіціант"
+        SENIOR = 2, "Старший офіціант"
+        MANAGER = 3, "Менеджер"
+
+    class Status(models.TextChoices):
+        OPEN = "open", "Відкрита"
+        ACKNOWLEDGED = "acknowledged", "Побачено"
+        RESOLVED = "resolved", "Вирішено"
+
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="escalations",
+    )
+    reason = models.CharField(max_length=20, choices=Reason.choices)
+    message = models.TextField(blank=True, max_length=300, verbose_name="Коментар")
+    level = models.IntegerField(
+        choices=Level.choices,
+        default=Level.WAITER,
+        db_index=True,
+    )
+    status = models.CharField(
+        max_length=15,
+        choices=Status.choices,
+        default=Status.OPEN,
+        db_index=True,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    acknowledged_at = models.DateTimeField(null=True, blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="resolved_escalations",
+    )
+    resolution_note = models.TextField(blank=True, max_length=300)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return (
+            f"Escalation #{self.pk} Order#{self.order_id} [{self.get_status_display()}]"
+        )
