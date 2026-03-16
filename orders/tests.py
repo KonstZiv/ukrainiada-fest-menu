@@ -593,6 +593,29 @@ def test_not_delivered_orders_not_escalated(django_user_model: Any) -> None:
     assert order.payment_escalation_level == 0
 
 
+@pytest.mark.django_db
+def test_payment_escalation_pushes_event(django_user_model: Any) -> None:
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.UNPAID,
+    )
+    old_time = timezone.now() - timedelta(minutes=12)
+    Order.objects.filter(pk=order.pk).update(delivered_at=old_time)
+
+    with (
+        patch("orders.tasks.settings") as mock_settings,
+        patch("orders.tasks.push_payment_escalation") as mock_push,
+    ):
+        mock_settings.PAY_TIMEOUT = 10
+        escalate_unpaid_orders()
+
+    mock_push.assert_called_once_with(order_id=order.pk, level=1)
+
+
 # --- Senior waiter dashboard tests ---
 
 

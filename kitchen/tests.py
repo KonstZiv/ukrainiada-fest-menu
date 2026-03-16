@@ -526,3 +526,22 @@ def test_pending_ticket_not_old_enough_stays_none() -> None:
     assert ticket.escalation_level == KitchenTicket.EscalationLevel.NONE
     assert result["supervisor"] == 0
     assert result["manager"] == 0
+
+
+@pytest.mark.django_db
+def test_escalation_pushes_event() -> None:
+    _, _, item = _make_dish_and_order()
+    ticket = KitchenTicket.objects.create(order_item=item)
+
+    old_time = timezone.now() - timedelta(minutes=7)
+    KitchenTicket.objects.filter(pk=ticket.pk).update(created_at=old_time)
+
+    with (
+        patch("kitchen.tasks.settings") as mock_settings,
+        patch("kitchen.tasks.push_kitchen_escalation") as mock_push,
+    ):
+        mock_settings.KITCHEN_TIMEOUT = 5
+        mock_settings.MANAGER_TIMEOUT = 5
+        escalate_pending_tickets()
+
+    mock_push.assert_called_once_with(ticket_id=ticket.pk, level=1)
