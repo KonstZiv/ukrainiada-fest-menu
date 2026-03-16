@@ -102,7 +102,7 @@
                 {% endif %}
               {% endfor %}
             </td>
-            <td>&euro;{{ order.total_price|floatformat:2 }}</td>
+            <td>&euro;{{ order.total_annotated|floatformat:2 }}</td>
             <td>
               {% if order.payment_status == 'unpaid' %}
                 <span class="badge bg-warning text-dark">{% trans "Не оплачено" %}</span>
@@ -149,7 +149,7 @@
               {{ order.get_status_display }}
             </span>
           </div>
-          <span>&euro;{{ order.total_price|floatformat:2 }}</span>
+          <span>&euro;{{ order.total_annotated|floatformat:2 }}</span>
         </div>
         {% if order.location_hint %}
           <div class="px-3 pt-1"><small class="text-muted"><i class="bi bi-geo-alt"></i> {{ order.location_hint }}</small></div>

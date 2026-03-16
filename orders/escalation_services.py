@@ -31,6 +31,10 @@ def create_escalation(
     """
     now = timezone.now()
 
+    if reason not in VisitorEscalation.Reason.values:
+        msg = f"Невідома причина звернення: {reason}"
+        raise ValueError(msg)
+
     open_exists = VisitorEscalation.objects.filter(
         order=order,
         status__in=[

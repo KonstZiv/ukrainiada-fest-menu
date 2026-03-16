@@ -91,7 +91,11 @@ class Order(models.Model):
 
     @property
     def total_price(self) -> Decimal:
-        """Calculate total price using DB aggregation."""
+        """Calculate total price using DB aggregation.
+
+        NOTE: For list views, prefer annotate(total_annotated=...) on QuerySet
+        to avoid N+1 queries. This property is for single-object access.
+        """
         result = self.items.aggregate(
             total=models.Sum(
                 models.F("dish__price") * models.F("quantity"),

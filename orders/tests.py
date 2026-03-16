@@ -179,7 +179,7 @@ def test_submit_order_creates_order_and_clears_cart(client: Client) -> None:
 
     response = client.post("/order/submit/")
     assert response.status_code == 302
-    assert Order.objects.filter(status="draft").count() == 1
+    assert Order.objects.filter(status="submitted").count() == 1
     assert client.session.get("festival_cart") is None
 
 
@@ -214,8 +214,8 @@ def test_cart_view_returns_200(client: Client) -> None:
 
 @pytest.mark.django_db
 def test_order_qr_returns_png(client: Client) -> None:
-    order = Order.objects.create(status=Order.Status.DRAFT)
-    response = client.get(f"/order/{order.id}/qr/")
+    order = Order.objects.create(status=Order.Status.SUBMITTED)
+    response = client.get(f"/order/{order.id}/qr/?token={order.access_token}")
     assert response.status_code == 200
     assert response["Content-Type"] == "image/png"
 
@@ -223,14 +223,14 @@ def test_order_qr_returns_png(client: Client) -> None:
 @pytest.mark.django_db
 def test_order_qr_not_available_for_approved(client: Client) -> None:
     order = Order.objects.create(status=Order.Status.APPROVED)
-    response = client.get(f"/order/{order.id}/qr/")
+    response = client.get(f"/order/{order.id}/qr/?token={order.access_token}")
     assert response.status_code == 404
 
 
 @pytest.mark.django_db
 def test_order_qr_is_valid_png(client: Client) -> None:
-    order = Order.objects.create(status=Order.Status.DRAFT)
-    response = client.get(f"/order/{order.id}/qr/")
+    order = Order.objects.create(status=Order.Status.SUBMITTED)
+    response = client.get(f"/order/{order.id}/qr/?token={order.access_token}")
     img = Image.open(io.BytesIO(response.content))
     assert img.format == "PNG"
 
@@ -308,14 +308,14 @@ def test_approve_rejects_non_submitted_order(
     client: Client,
     django_user_model: Any,
 ) -> None:
-    order = Order.objects.create(status=Order.Status.DRAFT)
+    order = Order.objects.create(status=Order.Status.APPROVED)
     waiter = django_user_model.objects.create_user(
         email="w@test.com", username="waiter1", password="testpass123", role="waiter"
     )
     client.force_login(waiter)
     client.post(f"/waiter/order/{order.id}/approve/")
     order.refresh_from_db()
-    assert order.status == Order.Status.DRAFT
+    assert order.status == Order.Status.APPROVED  # unchanged
 
 
 @pytest.mark.django_db
@@ -487,7 +487,7 @@ def test_online_payment_stub_marks_paid() -> None:
 
 @pytest.mark.django_db
 def test_online_payment_page_get(client: Client) -> None:
-    order = Order.objects.create(status=Order.Status.DRAFT)
+    order = Order.objects.create(status=Order.Status.SUBMITTED)
     response = client.get(f"/order/{order.id}/pay/?token={order.access_token}")
     assert response.status_code == 200
     assert "Демо-режим" in response.content.decode()

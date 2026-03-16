@@ -46,7 +46,7 @@ def can_access_order(request: HttpRequest, order: Order) -> bool:
 
 
 def submit_order_from_cart(request: HttpRequest) -> Order | None:
-    """Create a DRAFT Order from session cart contents.
+    """Create a SUBMITTED Order from session cart contents.
 
     Returns None if cart is empty or all dishes are out of stock.
     Filters out dishes with availability="out".
@@ -71,6 +71,8 @@ def submit_order_from_cart(request: HttpRequest) -> Order | None:
         order = Order.objects.create(
             visitor=request.user if request.user.is_authenticated else None,
             location_hint=location_hint,
+            status=Order.Status.SUBMITTED,
+            submitted_at=timezone.now(),
         )
         OrderItem.objects.bulk_create(
             [

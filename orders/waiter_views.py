@@ -6,7 +6,7 @@ import uuid
 
 from django.conf import settings
 from django.contrib import messages
-from django.db import transaction
+from django.db import models, transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -56,15 +56,15 @@ def order_scan(request: AuthenticatedHttpRequest, order_id: int) -> HttpResponse
 
 
 @role_required(*WAITER_ROLES)
+@require_POST
 def order_approve(request: AuthenticatedHttpRequest, order_id: int) -> HttpResponse:
-    """Waiter approves a SUBMITTED order (POST only)."""
+    """Waiter approves a SUBMITTED order."""
     order = get_object_or_404(Order, pk=order_id)
-    if request.method == "POST":
-        try:
-            approve_order(order, request.user)
-            messages.success(request, f"Замовлення #{order.id} підтверджено.")
-        except ValueError as e:
-            messages.error(request, str(e))
+    try:
+        approve_order(order, request.user)
+        messages.success(request, f"Замовлення #{order.id} підтверджено.")
+    except ValueError as e:
+        messages.error(request, str(e))
     return redirect("waiter:order_scan", order_id=order.id)
 
 
@@ -83,6 +83,12 @@ def waiter_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
             "items__dish",
             "items__kitchen_ticket",
             "items__kitchen_ticket__assigned_to",
+        )
+        .annotate(
+            total_annotated=models.Sum(
+                models.F("items__dish__price") * models.F("items__quantity"),
+                output_field=models.DecimalField(),
+            )
         )
         .order_by("created_at")
     )
@@ -116,13 +122,11 @@ def waiter_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
 
 
 @role_required(*WAITER_ROLES)
+@require_POST
 def order_mark_delivered(
     request: AuthenticatedHttpRequest, order_id: int
 ) -> HttpResponse:
     """Waiter marks a READY order as delivered to visitor."""
-    if request.method != "POST":
-        return redirect("waiter:dashboard")
-
     order = get_object_or_404(Order, pk=order_id, waiter=request.user)
     try:
         deliver_order(order, waiter=request.user)
@@ -134,13 +138,11 @@ def order_mark_delivered(
 
 
 @role_required(*WAITER_ROLES)
+@require_POST
 def order_confirm_payment(
     request: AuthenticatedHttpRequest, order_id: int
 ) -> HttpResponse:
     """Waiter confirms cash payment for an order."""
-    if request.method != "POST":
-        return redirect("waiter:dashboard")
-
     order = get_object_or_404(Order, pk=order_id, waiter=request.user)
     try:
         confirm_cash_payment(order, waiter=request.user)
@@ -280,13 +282,11 @@ def senior_waiter_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
 
 
 @role_required(*SENIOR_ROLES)
+@require_POST
 def senior_confirm_payment(
     request: AuthenticatedHttpRequest, order_id: int
 ) -> HttpResponse:
     """Senior waiter confirms payment on behalf of assigned waiter."""
-    if request.method != "POST":
-        return redirect("waiter:senior_dashboard")
-
     order = get_object_or_404(
         Order,
         pk=order_id,
