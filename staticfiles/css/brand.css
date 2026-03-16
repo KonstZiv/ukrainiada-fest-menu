@@ -240,3 +240,128 @@ body {
 .allergen-badge {
   font-size: 0.7rem;
 }
+
+
+/* =========================================================================== */
+/* Touch-friendly: smartphone + tablet (< lg)                                  */
+/* Кнопки дій ≥ 48px, відступи ≥ 8px між інтерактивними елементами             */
+/* =========================================================================== */
+@media (max-width: 991.98px) {
+  .btn-action {
+    min-height: 48px;
+    min-width: 48px;
+    font-size: 1rem;
+    padding: 0.625rem 1rem;
+  }
+
+  /* Kitchen: full-width on touch devices for easy tapping */
+  .btn-kitchen-action {
+    width: 100%;
+  }
+
+  .list-group-item {
+    padding: 12px 16px;
+  }
+}
+
+/* Kitchen buttons: 56px on ALL sizes — touch screens on desktops too */
+.btn-kitchen-action {
+  min-height: 56px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+
+/* =========================================================================== */
+/* Kitchen kanban layout — 3 cols on desktop, 2 on tablet, stack on mobile     */
+/* =========================================================================== */
+.kitchen-kanban {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .kitchen-kanban {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 992px) {
+  .kitchen-kanban {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+/* Kanban column */
+.kanban-col {
+  min-height: 200px;
+}
+
+.kanban-col .card {
+  height: 100%;
+}
+
+/* Ticket card — colored left border by status */
+.ticket-card-pending {
+  border-left: 4px solid #ffc107;
+}
+
+.ticket-card-taken {
+  border-left: 4px solid #0dcaf0;
+}
+
+.ticket-card-done {
+  border-left: 4px solid #198754;
+}
+
+.ticket-card-escalated {
+  border-left: 4px solid #dc3545;
+  animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+  0%, 100% { border-left-color: #dc3545; }
+  50% { border-left-color: #ff6b6b; }
+}
+
+
+/* =========================================================================== */
+/* Waiter dashboard: table on desktop, cards on mobile/tablet                   */
+/* =========================================================================== */
+.waiter-order-table {
+  display: none;
+}
+
+@media (min-width: 992px) {
+  .waiter-order-table {
+    display: table;
+  }
+  .waiter-order-cards {
+    display: none;
+  }
+}
+
+
+/* =========================================================================== */
+/* Extra detail columns — visible only on tablet+ and desktop                  */
+/* =========================================================================== */
+.detail-md {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .detail-md {
+    display: block;
+  }
+}
+
+.detail-lg {
+  display: none;
+}
+
+@media (min-width: 992px) {
+  .detail-lg {
+    display: block;
+  }
+}

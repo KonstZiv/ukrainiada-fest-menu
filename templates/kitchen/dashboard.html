@@ -3,13 +3,13 @@
 {% block title %}Jadran Sun — Кухня{% endblock %}
 
 {% block content %}
-<div class="container mt-3">
+<div class="container-fluid mt-3 px-2 px-md-3">
   <h2><i class="bi bi-fire"></i> Кухня</h2>
 
   {% if escalated %}
-    <div class="card border-danger mb-3">
+    <div class="card border-danger mb-3 ticket-card-escalated">
       <div class="card-header bg-danger text-white">
-        <i class="bi bi-exclamation-triangle"></i> Ескальовані
+        <i class="bi bi-exclamation-triangle"></i> Ескальовані ({{ escalated|length }})
       </div>
       <ul class="list-group list-group-flush">
         {% for ticket in escalated %}
@@ -26,92 +26,110 @@
     </div>
   {% endif %}
 
-  <div class="card mb-3">
-    <div class="card-header bg-warning text-dark">
-      <i class="bi bi-hourglass-split"></i> Черга (<span id="pending-count">{{ pending|length }}</span>)
-    </div>
-    <ul class="list-group list-group-flush">
-      {% for ticket in pending %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <div>
-            <strong>{{ ticket.order_item.dish.title }}</strong>
-            <span class="text-muted ms-1">x{{ ticket.order_item.quantity }}</span>
-            <small class="text-muted ms-2">Замовлення #{{ ticket.order_item.order.id }}</small>
-          </div>
-          <div class="d-flex align-items-center gap-2">
-            <small class="text-muted">{{ ticket.created_at|timesince }} тому</small>
-            <form method="post" action="{% url 'kitchen:ticket_take' ticket.id %}">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-sm btn-primary">
-                <i class="bi bi-hand-index"></i> Взяти
-              </button>
-            </form>
-          </div>
-        </li>
-      {% empty %}
-        <li class="list-group-item text-muted">Черга порожня</li>
-      {% endfor %}
-    </ul>
-  </div>
+  {# Kanban: 1 col mobile, 2 cols tablet, 3 cols desktop #}
+  <div class="kitchen-kanban">
 
-  <div class="card mb-3">
-    <div class="card-header bg-primary text-white">
-      <i class="bi bi-gear"></i> В роботі ({{ my_taken|length }})
+    {# --- Черга (Pending) --- #}
+    <div class="kanban-col">
+      <div class="card mb-3 h-100">
+        <div class="card-header bg-warning text-dark">
+          <i class="bi bi-hourglass-split"></i> Черга (<span id="pending-count">{{ pending|length }}</span>)
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for ticket in pending %}
+            <li class="list-group-item ticket-card-pending">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <strong>{{ ticket.order_item.dish.title }}</strong>
+                  <span class="text-muted ms-1">x{{ ticket.order_item.quantity }}</span>
+                  <br>
+                  <small class="text-muted">#{{ ticket.order_item.order.id }}</small>
+                  <small class="text-muted detail-md ms-1">{{ ticket.created_at|timesince }} тому</small>
+                  <small class="text-muted detail-lg ms-1">Офіц: {{ ticket.order_item.order.waiter.get_full_name|default:"—" }}</small>
+                </div>
+              </div>
+              <form method="post" action="{% url 'kitchen:ticket_take' ticket.id %}" class="mt-2">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary btn-action btn-kitchen-action">
+                  <i class="bi bi-hand-index"></i> Взяти
+                </button>
+              </form>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted text-center py-4">Черга порожня</li>
+          {% endfor %}
+        </ul>
+      </div>
     </div>
-    <ul class="list-group list-group-flush">
-      {% for ticket in my_taken %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <div>
-            <strong>{{ ticket.order_item.dish.title }}</strong>
-            <span class="text-muted ms-1">x{{ ticket.order_item.quantity }}</span>
-          </div>
-          <div class="d-flex align-items-center gap-2">
-            <small class="text-muted">{{ ticket.taken_at|timesince }} тому</small>
-            <form method="post" action="{% url 'kitchen:ticket_done' ticket.id %}">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-sm btn-success">
-                <i class="bi bi-check-lg"></i> Готово
-              </button>
-            </form>
-          </div>
-        </li>
-      {% empty %}
-        <li class="list-group-item text-muted">Нічого в роботі</li>
-      {% endfor %}
-    </ul>
-  </div>
 
-  <div class="card mb-3">
-    <div class="card-header bg-success text-white">
-      <i class="bi bi-check-circle"></i> Готово сьогодні ({{ my_done|length }})
+    {# --- В роботі (Taken) --- #}
+    <div class="kanban-col">
+      <div class="card mb-3 h-100">
+        <div class="card-header bg-info text-white">
+          <i class="bi bi-gear"></i> В роботі ({{ my_taken|length }})
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for ticket in my_taken %}
+            <li class="list-group-item ticket-card-taken">
+              <div>
+                <strong>{{ ticket.order_item.dish.title }}</strong>
+                <span class="text-muted ms-1">x{{ ticket.order_item.quantity }}</span>
+                <br>
+                <small class="text-muted">{{ ticket.taken_at|timesince }} тому</small>
+              </div>
+              <form method="post" action="{% url 'kitchen:ticket_done' ticket.id %}" class="mt-2">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-action btn-kitchen-action">
+                  <i class="bi bi-check-lg"></i> Готово
+                </button>
+              </form>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted text-center py-4">Нічого в роботі</li>
+          {% endfor %}
+        </ul>
+      </div>
     </div>
-    <ul class="list-group list-group-flush">
-      {% for ticket in my_done %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <div>
-            <strong>{{ ticket.order_item.dish.title }}</strong>
-            <span class="text-muted ms-1">x{{ ticket.order_item.quantity }}</span>
-            <small class="text-muted ms-2">{{ ticket.order_item.order.waiter.get_full_name|default:ticket.order_item.order.waiter.email }}</small>
-          </div>
-          <div class="d-flex align-items-center gap-2">
-            <small class="text-muted">{{ ticket.done_at|time:"H:i" }}</small>
-            <a href="{% url 'kitchen:handoff_qr' ticket.id %}"
-               class="btn btn-sm btn-outline-primary">
-              <i class="bi bi-qr-code"></i> QR
-            </a>
-            <form method="post" action="{% url 'kitchen:manual_handoff' ticket.id %}"
-                  class="d-inline">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-hand-index"></i> Вручну
-              </button>
-            </form>
-          </div>
-        </li>
-      {% empty %}
-        <li class="list-group-item text-muted">Ще нічого не приготовлено</li>
-      {% endfor %}
-    </ul>
+
+    {# --- Готово сьогодні (Done) --- #}
+    <div class="kanban-col">
+      <div class="card mb-3 h-100">
+        <div class="card-header bg-success text-white">
+          <i class="bi bi-check-circle"></i> Готово ({{ my_done|length }})
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for ticket in my_done %}
+            <li class="list-group-item ticket-card-done">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <strong>{{ ticket.order_item.dish.title }}</strong>
+                  <span class="text-muted ms-1">x{{ ticket.order_item.quantity }}</span>
+                  <br>
+                  <small class="text-muted">{{ ticket.done_at|time:"H:i" }}</small>
+                  <small class="text-muted detail-md ms-1">{{ ticket.order_item.order.waiter.get_full_name|default:ticket.order_item.order.waiter.email }}</small>
+                </div>
+                <div class="d-flex gap-2">
+                  <a href="{% url 'kitchen:handoff_qr' ticket.id %}"
+                     class="btn btn-outline-primary btn-kitchen-action">
+                    <i class="bi bi-qr-code"></i> <span class="d-none d-md-inline">QR</span>
+                  </a>
+                  <form method="post" action="{% url 'kitchen:manual_handoff' ticket.id %}"
+                        class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-secondary btn-kitchen-action">
+                      <i class="bi bi-hand-index"></i> <span class="d-none d-md-inline">Вручну</span>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted text-center py-4">Ще нічого не приготовлено</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
   </div>
 </div>
 {% endblock %}
