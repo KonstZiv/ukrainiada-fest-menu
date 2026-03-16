@@ -13,6 +13,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from feedback.models import GuestFeedback
@@ -112,8 +113,6 @@ def _build_progress_steps(order_status: str) -> list[dict[str, object]]:
     Maps 6 order statuses to 5 visual steps. submitted and approved
     both map to step 1 ("Прийнято"). Uses gettext for i18n labels.
     """
-    from django.utils.translation import gettext as _
-
     status_to_step: dict[str, int] = {
         "draft": -1,
         "submitted": 0,
