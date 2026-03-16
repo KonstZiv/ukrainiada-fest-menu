@@ -202,4 +202,30 @@
 
   </div>
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  var KEY = "openAccordion";
+  var saved = sessionStorage.getItem(KEY);
+  if (saved) {
+    var el = document.getElementById(saved);
+    if (el) {
+      new bootstrap.Collapse(el, {toggle: false}).show();
+    }
+  }
+  document.querySelectorAll(".accordion-collapse").forEach(function(panel) {
+    panel.addEventListener("shown.bs.collapse", function() {
+      sessionStorage.setItem(KEY, panel.id);
+    });
+    panel.addEventListener("hidden.bs.collapse", function() {
+      if (sessionStorage.getItem(KEY) === panel.id) {
+        sessionStorage.removeItem(KEY);
+      }
+    });
+  });
+})();
+</script>
 {% endblock %}
