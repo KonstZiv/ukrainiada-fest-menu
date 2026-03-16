@@ -73,3 +73,23 @@ def push_payment_escalation(order_id: int, level: int) -> None:
 def push_visitor_event(order_id: int, event_type: str, data: dict[str, Any]) -> None:
     """Push event to visitor watching this order."""
     _push(visitor_order_channel(order_id), event_type, data)
+
+
+def push_staff_escalation(
+    waiter_id: int | None,
+    escalation_id: int,
+    order_id: int,
+    reason: str,
+    level: int,
+) -> None:
+    """Notify staff about visitor escalation at appropriate level."""
+    payload = {
+        "escalation_id": escalation_id,
+        "order_id": order_id,
+        "reason": reason,
+        "level": level,
+    }
+    if level >= 2:
+        _push(manager_channel(), "visitor_escalation", payload)
+    if waiter_id:
+        _push(waiter_channel(waiter_id), "visitor_escalation", payload)

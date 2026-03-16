@@ -163,6 +163,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "orders.escalate_unpaid_orders",
         "schedule": 60.0,
     },
+    "escalate-visitor-issues": {
+        "task": "orders.escalate_visitor_issues",
+        "schedule": 60.0,
+    },
 }
 
 # ---------------------------------------------------------------------------
@@ -189,3 +193,8 @@ KITCHEN_TIMEOUT: int = config("KITCHEN_TIMEOUT", default=5, cast=int)
 MANAGER_TIMEOUT: int = config("MANAGER_TIMEOUT", default=5, cast=int)
 PAY_TIMEOUT: int = config("PAY_TIMEOUT", default=10, cast=int)
 SPEED_INTERVAL_KITCHEN: int = config("SPEED_INTERVAL_KITCHEN", default=15, cast=int)
+ESCALATION_COOLDOWN: int = config("ESCALATION_COOLDOWN", default=5, cast=int)  # minutes
+ESCALATION_AUTO_LEVEL: int = config(
+    "ESCALATION_AUTO_LEVEL", default=3, cast=int
+)  # minutes
+ESCALATION_MIN_WAIT: int = config("ESCALATION_MIN_WAIT", default=5, cast=int)  # minutes
