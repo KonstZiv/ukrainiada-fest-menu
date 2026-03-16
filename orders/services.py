@@ -8,6 +8,7 @@ from django.db import transaction
 from django.http import HttpRequest
 from django.utils import timezone
 
+from kitchen.models import KitchenTicket
 from kitchen.services import create_tickets_for_order
 from menu.models import Dish
 from notifications.events import push_order_approved
@@ -77,6 +78,39 @@ def approve_order(order: Order, waiter: User) -> Order:
 
     # Push AFTER transaction — don't push if transaction rolled back
     push_order_approved(order_id=order.id)
+    return order
+
+
+def deliver_order(order: Order, waiter: User) -> Order:
+    """Waiter marks order as delivered to visitor.
+
+    Validates that the order is READY and all kitchen tickets are DONE
+    before allowing delivery.
+
+    Raises:
+        ValueError: if order is not READY, waiter is not assigned,
+            or some dishes are not yet ready from kitchen.
+
+    """
+    if order.status != Order.Status.READY:
+        msg = f"Order #{order.id} is not ready (status: {order.status})"
+        raise ValueError(msg)
+    if order.waiter_id != waiter.id:
+        msg = "Only the assigned waiter can deliver the order"
+        raise ValueError(msg)
+
+    unconfirmed = (
+        KitchenTicket.objects.filter(order_item__order=order)
+        .exclude(status=KitchenTicket.Status.DONE)
+        .count()
+    )
+    if unconfirmed > 0:
+        msg = f"{unconfirmed} dish(es) not yet ready from kitchen"
+        raise ValueError(msg)
+
+    order.status = Order.Status.DELIVERED
+    order.delivered_at = timezone.now()
+    order.save(update_fields=["status", "delivered_at"])
     return order
 
 

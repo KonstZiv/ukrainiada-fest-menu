@@ -13,4 +13,9 @@ urlpatterns = [
         views.generate_handoff_qr,
         name="handoff_qr",
     ),
+    path(
+        "ticket/<int:ticket_id>/manual-handoff/",
+        views.ticket_manual_handoff,
+        name="manual_handoff",
+    ),
 ]

@@ -18,6 +18,7 @@ from kitchen.models import KitchenTicket
 from kitchen.services import (
     create_handoff,
     get_pending_tickets_for_user,
+    manual_handoff,
     mark_ticket_done,
     take_ticket,
 )
@@ -163,3 +164,26 @@ def generate_handoff_qr(
         "kitchen/handoff_select_waiter.html",
         {"ticket": ticket, "waiters": waiters},
     )
+
+
+@role_required(*KITCHEN_ROLES)
+@require_POST
+def ticket_manual_handoff(
+    request: AuthenticatedHttpRequest, ticket_id: int
+) -> HttpResponse:
+    """Cook manually confirms dish handoff (fallback without QR)."""
+    ticket = get_object_or_404(
+        KitchenTicket,
+        pk=ticket_id,
+        assigned_to=request.user,
+        status=KitchenTicket.Status.DONE,
+    )
+    try:
+        manual_handoff(ticket, kitchen_user=request.user)
+        messages.success(
+            request,
+            f"Передачу '{ticket.order_item.dish.title}' відмічено вручну.",
+        )
+    except ValueError as e:
+        messages.error(request, str(e))
+    return redirect("kitchen:dashboard")

@@ -142,6 +142,30 @@ def create_handoff(ticket: KitchenTicket, target_waiter: User) -> KitchenHandoff
     )
 
 
+def manual_handoff(ticket: KitchenTicket, kitchen_user: User) -> None:
+    """One-sided handoff confirmation without QR scan.
+
+    Used as fallback when the waiter cannot scan the QR code.
+    Cancels any pending (unconfirmed) QR-based handoff for this ticket.
+    Idempotent — safe to call multiple times.
+
+    Raises:
+        ValueError: if ticket is not DONE or not assigned to this cook.
+
+    """
+    if ticket.status != KitchenTicket.Status.DONE:
+        msg = f"Cannot handoff ticket in status '{ticket.status}'"
+        raise ValueError(msg)
+    if ticket.assigned_to_id != kitchen_user.id:
+        msg = "Only the assigned cook can confirm handoff"
+        raise ValueError(msg)
+
+    # Cancel any pending QR-based handoff
+    KitchenHandoff.objects.filter(ticket=ticket, is_confirmed=False).update(
+        is_confirmed=True, confirmed_at=timezone.now()
+    )
+
+
 def _check_order_ready(ticket: KitchenTicket) -> bool:
     """If all KitchenTickets for the order are DONE, set Order to READY."""
     order = ticket.order_item.order
