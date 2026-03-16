@@ -111,6 +111,11 @@ ignore_missing_imports = true
 # Виключаємо з перевірки міграції та документацію
 exclude = ["migrations", "doc"]
 
+# django-modeltranslation patches managers at runtime — django-stubs cannot resolve them
+[[tool.mypy.overrides]]
+module = "menu.models"
+disable_error_code = ["django-manager-missing"]
+
 # Налаштування плагіну django-stubs
 [tool.django-stubs]
 django_settings_module = "core_settings.settings.dev"

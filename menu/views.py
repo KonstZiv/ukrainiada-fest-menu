@@ -133,7 +133,7 @@ def category_list(request: HttpRequest) -> HttpResponse:
     # prefetch_related("dishes") — окремий запит для ForeignKey (зворотній).
     # Prefetch("dishes", queryset=...) — вкладений prefetch для тегів страв.
     dish_qs = Dish.objects.prefetch_related(
-        Prefetch("tags", queryset=Tag.objects.select_related("logo"))
+        Prefetch("tags", queryset=Tag.objects.select_related("logo"))  # type: ignore[arg-type]
     )
     if not _can_see_all_dishes(request.user):
         dish_qs = dish_qs.exclude(availability=Dish.Availability.OUT)
@@ -254,7 +254,9 @@ def category_update(request: HttpRequest, pk: int) -> HttpResponse:
     # --- Завантажуємо існуючий об'єкт --- #
     # get_object_or_404 — повертає 404 якщо об'єкт не знайдено.
     # select_related("logo") — JOIN для OneToOne, уникаємо зайвого запиту.
-    category = get_object_or_404(Category.objects.select_related("logo"), pk=pk)
+    category: Category = get_object_or_404(
+        Category.objects.select_related("logo"), pk=pk
+    )
 
     # --- Перевіряємо чи категорія вже має логотип --- #
     existing_logo = getattr(category, "logo", None)
@@ -376,7 +378,7 @@ def dish_detail(request: HttpRequest, pk: int) -> HttpResponse:
     # щоб усі зв'язані дані завантажились мінімальною кількістю запитів.
     # select_related — для FK (category) та OneToOne (main_image): JOIN.
     # prefetch_related — для M2M (tags) та reverse FK (additional_images): окремі запити.
-    dish = get_object_or_404(
+    dish: Dish = get_object_or_404(
         Dish.objects.select_related("category", "main_image").prefetch_related(
             "tags__logo", "additional_images"
         ),
