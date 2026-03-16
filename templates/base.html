@@ -158,5 +158,12 @@
   {#   {% block extra_js %}<script>...</script>{% endblock %}                  #}
   {% block extra_js %}{% endblock %}
 
+  <div id="flash-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1080;"></div>
+
+  {% if user.is_authenticated %}
+  <script>window.SSE_STREAM_URL = "{% url 'notifications:user_events' %}";</script>
+  <script src="{% static 'js/sse_client.js' %}"></script>
+  {% endif %}
+
 </body>
 </html>

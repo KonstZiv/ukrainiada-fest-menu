@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from kitchen.services import create_tickets_for_order
 from menu.models import Dish
+from notifications.events import push_order_approved
 
 if TYPE_CHECKING:
     from user.models import User
@@ -74,6 +75,8 @@ def approve_order(order: Order, waiter: User) -> Order:
         order.save(update_fields=["status", "waiter", "approved_at"])
         create_tickets_for_order(order)
 
+    # Push AFTER transaction — don't push if transaction rolled back
+    push_order_approved(order_id=order.id)
     return order
 
 

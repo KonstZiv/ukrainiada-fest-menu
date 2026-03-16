@@ -9,6 +9,7 @@ from django.db.models import QuerySet
 from django.utils import timezone
 
 from kitchen.models import KitchenAssignment, KitchenTicket
+from notifications.events import push_order_ready, push_ticket_done, push_ticket_taken
 from orders.models import Order
 
 if TYPE_CHECKING:
@@ -68,6 +69,15 @@ def take_ticket(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket:
         ticket.taken_at = timezone.now()
         ticket.save(update_fields=["status", "assigned_to", "taken_at"])
 
+    waiter_id = ticket.order_item.order.waiter_id
+    if waiter_id:
+        cook_name = kitchen_user.get_full_name() or kitchen_user.email
+        push_ticket_taken(
+            ticket_id=ticket.pk,
+            waiter_id=waiter_id,
+            kitchen_user_name=cook_name,
+        )
+
     return ticket
 
 
@@ -92,11 +102,23 @@ def mark_ticket_done(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket
     ticket.done_at = timezone.now()
     ticket.save(update_fields=["status", "done_at"])
 
-    _check_order_ready(ticket)
+    waiter_id = ticket.order_item.order.waiter_id
+    if waiter_id:
+        push_ticket_done(
+            ticket_id=ticket.pk,
+            order_id=ticket.order_item.order_id,
+            waiter_id=waiter_id,
+            dish_title=ticket.order_item.dish.title,
+        )
+
+    order_ready = _check_order_ready(ticket)
+    if order_ready and waiter_id:
+        push_order_ready(order_id=ticket.order_item.order_id, waiter_id=waiter_id)
+
     return ticket
 
 
-def _check_order_ready(ticket: KitchenTicket) -> None:
+def _check_order_ready(ticket: KitchenTicket) -> bool:
     """If all KitchenTickets for the order are DONE, set Order to READY."""
     order = ticket.order_item.order
     all_done = not (
@@ -109,3 +131,5 @@ def _check_order_ready(ticket: KitchenTicket) -> None:
         order.status = Order.Status.READY
         order.ready_at = timezone.now()
         order.save(update_fields=["status", "ready_at"])
+
+    return all_done
