@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+import uuid
+
 from django.conf import settings
 from django.contrib import messages
+from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from core_settings.types import AuthenticatedHttpRequest
+from kitchen.models import KitchenHandoff
 from kitchen.stats import get_dish_queue_stats
 from orders.models import Order
 from orders.services import (
@@ -128,12 +132,49 @@ def order_confirm_payment(
 
 
 @role_required(*WAITER_ROLES)
-def handoff_confirm_view(request: AuthenticatedHttpRequest, token: str) -> HttpResponse:
+def handoff_confirm_view(
+    request: AuthenticatedHttpRequest, token: uuid.UUID
+) -> HttpResponse:
     """Waiter confirms dish handoff after scanning QR.
 
-    Placeholder — full implementation in Task 5.2.
+    GET:  show handoff details (dish, cook, order).
+    POST: confirm the handoff atomically.
     """
-    return HttpResponse("Handoff confirm — not yet implemented", status=501)
+    handoff = get_object_or_404(KitchenHandoff, token=token)
+
+    if handoff.target_waiter_id != request.user.id:
+        return HttpResponse("Цей QR-код призначений іншому офіціанту.", status=403)
+
+    if handoff.is_expired:
+        return render(
+            request, "orders/handoff_expired.html", {"handoff": handoff}, status=400
+        )
+
+    if handoff.is_confirmed:
+        return render(
+            request, "orders/handoff_already_confirmed.html", {"handoff": handoff}
+        )
+
+    if request.method == "POST":
+        with transaction.atomic():
+            handoff.is_confirmed = True
+            handoff.confirmed_at = timezone.now()
+            handoff.save(update_fields=["is_confirmed", "confirmed_at"])
+
+        dish_title = handoff.ticket.order_item.dish.title
+        messages.success(request, f"Прийом '{dish_title}' підтверджено.")
+        return redirect("waiter:dashboard")
+
+    ttl_remaining = max(
+        0,
+        settings.HANDOFF_TOKEN_TTL
+        - int((timezone.now() - handoff.created_at).total_seconds()),
+    )
+    return render(
+        request,
+        "orders/handoff_confirm.html",
+        {"handoff": handoff, "ttl_remaining": ttl_remaining},
+    )
 
 
 SENIOR_ROLES = ("senior_waiter", "manager")
