@@ -2,6 +2,7 @@ from django.contrib import admin
 from modeltranslation.admin import TabbedTranslationAdmin
 
 from .models import (
+    Allergen,
     Category,
     CategoryLogo,
     Dish,
@@ -57,3 +58,10 @@ class DishAdmin(TabbedTranslationAdmin):
     search_fields = ["title_uk", "title_en"]
     ordering = ["category", "title"]
     inlines = [DishMainImageInline, DishPictureInline]
+
+
+@admin.register(Allergen)
+class AllergenAdmin(TabbedTranslationAdmin):
+    list_display = ["title", "icon"]
+    search_fields = ["title_uk", "title_en"]
+    ordering = ["title"]

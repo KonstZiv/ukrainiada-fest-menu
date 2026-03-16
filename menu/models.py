@@ -80,12 +80,32 @@ class Dish(ModelWithTitle):
     tags: models.ManyToManyField[Tag, Dish] = models.ManyToManyField(
         "Tag", related_name="dishes", blank=True
     )
+    allergens: models.ManyToManyField[Allergen, Dish] = models.ManyToManyField(
+        "Allergen",
+        related_name="dishes",
+        blank=True,
+        verbose_name="Алергени",
+    )
     availability = models.CharField(
         max_length=16,
         choices=Availability.choices,
         default=Availability.AVAILABLE,
         db_index=True,
         verbose_name="Наявність",
+    )
+
+
+class Allergen(ModelWithTitle):
+    """Food allergen marker for dish composition.
+
+    Translated to all supported languages.
+    Examples: Глютен / Gluten, Лактоза / Lactose, Горіхи / Nuts.
+    """
+
+    icon = models.CharField(
+        max_length=10,
+        blank=True,
+        help_text="Emoji icon: 🌾 🥛 🥜",
     )
 
 

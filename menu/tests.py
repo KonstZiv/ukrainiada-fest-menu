@@ -180,14 +180,14 @@ class CategoryListQueryTest(TestCase):
     def test_category_list_query_count(self) -> None:
         """Сторінка /menu/categories/ повинна виконувати ≤ 4 SQL-запити.
 
-        Без оптимізації: 1 (categories) + 5 (dishes) + 15 (tags) + 15 (tag_logos) = 36 запитів.
         З prefetch_related + select_related:
           1. categories + category_logos (select_related JOIN)
           2. dishes (prefetch_related)
           3. tags + tag_logos (prefetch з select_related JOIN)
-        Разом: 3 SQL-запити.
+          4. allergens (prefetch_related)
+        Разом: 4 SQL-запити.
         """
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(4):
             self.client.get("/menu/categories/")
 
 
