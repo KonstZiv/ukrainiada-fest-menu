@@ -82,7 +82,10 @@
       <tbody>
         {% for order in orders %}
           <tr {% if order.status == 'ready' %}class="table-success"{% endif %} data-order-id="{{ order.id }}">
-            <td><strong>{{ order.id }}</strong></td>
+            <td>
+              <strong>{{ order.id }}</strong>
+              {% if order.visitor %}<br><small class="text-muted">{{ order.visitor.get_full_name|default:order.visitor.email }}</small>{% endif %}
+            </td>
             <td>
               <span class="badge bg-{% if order.status == 'submitted' %}warning text-dark{% elif order.status == 'approved' %}primary{% elif order.status == 'in_progress' %}info{% elif order.status == 'ready' %}success{% else %}secondary{% endif %}">
                 {{ order.get_status_display }}
@@ -145,9 +148,17 @@
         <div class="card-header d-flex justify-content-between align-items-center">
           <div>
             <strong>#{{ order.id }}</strong>
+            {% if order.visitor %}
+              <span class="text-muted ms-1">{{ order.visitor.get_full_name|default:order.visitor.email }}</span>
+            {% endif %}
             <span class="badge bg-{% if order.status == 'submitted' %}warning text-dark{% elif order.status == 'approved' %}primary{% elif order.status == 'in_progress' %}info{% elif order.status == 'ready' %}success{% else %}secondary{% endif %} ms-2">
               {{ order.get_status_display }}
             </span>
+            {% if order.payment_status == 'unpaid' %}
+              <span class="badge bg-warning text-dark ms-1">{% trans "Не оплачено" %}</span>
+            {% else %}
+              <span class="badge bg-success ms-1">{% trans "Оплачено" %}</span>
+            {% endif %}
           </div>
           <span>&euro;{{ order.total_annotated|floatformat:2 }}</span>
         </div>

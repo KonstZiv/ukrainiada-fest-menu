@@ -19,6 +19,12 @@
         </span>
       </p>
       <p><strong>Створено:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+      {% if order.visitor %}
+        <p><strong>Відвідувач:</strong> {{ order.visitor.get_full_name|default:order.visitor.email }}</p>
+      {% endif %}
+      {% if order.location_hint %}
+        <p><i class="bi bi-geo-alt"></i> {{ order.location_hint }}</p>
+      {% endif %}
       {% if order.waiter %}
         <p><strong>Офіціант:</strong> {{ order.waiter.get_full_name|default:order.waiter.email }}</p>
       {% endif %}

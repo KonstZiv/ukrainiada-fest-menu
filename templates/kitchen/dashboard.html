@@ -38,21 +38,13 @@
         </div>
         <ul class="list-group list-group-flush">
           {% for ticket in pending %}
-            <li class="list-group-item ticket-card-pending">
-              <div class="d-flex justify-content-between align-items-start">
-                <div>
-                  <strong>{{ ticket.order_item.dish.title }}</strong>
-                  <span class="text-muted ms-1">x{{ ticket.order_item.quantity }}</span>
-                  <br>
-                  <small class="text-muted">#{{ ticket.order_item.order.id }}</small>
-                  <small class="text-muted detail-md ms-1">{% blocktrans with time=ticket.created_at|timesince %}{{ time }} тому{% endblocktrans %}</small>
-                  <small class="text-muted detail-lg ms-1">{% blocktrans with name=ticket.order_item.order.waiter.get_full_name|default:"—" %}Офіц: {{ name }}{% endblocktrans %}</small>
-                </div>
-              </div>
-              <form method="post" action="{% url 'kitchen:ticket_take' ticket.id %}" class="mt-2">
+            <li class="list-group-item ticket-card-pending p-2">
+              <form method="post" action="{% url 'kitchen:ticket_take' ticket.id %}">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-primary btn-action btn-kitchen-action">
-                  <i class="bi bi-hand-index"></i> {% trans "Взяти" %}
+                <button type="submit" class="btn btn-primary btn-kitchen-action w-100 text-start">
+                  <strong>{{ ticket.order_item.dish.title }}</strong> x{{ ticket.order_item.quantity }}
+                  <br>
+                  <small>#{{ ticket.order_item.order.id }} · {{ ticket.order_item.order.waiter.get_full_name|default:"—" }} · {{ ticket.created_at|timesince }}</small>
                 </button>
               </form>
             </li>
@@ -71,17 +63,13 @@
         </div>
         <ul class="list-group list-group-flush">
           {% for ticket in my_taken %}
-            <li class="list-group-item ticket-card-taken">
-              <div>
-                <strong>{{ ticket.order_item.dish.title }}</strong>
-                <span class="text-muted ms-1">x{{ ticket.order_item.quantity }}</span>
-                <br>
-                <small class="text-muted">{% blocktrans with time=ticket.taken_at|timesince %}{{ time }} тому{% endblocktrans %}</small>
-              </div>
-              <form method="post" action="{% url 'kitchen:ticket_done' ticket.id %}" class="mt-2">
+            <li class="list-group-item ticket-card-taken p-2">
+              <form method="post" action="{% url 'kitchen:ticket_done' ticket.id %}">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-success btn-action btn-kitchen-action">
-                  <i class="bi bi-check-lg"></i> {% trans "Готово" %}
+                <button type="submit" class="btn btn-success btn-kitchen-action w-100 text-start">
+                  <strong>{{ ticket.order_item.dish.title }}</strong> x{{ ticket.order_item.quantity }}
+                  <br>
+                  <small>#{{ ticket.order_item.order.id }} · {{ ticket.order_item.order.waiter.get_full_name|default:"—" }} · {{ ticket.taken_at|timesince }}</small>
                 </button>
               </form>
             </li>
