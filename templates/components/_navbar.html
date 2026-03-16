@@ -84,7 +84,7 @@
         </ul>
       </div>
 
-      {% load i18n %}
+      {% load i18n menu_extras %}
       <form action="{% url 'set_language' %}" method="post" class="d-inline">
         {% csrf_token %}
         <input name="next" type="hidden" value="{{ request.path }}">
@@ -94,7 +94,7 @@
                 class="form-select form-select-sm d-inline-block language-switcher-select">
           {% for lang_code, lang_name in languages %}
             <option value="{{ lang_code }}" {% if lang_code == current_lang %}selected{% endif %}>
-              {{ lang_name }}
+              {{ lang_code|lang_flag }} {{ lang_name }}
             </option>
           {% endfor %}
         </select>

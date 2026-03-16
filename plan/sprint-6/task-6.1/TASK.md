@@ -21,15 +21,15 @@ INSTALLED_APPS = [
     ...
 ]
 
-# Підтримувані мови (7 мов, прапорці в назвах для UI switcher)
+# Підтримувані мови (7 мов, прапорці через |lang_flag template filter)
 LANGUAGES = [
-    ("uk", "🇺🇦 Українська"),
-    ("en", "🇬🇧 English"),
-    ("cnr", "🇲🇪 Crnogorski"),   # ISO 639-3 — чорногорська (не sr!)
-    ("hr", "🇭🇷 Hrvatski"),
-    ("bs", "🇧🇦 Bosanski"),
-    ("it", "🇮🇹 Italiano"),
-    ("de", "🇩🇪 Deutsch"),
+    ("uk", "Українська"),
+    ("en", "English"),
+    ("cnr", "Crnogorski"),   # ISO 639-3 — чорногорська (не sr!)
+    ("hr", "Hrvatski"),
+    ("bs", "Bosanski"),
+    ("it", "Italiano"),
+    ("de", "Deutsch"),
 ]
 
 LANGUAGE_CODE = "uk"  # основна мова
