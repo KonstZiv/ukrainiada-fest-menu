@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Немає з'єднання</title>
+  <style>
+    body {
+      background: #F8FAFC;
+      color: #0F172A;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 1.25rem;
+      margin: 0;
+    }
+    .icon { font-size: 4rem; margin-bottom: 1rem; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    p { color: #64748B; }
+    button {
+      padding: 0.875rem 1.75rem;
+      font-size: 1rem;
+      margin-top: 1rem;
+      border-radius: 0.375rem;
+      background: #004A7A;
+      color: white;
+      border: none;
+      cursor: pointer;
+      min-height: 48px;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="icon">📵</div>
+    <h1>Немає з'єднання</h1>
+    <p>Перевірте інтернет і спробуйте знову.</p>
+    <p>Якщо ви переглядали меню раніше — воно доступне в кеші.</p>
+    <button onclick="location.reload()">🔄 Спробувати знову</button>
+  </div>
+</body>
+</html>
