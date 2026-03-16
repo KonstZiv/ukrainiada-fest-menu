@@ -7,7 +7,5 @@
     {% endif %}
     <span class="fw-semibold small" style="letter-spacing: 0.05em;">{% trans "ЗАМОВЛЕННЯ" %}</span>
   </div>
-  {% if cart_total %}
   <span class="fw-bold">&euro;{{ cart_total|floatformat:2 }}</span>
-  {% endif %}
 </a>

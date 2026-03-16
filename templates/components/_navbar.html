@@ -91,9 +91,8 @@
       {% get_available_languages as languages %}
       {% get_current_language as current_lang %}
       <div class="dropdown d-inline-flex align-items-center">
-        <button class="btn btn-sm text-primary fw-semibold p-0 dropdown-toggle"
-                type="button" data-bs-toggle="dropdown" aria-expanded="false"
-                style="font-size: 0.8rem; letter-spacing: 0.05em;">
+        <button class="btn btn-sm text-primary fw-semibold p-0 dropdown-toggle language-switcher-btn"
+                type="button" data-bs-toggle="dropdown" aria-expanded="false">
           {{ current_lang|lang_flag }} {{ current_lang|upper }}
         </button>
         <ul class="dropdown-menu dropdown-menu-end">

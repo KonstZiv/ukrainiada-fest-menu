@@ -229,6 +229,12 @@ body {
   font-weight: 800;
 }
 
+/* Language switcher button in navbar */
+.language-switcher-btn {
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+}
+
 /* Allergen badge on dish card */
 .allergen-badge {
   font-size: 0.7rem;
