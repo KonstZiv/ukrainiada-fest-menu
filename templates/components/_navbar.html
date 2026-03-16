@@ -94,7 +94,7 @@
                 class="form-select form-select-sm d-inline-block language-switcher-select">
           {% for lang_code, lang_name in languages %}
             <option value="{{ lang_code }}" {% if lang_code == current_lang %}selected{% endif %}>
-              {{ lang_code|upper }}
+              {{ lang_name }}
             </option>
           {% endfor %}
         </select>

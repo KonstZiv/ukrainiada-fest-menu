@@ -18,7 +18,7 @@ from menu.models import Category, Dish, Tag
 def test_dish_has_translation_fields() -> None:
     assert hasattr(Dish, "title_uk")
     assert hasattr(Dish, "title_en")
-    assert hasattr(Dish, "title_sr")
+    assert hasattr(Dish, "title_cnr")
     assert hasattr(Dish, "title_de")
     assert hasattr(Dish, "description_uk")
     assert hasattr(Dish, "description_en")
