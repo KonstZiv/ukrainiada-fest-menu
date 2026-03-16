@@ -73,7 +73,7 @@
         {% if dish.allergens.all %}
           <div class="mt-1">
             {% for allergen in dish.allergens.all %}
-              <span class="badge bg-warning text-dark" style="font-size: 0.7rem;">
+              <span class="badge bg-warning text-dark allergen-badge">
                 {{ allergen.icon }} {{ allergen.title }}
               </span>
             {% endfor %}
