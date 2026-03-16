@@ -16,6 +16,7 @@ dependencies = [
     "channels-redis>=4.0",
     "uvicorn[standard]>=0.30",
     "qrcode[pil]>=8.0",
+    "django-modeltranslation>=0.20.2",
 ]
 
 [dependency-groups]
