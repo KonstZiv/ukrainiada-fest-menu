@@ -251,7 +251,7 @@ body {
     min-height: 48px;
     min-width: 48px;
     font-size: 1rem;
-    padding: 10px 16px;
+    padding: 0.625rem 1rem;
   }
 
   /* Kitchen: ще більші кнопки — брудні/мокрі руки */
