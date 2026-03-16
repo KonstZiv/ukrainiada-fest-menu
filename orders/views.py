@@ -99,6 +99,36 @@ def order_qr(request: HttpRequest, order_id: int) -> HttpResponse:
     return HttpResponse(buffer.getvalue(), content_type="image/png")
 
 
+def _build_progress_steps(order_status: str) -> list[dict[str, object]]:
+    """Build progress bar steps for order detail template.
+
+    Returns a list of 5 step dicts with icon, label, done, active flags.
+    """
+    status_order = [
+        "draft",
+        "submitted",
+        "approved",
+        "in_progress",
+        "ready",
+        "delivered",
+    ]
+    current_idx = (
+        status_order.index(order_status) if order_status in status_order else 0
+    )
+    icons = ["📝", "👍", "👩\u200d🍳", "✅", "🍽️"]
+    labels = ["Створено", "Прийнято", "Готується", "Готово", "Доставлено"]
+    thresholds = [0, 2, 3, 4, 5]
+    return [
+        {
+            "icon": icons[i],
+            "label": labels[i],
+            "done": current_idx >= thresholds[i],
+            "active": current_idx == thresholds[i],
+        }
+        for i in range(5)
+    ]
+
+
 def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
     """Display order details with live tracking timeline."""
     order = get_object_or_404(
@@ -131,38 +161,13 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
             }
         )
 
-    # Progress bar: 5 visible steps mapped to 6 order statuses
-    status_order = [
-        "draft",
-        "submitted",
-        "approved",
-        "in_progress",
-        "ready",
-        "delivered",
-    ]
-    current_idx = (
-        status_order.index(order.status) if order.status in status_order else 0
-    )
-    step_icons = ["📝", "👍", "👩\u200d🍳", "✅", "🍽️"]
-    step_labels = ["Створено", "Прийнято", "Готується", "Готово", "Доставлено"]
-    step_thresholds = [0, 2, 3, 4, 5]  # min status_order index to be "done"
-    progress_steps = [
-        {
-            "icon": step_icons[i],
-            "label": step_labels[i],
-            "done": current_idx >= step_thresholds[i],
-            "active": current_idx == step_thresholds[i],
-        }
-        for i in range(5)
-    ]
-
     return render(
         request,
         "orders/order_detail.html",
         {
             "order": order,
             "ticket_states": ticket_states,
-            "progress_steps": progress_steps,
+            "progress_steps": _build_progress_steps(order.status),
         },
     )
 
