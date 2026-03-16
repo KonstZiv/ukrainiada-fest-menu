@@ -136,7 +136,7 @@ class KitchenHandoff(models.Model):
     @property
     def is_expired(self) -> bool:
         """Check if the handoff token has exceeded its TTL."""
-        ttl: int = getattr(settings, "HANDOFF_TOKEN_TTL", 120)
+        ttl: int = settings.HANDOFF_TOKEN_TTL
         return (
             not self.is_confirmed
             and (timezone.now() - self.created_at).total_seconds() > ttl
