@@ -11,7 +11,7 @@ from django.utils import timezone
 from kitchen.models import KitchenTicket
 from kitchen.services import create_tickets_for_order
 from menu.models import Dish
-from notifications.events import push_order_approved
+from notifications.events import push_order_approved, push_visitor_event
 
 if TYPE_CHECKING:
     from user.models import User
@@ -113,6 +113,11 @@ def approve_order(order: Order, waiter: User) -> Order:
 
     # Push AFTER transaction — don't push if transaction rolled back
     push_order_approved(order_id=order.id)
+    push_visitor_event(
+        order_id=order.id,
+        event_type="order_approved",
+        data={"order_id": order.id, "waiter_label": waiter.staff_label},
+    )
     return order
 
 
@@ -146,6 +151,12 @@ def deliver_order(order: Order, waiter: User) -> Order:
     order.status = Order.Status.DELIVERED
     order.delivered_at = timezone.now()
     order.save(update_fields=["status", "delivered_at"])
+
+    push_visitor_event(
+        order_id=order.id,
+        event_type="order_delivered",
+        data={"order_id": order.id, "waiter_label": waiter.staff_label},
+    )
     return order
 
 

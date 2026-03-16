@@ -9,7 +9,12 @@ from django.db.models import QuerySet
 from django.utils import timezone
 
 from kitchen.models import KitchenAssignment, KitchenHandoff, KitchenTicket
-from notifications.events import push_order_ready, push_ticket_done, push_ticket_taken
+from notifications.events import (
+    push_order_ready,
+    push_ticket_done,
+    push_ticket_taken,
+    push_visitor_event,
+)
 from orders.models import Order
 
 if TYPE_CHECKING:
@@ -78,6 +83,17 @@ def take_ticket(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket:
             kitchen_user_name=cook_name,
         )
 
+    # Notify visitor
+    push_visitor_event(
+        order_id=ticket.order_item.order_id,
+        event_type="ticket_taken",
+        data={
+            "ticket_id": ticket.pk,
+            "dish": ticket.order_item.dish.title[:40],
+            "cook_label": kitchen_user.staff_label,
+        },
+    )
+
     return ticket
 
 
@@ -110,6 +126,17 @@ def mark_ticket_done(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket
             waiter_id=waiter_id,
             dish_title=ticket.order_item.dish.title,
         )
+
+    # Notify visitor
+    push_visitor_event(
+        order_id=ticket.order_item.order_id,
+        event_type="ticket_done",
+        data={
+            "ticket_id": ticket.pk,
+            "dish": ticket.order_item.dish.title[:40],
+            "cook_label": kitchen_user.staff_label,
+        },
+    )
 
     order_ready = _check_order_ready(ticket)
     if order_ready and waiter_id:
@@ -179,5 +206,10 @@ def _check_order_ready(ticket: KitchenTicket) -> bool:
         order.status = Order.Status.READY
         order.ready_at = timezone.now()
         order.save(update_fields=["status", "ready_at"])
+        push_visitor_event(
+            order_id=order.id,
+            event_type="order_ready",
+            data={"order_id": order.id},
+        )
 
     return all_done

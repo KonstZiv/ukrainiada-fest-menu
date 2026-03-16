@@ -172,6 +172,19 @@ def handoff_confirm_view(
 
         dish_title = handoff.ticket.order_item.dish.title
         messages.success(request, f"Прийом '{dish_title}' підтверджено.")
+
+        # Notify visitor: waiter collected the dish
+        from notifications.events import push_visitor_event
+
+        push_visitor_event(
+            order_id=handoff.ticket.order_item.order_id,
+            event_type="dish_collecting",
+            data={
+                "ticket_id": handoff.ticket.pk,
+                "dish": dish_title[:40],
+                "waiter_label": request.user.staff_label,
+            },
+        )
         return redirect("waiter:dashboard")
 
     ttl_remaining = max(

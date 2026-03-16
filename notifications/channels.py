@@ -29,6 +29,11 @@ def manager_channel() -> str:
     return "manager"
 
 
+def visitor_order_channel(order_id: int) -> str:
+    """Return visitor channel for a specific order."""
+    return f"visitor-order-{order_id}"
+
+
 def channels_for_user(user: User) -> list[str]:
     """Return list of SSE channels the user should subscribe to."""
     from user.models import User as UserModel
