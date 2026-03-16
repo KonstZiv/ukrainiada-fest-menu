@@ -7,14 +7,17 @@ from decimal import Decimal
 from typing import TypedDict
 
 import qrcode
+from django.conf import settings as django_settings
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 
 from menu.models import Dish
 from orders.cart import add_to_cart, get_cart, remove_from_cart
-from orders.models import Order
+from orders.escalation_services import create_escalation
+from orders.models import Order, VisitorEscalation
 from orders.services import (
     can_access_order,
     confirm_online_payment_stub,
@@ -161,6 +164,18 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
             }
         )
 
+    now = timezone.now()
+    can_escalate = (
+        order.status in ("approved", "in_progress", "ready")
+        and order.approved_at
+        and (now - order.approved_at).total_seconds()
+        > django_settings.ESCALATION_MIN_WAIT * 60
+    )
+    active_escalation = VisitorEscalation.objects.filter(
+        order=order,
+        status__in=["open", "acknowledged"],
+    ).first()
+
     return render(
         request,
         "orders/order_detail.html",
@@ -168,6 +183,9 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
             "order": order,
             "ticket_states": ticket_states,
             "progress_steps": _build_progress_steps(order.status),
+            "show_escalation_button": can_escalate and not active_escalation,
+            "active_escalation": active_escalation,
+            "escalation_reasons": VisitorEscalation.Reason.choices,
         },
     )
 
@@ -187,3 +205,19 @@ def order_pay_online(request: HttpRequest, order_id: int) -> HttpResponse:
             messages.error(request, str(e))
 
     return render(request, "orders/pay_online.html", {"order": order})
+
+
+def create_escalation_view(request: HttpRequest, order_id: int) -> HttpResponse:
+    """Visitor creates an escalation (POST only)."""
+    order = get_object_or_404(Order, pk=order_id)
+    if not can_access_order(request, order):
+        return render(request, "403.html", status=403)
+    if request.method == "POST":
+        reason = request.POST.get("reason", "")
+        message = request.POST.get("message", "")
+        try:
+            create_escalation(order, reason=reason, message=message)
+            messages.success(request, "Ваше звернення надіслано!")
+        except ValueError as e:
+            messages.warning(request, str(e))
+    return redirect("orders:order_detail", order_id=order_id)

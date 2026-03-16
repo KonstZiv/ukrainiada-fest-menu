@@ -10,12 +10,14 @@ from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from core_settings.types import AuthenticatedHttpRequest
 from kitchen.models import KitchenHandoff
 from kitchen.stats import get_dish_queue_stats
 from notifications.events import push_visitor_event
-from orders.models import Order
+from orders.escalation_services import acknowledge_escalation, resolve_escalation
+from orders.models import Order, VisitorEscalation
 from orders.services import (
     approve_order,
     confirm_cash_payment,
@@ -84,6 +86,15 @@ def waiter_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
         )
         .order_by("created_at")
     )
+    my_escalations = (
+        VisitorEscalation.objects.filter(
+            order__waiter=request.user,
+            status__in=["open", "acknowledged"],
+        )
+        .select_related("order")
+        .order_by("created_at")
+    )
+
     # Delivered but unpaid — show payment reminder
     unpaid_delivered = Order.objects.filter(
         waiter=request.user,
@@ -99,6 +110,7 @@ def waiter_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
             "orders": orders,
             "unpaid_delivered": unpaid_delivered,
             "dish_stats": dish_stats,
+            "my_escalations": my_escalations,
         },
     )
 
@@ -196,6 +208,37 @@ def handoff_confirm_view(
         "orders/handoff_confirm.html",
         {"handoff": handoff, "ttl_remaining": ttl_remaining},
     )
+
+
+@role_required(*WAITER_ROLES)
+@require_POST
+def escalation_acknowledge(
+    request: AuthenticatedHttpRequest, escalation_id: int
+) -> HttpResponse:
+    """Waiter acknowledges a visitor escalation."""
+    escalation = get_object_or_404(VisitorEscalation, pk=escalation_id)
+    try:
+        acknowledge_escalation(escalation, request.user)
+        messages.success(request, "Звернення позначено як побачене.")
+    except ValueError as e:
+        messages.error(request, str(e))
+    return redirect("waiter:dashboard")
+
+
+@role_required(*WAITER_ROLES)
+@require_POST
+def escalation_resolve(
+    request: AuthenticatedHttpRequest, escalation_id: int
+) -> HttpResponse:
+    """Waiter resolves a visitor escalation."""
+    escalation = get_object_or_404(VisitorEscalation, pk=escalation_id)
+    note = request.POST.get("note", "")
+    try:
+        resolve_escalation(escalation, request.user, note=note)
+        messages.success(request, "Звернення вирішено.")
+    except ValueError as e:
+        messages.error(request, str(e))
+    return redirect("waiter:dashboard")
 
 
 SENIOR_ROLES = ("senior_waiter", "manager")
