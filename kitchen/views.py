@@ -133,7 +133,7 @@ def generate_handoff_qr(
                 pk=int(waiter_id),
                 role__in=[User.Role.WAITER, User.Role.SENIOR_WAITER],
             )
-        except (User.DoesNotExist, ValueError):
+        except User.DoesNotExist, ValueError:
             messages.error(
                 request,
                 "Обраний офіціант не знайдений або не має відповідної ролі.",
