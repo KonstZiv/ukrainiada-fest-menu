@@ -25,6 +25,16 @@
     <div class="card-body">
       <p><strong>{% trans "Статус:" %}</strong> {{ order.get_status_display }}</p>
       <p><strong>{% trans "Створено:" %}</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+      {% if order.status != 'submitted' %}
+      <p>
+        <strong>{% trans "Оплата:" %}</strong>
+        {% if order.payment_status == 'paid' %}
+          <span class="badge bg-success">{{ order.get_payment_method_display }}</span>
+        {% else %}
+          <span class="badge bg-warning text-dark">{% trans "Не оплачено" %}</span>
+        {% endif %}
+      </p>
+      {% endif %}
       {% if order.location_hint %}
         <p><i class="bi bi-geo-alt"></i> {{ order.location_hint }}</p>
       {% endif %}
@@ -175,7 +185,7 @@
       <p class="text-muted">{% trans "Покажіть QR-код або назвіть номер замовлення офіціанту" %}</p>
       <img src="{% url 'orders:order_qr' order.id %}"
            alt="QR #{{ order.id }}"
-           width="256" height="256"
+           width="360" height="360"
            loading="eager">
       <p class="display-4 fw-bold mt-2">#{{ order.id }}</p>
     </div>

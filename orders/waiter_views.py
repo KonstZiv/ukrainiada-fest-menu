@@ -79,6 +79,7 @@ def waiter_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
     ]
     orders = (
         Order.objects.filter(waiter=request.user, status__in=active_statuses)
+        .select_related("visitor")
         .prefetch_related(
             "items__dish",
             "items__kitchen_ticket",

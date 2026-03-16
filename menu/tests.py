@@ -2087,6 +2087,11 @@ class AdminNavCrudLinksTest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         """Create test data for CRUD links tests."""
+        from user.models import User
+
+        cls.staff_user = User.objects.create_superuser(  # type: ignore[attr-defined]
+            email="staff@test.com", username="stafftest", password="testpass123"
+        )
         cls.cat = Category.objects.create(
             title="Салати", description="Тест", number_in_line=1
         )
@@ -2101,6 +2106,10 @@ class AdminNavCrudLinksTest(TestCase):
         )
         cls.dish.tags.add(cls.tag)
         DishMainImage.objects.create(dish=cls.dish, title="Фото", image="test.jpg")
+
+    def setUp(self) -> None:
+        """Log in as staff for each test."""
+        self.client.force_login(self.staff_user)  # type: ignore[attr-defined]
 
     # --- Navbar dropdown --- #
 

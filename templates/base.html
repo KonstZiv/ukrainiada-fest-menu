@@ -94,7 +94,9 @@
   {# Кнопка фіксована внизу екрану і видна на кожній сторінці.                 #}
   {# ======================================================================= #}
   {% block order_fab %}
+    {% if not user.is_authenticated or user.role == 'visitor' %}
     {% include "components/_order_fab.html" %}
+    {% endif %}
   {% endblock %}
 
   {# ======================================================================= #}
@@ -167,6 +169,7 @@
   <script src="{% static 'js/sse_client.js' %}"></script>
   {% endif %}
 
+  <script src="{% static 'js/cart_ajax.js' %}" defer></script>
   <script src="{% static 'js/offline_detector.js' %}" defer></script>
   <script>
   if ("serviceWorker" in navigator) {

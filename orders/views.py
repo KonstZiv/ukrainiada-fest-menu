@@ -18,7 +18,7 @@ from django.views.decorators.http import require_POST
 
 from feedback.models import GuestFeedback
 from menu.models import Dish
-from orders.cart import add_to_cart, get_cart, remove_from_cart
+from orders.cart import add_to_cart, decrease_in_cart, get_cart, remove_from_cart
 from orders.escalation_services import create_escalation
 from orders.models import Order, VisitorEscalation
 from orders.services import (
@@ -33,23 +33,62 @@ class _EnrichedItem(TypedDict):
     quantity: int
 
 
+def _cart_json_response(request: HttpRequest, dish_id: int) -> HttpResponse:
+    """Return JSON with cart state for AJAX cart operations."""
+    from django.http import JsonResponse
+
+    from orders.cart import cart_item_count, get_cart
+
+    cart = get_cart(request)
+    quantities = {item["dish_id"]: item["quantity"] for item in cart}
+    dish_qty = quantities.get(dish_id, 0)
+
+    total = Decimal("0")
+    if quantities:
+        prices = dict(Dish.objects.filter(id__in=quantities).values_list("id", "price"))
+        total = sum(
+            (prices.get(did, Decimal("0")) * qty for did, qty in quantities.items()),
+            Decimal("0"),
+        )
+
+    return JsonResponse(
+        {
+            "dish_id": dish_id,
+            "dish_qty": dish_qty,
+            "cart_count": cart_item_count(request),
+            "cart_total": str(total),
+        }
+    )
+
+
 @require_POST
 def cart_add(request: HttpRequest) -> HttpResponse:
-    """Add a dish to the session cart."""
+    """Add a dish to the session cart. Returns JSON for AJAX, redirect otherwise."""
     try:
         dish_id = int(request.POST.get("dish_id", 0))
         quantity = int(request.POST.get("quantity", 1))
     except ValueError, TypeError:
-        return redirect("orders:cart")
+        return redirect(request.META.get("HTTP_REFERER", "/order/cart/"))
     if dish_id > 0 and quantity > 0:
         add_to_cart(request, dish_id, quantity)
-    return redirect("orders:cart")
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return _cart_json_response(request, dish_id)
+    return redirect(request.META.get("HTTP_REFERER", "/order/cart/"))
 
 
 def cart_remove(request: HttpRequest, dish_id: int) -> HttpResponse:
     """Remove a dish from the session cart."""
     remove_from_cart(request, dish_id)
     return redirect("orders:cart")
+
+
+@require_POST
+def cart_decrease(request: HttpRequest, dish_id: int) -> HttpResponse:
+    """Decrease dish quantity by 1. Returns JSON for AJAX, redirect otherwise."""
+    decrease_in_cart(request, dish_id)
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return _cart_json_response(request, dish_id)
+    return redirect(request.META.get("HTTP_REFERER", "/order/cart/"))
 
 
 def cart_view(request: HttpRequest) -> HttpResponse:

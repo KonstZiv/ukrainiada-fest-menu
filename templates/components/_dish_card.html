@@ -81,12 +81,9 @@
         {% endif %}
       </div>
 
-      {# --- Колонка 3: Кнопка "+" та ціна (вертикально по центру) --- #}
-      <div class="flex-shrink-0 d-flex align-items-center gap-2">
-        <button class="btn btn-outline-primary btn-sm rounded-circle p-0"
-                style="width: 28px; height: 28px;">
-          <i class="bi bi-plus"></i>
-        </button>
+      {# --- Колонка 3: Cart controls + ціна --- #}
+      <div class="flex-shrink-0 d-flex align-items-center gap-1">
+        {% include "components/_cart_controls.html" with dish=dish %}
         <span class="fw-bold text-nowrap" style="font-size: 1.25rem;">&euro;{{ dish.price }}</span>
       </div>
 

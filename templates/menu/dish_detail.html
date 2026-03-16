@@ -113,13 +113,19 @@
         </div>
       {% endif %}
 
-      {# --- Кнопка "Додати в замовлення" (заглушка) --- #}
+      {# --- Кнопка "Додати в замовлення" --- #}
       <div class="mt-4 d-flex gap-2">
-        <button class="btn btn-primary" disabled>
-          <i class="bi bi-plus-circle"></i> Додати в замовлення
-        </button>
+        <form method="post" action="{% url 'orders:cart_add' %}" class="d-inline">
+          {% csrf_token %}
+          <input type="hidden" name="dish_id" value="{{ dish.pk }}">
+          <input type="hidden" name="quantity" value="1">
+          <button type="submit" class="btn btn-primary btn-action">
+            <i class="bi bi-plus-circle"></i> Додати в замовлення
+          </button>
+        </form>
 
-        {# --- Кнопки Edit/Delete для страви (таска 2.8) --- #}
+        {# --- Кнопки Edit/Delete — тільки для staff/manager --- #}
+        {% if user.is_staff or user.role == 'manager' %}
         <a href="{% url 'menu:dish_update' dish.pk %}"
            class="btn btn-outline-secondary" title="Редагувати">
           <i class="bi bi-pencil"></i> Редагувати
@@ -128,6 +134,7 @@
            class="btn btn-outline-danger" title="Видалити">
           <i class="bi bi-trash"></i> Видалити
         </a>
+        {% endif %}
       </div>
 
     </div>
