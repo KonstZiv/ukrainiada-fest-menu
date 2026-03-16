@@ -254,11 +254,8 @@ body {
     padding: 0.625rem 1rem;
   }
 
-  /* Kitchen: ще більші кнопки — брудні/мокрі руки */
+  /* Kitchen: full-width on touch devices for easy tapping */
   .btn-kitchen-action {
-    min-height: 56px;
-    font-size: 1.1rem;
-    font-weight: bold;
     width: 100%;
   }
 
@@ -267,13 +264,11 @@ body {
   }
 }
 
-/* Desktop (≥ lg): компактніше */
-@media (min-width: 992px) {
-  .btn-kitchen-action {
-    min-height: 38px;
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
+/* Kitchen buttons: 56px on ALL sizes — touch screens on desktops too */
+.btn-kitchen-action {
+  min-height: 56px;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 
