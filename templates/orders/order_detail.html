@@ -7,33 +7,16 @@
 <div class="container mt-3">
   <h2>{% blocktrans with order_id=order.id %}Замовлення #{{ order_id }}{% endblocktrans %}</h2>
 
-  {# --- Progress bar (Task 9.4) --- #}
+  {# --- Progress bar (Task 9.4) — built from progress_steps in view context --- #}
   {% if order.status != 'draft' %}
   <div class="order-progress" data-status="{{ order.status }}">
-    <div class="progress-step {% if order.status != 'draft' %}done{% endif %}">
-      <span class="step-icon">📝</span>
-      <span class="step-label d-none d-sm-inline">{% trans "Створено" %}</span>
-    </div>
-    <div class="progress-line"></div>
-    <div class="progress-step {% if order.status == 'approved' or order.status == 'in_progress' or order.status == 'ready' or order.status == 'delivered' %}done{% elif order.status == 'submitted' %}active{% endif %}">
-      <span class="step-icon">👍</span>
-      <span class="step-label d-none d-sm-inline">{% trans "Прийнято" %}</span>
-    </div>
-    <div class="progress-line"></div>
-    <div class="progress-step {% if order.status == 'ready' or order.status == 'delivered' %}done{% elif order.status == 'in_progress' %}active{% endif %}">
-      <span class="step-icon">👩‍🍳</span>
-      <span class="step-label d-none d-sm-inline">{% trans "Готується" %}</span>
-    </div>
-    <div class="progress-line"></div>
-    <div class="progress-step {% if order.status == 'delivered' %}done{% elif order.status == 'ready' %}active{% endif %}">
-      <span class="step-icon">✅</span>
-      <span class="step-label d-none d-sm-inline">{% trans "Готово" %}</span>
-    </div>
-    <div class="progress-line"></div>
-    <div class="progress-step {% if order.status == 'delivered' %}done{% endif %}">
-      <span class="step-icon">🍽️</span>
-      <span class="step-label d-none d-sm-inline">{% trans "Доставлено" %}</span>
-    </div>
+    {% for step in progress_steps %}
+      <div class="progress-step {% if step.done %}done{% endif %} {% if step.active %}active{% endif %}">
+        <span class="step-icon">{{ step.icon }}</span>
+        <span class="step-label d-none d-sm-inline">{% trans step.label %}</span>
+      </div>
+      {% if not forloop.last %}<div class="progress-line"></div>{% endif %}
+    {% endfor %}
   </div>
   {% endif %}
 
