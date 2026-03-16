@@ -55,8 +55,11 @@
 
   {# --- Список результатів --- #}
   {% if query %}
+    <div class="row g-2 g-md-3">
     {% for dish in dishes %}
-      {% include "components/_dish_card.html" with dish=dish query=query %}
+      <div class="col-12 col-md-6 col-lg-4">
+        {% include "components/_dish_card.html" with dish=dish query=query %}
+      </div>
     {% empty %}
       <div class="text-center text-muted py-5">
         <i class="bi bi-search" style="font-size: 2rem;"></i>
@@ -64,6 +67,7 @@
         <p class="small">Спробуйте інший запит або перевірте правопис.</p>
       </div>
     {% endfor %}
+    </div>
   {% else %}
     <div class="text-center text-muted py-5">
       <i class="bi bi-search" style="font-size: 2rem;"></i>

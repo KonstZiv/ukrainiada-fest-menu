@@ -4,96 +4,148 @@
 {% block title %}Jadran Sun — Мої замовлення{% endblock %}
 
 {% block content %}
-<div class="container mt-3">
+<div class="container-fluid mt-3 px-2 px-md-3">
   <h2><i class="bi bi-clipboard-check"></i> Мої замовлення</h2>
 
-  {% for order in orders %}
-    <div class="card mb-3 {% if order.status == 'ready' %}border-success{% endif %}" data-order-id="{{ order.id }}">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <div>
-          <strong>#{{ order.id }}</strong>
-          <span class="badge bg-{% if order.status == 'submitted' %}warning text-dark{% elif order.status == 'approved' %}primary{% elif order.status == 'in_progress' %}info{% elif order.status == 'ready' %}success{% else %}secondary{% endif %} ms-2">
-            {{ order.get_status_display }}
-          </span>
+  {# --- Desktop: table view (≥ lg) --- #}
+  <div class="waiter-order-table table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Статус</th>
+          <th>Страви</th>
+          <th>Кухня</th>
+          <th>Сума</th>
+          <th>Оплата</th>
+          <th>Дії</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+          <tr {% if order.status == 'ready' %}class="table-success"{% endif %} data-order-id="{{ order.id }}">
+            <td><strong>{{ order.id }}</strong></td>
+            <td>
+              <span class="badge bg-{% if order.status == 'submitted' %}warning text-dark{% elif order.status == 'approved' %}primary{% elif order.status == 'in_progress' %}info{% elif order.status == 'ready' %}success{% else %}secondary{% endif %}">
+                {{ order.get_status_display }}
+              </span>
+            </td>
+            <td>
+              {% for item in order.items.all %}
+                {{ item.dish.title }} x{{ item.quantity }}{% if not forloop.last %}, {% endif %}
+              {% endfor %}
+            </td>
+            <td>
+              {% for item in order.items.all %}
+                {% if item.kitchen_ticket %}
+                  <span class="ticket-status badge bg-{% if item.kitchen_ticket.status == 'pending' %}warning text-dark{% elif item.kitchen_ticket.status == 'taken' %}info{% elif item.kitchen_ticket.status == 'done' %}success{% endif %}" style="font-size: 0.7rem;">
+                    {{ item.dish.title|truncatechars:10 }}: {{ item.kitchen_ticket.get_status_display }}
+                  </span>
+                {% endif %}
+              {% endfor %}
+            </td>
+            <td>&euro;{{ order.total_price|floatformat:2 }}</td>
+            <td>
+              {% if order.payment_status == 'unpaid' %}
+                <span class="badge bg-warning text-dark">Не оплачено</span>
+              {% else %}
+                <span class="badge bg-success">{{ order.get_payment_method_display }}</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="d-flex gap-1">
+                {% if order.status == 'ready' %}
+                  <form method="post" action="{% url 'waiter:order_delivered' order.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-success">
+                      <i class="bi bi-check-circle"></i> Передав
+                    </button>
+                  </form>
+                {% endif %}
+                {% if order.payment_status == 'unpaid' %}
+                  <form method="post" action="{% url 'waiter:confirm_payment' order.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-warning">
+                      <i class="bi bi-cash-coin"></i> Готівка
+                    </button>
+                  </form>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="text-center text-muted py-4">Немає активних замовлень</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {# --- Mobile + Tablet: card view (< lg) --- #}
+  <div class="waiter-order-cards">
+    {% for order in orders %}
+      <div class="card mb-3 {% if order.status == 'ready' %}border-success{% endif %}" data-order-id="{{ order.id }}">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div>
+            <strong>#{{ order.id }}</strong>
+            <span class="badge bg-{% if order.status == 'submitted' %}warning text-dark{% elif order.status == 'approved' %}primary{% elif order.status == 'in_progress' %}info{% elif order.status == 'ready' %}success{% else %}secondary{% endif %} ms-2">
+              {{ order.get_status_display }}
+            </span>
+          </div>
+          <span>&euro;{{ order.total_price|floatformat:2 }}</span>
         </div>
-        <span>&euro;{{ order.total_price|floatformat:2 }}</span>
+        <div class="card-body p-2">
+          {% for item in order.items.all %}
+            <div class="d-flex justify-content-between align-items-center py-1 {% if not forloop.last %}border-bottom{% endif %}">
+              <div>
+                <span>{{ item.dish.title }}</span>
+                <span class="text-muted ms-1">x{{ item.quantity }}</span>
+              </div>
+              {% if item.kitchen_ticket %}
+                <span class="ticket-status badge bg-{% if item.kitchen_ticket.status == 'pending' %}warning text-dark{% elif item.kitchen_ticket.status == 'taken' %}info{% elif item.kitchen_ticket.status == 'done' %}success{% endif %}">
+                  {{ item.kitchen_ticket.get_status_display }}
+                </span>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+        <div class="card-footer d-flex gap-2 gap-touch flex-wrap">
+          {% if order.status == 'ready' %}
+            <form method="post" action="{% url 'waiter:order_delivered' order.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-success btn-action">
+                <i class="bi bi-check-circle"></i> Передав відвідувачу
+              </button>
+            </form>
+          {% endif %}
+          {% if order.payment_status == 'unpaid' %}
+            <form method="post" action="{% url 'waiter:confirm_payment' order.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-warning btn-action">
+                <i class="bi bi-cash-coin"></i> Прийняв готівку
+              </button>
+            </form>
+          {% else %}
+            <span class="badge bg-success align-self-center">
+              <i class="bi bi-check"></i> Оплачено ({{ order.get_payment_method_display }})
+            </span>
+          {% endif %}
+        </div>
       </div>
-      <div class="card-body p-0">
-        <table class="table table-sm mb-0">
-          <thead class="table-light">
-            <tr>
-              <th>Страва</th>
-              <th>К-сть</th>
-              <th>Кухня</th>
-              <th>Кухар</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for item in order.items.all %}
-              <tr {% if item.kitchen_ticket %}data-ticket-id="{{ item.kitchen_ticket.id }}"{% endif %}>
-                <td>{{ item.dish.title }}</td>
-                <td>{{ item.quantity }}</td>
-                <td>
-                  {% if item.kitchen_ticket %}
-                    <span class="ticket-status badge bg-{% if item.kitchen_ticket.status == 'pending' %}warning text-dark{% elif item.kitchen_ticket.status == 'taken' %}info{% elif item.kitchen_ticket.status == 'done' %}success{% endif %}">
-                      {{ item.kitchen_ticket.get_status_display }}
-                    </span>
-                  {% else %}
-                    &mdash;
-                  {% endif %}
-                </td>
-                <td>
-                  {% if item.kitchen_ticket and item.kitchen_ticket.assigned_to %}
-                    {{ item.kitchen_ticket.assigned_to.get_full_name|default:item.kitchen_ticket.assigned_to.email }}
-                    {% if item.kitchen_ticket.taken_at %}
-                      <small class="text-muted">({{ item.kitchen_ticket.taken_at|timesince }} тому)</small>
-                    {% endif %}
-                  {% else %}
-                    &mdash;
-                  {% endif %}
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+    {% empty %}
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Немає активних замовлень.
       </div>
-      <div class="card-footer d-flex gap-2">
-        {% if order.status == 'ready' %}
-          <form method="post" action="{% url 'waiter:order_delivered' order.id %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-success">
-              <i class="bi bi-check-circle"></i> Передав відвідувачу
-            </button>
-          </form>
-        {% endif %}
-        {% if order.payment_status == 'unpaid' %}
-          <form method="post" action="{% url 'waiter:confirm_payment' order.id %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-warning">
-              <i class="bi bi-cash-coin"></i> Прийняв готівку
-            </button>
-          </form>
-        {% else %}
-          <span class="badge bg-success align-self-center">
-            <i class="bi bi-check"></i> Оплачено ({{ order.get_payment_method_display }})
-          </span>
-        {% endif %}
-      </div>
-    </div>
-  {% empty %}
-    <div class="alert alert-info">
-      <i class="bi bi-info-circle"></i> Немає активних замовлень.
-    </div>
-  {% endfor %}
+    {% endfor %}
+  </div>
 
   {% if unpaid_delivered %}
     <h3 class="mt-4"><i class="bi bi-exclamation-triangle text-warning"></i> Передано, але не оплачено</h3>
     {% for order in unpaid_delivered %}
-      <div class="alert alert-warning d-flex justify-content-between align-items-center">
+      <div class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap gap-2">
         <span>Замовлення <strong>#{{ order.id }}</strong> передано, але НЕ ОПЛАЧЕНО!</span>
         <form method="post" action="{% url 'waiter:confirm_payment' order.id %}">
           {% csrf_token %}
-          <button type="submit" class="btn btn-warning btn-sm">
+          <button type="submit" class="btn btn-warning btn-action">
             <i class="bi bi-cash-coin"></i> Прийняв готівку
           </button>
         </form>
