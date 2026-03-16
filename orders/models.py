@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 from decimal import Decimal
 
 from django.conf import settings
@@ -26,6 +27,12 @@ class Order(models.Model):
         CASH = "cash", "Готівка"
         ONLINE = "online", "Онлайн"
 
+    access_token = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        db_index=True,
+        editable=False,
+    )
     visitor = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -60,6 +67,11 @@ class Order(models.Model):
     payment_escalation_level = models.IntegerField(
         default=0,
         db_index=True,
+    )
+    location_hint = models.CharField(
+        max_length=60,
+        blank=True,
+        verbose_name="Де вас знайти (необов'язково)",
     )
     notes = models.TextField(blank=True)
 

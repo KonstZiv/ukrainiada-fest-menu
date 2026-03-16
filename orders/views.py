@@ -15,7 +15,11 @@ from django.urls import reverse
 from menu.models import Dish
 from orders.cart import add_to_cart, get_cart, remove_from_cart
 from orders.models import Order
-from orders.services import confirm_online_payment_stub, submit_order_from_cart
+from orders.services import (
+    can_access_order,
+    confirm_online_payment_stub,
+    submit_order_from_cart,
+)
 
 
 class _EnrichedItem(TypedDict):
@@ -101,12 +105,16 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
         Order.objects.prefetch_related("items__dish"),
         pk=order_id,
     )
+    if not can_access_order(request, order):
+        return render(request, "403.html", status=403)
     return render(request, "orders/order_detail.html", {"order": order})
 
 
 def order_pay_online(request: HttpRequest, order_id: int) -> HttpResponse:
     """Online payment page (stub — always succeeds)."""
     order = get_object_or_404(Order, pk=order_id)
+    if not can_access_order(request, order):
+        return render(request, "403.html", status=403)
 
     if request.method == "POST":
         try:

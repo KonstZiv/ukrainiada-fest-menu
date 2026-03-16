@@ -81,6 +81,34 @@ class User(AbstractUser):
         verbose_name="Роль",
     )
 
+    display_title = models.CharField(
+        max_length=60,
+        blank=True,
+        verbose_name="Посада для відвідувачів",
+        help_text="Наприклад: Повариха, Бармен, Майстер десертів",
+    )
+
+    public_name = models.CharField(
+        max_length=50,
+        blank=True,
+        verbose_name="Публічне ім'я",
+        help_text="Ім'я без прізвища для відвідувачів",
+    )
+
+    @property
+    def staff_label(self) -> str:
+        """Human-friendly label for visitor-facing displays.
+
+        Examples:
+            'Повариха Валентина'  — display_title + public_name
+            'Виробництво Дмитро'  — role display + first_name (fallback)
+            'Офіціант john'       — role display + email prefix (last fallback)
+
+        """
+        title = self.display_title or self.get_role_display()
+        name = self.public_name or self.first_name or self.email.split("@")[0]
+        return f"{title} {name}"
+
     def save(self, *args: Any, **kwargs: Any) -> None:
         """Save user, generate username from email if needed, process avatar.
 

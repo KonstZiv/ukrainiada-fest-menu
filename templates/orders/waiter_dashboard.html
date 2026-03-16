@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% load order_extras %}
+{% load i18n order_extras %}
 
 {% block title %}Jadran Sun — Мої замовлення{% endblock %}
 
 {% block content %}
 <div class="container-fluid mt-3 px-2 px-md-3">
-  <h2><i class="bi bi-clipboard-check"></i> Мої замовлення</h2>
+  <h2><i class="bi bi-clipboard-check"></i> {% trans "Мої замовлення" %}</h2>
 
   {# --- Desktop: table view (≥ lg) --- #}
   <div class="waiter-order-table table-responsive">
@@ -13,12 +13,12 @@
       <thead class="table-light">
         <tr>
           <th>#</th>
-          <th>Статус</th>
-          <th>Страви</th>
-          <th>Кухня</th>
-          <th>Сума</th>
-          <th>Оплата</th>
-          <th>Дії</th>
+          <th>{% trans "Статус" %}</th>
+          <th>{% trans "Страви" %}</th>
+          <th>{% trans "Кухня" %}</th>
+          <th>{% trans "Сума" %}</th>
+          <th>{% trans "Оплата" %}</th>
+          <th>{% trans "Дії" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -47,7 +47,7 @@
             <td>&euro;{{ order.total_price|floatformat:2 }}</td>
             <td>
               {% if order.payment_status == 'unpaid' %}
-                <span class="badge bg-warning text-dark">Не оплачено</span>
+                <span class="badge bg-warning text-dark">{% trans "Не оплачено" %}</span>
               {% else %}
                 <span class="badge bg-success">{{ order.get_payment_method_display }}</span>
               {% endif %}
@@ -58,7 +58,7 @@
                   <form method="post" action="{% url 'waiter:order_delivered' order.id %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-success">
-                      <i class="bi bi-check-circle"></i> Передав
+                      <i class="bi bi-check-circle"></i> {% trans "Передав" %}
                     </button>
                   </form>
                 {% endif %}
@@ -66,7 +66,7 @@
                   <form method="post" action="{% url 'waiter:confirm_payment' order.id %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-warning">
-                      <i class="bi bi-cash-coin"></i> Готівка
+                      <i class="bi bi-cash-coin"></i> {% trans "Готівка" %}
                     </button>
                   </form>
                 {% endif %}
@@ -74,7 +74,7 @@
             </td>
           </tr>
         {% empty %}
-          <tr><td colspan="7" class="text-center text-muted py-4">Немає активних замовлень</td></tr>
+          <tr><td colspan="7" class="text-center text-muted py-4">{% trans "Немає активних замовлень" %}</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -93,6 +93,9 @@
           </div>
           <span>&euro;{{ order.total_price|floatformat:2 }}</span>
         </div>
+        {% if order.location_hint %}
+          <div class="px-3 pt-1"><small class="text-muted"><i class="bi bi-geo-alt"></i> {{ order.location_hint }}</small></div>
+        {% endif %}
         <div class="card-body p-2">
           {% for item in order.items.all %}
             <div class="d-flex justify-content-between align-items-center py-1 {% if not forloop.last %}border-bottom{% endif %}">
@@ -113,7 +116,7 @@
             <form method="post" action="{% url 'waiter:order_delivered' order.id %}">
               {% csrf_token %}
               <button type="submit" class="btn btn-success btn-action">
-                <i class="bi bi-check-circle"></i> Передав відвідувачу
+                <i class="bi bi-check-circle"></i> {% trans "Передав відвідувачу" %}
               </button>
             </form>
           {% endif %}
@@ -121,32 +124,32 @@
             <form method="post" action="{% url 'waiter:confirm_payment' order.id %}">
               {% csrf_token %}
               <button type="submit" class="btn btn-warning btn-action">
-                <i class="bi bi-cash-coin"></i> Прийняв готівку
+                <i class="bi bi-cash-coin"></i> {% trans "Прийняв готівку" %}
               </button>
             </form>
           {% else %}
             <span class="badge bg-success align-self-center">
-              <i class="bi bi-check"></i> Оплачено ({{ order.get_payment_method_display }})
+              <i class="bi bi-check"></i> {% blocktrans with method=order.get_payment_method_display %}Оплачено ({{ method }}){% endblocktrans %}
             </span>
           {% endif %}
         </div>
       </div>
     {% empty %}
       <div class="alert alert-info">
-        <i class="bi bi-info-circle"></i> Немає активних замовлень.
+        <i class="bi bi-info-circle"></i> {% trans "Немає активних замовлень." %}
       </div>
     {% endfor %}
   </div>
 
   {% if unpaid_delivered %}
-    <h3 class="mt-4"><i class="bi bi-exclamation-triangle text-warning"></i> Передано, але не оплачено</h3>
+    <h3 class="mt-4"><i class="bi bi-exclamation-triangle text-warning"></i> {% trans "Передано, але не оплачено" %}</h3>
     {% for order in unpaid_delivered %}
       <div class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <span>Замовлення <strong>#{{ order.id }}</strong> передано, але НЕ ОПЛАЧЕНО!</span>
+        <span>{% blocktrans with order_id=order.id %}Замовлення <strong>#{{ order_id }}</strong> передано, але НЕ ОПЛАЧЕНО!{% endblocktrans %}</span>
         <form method="post" action="{% url 'waiter:confirm_payment' order.id %}">
           {% csrf_token %}
           <button type="submit" class="btn btn-warning btn-action">
-            <i class="bi bi-cash-coin"></i> Прийняв готівку
+            <i class="bi bi-cash-coin"></i> {% trans "Прийняв готівку" %}
           </button>
         </form>
       </div>

@@ -22,6 +22,8 @@
 {#   https://docs.djangoproject.com/en/stable/ref/templates/builtins/#include  #}
 {# --------------------------------------------------------------------------- #}
 
+{% load i18n menu_extras %}
+
 {# --- Sticky Header --- #}
 {# position: sticky — елемент "прилипає" до верху вікна при скролі.            #}
 {# Стилі .sticky-header визначені в brand.css.                                 #}
@@ -53,7 +55,7 @@
       {# Документація:                                                           #}
       {#   https://getbootstrap.com/docs/5.3/components/dropdowns/               #}
       <span id="connection-indicator" class="badge bg-secondary me-2" style="font-size: 0.65rem;"></span>
-      <button onclick="location.reload()" class="btn btn-sm btn-outline-secondary me-2 p-0 px-1" style="font-size: 0.7rem;" title="Оновити">
+      <button onclick="location.reload()" class="btn btn-sm btn-outline-secondary me-2 p-0 px-1" style="font-size: 0.7rem;" title="{% trans "Оновити" %}">
         <i class="bi bi-arrow-clockwise"></i>
       </button>
       <div class="dropdown me-2">
@@ -62,29 +64,28 @@
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
                 style="font-size: 0.8rem; letter-spacing: 0.05em;">
-          АДМІНІСТРУВАННЯ
+          {% trans "АДМІНІСТРУВАННЯ" %}
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
-          <li><h6 class="dropdown-header">Створити</h6></li>
+          <li><h6 class="dropdown-header">{% trans "Створити" %}</h6></li>
           <li>
             <a class="dropdown-item" href="{% url 'menu:category_create' %}">
-              <i class="bi bi-plus-circle me-1"></i> Нова категорія
+              <i class="bi bi-plus-circle me-1"></i> {% trans "Нова категорія" %}
             </a>
           </li>
           <li>
             <a class="dropdown-item" href="{% url 'menu:tag_create' %}">
-              <i class="bi bi-plus-circle me-1"></i> Новий тег
+              <i class="bi bi-plus-circle me-1"></i> {% trans "Новий тег" %}
             </a>
           </li>
           <li>
             <a class="dropdown-item" href="{% url 'menu:dish_create' %}">
-              <i class="bi bi-plus-circle me-1"></i> Нова страва
+              <i class="bi bi-plus-circle me-1"></i> {% trans "Нова страва" %}
             </a>
           </li>
         </ul>
       </div>
 
-      {% load i18n menu_extras %}
       <form action="{% url 'set_language' %}" method="post" class="d-inline">
         {% csrf_token %}
         <input name="next" type="hidden" value="{{ request.path }}">
@@ -128,12 +129,12 @@
       {% else %}
         <a href="{% url 'login' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
            style="font-size: 0.8rem; letter-spacing: 0.05em;">
-          УВІЙТИ
+          {% trans "УВІЙТИ" %}
         </a>
         <div class="vr-custom"></div>
         <a href="{% url 'user:sign_up' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
            style="font-size: 0.8rem; letter-spacing: 0.05em;">
-          ЗАРЕЄСТРУВАТИСЬ
+          {% trans "ЗАРЕЄСТРУВАТИСЬ" %}
         </a>
       {% endif %}
     </div>
@@ -148,8 +149,9 @@
   {#   https://getbootstrap.com/docs/5.3/forms/input-group/                      #}
   <form method="get" action="{% url 'menu:dish_search' %}" class="mt-2">
     <div class="input-group input-group-sm">
+      {% trans "Пошук страв..." as search_placeholder %}
       <input type="text" name="q" class="form-control"
-             placeholder="Пошук страв..."
+             placeholder="{{ search_placeholder }}"
              value="{{ request.GET.q|default:'' }}"
              aria-label="Пошук">
       <button class="btn btn-outline-secondary" type="submit">

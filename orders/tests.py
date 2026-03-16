@@ -488,7 +488,7 @@ def test_online_payment_stub_marks_paid() -> None:
 @pytest.mark.django_db
 def test_online_payment_page_get(client: Client) -> None:
     order = Order.objects.create(status=Order.Status.DRAFT)
-    response = client.get(f"/order/{order.id}/pay/")
+    response = client.get(f"/order/{order.id}/pay/?token={order.access_token}")
     assert response.status_code == 200
     assert "Демо-режим" in response.content.decode()
 
@@ -496,7 +496,7 @@ def test_online_payment_page_get(client: Client) -> None:
 @pytest.mark.django_db
 def test_online_payment_page_post(client: Client) -> None:
     order = Order.objects.create(status=Order.Status.APPROVED)
-    response = client.post(f"/order/{order.id}/pay/")
+    response = client.post(f"/order/{order.id}/pay/?token={order.access_token}")
     assert response.status_code == 302
     order.refresh_from_db()
     assert order.payment_status == Order.PaymentStatus.PAID
