@@ -19,6 +19,32 @@ from orders.cart import clear_cart, get_cart
 from orders.models import Order, OrderItem
 
 
+def can_access_order(request: HttpRequest, order: Order) -> bool:
+    """Check if the current user/session has access to this order.
+
+    Access granted if:
+    1. User is staff (waiter/kitchen/manager), OR
+    2. Authenticated visitor is the order owner, OR
+    3. Session contains matching access_token, OR
+    4. GET parameter 'token' matches order.access_token.
+    """
+    if request.user.is_authenticated and request.user.role != "visitor":
+        return True
+
+    if request.user.is_authenticated and order.visitor_id == request.user.id:
+        return True
+
+    session_orders: dict[str, str] = request.session.get("my_orders", {})
+    if session_orders.get(str(order.id)) == str(order.access_token):
+        return True
+
+    url_token = request.GET.get("token", "")
+    if url_token and str(order.access_token) == url_token:
+        return True
+
+    return False
+
+
 def submit_order_from_cart(request: HttpRequest) -> Order | None:
     """Create a DRAFT Order from session cart contents.
 
@@ -56,6 +82,12 @@ def submit_order_from_cart(request: HttpRequest) -> Order | None:
                 for item in valid_items
             ]
         )
+
+    # Store access token in session for anonymous order tracking
+    if "my_orders" not in request.session:
+        request.session["my_orders"] = {}
+    request.session["my_orders"][str(order.id)] = str(order.access_token)
+    request.session.modified = True
 
     clear_cart(request)
     return order
