@@ -215,6 +215,9 @@ def create_escalation_view(request: HttpRequest, order_id: int) -> HttpResponse:
     if request.method == "POST":
         reason = request.POST.get("reason", "")
         message = request.POST.get("message", "")
+        if reason not in VisitorEscalation.Reason.values:
+            messages.warning(request, "Будь ласка, оберіть дійсну причину звернення.")
+            return redirect("orders:order_detail", order_id=order_id)
         try:
             create_escalation(order, reason=reason, message=message)
             messages.success(request, "Ваше звернення надіслано!")

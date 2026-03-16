@@ -103,35 +103,25 @@ def escalate_visitor_issues() -> dict[str, int]:
         level=VisitorEscalation.Level.SENIOR,
     )
 
-    # SSE pushes
-    for esc_id in manager_ids:
-        esc = VisitorEscalation.objects.select_related("order").get(id=esc_id)
-        push_staff_escalation(
-            waiter_id=esc.order.waiter_id,
-            escalation_id=esc.pk,
-            order_id=esc.order_id,
-            reason=esc.reason,
-            level=3,
-        )
-        push_visitor_event(
-            order_id=esc.order_id,
-            event_type="escalation_level_up",
-            data={"level": 3},
-        )
-
-    for esc_id in senior_ids:
-        esc = VisitorEscalation.objects.select_related("order").get(id=esc_id)
-        push_staff_escalation(
-            waiter_id=esc.order.waiter_id,
-            escalation_id=esc.pk,
-            order_id=esc.order_id,
-            reason=esc.reason,
-            level=2,
-        )
-        push_visitor_event(
-            order_id=esc.order_id,
-            event_type="escalation_level_up",
-            data={"level": 2},
-        )
+    # SSE pushes — single query for all escalations to notify
+    all_ids = manager_ids + senior_ids
+    if all_ids:
+        manager_id_set = set(manager_ids)
+        for esc in VisitorEscalation.objects.select_related("order").filter(
+            id__in=all_ids
+        ):
+            level = 3 if esc.id in manager_id_set else 2
+            push_staff_escalation(
+                waiter_id=esc.order.waiter_id,
+                escalation_id=esc.pk,
+                order_id=esc.order_id,
+                reason=esc.reason,
+                level=level,
+            )
+            push_visitor_event(
+                order_id=esc.order_id,
+                event_type="escalation_level_up",
+                data={"level": level},
+            )
 
     return {"to_senior": senior_count, "to_manager": manager_count}

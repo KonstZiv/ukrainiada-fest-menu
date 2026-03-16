@@ -30,11 +30,34 @@
               <button class="btn btn-sm btn-outline-primary btn-action">{% trans "Побачив" %}</button>
             </form>
             {% endif %}
-            <form method="post" action="{% url 'waiter:escalation_resolve' esc.pk %}">
-              {% csrf_token %}
-              <button class="btn btn-sm btn-success btn-action">{% trans "Вирішено" %}</button>
-            </form>
+            <button class="btn btn-sm btn-success btn-action"
+                    data-bs-toggle="modal" data-bs-target="#resolveModal-{{ esc.pk }}">
+              {% trans "Вирішено" %}
+            </button>
           </div>
+        </div>
+      </div>
+    </div>
+    {# Resolve modal with note field #}
+    <div class="modal fade" id="resolveModal-{{ esc.pk }}" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">{% blocktrans with esc_id=esc.pk %}Вирішити звернення #{{ esc_id }}{% endblocktrans %}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <form method="post" action="{% url 'waiter:escalation_resolve' esc.pk %}">
+            {% csrf_token %}
+            <div class="modal-body">
+              {% trans "Нотатка (необов'язково)" as note_label %}
+              <textarea name="note" class="form-control" rows="2" maxlength="300"
+                        placeholder="{{ note_label }}"></textarea>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Скасувати" %}</button>
+              <button type="submit" class="btn btn-success">{% trans "Вирішити" %}</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
