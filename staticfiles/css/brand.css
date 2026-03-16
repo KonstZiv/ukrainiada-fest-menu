@@ -265,11 +265,6 @@ body {
   .list-group-item {
     padding: 12px 16px;
   }
-
-  /* Більші gap між кнопками — higher specificity to override Bootstrap gap-* */
-  .d-flex.gap-touch {
-    gap: 10px;
-  }
 }
 
 /* Desktop (≥ lg): компактніше */

@@ -108,7 +108,7 @@
             </div>
           {% endfor %}
         </div>
-        <div class="card-footer d-flex gap-2 gap-touch flex-wrap">
+        <div class="card-footer d-flex gap-2 flex-wrap">
           {% if order.status == 'ready' %}
             <form method="post" action="{% url 'waiter:order_delivered' order.id %}">
               {% csrf_token %}

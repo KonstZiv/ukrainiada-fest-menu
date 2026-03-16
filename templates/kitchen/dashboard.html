@@ -108,7 +108,7 @@
                   <small class="text-muted">{{ ticket.done_at|time:"H:i" }}</small>
                   <small class="text-muted detail-md ms-1">{{ ticket.order_item.order.waiter.get_full_name|default:ticket.order_item.order.waiter.email }}</small>
                 </div>
-                <div class="d-flex gap-1 gap-touch">
+                <div class="d-flex gap-2">
                   <a href="{% url 'kitchen:handoff_qr' ticket.id %}"
                      class="btn btn-outline-primary btn-kitchen-action">
                     <i class="bi bi-qr-code"></i> <span class="d-none d-md-inline">QR</span>
