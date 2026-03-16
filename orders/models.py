@@ -61,6 +61,11 @@ class Order(models.Model):
         default=0,
         db_index=True,
     )
+    location_hint = models.CharField(
+        max_length=60,
+        blank=True,
+        verbose_name="Де вас знайти (необов'язково)",
+    )
     notes = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

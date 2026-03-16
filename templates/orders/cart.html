@@ -27,9 +27,13 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h5 class="mb-0">Разом: <strong>&euro;{{ total|floatformat:2 }}</strong></h5>
-      <form method="post" action="{% url 'orders:order_submit' %}">
+      <form method="post" action="{% url 'orders:order_submit' %}" class="form-needs-network">
         {% csrf_token %}
-        <button type="submit" class="btn btn-success">
+        <div class="mb-2">
+          <input type="text" class="form-control form-control-sm" name="location_hint"
+                 maxlength="60" placeholder="Де вас знайти? (необов'язково)">
+        </div>
+        <button type="submit" class="btn btn-success btn-action">
           <i class="bi bi-check-circle"></i> Оформити замовлення
         </button>
       </form>

@@ -39,9 +39,12 @@ def submit_order_from_cart(request: HttpRequest) -> Order | None:
     if not valid_items:
         return None
 
+    location_hint = request.POST.get("location_hint", "").strip()[:60]
+
     with transaction.atomic():
         order = Order.objects.create(
             visitor=request.user if request.user.is_authenticated else None,
+            location_hint=location_hint,
         )
         OrderItem.objects.bulk_create(
             [

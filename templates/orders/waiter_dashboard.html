@@ -93,6 +93,9 @@
           </div>
           <span>&euro;{{ order.total_price|floatformat:2 }}</span>
         </div>
+        {% if order.location_hint %}
+          <div class="px-3 pt-1"><small class="text-muted"><i class="bi bi-geo-alt"></i> {{ order.location_hint }}</small></div>
+        {% endif %}
         <div class="card-body p-2">
           {% for item in order.items.all %}
             <div class="d-flex justify-content-between align-items-center py-1 {% if not forloop.last %}border-bottom{% endif %}">
