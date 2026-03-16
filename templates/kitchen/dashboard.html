@@ -91,8 +91,15 @@
           <div>
             <strong>{{ ticket.order_item.dish.title }}</strong>
             <span class="text-muted ms-1">x{{ ticket.order_item.quantity }}</span>
+            <small class="text-muted ms-2">{{ ticket.order_item.order.waiter.get_full_name|default:ticket.order_item.order.waiter.email }}</small>
           </div>
-          <small class="text-muted">{{ ticket.done_at|time:"H:i" }}</small>
+          <div class="d-flex align-items-center gap-2">
+            <small class="text-muted">{{ ticket.done_at|time:"H:i" }}</small>
+            <a href="{% url 'kitchen:handoff_qr' ticket.id %}"
+               class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-qr-code"></i> QR
+            </a>
+          </div>
         </li>
       {% empty %}
         <li class="list-group-item text-muted">Ще нічого не приготовлено</li>

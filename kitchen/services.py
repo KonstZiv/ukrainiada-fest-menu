@@ -8,7 +8,7 @@ from django.db import transaction
 from django.db.models import QuerySet
 from django.utils import timezone
 
-from kitchen.models import KitchenAssignment, KitchenTicket
+from kitchen.models import KitchenAssignment, KitchenHandoff, KitchenTicket
 from notifications.events import push_order_ready, push_ticket_done, push_ticket_taken
 from orders.models import Order
 
@@ -116,6 +116,30 @@ def mark_ticket_done(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket
         push_order_ready(order_id=ticket.order_item.order_id, waiter_id=waiter_id)
 
     return ticket
+
+
+def create_handoff(ticket: KitchenTicket, target_waiter: User) -> KitchenHandoff:
+    """Create a one-time handoff token for dish transfer to waiter.
+
+    Removes any existing unconfirmed handoff for this ticket before
+    creating a new one (e.g. expired QR regeneration).
+
+    Raises:
+        ValueError: if ticket is not in DONE status or already has
+            a confirmed handoff.
+
+    """
+    if ticket.status != KitchenTicket.Status.DONE:
+        msg = f"Cannot handoff ticket in status '{ticket.status}'"
+        raise ValueError(msg)
+
+    # Remove old unconfirmed handoff if any
+    KitchenHandoff.objects.filter(ticket=ticket, is_confirmed=False).delete()
+
+    return KitchenHandoff.objects.create(
+        ticket=ticket,
+        target_waiter=target_waiter,
+    )
 
 
 def _check_order_ready(ticket: KitchenTicket) -> bool:

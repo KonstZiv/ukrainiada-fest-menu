@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import uuid
+
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 
 class KitchenAssignment(models.Model):
@@ -91,3 +94,50 @@ class KitchenTicket(models.Model):
 
     def __str__(self) -> str:
         return f"Ticket #{self.pk}: {self.order_item} [{self.status}]"
+
+
+class KitchenHandoff(models.Model):
+    """One-time token for confirming dish handoff from kitchen to waiter.
+
+    Lifecycle:
+        created   — cook pressed "Hand off to waiter"
+        confirmed — waiter scanned QR and confirmed
+        expired   — TTL elapsed without confirmation (checked in view)
+    """
+
+    ticket = models.OneToOneField(
+        "KitchenTicket",
+        on_delete=models.CASCADE,
+        related_name="handoff",
+    )
+    token = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        db_index=True,
+        editable=False,
+    )
+    target_waiter = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="pending_handoffs",
+        limit_choices_to={"role__in": ["waiter", "senior_waiter"]},
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+    is_confirmed = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Передача страви"
+        verbose_name_plural = "Передачі страв"
+
+    def __str__(self) -> str:
+        return f"Handoff {self.token} [{self.ticket}]"
+
+    @property
+    def is_expired(self) -> bool:
+        """Check if the handoff token has exceeded its TTL."""
+        ttl: int = getattr(settings, "HANDOFF_TOKEN_TTL", 120)
+        return (
+            not self.is_confirmed
+            and (timezone.now() - self.created_at).total_seconds() > ttl
+        )
