@@ -127,5 +127,5 @@ def resolve_escalation(
     push_visitor_event(
         order_id=escalation.order_id,
         event_type="escalation_resolved",
-        data={"note": note[:100] if note else "Ваше питання вирішено"},
+        data={"note": note[:300] if note else "Ваше питання вирішено"},
     )
