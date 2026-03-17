@@ -10,6 +10,7 @@ from django.contrib import messages
 from django.db import models, transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
@@ -289,7 +290,7 @@ def order_mark_delivered(
     except ValueError as e:
         messages.error(request, str(e))
 
-    return redirect("waiter:order_list")
+    return redirect(f"{reverse('waiter:order_list')}?tab=my")
 
 
 @role_required(*WAITER_ROLES)
@@ -307,7 +308,7 @@ def order_confirm_payment(
     except ValueError as e:
         messages.error(request, str(e))
 
-    return redirect("waiter:order_list")
+    return redirect(f"{reverse('waiter:order_list')}?tab=my")
 
 
 @role_required(*WAITER_ROLES)
