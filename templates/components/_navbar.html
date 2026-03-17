@@ -121,6 +121,25 @@
       {# Документація:                                                            #}
       {#   https://docs.djangoproject.com/en/stable/topics/auth/default/#authentication-in-web-requests #}
       {% if user.is_authenticated %}
+        {% if user.role == 'waiter' or user.role == 'senior_waiter' %}
+          <a href="{% url 'waiter:order_list' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
+             style="font-size: 0.8rem; letter-spacing: 0.05em;">
+            {% trans "ЗАМОВЛЕННЯ" %}
+          </a>
+          <div class="vr-custom"></div>
+        {% elif user.role == 'kitchen' %}
+          <a href="{% url 'kitchen:dashboard' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
+             style="font-size: 0.8rem; letter-spacing: 0.05em;">
+            {% trans "КУХНЯ" %}
+          </a>
+          <div class="vr-custom"></div>
+        {% elif user.role == 'manager' %}
+          <a href="{% url 'waiter:order_list' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
+             style="font-size: 0.8rem; letter-spacing: 0.05em;">
+            {% trans "ЗАМОВЛЕННЯ" %}
+          </a>
+          <div class="vr-custom"></div>
+        {% endif %}
         <a href="{% url 'user:profile' %}" class="d-flex align-items-center gap-1 btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
            style="font-size: 0.8rem; letter-spacing: 0.05em;">
           {% if user.avatar %}

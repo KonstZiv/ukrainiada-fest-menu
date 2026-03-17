@@ -225,56 +225,8 @@ def order_approve(request: AuthenticatedHttpRequest, order_id: int) -> HttpRespo
 
 @role_required(*WAITER_ROLES)
 def waiter_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
-    """Waiter dashboard — own active orders with kitchen ticket status."""
-    active_statuses = [
-        Order.Status.ACCEPTED,
-        Order.Status.VERIFIED,
-        Order.Status.IN_PROGRESS,
-        Order.Status.READY,
-    ]
-    orders = (
-        Order.objects.filter(waiter=request.user, status__in=active_statuses)
-        .select_related("visitor")
-        .prefetch_related(
-            "items__dish",
-            "items__kitchen_ticket",
-            "items__kitchen_ticket__assigned_to",
-        )
-        .annotate(
-            total_annotated=models.Sum(
-                models.F("items__dish__price") * models.F("items__quantity"),
-                output_field=models.DecimalField(),
-            )
-        )
-        .order_by("created_at")
-    )
-    my_escalations = (
-        VisitorEscalation.objects.filter(
-            order__waiter=request.user,
-            status__in=["open", "acknowledged"],
-        )
-        .select_related("order")
-        .order_by("created_at")
-    )
-
-    # Delivered but unpaid — show payment reminder
-    unpaid_delivered = Order.objects.filter(
-        waiter=request.user,
-        status=Order.Status.DELIVERED,
-        payment_status=Order.PaymentStatus.UNPAID,
-    ).order_by("delivered_at")
-
-    dish_stats = get_dish_queue_stats()
-    return render(
-        request,
-        "orders/waiter_dashboard.html",
-        {
-            "orders": orders,
-            "unpaid_delivered": unpaid_delivered,
-            "dish_stats": dish_stats,
-            "my_escalations": my_escalations,
-        },
-    )
+    """Legacy dashboard — redirect to new order board."""
+    return redirect(f"{reverse('waiter:order_list')}?tab=my")
 
 
 @role_required(*WAITER_ROLES)
