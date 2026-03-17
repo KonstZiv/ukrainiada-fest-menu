@@ -12,11 +12,11 @@ from menu.models import Dish
 class Order(models.Model):
     class Status(models.TextChoices):
         DRAFT = "draft", "Чернетка"
-        SUBMITTED = "submitted", "Передано офіціанту"
-        APPROVED = "approved", "Підтверджено"
+        SUBMITTED = "submitted", "Створено"
+        APPROVED = "approved", "Верифіковано"
         IN_PROGRESS = "in_progress", "Готується"
-        READY = "ready", "Готово — очікує офіціанта"
-        DELIVERED = "delivered", "Видано відвідувачу"
+        READY = "ready", "Готово"
+        DELIVERED = "delivered", "Доставлено"
 
     class PaymentStatus(models.TextChoices):
         UNPAID = "unpaid", "Не оплачено"

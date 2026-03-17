@@ -151,12 +151,8 @@
 
   </div>
 
-  {# --- Рядок пошуку (таска 3.1) --- #}
-  {# GET-форма: ?q=... передається як URL-параметр.                              #}
-  {# Це дозволяє ділитися посиланням та оновлювати сторінку без POST.            #}
-  {# input-group — Bootstrap компонент для поля з кнопкою.                       #}
-  {# Документація:                                                               #}
-  {#   https://getbootstrap.com/docs/5.3/forms/input-group/                      #}
+  {# --- Рядок пошуку — тільки на сторінках меню --- #}
+  {% if show_search|default_if_none:True %}
   <form method="get" action="{% url 'menu:dish_search' %}" class="mt-2">
     <div class="input-group input-group-sm">
       {% trans "Пошук страв..." as search_placeholder %}
@@ -169,5 +165,6 @@
       </button>
     </div>
   </form>
+  {% endif %}
 
 </div>

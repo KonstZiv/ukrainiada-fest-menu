@@ -3,6 +3,8 @@
 
 {% block title %}Jadran Sun — {% trans "Історія замовлень" %}{% endblock %}
 
+{% block header %}{% include "components/_navbar.html" with show_search=False %}{% endblock %}
+
 {% block content %}
 <div class="container mt-3">
   {% include "components/_back_button.html" %}
