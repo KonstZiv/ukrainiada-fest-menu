@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from decimal import Decimal
 
 from django.conf import settings
 from django.contrib import messages
@@ -115,11 +116,26 @@ def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
             }
         )
     # Unpaid delivered
-    unpaid_delivered = Order.objects.filter(
+    unpaid_delivered = (
+        Order.objects.filter(
+            waiter=request.user,
+            status=Order.Status.DELIVERED,
+            payment_status=Order.PaymentStatus.UNPAID,
+        )
+        .prefetch_related("items__dish")
+        .order_by("delivered_at")
+    )
+
+    # Cash on hand — sum of cash-paid orders for this waiter today
+    cash_orders = Order.objects.filter(
         waiter=request.user,
-        status=Order.Status.DELIVERED,
-        payment_status=Order.PaymentStatus.UNPAID,
-    ).order_by("delivered_at")
+        payment_status=Order.PaymentStatus.PAID,
+        payment_method=Order.PaymentMethod.CASH,
+    ).prefetch_related("items__dish")
+    cash_total = sum(
+        (o.total_price for o in cash_orders),
+        Decimal("0"),
+    )
 
     dish_stats = get_dish_queue_stats()
     tab = request.GET.get("tab", "new")
@@ -150,6 +166,8 @@ def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
             "new_count": len(new_orders_with_wait),
             "my_count": len(my_orders_enriched),
             "my_ready_count": my_ready_count,
+            "cash_total": cash_total,
+            "cash_orders": cash_orders,
             "dish_stats": dish_stats,
             "active_tab": tab,
         },
@@ -271,7 +289,7 @@ def order_mark_delivered(
     except ValueError as e:
         messages.error(request, str(e))
 
-    return redirect("waiter:dashboard")
+    return redirect("waiter:order_list")
 
 
 @role_required(*WAITER_ROLES)
@@ -289,7 +307,7 @@ def order_confirm_payment(
     except ValueError as e:
         messages.error(request, str(e))
 
-    return redirect("waiter:dashboard")
+    return redirect("waiter:order_list")
 
 
 @role_required(*WAITER_ROLES)
@@ -335,7 +353,7 @@ def handoff_confirm_view(
                 "waiter_label": request.user.staff_label,
             },
         )
-        return redirect("waiter:dashboard")
+        return redirect("waiter:order_list")
 
     ttl_remaining = max(
         0,
@@ -361,7 +379,7 @@ def escalation_acknowledge(
         messages.success(request, "Звернення позначено як побачене.")
     except ValueError as e:
         messages.error(request, str(e))
-    return redirect("waiter:dashboard")
+    return redirect("waiter:order_list")
 
 
 @role_required(*WAITER_ROLES)
@@ -377,7 +395,7 @@ def escalation_resolve(
         messages.success(request, "Звернення вирішено.")
     except ValueError as e:
         messages.error(request, str(e))
-    return redirect("waiter:dashboard")
+    return redirect("waiter:order_list")
 
 
 SENIOR_ROLES = ("senior_waiter", "manager")

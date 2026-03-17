@@ -82,12 +82,14 @@
         <i class="bi bi-check2-all"></i> {% trans "Доставлено клієнту" %}
       </button>
     </form>
+  {% endif %}
 
-  {% elif order.status == 'delivered' and order.payment_status == 'unpaid' and order.waiter == request.user %}
-    <form method="post" action="{% url 'waiter:confirm_payment' order.id %}">
+  {# --- Payment button — available any time after verification --- #}
+  {% if order.payment_status == 'unpaid' and order.status != 'submitted' and order.status != 'accepted' and order.waiter == request.user %}
+    <form method="post" action="{% url 'waiter:confirm_payment' order.id %}" class="mt-2">
       {% csrf_token %}
-      <button type="submit" class="btn btn-warning btn-lg w-100">
-        <i class="bi bi-cash"></i> {% trans "Підтвердити оплату (готівка)" %}
+      <button type="submit" class="btn btn-outline-warning btn-lg w-100">
+        <i class="bi bi-cash"></i> {% trans "Оплату прийнято (готівка)" %}
       </button>
     </form>
   {% endif %}
