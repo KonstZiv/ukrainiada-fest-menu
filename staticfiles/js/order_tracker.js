@@ -10,7 +10,8 @@
     const STATUS_TO_STEP = {
         "draft": -1,
         "submitted": 0,
-        "approved": 2,
+        "accepted": 1,
+        "verified": 2,
         "in_progress": 3,
         "ready": 4,
         "delivered": 5,

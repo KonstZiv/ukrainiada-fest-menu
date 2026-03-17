@@ -31,7 +31,7 @@ def test_create_feedback_success() -> None:
 
 @pytest.mark.django_db
 def test_cannot_feedback_non_delivered() -> None:
-    order = Order.objects.create(status=Order.Status.APPROVED)
+    order = Order.objects.create(status=Order.Status.VERIFIED)
     with pytest.raises(ValueError, match="після отримання"):
         create_feedback(order, mood="good")
 

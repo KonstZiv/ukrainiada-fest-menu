@@ -200,3 +200,9 @@ ESCALATION_AUTO_LEVEL: int = config(
     "ESCALATION_AUTO_LEVEL", default=3, cast=int
 )  # minutes
 ESCALATION_MIN_WAIT: int = config("ESCALATION_MIN_WAIT", default=5, cast=int)  # minutes
+DISH_PICKUP_WARN: int = config(
+    "DISH_PICKUP_WARN", default=3, cast=int
+)  # minutes — dish ready, warn waiter
+DISH_PICKUP_CRITICAL: int = config(
+    "DISH_PICKUP_CRITICAL", default=6, cast=int
+)  # minutes — dish ready, escalate to senior

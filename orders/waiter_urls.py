@@ -8,6 +8,16 @@ urlpatterns = [
     path("orders/", waiter_views.waiter_order_list, name="order_list"),
     path("order/<int:order_id>/scan/", waiter_views.order_scan, name="order_scan"),
     path(
+        "order/<int:order_id>/accept/",
+        waiter_views.order_accept,
+        name="order_accept",
+    ),
+    path(
+        "order/<int:order_id>/verify/",
+        waiter_views.order_verify,
+        name="order_verify",
+    ),
+    path(
         "order/<int:order_id>/approve/",
         waiter_views.order_approve,
         name="order_approve",

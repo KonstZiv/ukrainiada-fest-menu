@@ -1,33 +1,323 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Jadran Sun — Замовлення (офіціант){% endblock %}
+{% block title %}Jadran Sun — {% trans "Замовлення (офіціант)" %}{% endblock %}
+
+{% block header %}{% include "components/_navbar.html" with show_search=False %}{% endblock %}
 
 {% block content %}
 <div class="container mt-3">
-  <h2><i class="bi bi-list-check"></i> Активні замовлення</h2>
 
-  {% if orders %}
-    <div class="list-group">
-      {% for order in orders %}
-        <a href="{% url 'waiter:order_scan' order.id %}"
-           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-          <div>
-            <strong>#{{ order.id }}</strong>
-            <span class="badge bg-{% if order.status == 'submitted' %}warning text-dark{% elif order.status == 'approved' %}primary{% elif order.status == 'ready' %}success{% else %}secondary{% endif %} ms-2">
-              {{ order.get_status_display }}
-            </span>
+  {# --- Tabs: Нові / Мої --- #}
+  <ul class="nav nav-pills mb-3" role="tablist">
+    <li class="nav-item" role="presentation">
+      <a class="nav-link {% if active_tab == 'new' %}active{% endif %}"
+         href="?tab=new" role="tab">
+        {% trans "Нові" %}
+        {% if new_count %}
+          <span class="badge bg-danger ms-1">{{ new_count }}</span>
+        {% endif %}
+      </a>
+    </li>
+    <li class="nav-item" role="presentation">
+      <a class="nav-link {% if active_tab == 'my' %}active{% endif %}"
+         href="?tab=my" role="tab">
+        {% trans "Мої" %}
+        {% if my_count %}
+          <span class="badge bg-primary ms-1">{{ my_count }}</span>
+        {% endif %}
+        {% if my_ready_count %}
+          <span class="badge bg-success ms-1" title="{% trans 'Готові до доставки' %}">{{ my_ready_count }} ✅</span>
+        {% endif %}
+      </a>
+    </li>
+  </ul>
+
+  {# --- Tab: Нові замовлення --- #}
+  {% if active_tab == "new" %}
+    {% if new_orders_with_wait %}
+      <div class="list-group">
+        {% for entry in new_orders_with_wait %}
+          <div class="list-group-item d-flex justify-content-between align-items-center
+                      {% if entry.urgency == 'critical' %}list-group-item-danger{% elif entry.urgency == 'overdue' %}list-group-item-warning{% endif %}">
+            <div class="flex-grow-1" style="cursor: pointer;"
+                 data-bs-toggle="modal" data-bs-target="#newOrderModal{{ entry.order.id }}">
+              <strong>#{{ entry.order.id }}</strong>
+              {% if entry.urgency == 'critical' %}
+                <span class="badge bg-danger ms-2">{% trans "Терміново!" %}</span>
+              {% elif entry.urgency == 'overdue' %}
+                <span class="badge bg-warning text-dark ms-2">{% trans "Прострочено" %}</span>
+              {% endif %}
+              {% if entry.order.location_hint %}
+                <small class="text-muted ms-2"><i class="bi bi-geo-alt"></i> {{ entry.order.location_hint }}</small>
+              {% endif %}
+              <div class="text-muted small">
+                {{ entry.order.items.count }} {% trans "позицій" %} &middot; &euro;{{ entry.order.total_price|floatformat:2 }}
+                &middot; {{ entry.order.created_at|date:"H:i" }}
+                &middot; {{ entry.wait_min }} {% trans "хв" %}
+              </div>
+            </div>
+            <form method="post" action="{% url 'waiter:order_accept' entry.order.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn {% if entry.urgency == 'critical' %}btn-danger{% else %}btn-primary{% endif %} btn-sm">
+                <i class="bi bi-hand-index"></i> {% trans "Взяти" %}
+              </button>
+            </form>
           </div>
-          <div>
-            <span class="text-muted">{{ order.items.count }} позицій</span>
-            <span class="ms-2">&euro;{{ order.total_price|floatformat:2 }}</span>
+        {% endfor %}
+      </div>
+
+      {# --- Modals for new orders --- #}
+      {% for entry in new_orders_with_wait %}
+      <div class="modal fade" id="newOrderModal{{ entry.order.id }}" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">
+                {% trans "Замовлення" %} #{{ entry.order.id }}
+                {% if entry.urgency == 'critical' %}
+                  <span class="badge bg-danger">{% trans "Терміново!" %}</span>
+                {% elif entry.urgency == 'overdue' %}
+                  <span class="badge bg-warning text-dark">{% trans "Прострочено" %}</span>
+                {% endif %}
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">{{ entry.order.created_at|date:"d.m.Y H:i" }} ({{ entry.wait_min }} {% trans "хв тому" %})</span>
+                {% if entry.order.location_hint %}
+                  <span><i class="bi bi-geo-alt"></i> {{ entry.order.location_hint }}</span>
+                {% endif %}
+              </div>
+              {% if entry.order.visitor %}
+                <p class="mb-2 small text-muted">{% trans "Відвідувач:" %} {{ entry.order.visitor.get_full_name|default:entry.order.visitor.email }}</p>
+              {% endif %}
+              <div class="list-group mb-3">
+                {% for item in entry.order.items.all %}
+                  <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+                    <div>
+                      <strong>{{ item.dish.title }}</strong>
+                      <span class="text-muted ms-1">x{{ item.quantity }}</span>
+                      <div class="text-muted small" style="font-size: 0.8rem;">
+                        {{ item.dish.description|truncatewords:8 }}
+                      </div>
+                    </div>
+                    <span class="fw-bold">&euro;{{ item.subtotal|floatformat:2 }}</span>
+                  </div>
+                {% endfor %}
+              </div>
+              <h5 class="text-end">{% trans "Разом:" %} &euro;{{ entry.order.total_price|floatformat:2 }}</h5>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Закрити" %}</button>
+              <form method="post" action="{% url 'waiter:order_accept' entry.order.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-hand-index"></i> {% trans "Взяти замовлення" %}
+                </button>
+              </form>
+            </div>
           </div>
-        </a>
+        </div>
+      </div>
       {% endfor %}
-    </div>
-  {% else %}
-    <div class="alert alert-info">
-      <i class="bi bi-info-circle"></i> Немає активних замовлень.
-    </div>
+
+    {% else %}
+      <div class="alert alert-info">
+        <i class="bi bi-check-circle"></i> {% trans "Немає нових замовлень" %}
+      </div>
+    {% endif %}
+
+  {# --- Tab: Мої замовлення --- #}
+  {% elif active_tab == "my" %}
+    {% if my_orders %}
+      <div class="list-group">
+        {% for entry in my_orders %}
+          <div class="list-group-item d-flex justify-content-between align-items-center
+                      {% if entry.has_overdue %}list-group-item-danger{% elif entry.order.status == 'ready' %}list-group-item-success{% elif entry.done_dishes > 0 %}list-group-item-info{% endif %}"
+               style="cursor: pointer;"
+               data-bs-toggle="modal" data-bs-target="#myOrderModal{{ entry.order.id }}">
+            <div class="flex-grow-1">
+              <strong>#{{ entry.order.id }}</strong>
+              <span class="badge bg-{% if entry.order.status == 'accepted' %}info{% elif entry.order.status == 'verified' %}primary{% elif entry.order.status == 'ready' %}success{% else %}secondary{% endif %} ms-1">
+                {{ entry.order.get_status_display }}
+              </span>
+              {% if entry.taken_dishes > 0 %}
+                <span class="badge bg-warning text-dark ms-1">{{ entry.taken_dishes }} {% trans "готується" %}</span>
+              {% endif %}
+              {% if entry.done_dishes > 0 %}
+                <span class="badge bg-success ms-1">{{ entry.done_dishes }} {% trans "готово" %}</span>
+              {% endif %}
+              {% if entry.has_overdue %}
+                <span class="badge bg-danger ms-1">{% trans "Забери!" %}</span>
+              {% endif %}
+              {% if entry.order.location_hint %}
+                <small class="text-muted ms-1"><i class="bi bi-geo-alt"></i> {{ entry.order.location_hint }}</small>
+              {% endif %}
+            </div>
+            <div class="text-end text-nowrap">
+              <span class="fw-bold">&euro;{{ entry.order.total_price|floatformat:2 }}</span>
+              {% if entry.order.payment_status == 'paid' %}
+                <span class="badge bg-success ms-1">{% trans "Сплачено" %}</span>
+              {% else %}
+                <span class="badge bg-warning text-dark ms-1">{% trans "Не сплачено" %}</span>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      {# --- Modals for my orders --- #}
+      {% for entry in my_orders %}
+      <div class="modal fade" id="myOrderModal{{ entry.order.id }}" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">
+                {% trans "Замовлення" %} #{{ entry.order.id }}
+                {% if entry.order.payment_status == 'paid' %}
+                  <span class="badge bg-success">{% trans "Сплачено" %}</span>
+                {% else %}
+                  <span class="badge bg-warning text-dark">{% trans "Не сплачено" %}</span>
+                {% endif %}
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">{{ entry.order.created_at|date:"d.m.Y H:i" }}</span>
+                {% if entry.order.location_hint %}
+                  <span><i class="bi bi-geo-alt"></i> {{ entry.order.location_hint }}</span>
+                {% endif %}
+              </div>
+
+              {# --- Per-dish status --- #}
+              <div class="list-group mb-3">
+                {% for t in entry.tickets %}
+                  <div class="list-group-item d-flex justify-content-between align-items-center py-2
+                              {% if t.dish_urgency == 'critical' %}list-group-item-danger{% elif t.dish_urgency == 'warn' %}list-group-item-warning{% elif t.status == 'done' %}list-group-item-success{% elif t.status == 'taken' %}list-group-item-light{% endif %}">
+                    <div>
+                      <span class="me-1">
+                        {% if t.dish_urgency == 'critical' %}🔥{% elif t.status == 'done' %}✅{% elif t.status == 'taken' %}👩‍🍳{% else %}⏳{% endif %}
+                      </span>
+                      <strong>{{ t.dish_title }}</strong>
+                      <span class="text-muted ms-1">x{{ t.quantity }}</span>
+                      {% if t.dish_urgency == 'critical' %}
+                        <div class="text-danger small fw-bold">⚠️ {% trans "Готово" %} {{ t.done_min }} {% trans "хв тому — остигає!" %}</div>
+                      {% elif t.dish_urgency == 'warn' %}
+                        <div class="text-warning small fw-bold">{% trans "Готово" %} {{ t.done_min }} {% trans "хв — забрати!" %}</div>
+                      {% elif t.status == 'taken' and t.cook_label %}
+                        <div class="text-muted small">{{ t.cook_label }} {% trans "готує" %}</div>
+                      {% elif t.status == 'done' %}
+                        <div class="text-success small fw-bold">{% trans "Готово — забрати!" %}</div>
+                      {% elif t.status == 'pending' %}
+                        <div class="text-muted small">{% trans "В черзі" %}</div>
+                      {% endif %}
+                    </div>
+                    <span class="fw-bold">&euro;{{ t.subtotal|floatformat:2 }}</span>
+                  </div>
+                {% endfor %}
+              </div>
+
+              <h5 class="text-end">{% trans "Разом:" %} &euro;{{ entry.order.total_price|floatformat:2 }}</h5>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Закрити" %}</button>
+
+              {% if entry.order.status == 'accepted' %}
+                <form method="post" action="{% url 'waiter:order_verify' entry.order.id %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-circle"></i> {% trans "Верифікувати" %}
+                  </button>
+                </form>
+
+              {% elif entry.order.status == 'ready' %}
+                <form method="post" action="{% url 'waiter:order_delivered' entry.order.id %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check2-all"></i> {% trans "Доставлено" %}
+                  </button>
+                </form>
+              {% endif %}
+
+              {% if entry.order.status == 'delivered' and entry.order.payment_status == 'unpaid' %}
+                <form method="post" action="{% url 'waiter:confirm_payment' entry.order.id %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-warning">
+                    <i class="bi bi-cash"></i> {% trans "Оплату підтверджено" %}
+                  </button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+    {% else %}
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> {% trans "У вас немає активних замовлень" %}
+      </div>
+    {% endif %}
+
+    {# --- Unpaid delivered --- #}
+    {% if unpaid_delivered %}
+      <h5 class="mt-4 text-danger"><i class="bi bi-exclamation-triangle"></i> {% trans "Очікують оплати" %}</h5>
+      <div class="list-group">
+        {% for order in unpaid_delivered %}
+          <div class="list-group-item d-flex justify-content-between align-items-center"
+               style="cursor: pointer;"
+               data-bs-toggle="modal" data-bs-target="#unpaidModal{{ order.id }}">
+            <div>
+              <strong>#{{ order.id }}</strong>
+              {% if order.location_hint %}
+                <small class="text-muted ms-1"><i class="bi bi-geo-alt"></i> {{ order.location_hint }}</small>
+              {% endif %}
+            </div>
+            <div>
+              <span class="fw-bold">&euro;{{ order.total_price|floatformat:2 }}</span>
+              <span class="badge bg-warning text-dark ms-1">{% trans "Не сплачено" %}</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      {# Unpaid modals #}
+      {% for order in unpaid_delivered %}
+      <div class="modal fade" id="unpaidModal{{ order.id }}" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">{% trans "Замовлення" %} #{{ order.id }} — {% trans "Не сплачено" %}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <div class="list-group mb-3">
+                {% for item in order.items.all %}
+                  <div class="list-group-item d-flex justify-content-between py-2">
+                    <div><strong>{{ item.dish.title }}</strong> <span class="text-muted">x{{ item.quantity }}</span></div>
+                    <span class="fw-bold">&euro;{{ item.subtotal|floatformat:2 }}</span>
+                  </div>
+                {% endfor %}
+              </div>
+              <h5 class="text-end">{% trans "Разом:" %} &euro;{{ order.total_price|floatformat:2 }}</h5>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Закрити" %}</button>
+              <form method="post" action="{% url 'waiter:confirm_payment' order.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-warning">
+                  <i class="bi bi-cash"></i> {% trans "Оплату підтверджено (готівка)" %}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% endif %}
   {% endif %}
+
 </div>
 {% endblock %}

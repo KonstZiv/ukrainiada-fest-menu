@@ -359,7 +359,7 @@ def test_all_tickets_done_sets_order_ready(django_user_model: Any) -> None:
         email="c@test.com", username="cook", password="testpass123", role="kitchen"
     )
     _, order, item = _make_dish_and_order()
-    order.status = Order.Status.APPROVED
+    order.status = Order.Status.VERIFIED
     order.save()
     ticket = KitchenTicket.objects.create(order_item=item)
 

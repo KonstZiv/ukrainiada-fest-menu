@@ -35,7 +35,7 @@ def test_escalation_str() -> None:
 @pytest.mark.django_db
 def test_create_escalation_success() -> None:
     order = Order.objects.create(
-        status=Order.Status.APPROVED,
+        status=Order.Status.VERIFIED,
         approved_at=timezone.now() - timedelta(minutes=10),
     )
     esc = create_escalation(order, reason="slow", message="Дуже довго")
@@ -47,7 +47,7 @@ def test_create_escalation_success() -> None:
 @pytest.mark.django_db
 def test_cannot_create_duplicate_open() -> None:
     order = Order.objects.create(
-        status=Order.Status.APPROVED,
+        status=Order.Status.VERIFIED,
         approved_at=timezone.now() - timedelta(minutes=10),
     )
     create_escalation(order, reason="slow")
@@ -58,7 +58,7 @@ def test_cannot_create_duplicate_open() -> None:
 @pytest.mark.django_db
 def test_min_wait_enforced() -> None:
     order = Order.objects.create(
-        status=Order.Status.APPROVED,
+        status=Order.Status.VERIFIED,
         approved_at=timezone.now() - timedelta(minutes=1),
     )
     with pytest.raises(ValueError, match="Зачекайте"):
@@ -68,7 +68,7 @@ def test_min_wait_enforced() -> None:
 @pytest.mark.django_db
 def test_cooldown_after_resolved() -> None:
     order = Order.objects.create(
-        status=Order.Status.APPROVED,
+        status=Order.Status.VERIFIED,
         approved_at=timezone.now() - timedelta(minutes=10),
     )
     esc = create_escalation(order, reason="slow")

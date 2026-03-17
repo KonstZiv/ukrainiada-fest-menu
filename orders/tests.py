@@ -29,7 +29,15 @@ class _FakeSession(dict):  # type: ignore[type-arg]
 
 def test_order_status_flow_values() -> None:
     statuses = {s.value for s in Order.Status}
-    expected = {"draft", "submitted", "approved", "in_progress", "ready", "delivered"}
+    expected = {
+        "draft",
+        "submitted",
+        "accepted",
+        "verified",
+        "in_progress",
+        "ready",
+        "delivered",
+    }
     assert statuses == expected
 
 
@@ -222,7 +230,7 @@ def test_order_qr_returns_png(client: Client) -> None:
 
 @pytest.mark.django_db
 def test_order_qr_not_available_for_approved(client: Client) -> None:
-    order = Order.objects.create(status=Order.Status.APPROVED)
+    order = Order.objects.create(status=Order.Status.VERIFIED)
     response = client.get(f"/order/{order.id}/qr/?token={order.access_token}")
     assert response.status_code == 404
 
@@ -298,7 +306,7 @@ def test_approve_order_creates_kitchen_tickets(
 
     assert response.status_code == 302
     order.refresh_from_db()
-    assert order.status == Order.Status.APPROVED
+    assert order.status == Order.Status.VERIFIED
     assert order.waiter == waiter
     assert KitchenTicket.objects.filter(order_item__order=order).count() == 1
 
@@ -308,14 +316,14 @@ def test_approve_rejects_non_submitted_order(
     client: Client,
     django_user_model: Any,
 ) -> None:
-    order = Order.objects.create(status=Order.Status.APPROVED)
+    order = Order.objects.create(status=Order.Status.VERIFIED)
     waiter = django_user_model.objects.create_user(
         email="w@test.com", username="waiter1", password="testpass123", role="waiter"
     )
     client.force_login(waiter)
     client.post(f"/waiter/order/{order.id}/approve/")
     order.refresh_from_db()
-    assert order.status == Order.Status.APPROVED  # unchanged
+    assert order.status == Order.Status.VERIFIED  # unchanged
 
 
 @pytest.mark.django_db
@@ -345,8 +353,8 @@ def test_waiter_dashboard_shows_only_own_orders(
     w2 = django_user_model.objects.create_user(
         email="w2@test.com", username="w2", password="testpass123", role="waiter"
     )
-    Order.objects.create(waiter=w1, status=Order.Status.APPROVED)
-    Order.objects.create(waiter=w2, status=Order.Status.APPROVED)
+    Order.objects.create(waiter=w1, status=Order.Status.VERIFIED)
+    Order.objects.create(waiter=w2, status=Order.Status.VERIFIED)
 
     client.force_login(w1)
     response = client.get("/waiter/dashboard/")
@@ -380,13 +388,13 @@ def test_cannot_mark_delivered_if_not_ready(
     waiter = django_user_model.objects.create_user(
         email="w@test.com", username="w", password="testpass123", role="waiter"
     )
-    order = Order.objects.create(waiter=waiter, status=Order.Status.APPROVED)
+    order = Order.objects.create(waiter=waiter, status=Order.Status.VERIFIED)
 
     client.force_login(waiter)
     client.post(f"/waiter/order/{order.id}/delivered/")
 
     order.refresh_from_db()
-    assert order.status == Order.Status.APPROVED
+    assert order.status == Order.Status.VERIFIED
 
 
 @pytest.mark.django_db
@@ -495,7 +503,7 @@ def test_online_payment_page_get(client: Client) -> None:
 
 @pytest.mark.django_db
 def test_online_payment_page_post(client: Client) -> None:
-    order = Order.objects.create(status=Order.Status.APPROVED)
+    order = Order.objects.create(status=Order.Status.VERIFIED)
     response = client.post(f"/order/{order.id}/pay/?token={order.access_token}")
     assert response.status_code == 302
     order.refresh_from_db()

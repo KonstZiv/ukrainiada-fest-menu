@@ -183,13 +183,13 @@ def order_qr(request: HttpRequest, order_id: int) -> HttpResponse:
 def _build_progress_steps(order_status: str) -> list[dict[str, object]]:
     """Build progress bar steps for order detail template.
 
-    Maps 6 order statuses to 6 visual steps. approved currently
-    maps to both Прийнято and Верифіковано (will be separated later).
+    Maps 7 order statuses to 6 visual steps.
     """
     status_to_step: dict[str, int] = {
         "draft": -1,
         "submitted": 0,
-        "approved": 2,
+        "accepted": 1,
+        "verified": 2,
         "in_progress": 3,
         "ready": 4,
         "delivered": 5,
@@ -259,7 +259,7 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
 
     now = timezone.now()
     can_escalate = (
-        order.status in ("approved", "in_progress", "ready")
+        order.status in ("accepted", "verified", "in_progress", "ready")
         and order.approved_at
         and (now - order.approved_at).total_seconds()
         > django_settings.ESCALATION_MIN_WAIT * 60

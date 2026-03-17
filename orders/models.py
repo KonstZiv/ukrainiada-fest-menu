@@ -13,7 +13,8 @@ class Order(models.Model):
     class Status(models.TextChoices):
         DRAFT = "draft", "Чернетка"
         SUBMITTED = "submitted", "Створено"
-        APPROVED = "approved", "Верифіковано"
+        ACCEPTED = "accepted", "Прийнято"
+        VERIFIED = "verified", "Верифіковано"
         IN_PROGRESS = "in_progress", "Готується"
         READY = "ready", "Готово"
         DELIVERED = "delivered", "Доставлено"

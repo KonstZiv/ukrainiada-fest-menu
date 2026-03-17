@@ -78,7 +78,7 @@ def test_take_ticket_pushes_visitor_event(django_user_model: Any) -> None:
         display_title="Повариха",
         public_name="Валентина",
     )
-    order = Order.objects.create(waiter=waiter, status=Order.Status.APPROVED)
+    order = Order.objects.create(waiter=waiter, status=Order.Status.VERIFIED)
     item = OrderItem.objects.create(order=order, dish=dish, quantity=1)
     ticket = KitchenTicket.objects.create(order_item=item)
 

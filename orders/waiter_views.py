@@ -19,10 +19,12 @@ from notifications.events import push_visitor_event
 from orders.escalation_services import acknowledge_escalation, resolve_escalation
 from orders.models import Order, VisitorEscalation
 from orders.services import (
+    accept_order,
     approve_order,
     confirm_cash_payment,
     confirm_payment_by_senior,
     deliver_order,
+    verify_order,
 )
 from user.decorators import role_required
 
@@ -31,20 +33,126 @@ WAITER_ROLES = ("waiter", "senior_waiter", "manager")
 
 @role_required(*WAITER_ROLES)
 def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
-    """List of active orders for the waiter."""
-    orders = Order.objects.filter(
-        status__in=[
-            Order.Status.SUBMITTED,
-            Order.Status.APPROVED,
-            Order.Status.IN_PROGRESS,
-            Order.Status.READY,
-        ]
-    ).prefetch_related("items__dish")
+    """Waiter board — two tabs: new (unclaimed) + my orders."""
+    new_orders = (
+        Order.objects.filter(status=Order.Status.SUBMITTED)
+        .prefetch_related("items__dish")
+        .order_by("created_at")
+    )
+    my_orders_qs = (
+        Order.objects.filter(
+            waiter=request.user,
+            status__in=[
+                Order.Status.ACCEPTED,
+                Order.Status.VERIFIED,
+                Order.Status.IN_PROGRESS,
+                Order.Status.READY,
+            ],
+        )
+        .prefetch_related(
+            "items__dish",
+            "items__kitchen_ticket",
+            "items__kitchen_ticket__assigned_to",
+        )
+        .order_by("created_at")
+    )
+
+    # Build per-order dish/ticket stats
+    now = timezone.now()
+    pickup_warn = settings.DISH_PICKUP_WARN  # minutes
+    pickup_critical = settings.DISH_PICKUP_CRITICAL  # minutes
+    my_orders_enriched = []
+    my_ready_count = 0
+    for order in my_orders_qs:
+        tickets = []
+        total_dishes = 0
+        done_dishes = 0
+        taken_dishes = 0
+        has_overdue = False
+        for item in order.items.all():
+            total_dishes += 1
+            ticket = getattr(item, "kitchen_ticket", None)
+            status = ticket.status if ticket else "pending"
+            done_min = 0
+            dish_urgency = "normal"
+            if status == "done":
+                done_dishes += 1
+                if ticket and ticket.done_at:
+                    done_min = int((now - ticket.done_at).total_seconds() / 60)
+                    if done_min >= pickup_critical:
+                        dish_urgency = "critical"
+                        has_overdue = True
+                    elif done_min >= pickup_warn:
+                        dish_urgency = "warn"
+                        has_overdue = True
+            elif status == "taken":
+                taken_dishes += 1
+            tickets.append(
+                {
+                    "dish_title": item.dish.title,
+                    "quantity": item.quantity,
+                    "subtotal": item.subtotal,
+                    "status": status,
+                    "cook_label": (
+                        ticket.assigned_to.staff_label
+                        if ticket and ticket.assigned_to
+                        else None
+                    ),
+                    "done_min": done_min,
+                    "dish_urgency": dish_urgency,
+                }
+            )
+        if order.status == Order.Status.READY:
+            my_ready_count += 1
+        my_orders_enriched.append(
+            {
+                "order": order,
+                "tickets": tickets,
+                "total_dishes": total_dishes,
+                "done_dishes": done_dishes,
+                "taken_dishes": taken_dishes,
+                "has_overdue": has_overdue,
+            }
+        )
+    # Unpaid delivered
+    unpaid_delivered = Order.objects.filter(
+        waiter=request.user,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.UNPAID,
+    ).order_by("delivered_at")
+
     dish_stats = get_dish_queue_stats()
+    tab = request.GET.get("tab", "new")
+
+    # Annotate new orders with wait time for urgency display
+    now = timezone.now()
+    esc_threshold = settings.ESCALATION_MIN_WAIT  # minutes
+    new_orders_with_wait = []
+    for order in new_orders:
+        wait_min = int((now - order.created_at).total_seconds() / 60)
+        if wait_min >= esc_threshold * 2:
+            urgency = "critical"
+        elif wait_min >= esc_threshold:
+            urgency = "overdue"
+        else:
+            urgency = "normal"
+        new_orders_with_wait.append(
+            {"order": order, "wait_min": wait_min, "urgency": urgency}
+        )
+
     return render(
         request,
         "orders/waiter_order_list.html",
-        {"orders": orders, "dish_stats": dish_stats},
+        {
+            "new_orders_with_wait": new_orders_with_wait,
+            "my_orders": my_orders_enriched,
+            "unpaid_delivered": unpaid_delivered,
+            "new_count": len(new_orders_with_wait),
+            "my_count": len(my_orders_enriched),
+            "my_ready_count": my_ready_count,
+            "dish_stats": dish_stats,
+            "active_tab": tab,
+        },
     )
 
 
@@ -57,8 +165,36 @@ def order_scan(request: AuthenticatedHttpRequest, order_id: int) -> HttpResponse
 
 @role_required(*WAITER_ROLES)
 @require_POST
+def order_accept(request: AuthenticatedHttpRequest, order_id: int) -> HttpResponse:
+    """Waiter takes (accepts) a SUBMITTED order."""
+    order = get_object_or_404(Order, pk=order_id)
+    try:
+        accept_order(order, request.user)
+        messages.success(request, f"Замовлення #{order.id} — тепер ваше.")
+    except ValueError as e:
+        messages.error(request, str(e))
+    return redirect("waiter:order_scan", order_id=order.id)
+
+
+@role_required(*WAITER_ROLES)
+@require_POST
+def order_verify(request: AuthenticatedHttpRequest, order_id: int) -> HttpResponse:
+    """Waiter verifies an ACCEPTED order — sends to kitchen."""
+    order = get_object_or_404(Order, pk=order_id)
+    try:
+        verify_order(order, request.user)
+        messages.success(
+            request, f"Замовлення #{order.id} верифіковано і передано на кухню."
+        )
+    except ValueError as e:
+        messages.error(request, str(e))
+    return redirect("waiter:order_scan", order_id=order.id)
+
+
+@role_required(*WAITER_ROLES)
+@require_POST
 def order_approve(request: AuthenticatedHttpRequest, order_id: int) -> HttpResponse:
-    """Waiter approves a SUBMITTED order."""
+    """Legacy: accept + verify in one step."""
     order = get_object_or_404(Order, pk=order_id)
     try:
         approve_order(order, request.user)
@@ -72,8 +208,8 @@ def order_approve(request: AuthenticatedHttpRequest, order_id: int) -> HttpRespo
 def waiter_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
     """Waiter dashboard — own active orders with kitchen ticket status."""
     active_statuses = [
-        Order.Status.SUBMITTED,
-        Order.Status.APPROVED,
+        Order.Status.ACCEPTED,
+        Order.Status.VERIFIED,
         Order.Status.IN_PROGRESS,
         Order.Status.READY,
     ]

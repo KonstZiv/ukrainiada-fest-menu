@@ -38,7 +38,7 @@ def _make_approved_order(
         display_title="Повариха",
         public_name="Валентина",
     )
-    order = Order.objects.create(waiter=waiter, status=Order.Status.APPROVED)
+    order = Order.objects.create(waiter=waiter, status=Order.Status.VERIFIED)
     item = OrderItem.objects.create(order=order, dish=dish, quantity=1)
     KitchenTicket.objects.create(
         order_item=item,

@@ -101,38 +101,78 @@ def submit_order_from_cart(request: HttpRequest) -> Order | None:
     return order
 
 
-def approve_order(order: Order, waiter: User) -> Order:
-    """Waiter approves an order — atomic status change + kitchen tickets.
+def accept_order(order: Order, waiter: User) -> Order:
+    """Waiter takes an order — assigns themselves, removes from general board.
 
     Raises:
         ValueError: if order is not in SUBMITTED status.
 
     """
     if order.status != Order.Status.SUBMITTED:
-        msg = f"Cannot approve order in status '{order.status}'"
+        msg = f"Cannot accept order in status '{order.status}'"
+        raise ValueError(msg)
+
+    order.status = Order.Status.ACCEPTED
+    order.waiter = waiter
+    order.save(update_fields=["status", "waiter"])
+
+    log_event(
+        order,
+        f"{waiter.staff_label} прийняв(ла) замовлення",
+        actor_label=waiter.staff_label,
+    )
+    push_visitor_event(
+        order_id=order.id,
+        event_type="order_accepted",
+        data={"order_id": order.id, "waiter_label": waiter.staff_label},
+    )
+    return order
+
+
+def verify_order(order: Order, waiter: User) -> Order:
+    """Waiter verifies an order — confirms with client, sends to kitchen.
+
+    Raises:
+        ValueError: if order is not in ACCEPTED status or wrong waiter.
+
+    """
+    if order.status != Order.Status.ACCEPTED:
+        msg = f"Cannot verify order in status '{order.status}'"
+        raise ValueError(msg)
+    if order.waiter_id != waiter.id:
+        msg = "Only the assigned waiter can verify the order"
         raise ValueError(msg)
 
     with transaction.atomic():
-        order.status = Order.Status.APPROVED
-        order.waiter = waiter
+        order.status = Order.Status.VERIFIED
         order.approved_at = timezone.now()
-        order.save(update_fields=["status", "waiter", "approved_at"])
+        order.save(update_fields=["status", "approved_at"])
         create_tickets_for_order(order)
 
     log_event(
         order,
-        f"{waiter.staff_label} перевірив(ла) замовлення і передав(ла) на кухню",
+        f"{waiter.staff_label} верифікував(ла) замовлення і передав(ла) на кухню",
         actor_label=waiter.staff_label,
     )
 
-    # Push AFTER transaction — don't push if transaction rolled back
     push_order_approved(order_id=order.id)
     push_visitor_event(
         order_id=order.id,
-        event_type="order_approved",
+        event_type="order_verified",
         data={"order_id": order.id, "waiter_label": waiter.staff_label},
     )
     return order
+
+
+def approve_order(order: Order, waiter: User) -> Order:
+    """Legacy: accept + verify in one step (for existing tests/views).
+
+    TODO: Remove after full migration to accept/verify flow.
+    """
+    if order.status == Order.Status.SUBMITTED:
+        accept_order(order, waiter)
+        order.refresh_from_db()
+    return verify_order(order, waiter)
 
 
 def deliver_order(order: Order, waiter: User) -> Order:

@@ -78,7 +78,7 @@ def test_deliver_fails_if_not_ready_status(django_user_model: Any) -> None:
     waiter = django_user_model.objects.create_user(
         email="w@test.com", username="wtest", password="testpass123", role="waiter"
     )
-    order = Order.objects.create(waiter=waiter, status=Order.Status.APPROVED)
+    order = Order.objects.create(waiter=waiter, status=Order.Status.VERIFIED)
 
     with pytest.raises(ValueError, match="not ready"):
         deliver_order(order, waiter=waiter)
