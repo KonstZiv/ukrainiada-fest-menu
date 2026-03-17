@@ -15,6 +15,7 @@ from notifications.events import (
     push_ticket_taken,
     push_visitor_event,
 )
+from orders.event_log import log_event
 from orders.models import Order
 
 if TYPE_CHECKING:
@@ -74,7 +75,15 @@ def take_ticket(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket:
         ticket.taken_at = timezone.now()
         ticket.save(update_fields=["status", "assigned_to", "taken_at"])
 
-    waiter_id = ticket.order_item.order.waiter_id
+    dish_title = ticket.order_item.dish.title
+    order = ticket.order_item.order
+    log_event(
+        order,
+        f"Кухня: {kitchen_user.staff_label} прийняв(ла) в роботу {dish_title}",
+        actor_label=kitchen_user.staff_label,
+    )
+
+    waiter_id = order.waiter_id
     if waiter_id:
         cook_name = kitchen_user.get_full_name() or kitchen_user.email
         push_ticket_taken(
@@ -85,11 +94,11 @@ def take_ticket(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket:
 
     # Notify visitor
     push_visitor_event(
-        order_id=ticket.order_item.order_id,
+        order_id=order.id,
         event_type="ticket_taken",
         data={
             "ticket_id": ticket.pk,
-            "dish": ticket.order_item.dish.title[:40],
+            "dish": dish_title[:40],
             "cook_label": kitchen_user.staff_label,
         },
     )
@@ -118,29 +127,39 @@ def mark_ticket_done(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket
     ticket.done_at = timezone.now()
     ticket.save(update_fields=["status", "done_at"])
 
-    waiter_id = ticket.order_item.order.waiter_id
+    dish_title = ticket.order_item.dish.title
+    order = ticket.order_item.order
+    log_event(
+        order,
+        f"Кухня: {kitchen_user.staff_label} приготував(ла) {dish_title} ✅",
+        actor_label=kitchen_user.staff_label,
+    )
+
+    waiter_id = order.waiter_id
     if waiter_id:
         push_ticket_done(
             ticket_id=ticket.pk,
-            order_id=ticket.order_item.order_id,
+            order_id=order.id,
             waiter_id=waiter_id,
-            dish_title=ticket.order_item.dish.title,
+            dish_title=dish_title,
         )
 
     # Notify visitor
     push_visitor_event(
-        order_id=ticket.order_item.order_id,
+        order_id=order.id,
         event_type="ticket_done",
         data={
             "ticket_id": ticket.pk,
-            "dish": ticket.order_item.dish.title[:40],
+            "dish": dish_title[:40],
             "cook_label": kitchen_user.staff_label,
         },
     )
 
     order_ready = _check_order_ready(ticket)
-    if order_ready and waiter_id:
-        push_order_ready(order_id=ticket.order_item.order_id, waiter_id=waiter_id)
+    if order_ready:
+        log_event(order, "Усі страви готові! Очікуємо офіціанта для доставки 🍽️")
+        if waiter_id:
+            push_order_ready(order_id=order.id, waiter_id=waiter_id)
 
     return ticket
 

@@ -31,6 +31,7 @@ from orders.services import (
 class _EnrichedItem(TypedDict):
     dish: Dish
     quantity: int
+    subtotal: Decimal
 
 
 def _cart_json_response(request: HttpRequest, dish_id: int) -> HttpResponse:
@@ -44,8 +45,11 @@ def _cart_json_response(request: HttpRequest, dish_id: int) -> HttpResponse:
     dish_qty = quantities.get(dish_id, 0)
 
     total = Decimal("0")
+    dish_price = Decimal("0")
+    all_ids = set(quantities.keys()) | {dish_id}
+    prices = dict(Dish.objects.filter(id__in=all_ids).values_list("id", "price"))
+    dish_price = prices.get(dish_id, Decimal("0"))
     if quantities:
-        prices = dict(Dish.objects.filter(id__in=quantities).values_list("id", "price"))
         total = sum(
             (prices.get(did, Decimal("0")) * qty for did, qty in quantities.items()),
             Decimal("0"),
@@ -55,6 +59,7 @@ def _cart_json_response(request: HttpRequest, dish_id: int) -> HttpResponse:
         {
             "dish_id": dish_id,
             "dish_qty": dish_qty,
+            "dish_price": str(dish_price),
             "cart_count": cart_item_count(request),
             "cart_total": str(total),
         }
@@ -97,7 +102,11 @@ def cart_view(request: HttpRequest) -> HttpResponse:
     dish_ids = [item["dish_id"] for item in cart]
     dishes = {d.id: d for d in Dish.objects.filter(id__in=dish_ids)}
     enriched: list[_EnrichedItem] = [
-        {"dish": dishes[item["dish_id"]], "quantity": item["quantity"]}
+        {
+            "dish": dishes[item["dish_id"]],
+            "quantity": item["quantity"],
+            "subtotal": dishes[item["dish_id"]].price * item["quantity"],
+        }
         for item in cart
         if item["dish_id"] in dishes
     ]
@@ -106,6 +115,31 @@ def cart_view(request: HttpRequest) -> HttpResponse:
         Decimal("0"),
     )
     return render(request, "orders/cart.html", {"items": enriched, "total": total})
+
+
+def order_history(request: HttpRequest) -> HttpResponse:
+    """Display completed & paid order history."""
+    if request.user.is_authenticated:
+        orders = Order.objects.filter(
+            visitor=request.user,
+            status=Order.Status.DELIVERED,
+            payment_status=Order.PaymentStatus.PAID,
+        ).prefetch_related("items__dish")
+    else:
+        session_orders: dict[str, str] = request.session.get("my_orders", {})
+        order_ids = [int(oid) for oid in session_orders]
+        orders = Order.objects.filter(
+            id__in=order_ids,
+            status=Order.Status.DELIVERED,
+            payment_status=Order.PaymentStatus.PAID,
+        ).prefetch_related("items__dish")
+
+    is_anonymous = not request.user.is_authenticated
+    return render(
+        request,
+        "orders/order_history.html",
+        {"orders": orders, "show_register_prompt": is_anonymous},
+    )
 
 
 @require_POST
@@ -149,35 +183,37 @@ def order_qr(request: HttpRequest, order_id: int) -> HttpResponse:
 def _build_progress_steps(order_status: str) -> list[dict[str, object]]:
     """Build progress bar steps for order detail template.
 
-    Maps 6 order statuses to 5 visual steps. submitted and approved
-    both map to step 1 ("Прийнято"). Uses gettext for i18n labels.
+    Maps 6 order statuses to 6 visual steps. approved currently
+    maps to both Прийнято and Верифіковано (will be separated later).
     """
     status_to_step: dict[str, int] = {
         "draft": -1,
         "submitted": 0,
-        "approved": 1,
-        "in_progress": 2,
-        "ready": 3,
-        "delivered": 4,
+        "approved": 2,
+        "in_progress": 3,
+        "ready": 4,
+        "delivered": 5,
     }
     current_step = status_to_step.get(order_status, -1)
 
     steps_config = [
-        ("📝", _("Створено")),
-        ("👍", _("Прийнято")),
-        ("👩\u200d🍳", _("Готується")),
-        ("✅", _("Готово")),
-        ("🍽️", _("Доставлено")),
+        ("📝", _("Створено"), "created"),
+        ("👍", _("Прийнято"), "accepted"),
+        ("🔍", _("Верифіковано"), "verified"),
+        ("👩\u200d🍳", _("Готується"), "cooking"),
+        ("✅", _("Готово"), "ready"),
+        ("🍽️", _("Доставлено"), "delivered"),
     ]
     return [
         {
             "icon": icon,
             "label": label,
+            "step_key": key,
             "done": i <= current_step,
             "active": i == current_step,
             "step_index": i,
         }
-        for i, (icon, label) in enumerate(steps_config)
+        for i, (icon, label, key) in enumerate(steps_config)
     ]
 
 
@@ -237,6 +273,11 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
     feedback_obj = GuestFeedback.objects.filter(order=order).first()
     has_feedback = feedback_obj is not None
 
+    # Event log for terminal display
+    from orders.models import OrderEvent
+
+    event_log_lines = [e.log_line for e in OrderEvent.objects.filter(order=order)]
+
     return render(
         request,
         "orders/order_detail.html",
@@ -250,6 +291,7 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
             "has_feedback": has_feedback,
             "feedback": feedback_obj,
             "mood_choices": GuestFeedback.Mood.choices if not has_feedback else [],
+            "event_log_lines": event_log_lines,
         },
     )
 

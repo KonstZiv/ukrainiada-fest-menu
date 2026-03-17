@@ -37,6 +37,8 @@
 {% block content %}
 <div class="container mt-3 px-0">
 
+  <div class="px-3">{% include "components/_back_button.html" %}</div>
+
   {# --- Bootstrap Accordion --- #}
   <div class="accordion accordion-flush" id="accTags">
 
@@ -128,13 +130,10 @@
                       </div>
                     </div>
 
-                    {# --- Права частина: ціна та кнопка "+" --- #}
+                    {# --- Права частина: ціна та cart controls --- #}
                     <div class="text-end">
                       <div class="fw-bold small mb-1">&euro;{{ dish.price }}</div>
-                      <button class="btn btn-outline-primary btn-sm rounded-circle p-0"
-                              style="width: 28px; height: 28px;">
-                        <i class="bi bi-plus"></i>
-                      </button>
+                      {% include "components/_cart_controls.html" with dish=dish %}
                     </div>
 
                   </div>

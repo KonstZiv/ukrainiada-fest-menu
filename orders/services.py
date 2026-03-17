@@ -1,4 +1,4 @@
-"""Order business logic — submit, approve."""
+"""Order business logic — submit, approve, deliver, pay."""
 
 from __future__ import annotations
 
@@ -16,6 +16,7 @@ from notifications.events import push_order_approved, push_visitor_event
 if TYPE_CHECKING:
     from user.models import User
 from orders.cart import clear_cart, get_cart
+from orders.event_log import log_event
 from orders.models import Order, OrderItem
 
 
@@ -85,6 +86,11 @@ def submit_order_from_cart(request: HttpRequest) -> Order | None:
             ]
         )
 
+    items_summary = ", ".join(
+        f"{dishes[i['dish_id']].title} x{i['quantity']}" for i in valid_items
+    )
+    log_event(order, f"Замовлення сформовано і передано в систему: {items_summary}")
+
     # Store access token in session for anonymous order tracking
     if "my_orders" not in request.session:
         request.session["my_orders"] = {}
@@ -112,6 +118,12 @@ def approve_order(order: Order, waiter: User) -> Order:
         order.approved_at = timezone.now()
         order.save(update_fields=["status", "waiter", "approved_at"])
         create_tickets_for_order(order)
+
+    log_event(
+        order,
+        f"{waiter.staff_label} перевірив(ла) замовлення і передав(ла) на кухню",
+        actor_label=waiter.staff_label,
+    )
 
     # Push AFTER transaction — don't push if transaction rolled back
     push_order_approved(order_id=order.id)
@@ -154,6 +166,12 @@ def deliver_order(order: Order, waiter: User) -> Order:
     order.delivered_at = timezone.now()
     order.save(update_fields=["status", "delivered_at"])
 
+    log_event(
+        order,
+        f"{waiter.staff_label} доставив(ла) замовлення",
+        actor_label=waiter.staff_label,
+    )
+
     push_visitor_event(
         order_id=order.id,
         event_type="order_delivered",
@@ -188,6 +206,11 @@ def confirm_cash_payment(order: Order, waiter: User) -> Order:
             "payment_escalation_level",
         ]
     )
+    log_event(
+        order,
+        f"Оплату готівкою підтверджено — {waiter.staff_label}",
+        actor_label=waiter.staff_label,
+    )
     return order
 
 
@@ -213,6 +236,7 @@ def confirm_online_payment_stub(order: Order) -> Order:
             "payment_escalation_level",
         ]
     )
+    log_event(order, "Оплату онлайн підтверджено")
     return order
 
 

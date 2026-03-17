@@ -1,0 +1,20 @@
+{# Back button — shown only when the user navigated from another page on this site. #}
+{# Hidden by default (d-none); JS removes d-none if document.referrer is same-origin. #}
+<a href="javascript:void(0)"
+   class="btn btn-outline-secondary btn-sm mb-3 back-btn d-none"
+   onclick="history.back()">
+  <i class="bi bi-arrow-left"></i> Назад
+</a>
+<script>
+(function () {
+    var ref = document.referrer;
+    if (ref) {
+        try {
+            if (new URL(ref).origin === location.origin) {
+                var btns = document.querySelectorAll(".back-btn");
+                btns.forEach(function (b) { b.classList.remove("d-none"); });
+            }
+        } catch (e) { /* invalid referrer URL — keep hidden */ }
+    }
+})();
+</script>

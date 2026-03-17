@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from orders.models import Order, OrderItem
+from orders.models import Order, OrderEvent, OrderItem
+
+
+class OrderEventInline(admin.TabularInline):
+    model = OrderEvent
+    extra = 0
+    readonly_fields = ["timestamp", "message", "actor_label"]
+    ordering = ["timestamp"]
 
 
 class OrderItemInline(admin.TabularInline):
@@ -35,7 +42,7 @@ class OrderAdmin(admin.ModelAdmin):
         "delivered_at",
         "payment_confirmed_at",
     ]
-    inlines = [OrderItemInline]
+    inlines = [OrderItemInline, OrderEventInline]
 
     def total_price_display(self, obj: Order) -> str:
         """Display total price for the order."""

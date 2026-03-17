@@ -75,6 +75,15 @@ def push_visitor_event(order_id: int, event_type: str, data: dict[str, Any]) -> 
     _push(visitor_order_channel(order_id), event_type, data)
 
 
+def push_order_log_event(order_id: int, log_line: str) -> None:
+    """Push terminal log line to visitor watching this order."""
+    _push(
+        visitor_order_channel(order_id),
+        "order_log",
+        {"order_id": order_id, "log_line": log_line},
+    )
+
+
 def push_staff_escalation(
     waiter_id: int | None,
     escalation_id: int,

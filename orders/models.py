@@ -130,6 +130,40 @@ class OrderItem(models.Model):
         return self.dish.price * self.quantity
 
 
+class OrderEvent(models.Model):
+    """Unified event log for order lifecycle.
+
+    Each row = one real event that happened (submitted, approved, kitchen
+    accepted, ready, delivered, paid, etc.).  Rendered as a terminal-style
+    log with typewriter animation on the visitor's order page.
+    """
+
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="events",
+    )
+    timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
+    message = models.CharField(max_length=300)
+    actor_label = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Human-readable actor name, e.g. 'офіціант Ірина'",
+    )
+
+    class Meta:
+        ordering = ["timestamp"]
+
+    def __str__(self) -> str:
+        return f"[{self.timestamp:%Y-%m-%d %H:%M:%S}] {self.message}"
+
+    @property
+    def log_line(self) -> str:
+        """Format as terminal log line."""
+        ts = self.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+        return f"{ts} — {self.message}"
+
+
 class VisitorEscalation(models.Model):
     """Visitor-initiated escalation for an order issue.
 
