@@ -8,7 +8,7 @@
 {% block content %}
 <div class="container mt-3">
 
-  {# --- Tabs: Нові / Мої --- #}
+  {# --- Tabs --- #}
   <ul class="nav nav-pills mb-3" role="tablist">
     <li class="nav-item" role="presentation">
       <a class="nav-link {% if active_tab == 'new' %}active{% endif %}"
@@ -31,9 +31,19 @@
         {% endif %}
       </a>
     </li>
+    {% if is_senior %}
+    <li class="nav-item" role="presentation">
+      <a class="nav-link {% if active_tab == 'team' %}active{% endif %}"
+         href="?tab=team" role="tab">
+        {% trans "Команда" %}
+      </a>
+    </li>
+    {% endif %}
   </ul>
 
-  {# --- Tab: Нові замовлення --- #}
+  {# ================================================================ #}
+  {# Tab: Нові замовлення                                              #}
+  {# ================================================================ #}
   {% if active_tab == "new" %}
     {% if new_orders_with_wait %}
       <div class="list-group">
@@ -67,7 +77,7 @@
         {% endfor %}
       </div>
 
-      {# --- Modals for new orders --- #}
+      {# Modals for new orders #}
       {% for entry in new_orders_with_wait %}
       <div class="modal fade" id="newOrderModal{{ entry.order.id }}" tabindex="-1">
         <div class="modal-dialog">
@@ -129,10 +139,11 @@
       </div>
     {% endif %}
 
-  {# --- Tab: Мої замовлення --- #}
+  {# ================================================================ #}
+  {# Tab: Мої замовлення                                               #}
+  {# ================================================================ #}
   {% elif active_tab == "my" %}
 
-    {# --- Cash on hand --- #}
     {% if cash_total %}
       <div class="alert alert-success d-flex justify-content-between align-items-center mb-3">
         <span><i class="bi bi-cash-stack"></i> {% trans "Готівка на руках:" %}</span>
@@ -143,107 +154,7 @@
     {% if my_orders %}
       <div class="accordion accordion-flush" id="accMyOrders">
         {% for entry in my_orders %}
-          <div class="accordion-item {% if entry.has_overdue %}border-danger{% elif entry.order.status == 'ready' %}border-success{% endif %}">
-            <h2 class="accordion-header">
-              <button class="accordion-button collapsed {% if entry.has_overdue %}bg-danger bg-opacity-10{% elif entry.order.status == 'ready' %}bg-success bg-opacity-10{% elif entry.done_dishes > 0 %}bg-info bg-opacity-10{% endif %}"
-                      type="button" data-bs-toggle="collapse" data-bs-target="#myOrder{{ entry.order.id }}">
-                <div class="flex-grow-1 me-2">
-                  {# Row 1: number + status badges #}
-                  <div>
-                    <strong>#{{ entry.order.id }}</strong>
-                    <span class="badge bg-{% if entry.order.status == 'accepted' %}info{% elif entry.order.status == 'verified' %}primary{% elif entry.order.status == 'ready' %}success{% else %}secondary{% endif %} ms-1">
-                      {{ entry.order.get_status_display }}
-                    </span>
-                    {% if entry.taken_dishes > 0 %}
-                      <span class="badge bg-warning text-dark ms-1">{{ entry.taken_dishes }} {% trans "готується" %}</span>
-                    {% endif %}
-                    {% if entry.done_dishes > 0 %}
-                      <span class="badge bg-success ms-1">{{ entry.done_dishes }} {% trans "готово" %}</span>
-                    {% endif %}
-                    {% if entry.has_overdue %}
-                      <span class="badge bg-danger ms-1">{% trans "Забери!" %}</span>
-                    {% endif %}
-                  </div>
-                  {# Row 2: location + total + payment #}
-                  <div class="d-flex justify-content-between mt-1">
-                    <span>
-                      {% if entry.order.location_hint %}
-                        <small class="text-muted"><i class="bi bi-geo-alt"></i> {{ entry.order.location_hint }}</small>
-                      {% endif %}
-                    </span>
-                    <span>
-                      <span class="fw-bold">&euro;{{ entry.order.total_price|floatformat:2 }}</span>
-                      {% if entry.order.payment_status == 'paid' %}
-                        <span class="badge bg-success ms-1">{% trans "Сплачено" %}</span>
-                      {% else %}
-                        <span class="badge bg-warning text-dark ms-1">{% trans "Не сплачено" %}</span>
-                      {% endif %}
-                    </span>
-                  </div>
-                  {# Row 3: time #}
-                  <small class="text-muted">{{ entry.order.created_at|date:"H:i" }}</small>
-                </div>
-              </button>
-            </h2>
-            <div id="myOrder{{ entry.order.id }}" class="accordion-collapse collapse" data-bs-parent="#accMyOrders">
-              <div class="accordion-body p-2">
-                {# --- Per-dish status --- #}
-                <div class="list-group list-group-flush mb-2">
-                  {% for t in entry.tickets %}
-                    <div class="list-group-item d-flex justify-content-between align-items-center py-2
-                                {% if t.dish_urgency == 'critical' %}list-group-item-danger{% elif t.dish_urgency == 'warn' %}list-group-item-warning{% elif t.status == 'done' %}list-group-item-success{% endif %}">
-                      <div>
-                        <span class="me-1">
-                          {% if t.dish_urgency == 'critical' %}🔥{% elif t.status == 'done' %}✅{% elif t.status == 'taken' %}👩‍🍳{% else %}⏳{% endif %}
-                        </span>
-                        <strong>{{ t.dish_title }}</strong>
-                        <span class="text-muted ms-1">x{{ t.quantity }}</span>
-                        {% if t.dish_urgency == 'critical' %}
-                          <div class="text-danger small fw-bold">⚠️ {% trans "Готово" %} {{ t.done_min }} {% trans "хв тому — остигає!" %}</div>
-                        {% elif t.dish_urgency == 'warn' %}
-                          <div class="text-warning small fw-bold">{% trans "Готово" %} {{ t.done_min }} {% trans "хв — забрати!" %}</div>
-                        {% elif t.status == 'taken' and t.cook_label %}
-                          <div class="text-muted small">{{ t.cook_label }} {% trans "готує" %}</div>
-                        {% elif t.status == 'done' %}
-                          <div class="text-success small fw-bold">{% trans "Готово — забрати!" %}</div>
-                        {% elif t.status == 'pending' %}
-                          <div class="text-muted small">{% trans "В черзі" %}</div>
-                        {% endif %}
-                      </div>
-                      <span class="fw-bold">&euro;{{ t.subtotal|floatformat:2 }}</span>
-                    </div>
-                  {% endfor %}
-                </div>
-
-                {# --- Action buttons --- #}
-                <div class="d-flex flex-wrap gap-2 justify-content-end">
-                  {% if entry.order.status == 'accepted' %}
-                    <form method="post" action="{% url 'waiter:order_verify' entry.order.id %}">
-                      {% csrf_token %}
-                      <button type="submit" class="btn btn-success btn-sm">
-                        <i class="bi bi-check-circle"></i> {% trans "Верифікувати" %}
-                      </button>
-                    </form>
-                  {% elif entry.order.status == 'ready' %}
-                    <form method="post" action="{% url 'waiter:order_delivered' entry.order.id %}">
-                      {% csrf_token %}
-                      <button type="submit" class="btn btn-success btn-sm">
-                        <i class="bi bi-check2-all"></i> {% trans "Доставлено" %}
-                      </button>
-                    </form>
-                  {% endif %}
-                  {% if entry.order.payment_status == 'unpaid' and entry.order.status != 'accepted' %}
-                    <form method="post" action="{% url 'waiter:confirm_payment' entry.order.id %}">
-                      {% csrf_token %}
-                      <button type="submit" class="btn btn-outline-warning btn-sm">
-                        <i class="bi bi-cash"></i> {% trans "Оплату прийнято" %}
-                      </button>
-                    </form>
-                  {% endif %}
-                </div>
-              </div>
-            </div>
-          </div>
+          {% include "components/_waiter_order_accordion_item.html" with entry=entry id_prefix="my" parent_id="accMyOrders" %}
         {% endfor %}
       </div>
     {% else %}
@@ -252,7 +163,7 @@
       </div>
     {% endif %}
 
-    {# --- Unpaid delivered (accordion) --- #}
+    {# Unpaid delivered #}
     {% if unpaid_delivered %}
       <h5 class="mt-4 text-danger"><i class="bi bi-exclamation-triangle"></i> {% trans "Очікують оплати" %}</h5>
       <div class="accordion accordion-flush" id="accUnpaid">
@@ -300,6 +211,69 @@
         {% endfor %}
       </div>
     {% endif %}
+
+  {# ================================================================ #}
+  {# Tab: Моя команда (senior/manager only)                            #}
+  {# ================================================================ #}
+  {% elif active_tab == "team" and is_senior %}
+
+    {% if team_data %}
+      <div class="accordion accordion-flush" id="accTeam">
+        {% for wd in team_data %}
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed"
+                      type="button" data-bs-toggle="collapse"
+                      data-bs-target="#teamW{{ wd.waiter.id }}">
+                <div class="flex-grow-1 me-2">
+                  <div>
+                    <strong>{{ wd.waiter.staff_label }}</strong>
+                    <span class="badge bg-primary ms-1">{{ wd.order_count }}</span>
+                    {% if wd.overdue_count %}
+                      <span class="badge bg-danger ms-1">{{ wd.overdue_count }} {% trans "прострочено" %}</span>
+                    {% endif %}
+                    {% if wd.unpaid_count %}
+                      <span class="badge bg-warning text-dark ms-1">{{ wd.unpaid_count }} {% trans "не сплачено" %}</span>
+                    {% endif %}
+                  </div>
+                  <div class="d-flex justify-content-between mt-1">
+                    <span></span>
+                    {% if wd.cash_total %}
+                      <small class="text-success"><i class="bi bi-cash-stack"></i> &euro;{{ wd.cash_total|floatformat:2 }}</small>
+                    {% endif %}
+                  </div>
+                </div>
+              </button>
+            </h2>
+            <div id="teamW{{ wd.waiter.id }}" class="accordion-collapse collapse" data-bs-parent="#accTeam">
+              <div class="accordion-body p-1">
+                <div class="accordion accordion-flush" id="accTeamOrders">
+                  {% for entry in wd.orders %}
+                    {% include "components/_waiter_order_accordion_item.html" with entry=entry id_prefix="tw" parent_id="accTeamOrders" %}
+                  {% endfor %}
+                </div>
+
+                {# Unpaid delivered for this waiter #}
+                {% if wd.unpaid_orders %}
+                  <h6 class="mt-2 text-danger px-2"><i class="bi bi-exclamation-triangle"></i> {% trans "Не сплачено" %}</h6>
+                  {% for order in wd.unpaid_orders %}
+                    <div class="list-group-item d-flex justify-content-between py-2 px-2">
+                      <span><strong>#{{ order.id }}</strong></span>
+                      <span class="fw-bold">&euro;{{ order.total_price|floatformat:2 }}</span>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> {% trans "Немає активних замовлень у команди" %}
+      </div>
+    {% endif %}
+
   {% endif %}
 
 </div>

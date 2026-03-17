@@ -31,41 +31,14 @@ from orders.services import (
 from user.decorators import role_required
 
 WAITER_ROLES = ("waiter", "senior_waiter", "manager")
+SENIOR_ROLES = ("senior_waiter", "manager")
 
 
-@role_required(*WAITER_ROLES)
-def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
-    """Waiter board — two tabs: new (unclaimed) + my orders."""
-    new_orders = (
-        Order.objects.filter(status=Order.Status.SUBMITTED)
-        .prefetch_related("items__dish")
-        .order_by("created_at")
-    )
-    my_orders_qs = (
-        Order.objects.filter(
-            waiter=request.user,
-            status__in=[
-                Order.Status.ACCEPTED,
-                Order.Status.VERIFIED,
-                Order.Status.IN_PROGRESS,
-                Order.Status.READY,
-            ],
-        )
-        .prefetch_related(
-            "items__dish",
-            "items__kitchen_ticket",
-            "items__kitchen_ticket__assigned_to",
-        )
-        .order_by("created_at")
-    )
-
-    # Build per-order dish/ticket stats
-    now = timezone.now()
-    pickup_warn = settings.DISH_PICKUP_WARN  # minutes
-    pickup_critical = settings.DISH_PICKUP_CRITICAL  # minutes
-    my_orders_enriched = []
-    my_ready_count = 0
-    for order in my_orders_qs:
+def _enrich_orders(orders_qs, now, pickup_warn, pickup_critical):  # type: ignore[no-untyped-def]
+    """Build per-order dish/ticket stats for a queryset of orders."""
+    enriched = []
+    ready_count = 0
+    for order in orders_qs:
         tickets = []
         total_dishes = 0
         done_dishes = 0
@@ -104,9 +77,9 @@ def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
                     "dish_urgency": dish_urgency,
                 }
             )
-        if order.status == Order.Status.READY:
-            my_ready_count += 1
-        my_orders_enriched.append(
+        if order.status == "ready":
+            ready_count += 1
+        enriched.append(
             {
                 "order": order,
                 "tickets": tickets,
@@ -116,6 +89,41 @@ def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
                 "has_overdue": has_overdue,
             }
         )
+    return enriched, ready_count
+
+
+@role_required(*WAITER_ROLES)
+def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
+    """Waiter board — two tabs: new (unclaimed) + my orders."""
+    new_orders = (
+        Order.objects.filter(status=Order.Status.SUBMITTED)
+        .prefetch_related("items__dish")
+        .order_by("created_at")
+    )
+    my_orders_qs = (
+        Order.objects.filter(
+            waiter=request.user,
+            status__in=[
+                Order.Status.ACCEPTED,
+                Order.Status.VERIFIED,
+                Order.Status.IN_PROGRESS,
+                Order.Status.READY,
+            ],
+        )
+        .prefetch_related(
+            "items__dish",
+            "items__kitchen_ticket",
+            "items__kitchen_ticket__assigned_to",
+        )
+        .order_by("created_at")
+    )
+
+    now = timezone.now()
+    pickup_warn = settings.DISH_PICKUP_WARN
+    pickup_critical = settings.DISH_PICKUP_CRITICAL
+    my_orders_enriched, my_ready_count = _enrich_orders(
+        my_orders_qs, now, pickup_warn, pickup_critical
+    )
     # Unpaid delivered
     unpaid_delivered = (
         Order.objects.filter(
@@ -157,6 +165,82 @@ def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
             {"order": order, "wait_min": wait_min, "urgency": urgency}
         )
 
+    # Team tab — only for senior/manager
+    is_senior = request.user.role in SENIOR_ROLES
+    team_data: list[dict] = []
+    if is_senior and tab == "team":
+        from itertools import groupby
+
+        all_active = (
+            Order.objects.filter(
+                status__in=[
+                    Order.Status.ACCEPTED,
+                    Order.Status.VERIFIED,
+                    Order.Status.IN_PROGRESS,
+                    Order.Status.READY,
+                ],
+                waiter__isnull=False,
+            )
+            .select_related("waiter")
+            .prefetch_related(
+                "items__dish",
+                "items__kitchen_ticket",
+                "items__kitchen_ticket__assigned_to",
+            )
+            .order_by("waiter_id", "created_at")
+        )
+        all_unpaid = (
+            Order.objects.filter(
+                status=Order.Status.DELIVERED,
+                payment_status=Order.PaymentStatus.UNPAID,
+                waiter__isnull=False,
+            )
+            .select_related("waiter")
+            .prefetch_related("items__dish")
+            .order_by("waiter_id")
+        )
+        all_cash = (
+            Order.objects.filter(
+                payment_status=Order.PaymentStatus.PAID,
+                payment_method=Order.PaymentMethod.CASH,
+                waiter__isnull=False,
+            )
+            .select_related("waiter")
+            .prefetch_related("items__dish")
+        )
+
+        # Group by waiter
+        unpaid_by_waiter: dict[int, list[Order]] = {}
+        for o in all_unpaid:
+            if o.waiter_id is not None:
+                unpaid_by_waiter.setdefault(o.waiter_id, []).append(o)
+
+        cash_by_waiter: dict[int, Decimal] = {}
+        for o in all_cash:
+            if o.waiter_id is not None:
+                cash_by_waiter[o.waiter_id] = (
+                    cash_by_waiter.get(o.waiter_id, Decimal("0")) + o.total_price
+                )
+
+        for waiter_id, group in groupby(all_active, key=lambda o: o.waiter_id):
+            orders_list = list(group)
+            if not orders_list or waiter_id is None:
+                continue
+            waiter = orders_list[0].waiter
+            enriched, _ = _enrich_orders(orders_list, now, pickup_warn, pickup_critical)
+            overdue_count = sum(1 for e in enriched if e["has_overdue"])
+            team_data.append(
+                {
+                    "waiter": waiter,
+                    "orders": enriched,
+                    "order_count": len(enriched),
+                    "overdue_count": overdue_count,
+                    "unpaid_orders": unpaid_by_waiter.get(waiter_id, []),
+                    "unpaid_count": len(unpaid_by_waiter.get(waiter_id, [])),
+                    "cash_total": cash_by_waiter.get(waiter_id, Decimal("0")),
+                }
+            )
+
     return render(
         request,
         "orders/waiter_order_list.html",
@@ -171,6 +255,8 @@ def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
             "cash_orders": cash_orders,
             "dish_stats": dish_stats,
             "active_tab": tab,
+            "is_senior": is_senior,
+            "team_data": team_data,
         },
     )
 
@@ -349,9 +435,6 @@ def escalation_resolve(
     except ValueError as e:
         messages.error(request, str(e))
     return redirect("waiter:order_list")
-
-
-SENIOR_ROLES = ("senior_waiter", "manager")
 
 
 @role_required(*SENIOR_ROLES)

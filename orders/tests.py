@@ -344,7 +344,20 @@ def test_kitchen_role_cannot_approve(
 
 
 @pytest.mark.django_db
-def test_waiter_dashboard_shows_only_own_orders(
+def test_waiter_dashboard_redirects_to_order_list(
+    client: Client, django_user_model: Any
+) -> None:
+    w1 = django_user_model.objects.create_user(
+        email="w1@test.com", username="w1", password="testpass123", role="waiter"
+    )
+    client.force_login(w1)
+    response = client.get("/waiter/dashboard/")
+    assert response.status_code == 302
+    assert "tab=my" in response["Location"]
+
+
+@pytest.mark.django_db
+def test_waiter_order_list_my_tab_shows_own_orders(
     client: Client, django_user_model: Any
 ) -> None:
     w1 = django_user_model.objects.create_user(
@@ -357,12 +370,12 @@ def test_waiter_dashboard_shows_only_own_orders(
     Order.objects.create(waiter=w2, status=Order.Status.VERIFIED)
 
     client.force_login(w1)
-    response = client.get("/waiter/dashboard/")
+    response = client.get("/waiter/orders/?tab=my")
 
     assert response.status_code == 200
-    orders_ctx = response.context["orders"]
-    assert orders_ctx.count() == 1
-    assert orders_ctx.first().waiter == w1
+    my_orders = response.context["my_orders"]
+    assert len(my_orders) == 1
+    assert my_orders[0]["order"].waiter == w1
 
 
 @pytest.mark.django_db
