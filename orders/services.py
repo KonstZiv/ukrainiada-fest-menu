@@ -276,7 +276,7 @@ def confirm_online_payment_stub(order: Order) -> Order:
             "payment_escalation_level",
         ]
     )
-    log_event(order, f"Оплату онлайн €{order.total_price:.2f} підтверджено")
+    log_event(order, f"Оплата онлайн €{order.total_price:.2f} — успішно 💳")
     return order
 
 
@@ -317,6 +317,6 @@ def confirm_payment_by_senior(order: Order, method: str) -> Order:
     method_label = "готівкою" if method == "cash" else "онлайн"
     log_event(
         order,
-        f"Оплату {method_label} €{order.total_price:.2f} підтверджено (старший офіціант)",
+        f"Оплату {method_label} €{order.total_price:.2f} закрив(ла) старший офіціант",
     )
     return order
