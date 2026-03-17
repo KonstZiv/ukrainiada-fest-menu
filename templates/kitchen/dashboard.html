@@ -1,124 +1,170 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load static i18n %}
 
-{% block title %}Jadran Sun — Кухня{% endblock %}
+{% block header %}{% include "components/_navbar.html" with show_search=False %}{% endblock %}
+{% block order_fab %}{% endblock %}
+{% block title %}Jadran Sun — {% trans "Кухня" %}{% endblock %}
 
 {% block content %}
 <div class="container-fluid mt-3 px-2 px-md-3">
-  <h2><i class="bi bi-fire"></i> Кухня</h2>
 
-  {% if escalated %}
-    <div class="card border-danger mb-3 ticket-card-escalated">
-      <div class="card-header bg-danger text-white">
-        <i class="bi bi-exclamation-triangle"></i> {% blocktrans with count=escalated|length %}Ескальовані ({{ count }}){% endblocktrans %}
-      </div>
-      <ul class="list-group list-group-flush">
-        {% for ticket in escalated %}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-              <strong>{{ ticket.order_item.dish.title }}</strong>
-              <span class="text-muted ms-1">x{{ ticket.order_item.quantity }}</span>
-              <small class="text-muted ms-2">{% blocktrans with order_id=ticket.order_item.order.id %}Замовлення #{{ order_id }}{% endblocktrans %}</small>
-            </div>
-            <span class="badge bg-danger">{{ ticket.get_escalation_level_display }}</span>
-          </li>
-        {% endfor %}
-      </ul>
+  {# --- Page heading --- #}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0"><i class="bi bi-fire"></i> {% trans "Кухня" %}</h2>
+    <div id="sound-banner" class="kitchen-sound-banner">
+      <i class="bi bi-volume-mute"></i> {% trans "Натисніть для звуку" %}
     </div>
+  </div>
+
+  {# --- Django messages --- #}
+  {% if messages %}
+  <div class="mb-2">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show py-2 mb-1" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+  </div>
   {% endif %}
 
-  {# Kanban: 1 col mobile, 2 cols tablet, 3 cols desktop #}
-  <div class="kitchen-kanban">
-
-    {# --- Черга (Pending) --- #}
-    <div class="kanban-col">
-      <div class="card mb-3 h-100">
-        <div class="card-header bg-warning text-dark">
-          <i class="bi bi-hourglass-split"></i> {% trans "Черга" %} (<span id="pending-count">{{ pending|length }}</span>)
-        </div>
-        <ul class="list-group list-group-flush">
-          {% for ticket in pending %}
-            <li class="list-group-item ticket-card-pending p-2">
-              <form method="post" action="{% url 'kitchen:ticket_take' ticket.id %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary btn-kitchen-action w-100 text-start">
-                  <strong>{{ ticket.order_item.dish.title }}</strong> x{{ ticket.order_item.quantity }}
-                  <br>
-                  <small>#{{ ticket.order_item.order.id }} · {{ ticket.order_item.order.waiter.get_full_name|default:"—" }} · {{ ticket.created_at|timesince }}</small>
-                </button>
-              </form>
-            </li>
-          {% empty %}
-            <li class="list-group-item text-muted text-center py-4">{% trans "Черга порожня" %}</li>
-          {% endfor %}
-        </ul>
-      </div>
+  {# ================================================================== #}
+  {# ESCALATED — always visible for supervisor/manager (both layouts)   #}
+  {# ================================================================== #}
+  {% if escalated_groups %}
+  <div class="card border-danger mb-3">
+    <div class="card-header bg-danger text-white py-2">
+      <i class="bi bi-exclamation-triangle"></i> {% trans "Ескалація" %}
+      <span class="badge bg-light text-danger ms-1">{{ escalated_count }}</span>
     </div>
-
-    {# --- В роботі (Taken) --- #}
-    <div class="kanban-col">
-      <div class="card mb-3 h-100">
-        <div class="card-header bg-info text-white">
-          <i class="bi bi-gear"></i> {% blocktrans with count=my_taken|length %}В роботі ({{ count }}){% endblocktrans %}
+    <div class="list-group list-group-flush">
+      {% for group in escalated_groups %}
+      <div class="kitchen-order-group">
+        <div class="kitchen-order-group-header">
+          #{{ group.order_id }} &middot; {{ group.waiter_label }}
         </div>
-        <ul class="list-group list-group-flush">
-          {% for ticket in my_taken %}
-            <li class="list-group-item ticket-card-taken p-2">
-              <form method="post" action="{% url 'kitchen:ticket_done' ticket.id %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-success btn-kitchen-action w-100 text-start">
-                  <strong>{{ ticket.order_item.dish.title }}</strong> x{{ ticket.order_item.quantity }}
-                  <br>
-                  <small>#{{ ticket.order_item.order.id }} · {{ ticket.order_item.order.waiter.get_full_name|default:"—" }} · {{ ticket.taken_at|timesince }}</small>
-                </button>
-              </form>
-            </li>
-          {% empty %}
-            <li class="list-group-item text-muted text-center py-4">{% trans "Нічого в роботі" %}</li>
-          {% endfor %}
-        </ul>
+        {% for t in group.tickets %}
+          {% include "kitchen/_ticket_card.html" with t=t action_type="take" %}
+        {% endfor %}
       </div>
+      {% endfor %}
     </div>
-
-    {# --- Готово сьогодні (Done) --- #}
-    <div class="kanban-col">
-      <div class="card mb-3 h-100">
-        <div class="card-header bg-success text-white">
-          <i class="bi bi-check-circle"></i> {% blocktrans with count=my_done|length %}Готово ({{ count }}){% endblocktrans %}
-        </div>
-        <ul class="list-group list-group-flush">
-          {% for ticket in my_done %}
-            <li class="list-group-item ticket-card-done">
-              <div class="d-flex justify-content-between align-items-start">
-                <div>
-                  <strong>{{ ticket.order_item.dish.title }}</strong>
-                  <span class="text-muted ms-1">x{{ ticket.order_item.quantity }}</span>
-                  <br>
-                  <small class="text-muted">{{ ticket.done_at|time:"H:i" }}</small>
-                  <small class="text-muted detail-md ms-1">{{ ticket.order_item.order.waiter.get_full_name|default:ticket.order_item.order.waiter.email }}</small>
-                </div>
-                <div class="d-flex gap-2">
-                  <a href="{% url 'kitchen:handoff_qr' ticket.id %}"
-                     class="btn btn-outline-primary btn-kitchen-action">
-                    <i class="bi bi-qr-code"></i> <span class="d-none d-md-inline">{% trans "QR" %}</span>
-                  </a>
-                  <form method="post" action="{% url 'kitchen:manual_handoff' ticket.id %}"
-                        class="d-inline">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-secondary btn-kitchen-action">
-                      <i class="bi bi-hand-index"></i> <span class="d-none d-md-inline">{% trans "Вручну" %}</span>
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </li>
-          {% empty %}
-            <li class="list-group-item text-muted text-center py-4">{% trans "Ще нічого не приготовлено" %}</li>
-          {% endfor %}
-        </ul>
-      </div>
-    </div>
-
   </div>
+  {% endif %}
+
+  {# ================================================================== #}
+  {# MOBILE: Tab pills (< md)                                          #}
+  {# ================================================================== #}
+  <div class="d-md-none">
+    <ul class="nav nav-pills kitchen-tab-pills mb-3 gap-1">
+      <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'queue' %}active{% endif %}"
+           href="?tab=queue">
+          {% trans "Черга" %}
+          {% if pending_count %}<span class="badge {% if active_tab == 'queue' %}bg-light text-primary{% else %}bg-primary{% endif %} ms-1">{{ pending_count }}</span>{% endif %}
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'in_progress' %}active{% endif %}"
+           href="?tab=in_progress">
+          {% trans "В роботі" %}
+          {% if taken_count %}<span class="badge {% if active_tab == 'in_progress' %}bg-light text-primary{% else %}bg-info{% endif %} ms-1">{{ taken_count }}</span>{% endif %}
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'done' %}active{% endif %}"
+           href="?tab=done">
+          {% trans "Готово" %}
+          {% if done_count %}<span class="badge {% if active_tab == 'done' %}bg-light text-primary{% else %}bg-success{% endif %} ms-1">{{ done_count }}</span>{% endif %}
+        </a>
+      </li>
+      {% if is_supervisor %}
+      <li class="nav-item">
+        <a class="nav-link {% if active_tab == 'team' %}active{% endif %}"
+           href="?tab=team">
+          {% trans "Команда" %}
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+
+    {# --- Mobile: active tab content --- #}
+    {% if active_tab == "queue" %}
+      {% include "kitchen/_column_content.html" with groups=pending_groups action_type="take" empty_text="Черга порожня" %}
+    {% elif active_tab == "in_progress" %}
+      {% include "kitchen/_column_content.html" with groups=taken_groups action_type="done" empty_text="Нічого в роботі" %}
+    {% elif active_tab == "done" %}
+      {% include "kitchen/_column_content.html" with groups=done_groups action_type="handoff" empty_text="Ще нічого не приготовлено" %}
+    {% elif active_tab == "team" and is_supervisor %}
+      {% include "kitchen/_team_section.html" %}
+    {% endif %}
+  </div>
+
+  {# ================================================================== #}
+  {# DESKTOP: KanBan columns (>= md)                                   #}
+  {# ================================================================== #}
+  <div class="d-none d-md-block">
+    <div class="kitchen-kanban">
+
+      {# --- Черга (Pending) --- #}
+      <div class="kanban-col">
+        <div class="card mb-3 h-100">
+          <div class="card-header bg-warning text-dark py-2">
+            <i class="bi bi-hourglass-split"></i> {% trans "Черга" %}
+            <span class="badge bg-dark ms-1" id="pending-count">{{ pending_count }}</span>
+          </div>
+          <div class="card-body p-2">
+            {% include "kitchen/_column_content.html" with groups=pending_groups action_type="take" empty_text="Черга порожня" %}
+          </div>
+        </div>
+      </div>
+
+      {# --- В роботі (Taken) --- #}
+      <div class="kanban-col">
+        <div class="card mb-3 h-100">
+          <div class="card-header bg-info text-white py-2">
+            <i class="bi bi-gear"></i> {% trans "В роботі" %}
+            <span class="badge bg-dark ms-1" id="taken-count">{{ taken_count }}</span>
+          </div>
+          <div class="card-body p-2">
+            {% include "kitchen/_column_content.html" with groups=taken_groups action_type="done" empty_text="Нічого в роботі" %}
+          </div>
+        </div>
+      </div>
+
+      {# --- Готово (Done) --- #}
+      <div class="kanban-col">
+        <div class="card mb-3 h-100">
+          <div class="card-header bg-success text-white py-2">
+            <i class="bi bi-check-circle"></i> {% trans "Готово" %}
+            <span class="badge bg-dark ms-1" id="done-count">{{ done_count }}</span>
+          </div>
+          <div class="card-body p-2">
+            {% include "kitchen/_column_content.html" with groups=done_groups action_type="handoff" empty_text="Ще нічого не приготовлено" %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    {# --- Desktop: Team section below KanBan --- #}
+    {% if is_supervisor %}
+    <div class="mt-3">
+      <h5><i class="bi bi-people"></i> {% trans "Команда" %}</h5>
+      {% include "kitchen/_team_section.html" %}
+    </div>
+    {% endif %}
+  </div>
+
 </div>
+{% endblock %}
+
+
+{% block extra_js %}
+{# TODO: remove when SSE/ASGI is deployed #}
+<script>
+  window.KITCHEN_POLL_URL = "{% url 'kitchen:poll_data' %}";
+  window.KITCHEN_LAST_ESCALATION_ID = {{ last_escalation_id|default:0 }};
+</script>
+<script src="{% static 'js/kitchen_poll.js' %}" defer></script>
 {% endblock %}

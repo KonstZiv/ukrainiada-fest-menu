@@ -1,0 +1,28 @@
+{# _column_content.html — Renders order groups with ticket cards #}
+{# Context: groups (list of order-group dicts), action_type, empty_text #}
+
+{% load i18n %}
+
+{% for group in groups %}
+<div class="kitchen-order-group">
+  <div class="kitchen-order-group-header d-flex justify-content-between align-items-center">
+    <span>#{{ group.order_id }} &middot; {{ group.waiter_label }}</span>
+    {% if group.max_urgency == "critical" or group.max_urgency == "escalated" %}
+      <span class="badge bg-danger">{{ group.tickets|length }} {% trans "стр." %}</span>
+    {% elif group.max_urgency == "warn" %}
+      <span class="badge bg-warning text-dark">{{ group.tickets|length }} {% trans "стр." %}</span>
+    {% else %}
+      <span class="badge bg-secondary">{{ group.tickets|length }} {% trans "стр." %}</span>
+    {% endif %}
+  </div>
+  <div class="list-group list-group-flush">
+    {% for t in group.tickets %}
+      {% include "kitchen/_ticket_card.html" with t=t action_type=action_type %}
+    {% endfor %}
+  </div>
+</div>
+{% empty %}
+<div class="text-muted text-center py-4">
+  <i class="bi bi-inbox"></i> {% trans empty_text %}
+</div>
+{% endfor %}

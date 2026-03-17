@@ -192,6 +192,7 @@ EVENTSTREAM_KEEPALIVE = 15  # seconds — less than typical 30s proxy timeout
 
 HANDOFF_TOKEN_TTL: int = config("HANDOFF_TOKEN_TTL", default=120, cast=int)  # seconds
 KITCHEN_TIMEOUT: int = config("KITCHEN_TIMEOUT", default=5, cast=int)
+KITCHEN_WARN_MINUTES: int = config("KITCHEN_WARN_MINUTES", default=3, cast=int)
 MANAGER_TIMEOUT: int = config("MANAGER_TIMEOUT", default=5, cast=int)
 PAY_TIMEOUT: int = config("PAY_TIMEOUT", default=10, cast=int)
 SPEED_INTERVAL_KITCHEN: int = config("SPEED_INTERVAL_KITCHEN", default=15, cast=int)

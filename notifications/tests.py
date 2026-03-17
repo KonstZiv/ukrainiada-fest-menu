@@ -29,14 +29,14 @@ def test_channels_for_kitchen() -> None:
     user = MagicMock(spec=User)
     user.id = 5
     user.role = User.Role.KITCHEN
-    assert channels_for_user(user) == ["kitchen-5"]
+    assert channels_for_user(user) == ["kitchen-5", "kitchen-broadcast"]
 
 
 def test_channels_for_kitchen_supervisor() -> None:
     user = MagicMock(spec=User)
     user.id = 3
     user.role = User.Role.KITCHEN_SUPERVISOR
-    assert channels_for_user(user) == ["kitchen-3"]
+    assert channels_for_user(user) == ["kitchen-3", "kitchen-broadcast"]
 
 
 def test_channels_for_waiter() -> None:
@@ -56,7 +56,7 @@ def test_channels_for_senior_waiter() -> None:
 def test_channels_for_manager() -> None:
     user = MagicMock(spec=User)
     user.role = User.Role.MANAGER
-    assert channels_for_user(user) == ["manager"]
+    assert channels_for_user(user) == ["manager", "kitchen-broadcast"]
 
 
 # --- SSE view tests ---
@@ -167,6 +167,6 @@ def test_staff_page_is_lightweight(client: Client, django_user_model: Any) -> No
         email="w@test.com", username="w", password="testpass123", role="waiter"
     )
     client.force_login(waiter)
-    response = client.get("/waiter/dashboard/")
+    response = client.get("/waiter/dashboard/", follow=True)
     assert response.status_code == 200
     assert len(response.content) < 50 * 1024

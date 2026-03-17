@@ -1,0 +1,60 @@
+{# _team_section.html — Supervisor "Команда" view: all kitchen staff stats #}
+{# Context: team_data (list of {cook, pending, taken, done, escalated}) #}
+
+{% load i18n %}
+
+{% if team_data %}
+<div class="accordion" id="accKitchenTeam">
+  {% for member in team_data %}
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button collapsed py-2" type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#cook-{{ member.cook.id }}"
+              aria-expanded="false">
+        <div class="d-flex align-items-center gap-2 w-100 kitchen-team-stats">
+          {% if member.cook.avatar %}
+            <img src="{{ member.cook.avatar.url }}" alt=""
+                 style="width: 28px; height: 28px; object-fit: cover; border-radius: var(--radius-sm);">
+          {% else %}
+            <i class="bi bi-person-circle" style="font-size: 1.3rem;"></i>
+          {% endif %}
+          <strong>{{ member.cook.staff_label }}</strong>
+          <div class="ms-auto d-flex gap-1">
+            {% if member.escalated %}
+              <span class="badge bg-danger">{{ member.escalated }} {% trans "ескал." %}</span>
+            {% endif %}
+            <span class="badge bg-warning text-dark">{{ member.pending }} {% trans "черга" %}</span>
+            <span class="badge bg-info">{{ member.taken }} {% trans "в роб." %}</span>
+            <span class="badge bg-success">{{ member.done }} {% trans "готово" %}</span>
+          </div>
+        </div>
+      </button>
+    </h2>
+    <div id="cook-{{ member.cook.id }}" class="accordion-collapse collapse"
+         data-bs-parent="#accKitchenTeam">
+      <div class="accordion-body py-2 px-3">
+        <div class="row text-center">
+          <div class="col-4">
+            <div class="fs-3 fw-bold text-warning">{{ member.pending }}</div>
+            <small class="text-muted">{% trans "В черзі" %}</small>
+          </div>
+          <div class="col-4">
+            <div class="fs-3 fw-bold text-info">{{ member.taken }}</div>
+            <small class="text-muted">{% trans "Готує" %}</small>
+          </div>
+          <div class="col-4">
+            <div class="fs-3 fw-bold text-success">{{ member.done }}</div>
+            <small class="text-muted">{% trans "Готово" %}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-muted text-center py-4">
+  <i class="bi bi-people"></i> {% trans "Немає кухарів у системі" %}
+</div>
+{% endif %}

@@ -127,7 +127,7 @@
             {% trans "ЗАМОВЛЕННЯ" %}
           </a>
           <div class="vr-custom"></div>
-        {% elif user.role == 'kitchen' %}
+        {% elif user.role == 'kitchen' or user.role == 'kitchen_supervisor' %}
           <a href="{% url 'kitchen:dashboard' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
              style="font-size: 0.8rem; letter-spacing: 0.05em;">
             {% trans "КУХНЯ" %}
@@ -137,6 +137,11 @@
           <a href="{% url 'waiter:order_list' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
              style="font-size: 0.8rem; letter-spacing: 0.05em;">
             {% trans "ЗАМОВЛЕННЯ" %}
+          </a>
+          <div class="vr-custom"></div>
+          <a href="{% url 'kitchen:dashboard' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
+             style="font-size: 0.8rem; letter-spacing: 0.05em;">
+            {% trans "КУХНЯ" %}
           </a>
           <div class="vr-custom"></div>
         {% endif %}

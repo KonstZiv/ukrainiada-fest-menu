@@ -1,0 +1,64 @@
+{# _ticket_card.html — Single dish ticket within an order group #}
+{# Context: t (enriched ticket dict), action_type ("take"|"done"|"handoff") #}
+
+<div class="list-group-item p-2
+     {% if t.urgency == 'critical' or t.urgency == 'escalated' %}kitchen-urgency-critical
+     {% elif t.urgency == 'warn' %}kitchen-urgency-warn
+     {% else %}ticket-card-{{ t.ticket.status }}{% endif %}"
+     data-ticket-id="{{ t.ticket.id }}">
+
+  <div class="d-flex justify-content-between align-items-center gap-2">
+    {# --- Dish info --- #}
+    <div class="flex-grow-1">
+      <strong>{{ t.dish_title }}</strong>
+      <span class="text-muted">x{{ t.quantity }}</span>
+
+      {% if t.urgency == 'escalated' %}
+        <span class="badge bg-danger">{{ t.ticket.get_escalation_level_display }}</span>
+      {% elif t.urgency == 'critical' %}
+        <span class="badge bg-danger">Прострочено</span>
+      {% elif t.urgency == 'warn' %}
+        <span class="badge bg-warning text-dark">Терміново!</span>
+      {% endif %}
+
+      <div class="text-muted" style="font-size: 0.78rem;">
+        {{ t.age_min }} хв
+        {% if t.ticket.assigned_to and action_type != "take" %}
+          &middot; {{ t.ticket.assigned_to.staff_label }}
+        {% endif %}
+      </div>
+    </div>
+
+    {# --- Action button --- #}
+    <div class="flex-shrink-0">
+      {% if action_type == "take" %}
+        <form method="post" action="{% url 'kitchen:ticket_take' t.ticket.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary btn-sm" style="min-height: 44px; min-width: 70px;">
+            <i class="bi bi-hand-index"></i> Взяти
+          </button>
+        </form>
+      {% elif action_type == "done" %}
+        <form method="post" action="{% url 'kitchen:ticket_done' t.ticket.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-success btn-sm" style="min-height: 44px; min-width: 70px;">
+            <i class="bi bi-check-lg"></i> Готово
+          </button>
+        </form>
+      {% elif action_type == "handoff" %}
+        <div class="d-flex gap-1">
+          <a href="{% url 'kitchen:handoff_qr' t.ticket.id %}"
+             class="btn btn-outline-primary btn-sm" style="min-height: 44px;">
+            <i class="bi bi-qr-code"></i>
+          </a>
+          <form method="post" action="{% url 'kitchen:manual_handoff' t.ticket.id %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-secondary btn-sm" style="min-height: 44px;">
+              <i class="bi bi-hand-index"></i>
+            </button>
+          </form>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
