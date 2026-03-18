@@ -260,19 +260,18 @@ def kitchen_stats(
         row["assigned_to_id"]: row for row in done_data
     }
 
-    # Query 2: escalation counts per cook (via kitchen_assignments)
+    # Query 2: escalation counts per cook (by assigned_to — actual executor)
     esc_data = (
         KitchenTicket.objects.filter(
-            order_item__dish__kitchen_assignments__kitchen_user_id__in=cook_ids,
+            assigned_to_id__in=cook_ids,
             escalation_level__gte=KitchenTicket.EscalationLevel.SUPERVISOR,
         )
         .filter(time_q_created)
-        .values("order_item__dish__kitchen_assignments__kitchen_user_id")
+        .values("assigned_to_id")
         .annotate(cnt=Count("id"))
     )
     esc_by_cook: dict[int, int] = {
-        row["order_item__dish__kitchen_assignments__kitchen_user_id"]: row["cnt"]
-        for row in esc_data
+        row["assigned_to_id"]: row["cnt"] for row in esc_data
     }
 
     # Query 3: auto-skip counts per cook (by actor_label)
