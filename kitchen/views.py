@@ -4,10 +4,14 @@ from __future__ import annotations
 
 import datetime
 import io
+from itertools import groupby
+from typing import Any
 
 import qrcode  # type: ignore[import-untyped]
+from django.conf import settings
 from django.contrib import messages
-from django.http import HttpResponse
+from django.db.models import Count, Max, Q, QuerySet
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -26,64 +30,299 @@ from user.decorators import role_required
 from user.models import User
 
 KITCHEN_ROLES = ("kitchen", "kitchen_supervisor", "manager")
+SUPERVISOR_ROLES = ("kitchen_supervisor", "manager")
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _enrich_tickets(
+    tickets_qs: QuerySet[KitchenTicket],
+    now: datetime.datetime,
+) -> list[dict[str, Any]]:
+    """Annotate each ticket with urgency and display data."""
+    warn_min: int = settings.KITCHEN_WARN_MINUTES
+    critical_min: int = settings.KITCHEN_TIMEOUT
+    enriched: list[dict[str, Any]] = []
+
+    for ticket in tickets_qs:
+        if ticket.status == KitchenTicket.Status.TAKEN and ticket.taken_at:
+            age_min = int((now - ticket.taken_at).total_seconds() / 60)
+        else:
+            age_min = int((now - ticket.created_at).total_seconds() / 60)
+
+        if ticket.escalation_level >= KitchenTicket.EscalationLevel.SUPERVISOR:
+            urgency = "escalated"
+        elif age_min >= critical_min:
+            urgency = "critical"
+        elif age_min >= warn_min:
+            urgency = "warn"
+        else:
+            urgency = "normal"
+
+        waiter = ticket.order_item.order.waiter
+        enriched.append(
+            {
+                "ticket": ticket,
+                "dish_title": ticket.order_item.dish.title,
+                "quantity": 1,
+                "order_id": ticket.order_item.order_id,
+                "waiter_label": waiter.staff_label if waiter else "—",
+                "age_min": age_min,
+                "urgency": urgency,
+                "escalation_level": ticket.escalation_level,
+            }
+        )
+    return enriched
+
+
+def _group_by_order(
+    enriched_tickets: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Group enriched tickets by order_id."""
+    urgency_rank = {"normal": 0, "warn": 1, "critical": 2, "escalated": 3}
+    sorted_tickets = sorted(enriched_tickets, key=lambda t: t["order_id"])
+    groups: list[dict[str, Any]] = []
+    for order_id, group_iter in groupby(sorted_tickets, key=lambda t: t["order_id"]):
+        tickets = list(group_iter)
+        max_urgency = max(tickets, key=lambda t: urgency_rank[t["urgency"]])["urgency"]
+        groups.append(
+            {
+                "order_id": order_id,
+                "waiter_label": tickets[0]["waiter_label"],
+                "tickets": tickets,
+                "max_urgency": max_urgency,
+            }
+        )
+    return groups
+
+
+def _today_start() -> datetime.datetime:
+    """Return the start of today as an aware datetime."""
+    return timezone.make_aware(
+        datetime.datetime.combine(timezone.localdate(), datetime.time.min)
+    )
+
+
+# ---------------------------------------------------------------------------
+# Dashboard
+# ---------------------------------------------------------------------------
 
 
 @role_required(*KITCHEN_ROLES)
 def kitchen_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
-    """Kitchen dashboard — pending queue, my taken, my done today."""
+    """Kitchen dashboard — tabs: queue, in_progress, done, team."""
     user = request.user
+    now = timezone.now()
+    tab = request.GET.get("tab", "queue")
+    is_supervisor = user.role in SUPERVISOR_ROLES
 
-    # Pending — own dishes for kitchen, all for supervisor/manager
+    # --- Pending (queue) ---
     if user.role == user.Role.KITCHEN:
-        pending = get_pending_tickets_for_user(user.id)
+        pending_qs = get_pending_tickets_for_user(user.id).select_related(
+            "order_item__order__waiter"
+        )
     else:
-        pending = KitchenTicket.objects.filter(
+        pending_qs = KitchenTicket.objects.filter(
             status=KitchenTicket.Status.PENDING
-        ).select_related("order_item__dish", "order_item__order")
+        ).select_related("order_item__dish", "order_item__order__waiter")
 
-    # Escalated — separate block for supervisor/manager
-    escalated = KitchenTicket.objects.none()
-    if user.role in (user.Role.KITCHEN_SUPERVISOR, user.Role.MANAGER):
+    pending_enriched = _enrich_tickets(pending_qs, now)
+    pending_groups = _group_by_order(pending_enriched)
+
+    # --- Escalated (supervisor/manager only) ---
+    escalated_groups: list[dict[str, Any]] = []
+    escalated_count = 0
+    if is_supervisor:
         level = (
             KitchenTicket.EscalationLevel.SUPERVISOR
             if user.role == user.Role.KITCHEN_SUPERVISOR
             else KitchenTicket.EscalationLevel.MANAGER
         )
-        escalated = KitchenTicket.objects.filter(
+        escalated_qs = KitchenTicket.objects.filter(
             status=KitchenTicket.Status.PENDING,
             escalation_level__gte=level,
-        ).select_related("order_item__dish", "order_item__order")
+        ).select_related("order_item__dish", "order_item__order__waiter")
+        escalated_enriched = _enrich_tickets(escalated_qs, now)
+        escalated_groups = _group_by_order(escalated_enriched)
+        escalated_count = len(escalated_enriched)
 
-    # My taken tickets
-    my_taken = KitchenTicket.objects.filter(
+    # --- Taken (in_progress) ---
+    taken_qs = KitchenTicket.objects.filter(
         status=KitchenTicket.Status.TAKEN,
         assigned_to=user,
-    ).select_related("order_item__dish", "order_item__order")
+    ).select_related("order_item__dish", "order_item__order__waiter")
+    taken_enriched = _enrich_tickets(taken_qs, now)
+    taken_groups = _group_by_order(taken_enriched)
 
-    # My done today
-    today_start = timezone.make_aware(
-        datetime.datetime.combine(timezone.localdate(), datetime.time.min)
-    )
-    my_done = (
+    # --- Done (still on kitchen, not handed to waiter yet) ---
+    done_qs = (
         KitchenTicket.objects.filter(
             status=KitchenTicket.Status.DONE,
             assigned_to=user,
-            done_at__gte=today_start,
+            handed_off_at__isnull=True,
         )
         .select_related("order_item__dish", "order_item__order__waiter")
         .order_by("-done_at")
     )
+    done_enriched = _enrich_tickets(done_qs, now)
+    done_groups = _group_by_order(done_enriched)
+
+    # --- Team data (supervisor/manager, only when tab == "team") ---
+    team_data: list[dict[str, Any]] = []
+    if is_supervisor and tab == "team":
+        today = _today_start()
+        kitchen_users = (
+            User.objects.filter(
+                role__in=[User.Role.KITCHEN, User.Role.KITCHEN_SUPERVISOR],
+            )
+            .annotate(
+                pending_count=Count(
+                    "kitchen_assignments__dish__order_items__kitchen_tickets",
+                    filter=Q(
+                        kitchen_assignments__dish__order_items__kitchen_tickets__status=KitchenTicket.Status.PENDING,
+                    ),
+                ),
+                taken_count=Count(
+                    "kitchen_tickets",
+                    filter=Q(kitchen_tickets__status=KitchenTicket.Status.TAKEN),
+                ),
+                done_count=Count(
+                    "kitchen_tickets",
+                    filter=Q(
+                        kitchen_tickets__status=KitchenTicket.Status.DONE,
+                        kitchen_tickets__done_at__gte=today,
+                    ),
+                ),
+                escalated_count=Count(
+                    "kitchen_assignments__dish__order_items__kitchen_tickets",
+                    filter=Q(
+                        kitchen_assignments__dish__order_items__kitchen_tickets__status=KitchenTicket.Status.PENDING,
+                        kitchen_assignments__dish__order_items__kitchen_tickets__escalation_level__gte=KitchenTicket.EscalationLevel.SUPERVISOR,
+                    ),
+                ),
+            )
+            .order_by("first_name", "email")
+        )
+        for cook in kitchen_users:
+            team_data.append(
+                {
+                    "cook": cook,
+                    "pending": cook.pending_count,
+                    "taken": cook.taken_count,
+                    "done": cook.done_count,
+                    "escalated": cook.escalated_count,
+                }
+            )
+
+    # Last escalation id — for polling comparison
+    last_esc = KitchenTicket.objects.filter(
+        escalation_level__gte=KitchenTicket.EscalationLevel.SUPERVISOR,
+    ).aggregate(last_id=Max("id"))
+    last_escalation_id: int = last_esc["last_id"] or 0
 
     return render(
         request,
         "kitchen/dashboard.html",
         {
-            "pending": pending,
-            "escalated": escalated,
-            "my_taken": my_taken,
-            "my_done": my_done,
+            "active_tab": tab,
+            "pending_groups": pending_groups,
+            "taken_groups": taken_groups,
+            "done_groups": done_groups,
+            "escalated_groups": escalated_groups,
+            "pending_count": len(pending_enriched),
+            "taken_count": len(taken_enriched),
+            "done_count": len(done_enriched),
+            "escalated_count": escalated_count,
+            "is_supervisor": is_supervisor,
+            "team_data": team_data,
+            "last_escalation_id": last_escalation_id,
         },
     )
+
+
+# ---------------------------------------------------------------------------
+# Polling endpoint (temporary — remove when SSE/ASGI is deployed)
+# ---------------------------------------------------------------------------
+
+
+@role_required(*KITCHEN_ROLES)
+def kitchen_poll_data(request: AuthenticatedHttpRequest) -> HttpResponse:
+    """Return kitchen dashboard counts as JSON for polling.
+
+    Optimized: single aggregate query for taken/done counts,
+    separate query for pending (role-dependent filter).
+    """
+    user = request.user
+
+    # Pending count depends on role (regular cook sees only assigned dishes)
+    if user.role == user.Role.KITCHEN:
+        pending_count = get_pending_tickets_for_user(user.id).count()
+    else:
+        pending_count = KitchenTicket.objects.filter(
+            status=KitchenTicket.Status.PENDING
+        ).count()
+
+    # Single aggregate for taken + done + escalated + last_esc_id
+    is_supervisor = user.role in SUPERVISOR_ROLES
+    esc_level = (
+        KitchenTicket.EscalationLevel.SUPERVISOR
+        if user.role == user.Role.KITCHEN_SUPERVISOR
+        else KitchenTicket.EscalationLevel.MANAGER
+    )
+    counts = KitchenTicket.objects.aggregate(
+        taken_count=Count(
+            "id",
+            filter=Q(status=KitchenTicket.Status.TAKEN, assigned_to=user),
+        ),
+        done_count=Count(
+            "id",
+            filter=Q(
+                status=KitchenTicket.Status.DONE,
+                assigned_to=user,
+                handed_off_at__isnull=True,
+            ),
+        ),
+        escalated_count=Count(
+            "id",
+            filter=Q(
+                status=KitchenTicket.Status.PENDING,
+                escalation_level__gte=esc_level,
+            ),
+        ),
+        last_esc_id=Max(
+            "id",
+            filter=Q(
+                escalation_level__gte=KitchenTicket.EscalationLevel.SUPERVISOR,
+            ),
+        ),
+    )
+    taken_count: int = counts["taken_count"]
+    done_count: int = counts["done_count"]
+    escalated_count: int = counts["escalated_count"] if is_supervisor else 0
+    last_escalation_id: int = counts["last_esc_id"] or 0
+
+    # Compare with client-side known state
+    client_last = int(request.GET.get("last_esc", "0") or "0")
+    has_new_escalation = last_escalation_id > client_last
+
+    return JsonResponse(
+        {
+            "pending_count": pending_count,
+            "taken_count": taken_count,
+            "done_count": done_count,
+            "escalated_count": escalated_count,
+            "has_new_escalation": has_new_escalation,
+            "last_escalation_id": last_escalation_id,
+        }
+    )
+
+
+# ---------------------------------------------------------------------------
+# Ticket actions
+# ---------------------------------------------------------------------------
 
 
 @role_required(*KITCHEN_ROLES)
@@ -95,20 +334,27 @@ def ticket_take(request: AuthenticatedHttpRequest, ticket_id: int) -> HttpRespon
         take_ticket(ticket, kitchen_user=request.user)
     except ValueError as e:
         messages.error(request, str(e))
-    return redirect("kitchen:dashboard")
+    tab = request.POST.get("tab", "queue")
+    return redirect(f"{reverse('kitchen:dashboard')}?tab={tab}")
 
 
 @role_required(*KITCHEN_ROLES)
 @require_POST
 def ticket_done(request: AuthenticatedHttpRequest, ticket_id: int) -> HttpResponse:
-    """Kitchen staff marks a taken ticket as done."""
+    """Kitchen staff marks a ticket as done (auto-takes if PENDING)."""
     ticket = get_object_or_404(KitchenTicket, pk=ticket_id)
     try:
-        mark_ticket_done(ticket, kitchen_user=request.user)
-        messages.success(request, f"Страва '{ticket.order_item.dish.title}' готова!")
+        ticket, skipped = mark_ticket_done(ticket, kitchen_user=request.user)
+        if skipped:
+            dish_title = ticket.order_item.dish.title
+            messages.warning(
+                request,
+                f"'{dish_title}' — пропущено: {', '.join(skipped)}",
+            )
     except ValueError as e:
         messages.error(request, str(e))
-    return redirect("kitchen:dashboard")
+    tab = request.POST.get("tab", "in_progress")
+    return redirect(f"{reverse('kitchen:dashboard')}?tab={tab}")
 
 
 @role_required(*KITCHEN_ROLES)
@@ -178,12 +424,15 @@ def ticket_manual_handoff(
         assigned_to=request.user,
         status=KitchenTicket.Status.DONE,
     )
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
     try:
         manual_handoff(ticket, kitchen_user=request.user)
-        messages.success(
-            request,
-            f"Передачу '{ticket.order_item.dish.title}' відмічено вручну.",
-        )
+        dish_title = ticket.order_item.dish.title
+        if is_ajax:
+            return JsonResponse({"ok": True, "dish": dish_title})
     except ValueError as e:
+        if is_ajax:
+            return JsonResponse({"ok": False, "error": str(e)}, status=400)
         messages.error(request, str(e))
-    return redirect("kitchen:dashboard")
+    tab = request.POST.get("tab", "done")
+    return redirect(f"{reverse('kitchen:dashboard')}?tab={tab}")

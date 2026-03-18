@@ -29,7 +29,15 @@ class _FakeSession(dict):  # type: ignore[type-arg]
 
 def test_order_status_flow_values() -> None:
     statuses = {s.value for s in Order.Status}
-    expected = {"draft", "submitted", "approved", "in_progress", "ready", "delivered"}
+    expected = {
+        "draft",
+        "submitted",
+        "accepted",
+        "verified",
+        "in_progress",
+        "ready",
+        "delivered",
+    }
     assert statuses == expected
 
 
@@ -222,7 +230,7 @@ def test_order_qr_returns_png(client: Client) -> None:
 
 @pytest.mark.django_db
 def test_order_qr_not_available_for_approved(client: Client) -> None:
-    order = Order.objects.create(status=Order.Status.APPROVED)
+    order = Order.objects.create(status=Order.Status.VERIFIED)
     response = client.get(f"/order/{order.id}/qr/?token={order.access_token}")
     assert response.status_code == 404
 
@@ -298,9 +306,10 @@ def test_approve_order_creates_kitchen_tickets(
 
     assert response.status_code == 302
     order.refresh_from_db()
-    assert order.status == Order.Status.APPROVED
+    assert order.status == Order.Status.VERIFIED
     assert order.waiter == waiter
-    assert KitchenTicket.objects.filter(order_item__order=order).count() == 1
+    # quantity=2 → 2 tickets (one per portion)
+    assert KitchenTicket.objects.filter(order_item__order=order).count() == 2
 
 
 @pytest.mark.django_db
@@ -308,14 +317,14 @@ def test_approve_rejects_non_submitted_order(
     client: Client,
     django_user_model: Any,
 ) -> None:
-    order = Order.objects.create(status=Order.Status.APPROVED)
+    order = Order.objects.create(status=Order.Status.VERIFIED)
     waiter = django_user_model.objects.create_user(
         email="w@test.com", username="waiter1", password="testpass123", role="waiter"
     )
     client.force_login(waiter)
     client.post(f"/waiter/order/{order.id}/approve/")
     order.refresh_from_db()
-    assert order.status == Order.Status.APPROVED  # unchanged
+    assert order.status == Order.Status.VERIFIED  # unchanged
 
 
 @pytest.mark.django_db
@@ -336,7 +345,20 @@ def test_kitchen_role_cannot_approve(
 
 
 @pytest.mark.django_db
-def test_waiter_dashboard_shows_only_own_orders(
+def test_waiter_dashboard_redirects_to_order_list(
+    client: Client, django_user_model: Any
+) -> None:
+    w1 = django_user_model.objects.create_user(
+        email="w1@test.com", username="w1", password="testpass123", role="waiter"
+    )
+    client.force_login(w1)
+    response = client.get("/waiter/dashboard/")
+    assert response.status_code == 302
+    assert "tab=my" in response["Location"]
+
+
+@pytest.mark.django_db
+def test_waiter_order_list_my_tab_shows_own_orders(
     client: Client, django_user_model: Any
 ) -> None:
     w1 = django_user_model.objects.create_user(
@@ -345,16 +367,16 @@ def test_waiter_dashboard_shows_only_own_orders(
     w2 = django_user_model.objects.create_user(
         email="w2@test.com", username="w2", password="testpass123", role="waiter"
     )
-    Order.objects.create(waiter=w1, status=Order.Status.APPROVED)
-    Order.objects.create(waiter=w2, status=Order.Status.APPROVED)
+    Order.objects.create(waiter=w1, status=Order.Status.VERIFIED)
+    Order.objects.create(waiter=w2, status=Order.Status.VERIFIED)
 
     client.force_login(w1)
-    response = client.get("/waiter/dashboard/")
+    response = client.get("/waiter/orders/?tab=my")
 
     assert response.status_code == 200
-    orders_ctx = response.context["orders"]
-    assert orders_ctx.count() == 1
-    assert orders_ctx.first().waiter == w1
+    my_orders = response.context["my_orders"]
+    assert len(my_orders) == 1
+    assert my_orders[0]["order"].waiter == w1
 
 
 @pytest.mark.django_db
@@ -374,19 +396,35 @@ def test_mark_delivered_changes_status(client: Client, django_user_model: Any) -
 
 
 @pytest.mark.django_db
-def test_cannot_mark_delivered_if_not_ready(
+def test_soft_flow_delivers_verified_order(
     client: Client, django_user_model: Any
 ) -> None:
+    """Soft flow: VERIFIED order can be delivered (auto-skips kitchen steps)."""
     waiter = django_user_model.objects.create_user(
         email="w@test.com", username="w", password="testpass123", role="waiter"
     )
-    order = Order.objects.create(waiter=waiter, status=Order.Status.APPROVED)
+    order = Order.objects.create(waiter=waiter, status=Order.Status.VERIFIED)
 
     client.force_login(waiter)
     client.post(f"/waiter/order/{order.id}/delivered/")
 
     order.refresh_from_db()
-    assert order.status == Order.Status.APPROVED
+    assert order.status == Order.Status.DELIVERED
+
+
+@pytest.mark.django_db
+def test_cannot_deliver_accepted_order(client: Client, django_user_model: Any) -> None:
+    """Delivery should fail for orders not yet sent to kitchen."""
+    waiter = django_user_model.objects.create_user(
+        email="w2@test.com", username="w2", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(waiter=waiter, status=Order.Status.ACCEPTED)
+
+    client.force_login(waiter)
+    client.post(f"/waiter/order/{order.id}/delivered/")
+
+    order.refresh_from_db()
+    assert order.status == Order.Status.ACCEPTED
 
 
 @pytest.mark.django_db
@@ -424,12 +462,13 @@ def test_confirm_cash_payment_success(django_user_model: Any) -> None:
         status=Order.Status.DELIVERED,
         payment_status=Order.PaymentStatus.UNPAID,
     )
-    result = confirm_cash_payment(order, waiter=waiter)
+    result, skipped = confirm_cash_payment(order, waiter=waiter)
 
     assert result.payment_status == Order.PaymentStatus.PAID
     assert result.payment_method == Order.PaymentMethod.CASH
     assert result.payment_confirmed_at is not None
     assert result.payment_escalation_level == 0
+    assert skipped == []  # already DELIVERED, no skip needed
 
 
 @pytest.mark.django_db
@@ -495,7 +534,7 @@ def test_online_payment_page_get(client: Client) -> None:
 
 @pytest.mark.django_db
 def test_online_payment_page_post(client: Client) -> None:
-    order = Order.objects.create(status=Order.Status.APPROVED)
+    order = Order.objects.create(status=Order.Status.VERIFIED)
     response = client.post(f"/order/{order.id}/pay/?token={order.access_token}")
     assert response.status_code == 302
     order.refresh_from_db()

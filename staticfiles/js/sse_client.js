@@ -8,6 +8,35 @@
 
   if (typeof EventSource === 'undefined') return;
 
+  // --- Audio beep via Web Audio API ---
+  var _audioCtx = null;
+  var _soundReady = false;
+
+  function _initAudio() {
+    if (_soundReady) return;
+    try {
+      _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      _soundReady = true;
+    } catch (e) { /* unsupported */ }
+  }
+
+  document.addEventListener('click', function () { _initAudio(); }, { once: true });
+  document.addEventListener('touchstart', function () { _initAudio(); }, { once: true });
+
+  function sseBeep(freq, duration) {
+    if (!_audioCtx || !_soundReady) return;
+    var osc = _audioCtx.createOscillator();
+    var gain = _audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(_audioCtx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq || 880, _audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.3, _audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, _audioCtx.currentTime + (duration || 0.4));
+    osc.start(_audioCtx.currentTime);
+    osc.stop(_audioCtx.currentTime + (duration || 0.4));
+  }
+
   var reconnectAttempts = 0;
   var source = new EventSource(window.SSE_STREAM_URL || '/events/stream/');
 
@@ -102,6 +131,7 @@
       counter.textContent = parseInt(counter.textContent || '0', 10) + 1;
     }
     showFlash('Нове замовлення #' + data.order_id, 'info');
+    sseBeep(660, 0.2); // soft beep for new order
   }
 
   var escalationLabels = {
@@ -115,6 +145,9 @@
     showFlash('Ескалація! ' + label + ' #' + id, 'danger');
     var badge = document.getElementById('escalation-badge');
     if (badge) badge.style.display = 'inline';
+    // Audio alert — double beep for escalation
+    sseBeep(880, 0.3);
+    setTimeout(function () { sseBeep(1046, 0.3); }, 350);
   }
 
   function showFlash(message, type) {

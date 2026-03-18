@@ -191,12 +191,21 @@ EVENTSTREAM_KEEPALIVE = 15  # seconds — less than typical 30s proxy timeout
 # ---------------------------------------------------------------------------
 
 HANDOFF_TOKEN_TTL: int = config("HANDOFF_TOKEN_TTL", default=120, cast=int)  # seconds
-KITCHEN_TIMEOUT: int = config("KITCHEN_TIMEOUT", default=5, cast=int)
-MANAGER_TIMEOUT: int = config("MANAGER_TIMEOUT", default=5, cast=int)
-PAY_TIMEOUT: int = config("PAY_TIMEOUT", default=10, cast=int)
+KITCHEN_TIMEOUT: int = config("KITCHEN_TIMEOUT", default=10, cast=int)
+KITCHEN_WARN_MINUTES: int = config("KITCHEN_WARN_MINUTES", default=5, cast=int)
+MANAGER_TIMEOUT: int = config("MANAGER_TIMEOUT", default=10, cast=int)
+PAY_TIMEOUT: int = config("PAY_TIMEOUT", default=15, cast=int)
 SPEED_INTERVAL_KITCHEN: int = config("SPEED_INTERVAL_KITCHEN", default=15, cast=int)
 ESCALATION_COOLDOWN: int = config("ESCALATION_COOLDOWN", default=5, cast=int)  # minutes
 ESCALATION_AUTO_LEVEL: int = config(
-    "ESCALATION_AUTO_LEVEL", default=3, cast=int
+    "ESCALATION_AUTO_LEVEL", default=5, cast=int
 )  # minutes
-ESCALATION_MIN_WAIT: int = config("ESCALATION_MIN_WAIT", default=5, cast=int)  # minutes
+ESCALATION_MIN_WAIT: int = config(
+    "ESCALATION_MIN_WAIT", default=10, cast=int
+)  # minutes
+DISH_PICKUP_WARN: int = config(
+    "DISH_PICKUP_WARN", default=5, cast=int
+)  # minutes — dish ready, warn waiter
+DISH_PICKUP_CRITICAL: int = config(
+    "DISH_PICKUP_CRITICAL", default=10, cast=int
+)  # minutes — dish ready, escalate to senior

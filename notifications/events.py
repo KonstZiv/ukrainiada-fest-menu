@@ -56,11 +56,9 @@ def push_order_ready(order_id: int, waiter_id: int) -> None:
 
 def push_kitchen_escalation(ticket_id: int, level: int) -> None:
     """Kitchen ticket escalated to supervisor/manager."""
-    _push(
-        manager_channel(),
-        "kitchen_escalation",
-        {"ticket_id": ticket_id, "level": level},
-    )
+    data = {"ticket_id": ticket_id, "level": level}
+    _push(manager_channel(), "kitchen_escalation", data)
+    _push("kitchen-broadcast", "kitchen_escalation", data)
 
 
 def push_payment_escalation(order_id: int, level: int) -> None:
@@ -73,6 +71,15 @@ def push_payment_escalation(order_id: int, level: int) -> None:
 def push_visitor_event(order_id: int, event_type: str, data: dict[str, Any]) -> None:
     """Push event to visitor watching this order."""
     _push(visitor_order_channel(order_id), event_type, data)
+
+
+def push_order_log_event(order_id: int, log_line: str) -> None:
+    """Push terminal log line to visitor watching this order."""
+    _push(
+        visitor_order_channel(order_id),
+        "order_log",
+        {"order_id": order_id, "log_line": log_line},
+    )
 
 
 def push_staff_escalation(

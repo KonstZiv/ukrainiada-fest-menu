@@ -15,21 +15,30 @@ from notifications.events import (
     push_ticket_taken,
     push_visitor_event,
 )
+from orders.event_log import log_event
 from orders.models import Order
 
 if TYPE_CHECKING:
     from user.models import User
 
 
-def create_tickets_for_order(order: Order) -> list[KitchenTicket]:
-    """Create a KitchenTicket for each OrderItem.
+def _activate_order(order: Order) -> None:
+    """Transition order VERIFIED → IN_PROGRESS on first ticket take."""
+    if order.status == Order.Status.VERIFIED:
+        order.status = Order.Status.IN_PROGRESS
+        order.save(update_fields=["status"])
 
-    Called from orders/services.py::approve_order().
+
+def create_tickets_for_order(order: Order) -> list[KitchenTicket]:
+    """Create one KitchenTicket per portion (quantity) of each OrderItem.
+
+    Called from orders/services.py::verify_order().
     Does not check order status — caller's responsibility.
     """
     tickets = [
         KitchenTicket(order_item=item)
         for item in order.items.select_related("dish").all()
+        for _ in range(item.quantity)
     ]
     return KitchenTicket.objects.bulk_create(tickets)
 
@@ -74,7 +83,18 @@ def take_ticket(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket:
         ticket.taken_at = timezone.now()
         ticket.save(update_fields=["status", "assigned_to", "taken_at"])
 
-    waiter_id = ticket.order_item.order.waiter_id
+    dish_title = ticket.order_item.dish.title
+    order = ticket.order_item.order
+
+    _activate_order(order)
+
+    log_event(
+        order,
+        f"Кухня: {kitchen_user.staff_label} прийняв(ла) в роботу {dish_title}",
+        actor_label=kitchen_user.staff_label,
+    )
+
+    waiter_id = order.waiter_id
     if waiter_id:
         cook_name = kitchen_user.get_full_name() or kitchen_user.email
         push_ticket_taken(
@@ -85,11 +105,11 @@ def take_ticket(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket:
 
     # Notify visitor
     push_visitor_event(
-        order_id=ticket.order_item.order_id,
+        order_id=order.id,
         event_type="ticket_taken",
         data={
             "ticket_id": ticket.pk,
-            "dish": ticket.order_item.dish.title[:40],
+            "dish": dish_title[:40],
             "cook_label": kitchen_user.staff_label,
         },
     )
@@ -97,52 +117,100 @@ def take_ticket(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket:
     return ticket
 
 
-def mark_ticket_done(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket:
+def mark_ticket_done(
+    ticket: KitchenTicket, kitchen_user: User
+) -> tuple[KitchenTicket, list[str]]:
     """Kitchen staff marks a ticket as done.
 
+    Supports soft flow: if ticket is PENDING, auto-takes it first.
     Automatically checks if all tickets for the order are done
     and updates Order.status to READY.
 
+    Returns:
+        Tuple of (ticket, skipped_steps) where skipped_steps lists
+        auto-skipped flow steps (empty if none were skipped).
+
     Raises:
-        ValueError: if ticket is not TAKEN or assigned to another cook.
+        ValueError: if ticket is already DONE or assigned to another cook.
 
     """
-    if ticket.status != KitchenTicket.Status.TAKEN:
-        msg = f"Cannot mark done ticket in status '{ticket.status}'"
+    skipped: list[str] = []
+
+    if ticket.status == KitchenTicket.Status.DONE:
+        msg = "Ticket is already done"
         raise ValueError(msg)
-    if ticket.assigned_to_id != kitchen_user.id:
+
+    if (
+        ticket.status == KitchenTicket.Status.TAKEN
+        and ticket.assigned_to_id != kitchen_user.id
+    ):
         msg = "Cannot mark done ticket assigned to another cook"
         raise ValueError(msg)
+
+    # Soft flow: auto-take if PENDING
+    if ticket.status == KitchenTicket.Status.PENDING:
+        now = timezone.now()
+        with transaction.atomic():
+            ticket = KitchenTicket.objects.select_for_update().get(pk=ticket.pk)
+            if ticket.status == KitchenTicket.Status.PENDING:
+                ticket.assigned_to = kitchen_user
+                ticket.taken_at = now
+                ticket.status = KitchenTicket.Status.TAKEN
+                ticket.save(update_fields=["status", "assigned_to", "taken_at"])
+                skipped.append("Взяти в роботу")
+
+        dish_title = ticket.order_item.dish.title
+        order = ticket.order_item.order
+
+        _activate_order(order)
+
+        log_event(
+            order,
+            f"⚠️ Авто: {kitchen_user.staff_label} пропустив(ла) крок "
+            f"'Взяти' для {dish_title}",
+            actor_label=kitchen_user.staff_label,
+            is_auto_skip=True,
+        )
 
     ticket.status = KitchenTicket.Status.DONE
     ticket.done_at = timezone.now()
     ticket.save(update_fields=["status", "done_at"])
 
-    waiter_id = ticket.order_item.order.waiter_id
+    dish_title = ticket.order_item.dish.title
+    order = ticket.order_item.order
+    log_event(
+        order,
+        f"Кухня: {kitchen_user.staff_label} приготував(ла) {dish_title} ✅",
+        actor_label=kitchen_user.staff_label,
+    )
+
+    waiter_id = order.waiter_id
     if waiter_id:
         push_ticket_done(
             ticket_id=ticket.pk,
-            order_id=ticket.order_item.order_id,
+            order_id=order.id,
             waiter_id=waiter_id,
-            dish_title=ticket.order_item.dish.title,
+            dish_title=dish_title,
         )
 
     # Notify visitor
     push_visitor_event(
-        order_id=ticket.order_item.order_id,
+        order_id=order.id,
         event_type="ticket_done",
         data={
             "ticket_id": ticket.pk,
-            "dish": ticket.order_item.dish.title[:40],
+            "dish": dish_title[:40],
             "cook_label": kitchen_user.staff_label,
         },
     )
 
     order_ready = _check_order_ready(ticket)
-    if order_ready and waiter_id:
-        push_order_ready(order_id=ticket.order_item.order_id, waiter_id=waiter_id)
+    if order_ready:
+        log_event(order, "Усі страви готові! Очікуємо офіціанта для доставки 🍽️")
+        if waiter_id:
+            push_order_ready(order_id=order.id, waiter_id=waiter_id)
 
-    return ticket
+    return ticket, skipped
 
 
 def create_handoff(ticket: KitchenTicket, target_waiter: User) -> KitchenHandoff:
@@ -170,11 +238,11 @@ def create_handoff(ticket: KitchenTicket, target_waiter: User) -> KitchenHandoff
 
 
 def manual_handoff(ticket: KitchenTicket, kitchen_user: User) -> None:
-    """One-sided handoff confirmation without QR scan.
+    """Cook confirms dish was physically handed to waiter.
 
-    Used as fallback when the waiter cannot scan the QR code.
-    Cancels any pending (unconfirmed) QR-based handoff for this ticket.
-    Idempotent — safe to call multiple times.
+    Marks ticket as delivered (removes from kitchen "Готово" tab).
+    Cancels any pending QR-based handoff.
+    Auto-transitions order to DELIVERED when all tickets handed off.
 
     Raises:
         ValueError: if ticket is not DONE or not assigned to this cook.
@@ -187,9 +255,24 @@ def manual_handoff(ticket: KitchenTicket, kitchen_user: User) -> None:
         msg = "Only the assigned cook can confirm handoff"
         raise ValueError(msg)
 
+    now = timezone.now()
+
+    # Mark as handed off (dish moved: kitchen → waiter)
+    if not ticket.handed_off_at:
+        ticket.handed_off_at = now
+        ticket.save(update_fields=["handed_off_at"])
+
+        dish_title = ticket.order_item.dish.title
+        order = ticket.order_item.order
+        log_event(
+            order,
+            f"Кухня: {kitchen_user.staff_label} передав(ла) {dish_title} офіціанту",
+            actor_label=kitchen_user.staff_label,
+        )
+
     # Cancel any pending QR-based handoff
     KitchenHandoff.objects.filter(ticket=ticket, is_confirmed=False).update(
-        is_confirmed=True, confirmed_at=timezone.now()
+        is_confirmed=True, confirmed_at=now
     )
 
 

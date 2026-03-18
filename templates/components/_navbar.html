@@ -121,6 +121,35 @@
       {# Документація:                                                            #}
       {#   https://docs.djangoproject.com/en/stable/topics/auth/default/#authentication-in-web-requests #}
       {% if user.is_authenticated %}
+        {% if user.role == 'waiter' or user.role == 'senior_waiter' %}
+          <a href="{% url 'waiter:order_list' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
+             style="font-size: 0.8rem; letter-spacing: 0.05em;">
+            {% trans "ЗАМОВЛЕННЯ" %}
+          </a>
+          <div class="vr-custom"></div>
+        {% elif user.role == 'kitchen' or user.role == 'kitchen_supervisor' %}
+          <a href="{% url 'kitchen:dashboard' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
+             style="font-size: 0.8rem; letter-spacing: 0.05em;">
+            {% trans "КУХНЯ" %}
+          </a>
+          <div class="vr-custom"></div>
+        {% elif user.role == 'manager' %}
+          <a href="{% url 'manager:dashboard' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
+             style="font-size: 0.8rem; letter-spacing: 0.05em;">
+            {% trans "ПАНЕЛЬ" %}
+          </a>
+          <div class="vr-custom"></div>
+          <a href="{% url 'waiter:order_list' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
+             style="font-size: 0.8rem; letter-spacing: 0.05em;">
+            {% trans "ЗАМОВЛЕННЯ" %}
+          </a>
+          <div class="vr-custom"></div>
+          <a href="{% url 'kitchen:dashboard' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
+             style="font-size: 0.8rem; letter-spacing: 0.05em;">
+            {% trans "КУХНЯ" %}
+          </a>
+          <div class="vr-custom"></div>
+        {% endif %}
         <a href="{% url 'user:profile' %}" class="d-flex align-items-center gap-1 btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
            style="font-size: 0.8rem; letter-spacing: 0.05em;">
           {% if user.avatar %}
@@ -151,12 +180,8 @@
 
   </div>
 
-  {# --- Рядок пошуку (таска 3.1) --- #}
-  {# GET-форма: ?q=... передається як URL-параметр.                              #}
-  {# Це дозволяє ділитися посиланням та оновлювати сторінку без POST.            #}
-  {# input-group — Bootstrap компонент для поля з кнопкою.                       #}
-  {# Документація:                                                               #}
-  {#   https://getbootstrap.com/docs/5.3/forms/input-group/                      #}
+  {# --- Рядок пошуку — тільки на сторінках меню --- #}
+  {% if show_search|default_if_none:True %}
   <form method="get" action="{% url 'menu:dish_search' %}" class="mt-2">
     <div class="input-group input-group-sm">
       {% trans "Пошук страв..." as search_placeholder %}
@@ -169,5 +194,6 @@
       </button>
     </div>
   </form>
+  {% endif %}
 
 </div>

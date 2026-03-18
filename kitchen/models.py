@@ -57,10 +57,10 @@ class KitchenTicket(models.Model):
         SUPERVISOR = 1, "Старший кухні"
         MANAGER = 2, "Менеджер"
 
-    order_item = models.OneToOneField(
+    order_item = models.ForeignKey(
         "orders.OrderItem",
         on_delete=models.CASCADE,
-        related_name="kitchen_ticket",
+        related_name="kitchen_tickets",
         verbose_name="Позиція замовлення",
     )
     assigned_to = models.ForeignKey(
@@ -86,6 +86,17 @@ class KitchenTicket(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     taken_at = models.DateTimeField(null=True, blank=True)
     done_at = models.DateTimeField(null=True, blank=True)
+    handed_off_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When cook handed dish to waiter (kitchen → waiter)",
+    )
+    is_delivered = models.BooleanField(default=False)
+    delivered_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When waiter delivered dish to visitor (waiter → visitor)",
+    )
 
     class Meta:
         ordering = ["created_at"]

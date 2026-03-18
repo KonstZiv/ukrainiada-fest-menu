@@ -45,7 +45,7 @@ def test_location_hint_shown_on_waiter_dashboard(
     )
     order = Order.objects.create(
         waiter=waiter,
-        status=Order.Status.APPROVED,
+        status=Order.Status.VERIFIED,
         location_hint="столик у Марини",
     )
     from orders.models import OrderItem

@@ -8,6 +8,7 @@ from django.test import Client
 from django.utils import timezone
 
 from kitchen.models import KitchenAssignment, KitchenTicket
+from orders.models import OrderEvent
 from kitchen.services import (
     create_tickets_for_order,
     get_pending_tickets_for_user,
@@ -55,9 +56,10 @@ def test_create_tickets_for_order() -> None:
 
     tickets = create_tickets_for_order(order)
 
-    assert len(tickets) == 2
+    # dish1 x1 + dish2 x2 = 3 tickets (one per portion)
+    assert len(tickets) == 3
     assert all(t.status == KitchenTicket.Status.PENDING for t in tickets)
-    assert KitchenTicket.objects.filter(order_item__order=order).count() == 2
+    assert KitchenTicket.objects.filter(order_item__order=order).count() == 3
 
 
 @pytest.mark.django_db
@@ -331,10 +333,11 @@ def test_mark_done_success(django_user_model: Any) -> None:
     ticket = KitchenTicket.objects.create(order_item=item)
 
     ticket = take_ticket(ticket, kitchen_user=cook)
-    result = mark_ticket_done(ticket, kitchen_user=cook)
+    result, skipped = mark_ticket_done(ticket, kitchen_user=cook)
 
     assert result.status == KitchenTicket.Status.DONE
     assert result.done_at is not None
+    assert skipped == []
 
 
 @pytest.mark.django_db
@@ -359,7 +362,7 @@ def test_all_tickets_done_sets_order_ready(django_user_model: Any) -> None:
         email="c@test.com", username="cook", password="testpass123", role="kitchen"
     )
     _, order, item = _make_dish_and_order()
-    order.status = Order.Status.APPROVED
+    order.status = Order.Status.VERIFIED
     order.save()
     ticket = KitchenTicket.objects.create(order_item=item)
 
@@ -369,6 +372,61 @@ def test_all_tickets_done_sets_order_ready(django_user_model: Any) -> None:
     order.refresh_from_db()
     assert order.status == Order.Status.READY
     assert order.ready_at is not None
+
+
+@pytest.mark.django_db
+def test_mark_done_soft_flow_from_pending(django_user_model: Any) -> None:
+    """Soft flow: mark_ticket_done auto-takes a PENDING ticket."""
+    cook = django_user_model.objects.create_user(
+        email="c@test.com", username="cook", password="testpass123", role="kitchen"
+    )
+    _, order, item = _make_dish_and_order()
+    ticket = KitchenTicket.objects.create(order_item=item)
+    assert ticket.status == KitchenTicket.Status.PENDING
+
+    result, skipped = mark_ticket_done(ticket, kitchen_user=cook)
+
+    assert result.status == KitchenTicket.Status.DONE
+    assert result.assigned_to == cook
+    assert result.taken_at is not None
+    assert result.done_at is not None
+    assert len(skipped) == 1
+    assert "Взяти в роботу" in skipped[0]
+    # Auto-skip event logged
+    assert OrderEvent.objects.filter(order=order, is_auto_skip=True).exists()
+
+
+@pytest.mark.django_db
+def test_mark_done_soft_flow_transitions_order_to_in_progress(
+    django_user_model: Any,
+) -> None:
+    """Soft flow: PENDING → DONE also transitions order VERIFIED → IN_PROGRESS."""
+    cook = django_user_model.objects.create_user(
+        email="c@test.com", username="cook", password="testpass123", role="kitchen"
+    )
+    _, order, item = _make_dish_and_order()
+    order.status = Order.Status.VERIFIED
+    order.save()
+    # Two tickets: one will be auto-taken, order should become IN_PROGRESS
+    t1 = KitchenTicket.objects.create(order_item=item)
+    OrderItem2 = OrderItem.objects.create(
+        order=order,
+        dish=Dish.objects.create(
+            title="D2",
+            description="",
+            price=Decimal("3.00"),
+            weight=100,
+            calorie=100,
+            category=item.dish.category,
+        ),
+        quantity=1,
+    )
+    KitchenTicket.objects.create(order_item=OrderItem2)
+
+    mark_ticket_done(t1, kitchen_user=cook)
+
+    order.refresh_from_db()
+    assert order.status == Order.Status.IN_PROGRESS
 
 
 @pytest.mark.django_db

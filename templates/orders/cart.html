@@ -1,22 +1,44 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n menu_extras %}
 
-{% block title %}Jadran Sun — Кошик{% endblock %}
+{% block title %}Jadran Sun — {% trans "Замовлення" %}{% endblock %}
+
+{% block header %}{% include "components/_navbar.html" with show_search=False %}{% endblock %}
 
 {% block content %}
 <div class="container mt-3">
-  <h2><i class="bi bi-cart3"></i> {% trans "Кошик" %}</h2>
+  {% include "components/_back_button.html" %}
+
+  {# --- Header: title + history link --- #}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0"><i class="bi bi-cart3"></i> {% trans "Замовлення" %}</h2>
+    <a href="{% url 'orders:order_history' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-clock-history"></i> {% trans "Історія замовлень" %}
+    </a>
+  </div>
 
   {% if items %}
-    <div class="list-group mb-3">
+    <h5 class="text-muted mb-2">{% trans "Поточне замовлення" %}</h5>
+
+    <div class="list-group mb-3" id="cart-items">
       {% for entry in items %}
-        <div class="list-group-item d-flex justify-content-between align-items-center">
-          <div>
+        <div class="list-group-item d-flex justify-content-between align-items-center"
+             data-cart-row="{{ entry.dish.id }}">
+          {# --- Name + description (link to detail) --- #}
+          <a href="{% url 'menu:dish_detail' entry.dish.pk %}"
+             class="flex-grow-1 me-2 text-decoration-none text-body">
             <strong>{{ entry.dish.title }}</strong>
-            <span class="text-muted ms-2">x{{ entry.quantity }}</span>
-          </div>
+            <div class="text-muted small" style="font-size: 0.8rem; line-height: 1.3;">
+              {{ entry.dish.description|truncatewords:8 }}
+            </div>
+          </a>
+          {# --- Cart controls (- qty +) + subtotal + remove --- #}
           <div class="d-flex align-items-center gap-2">
-            <span>&euro;{{ entry.dish.price|floatformat:2 }}</span>
+            {% include "components/_cart_controls.html" with dish=entry.dish %}
+            <span class="fw-bold text-nowrap cart-subtotal"
+                  style="min-width: 4rem; text-align: right;">
+              &euro;{{ entry.subtotal|floatformat:2 }}
+            </span>
             <a href="{% url 'orders:cart_remove' entry.dish.id %}"
                class="btn btn-sm btn-outline-danger">
               <i class="bi bi-trash"></i>
@@ -26,14 +48,15 @@
       {% endfor %}
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h5 class="mb-0">{% trans "Разом:" %} <strong>&euro;{{ total|floatformat:2 }}</strong></h5>
+    {# --- Total + submit --- #}
+    <div class="text-end mb-3" id="cart-footer">
+      <h5 class="mb-3 cart-total-line">{% trans "Разом:" %} <strong class="cart-total-value">&euro;{{ total|floatformat:2 }}</strong></h5>
       <form method="post" action="{% url 'orders:order_submit' %}" class="form-needs-network">
         {% csrf_token %}
         <div class="mb-2">
-          {% trans "Де вас знайти? (необов'язково)" as location_placeholder %}
           <input type="text" class="form-control form-control-sm" name="location_hint"
-                 maxlength="60" placeholder="{{ location_placeholder }}">
+                 maxlength="60"
+                 placeholder="{% trans "Де вас шукати? Столик №, тераса, біля бару... (щоб офіціант міг вас знайти)" %}">
         </div>
         <button type="submit" class="btn btn-success btn-action">
           <i class="bi bi-check-circle"></i> {% trans "Оформити замовлення" %}
@@ -41,8 +64,8 @@
       </form>
     </div>
   {% else %}
-    <div class="alert alert-info">
-      <i class="bi bi-info-circle"></i> {% trans "Кошик порожній." %}
+    <div class="alert alert-info" id="cart-empty">
+      <i class="bi bi-info-circle"></i> {% trans "Ви ще нічого не обрали." %}
       <a href="{% url 'menu:dish_list' %}">{% trans "Перейти до меню" %}</a>
     </div>
   {% endif %}

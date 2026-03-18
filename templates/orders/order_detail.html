@@ -1,194 +1,296 @@
 {% extends "base.html" %}
-{% load i18n static %}
+{% load i18n static l10n %}
 
 {% block title %}Jadran Sun — Замовлення #{{ order.id }}{% endblock %}
 
+{% block header %}{% include "components/_navbar.html" with show_search=False %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/terminal.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="container mt-3">
-  <h2>{% blocktrans with order_id=order.id %}Замовлення #{{ order_id }}{% endblocktrans %}</h2>
-
-  {# --- Progress bar — visible for approved+ orders --- #}
-  {% if order.status != 'submitted' %}
-  <div class="order-progress" data-status="{{ order.status }}">
-    {% for step in progress_steps %}
-      <div class="progress-step {% if step.done %}done{% endif %} {% if step.active %}active{% endif %}"
-           data-step-index="{{ step.step_index }}">
-        <span class="step-icon">{{ step.icon }}</span>
-        <span class="step-label d-none d-sm-inline">{{ step.label }}</span>
-      </div>
-      {% if not forloop.last %}<div class="progress-line"></div>{% endif %}
-    {% endfor %}
+  {% include "components/_back_button.html" %}
+  <div class="d-flex justify-content-between align-items-baseline mb-2">
+    <h2 class="mb-0">{% blocktrans with order_id=order.id %}Замовлення #{{ order_id }}{% endblocktrans %}</h2>
+    <span class="text-muted" style="font-size: 0.85rem;">{{ order.created_at|date:"d.m.Y H:i" }}</span>
   </div>
-  {% endif %}
 
   <div class="card mb-3">
     <div class="card-body">
-      <p><strong>{% trans "Статус:" %}</strong> {{ order.get_status_display }}</p>
-      <p><strong>{% trans "Створено:" %}</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
-      {% if order.status != 'submitted' %}
-      <p>
-        <strong>{% trans "Оплата:" %}</strong>
-        {% if order.payment_status == 'paid' %}
-          <span class="badge bg-success">{{ order.get_payment_method_display }}</span>
-        {% else %}
-          <span class="badge bg-warning text-dark">{% trans "Не оплачено" %}</span>
-        {% endif %}
-      </p>
-      {% endif %}
-      {% if order.location_hint %}
-        <p><i class="bi bi-geo-alt"></i> {{ order.location_hint }}</p>
-      {% endif %}
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          {% if order.location_hint %}
+            <span><i class="bi bi-geo-alt"></i> {{ order.location_hint }}</span>
+          {% endif %}
+        </div>
+        <div>
+          {% if order.payment_status == 'paid' %}
+            <span class="badge bg-success">{% trans "Сплачено" %}</span>
+          {% else %}
+            <span class="badge bg-warning text-dark">{% trans "Не сплачено" %}</span>
+          {% endif %}
+        </div>
+      </div>
 
-      {# --- Ticket tracking — visible after approve (when tickets exist) --- #}
-      {% if ticket_states and order.status != 'submitted' %}
-      <h5 class="mt-3">{% trans "Статус вашого замовлення" %}</h5>
-      <div id="order-tracker"
+      {# --- Items list with descriptions --- #}
+      <h5 class="mt-3">{% trans "Позиції" %}</h5>
+      <div class="list-group mb-3">
+        {% for item in order.items.all %}
+          <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div class="flex-grow-1 me-2">
+              <strong>{{ item.dish.title }}</strong>
+              <span class="text-muted ms-1">x{{ item.quantity }}</span>
+              <div class="text-muted small" style="font-size: 0.8rem; line-height: 1.3;">
+                {{ item.dish.description|truncatewords:8 }}
+              </div>
+            </div>
+            <span class="fw-bold text-nowrap">&euro;{{ item.subtotal|floatformat:2 }}</span>
+          </div>
+        {% endfor %}
+      </div>
+
+      <h5 class="text-end">{% trans "Разом:" %} &euro;{{ order.total_price|floatformat:2 }}</h5>
+    </div>
+  </div>
+
+  {# --- Order tracking section --- #}
+  {% if event_log_lines %}
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5 class="mb-3"><i class="bi bi-activity"></i> {% trans "Стан обробки замовлення" %}</h5>
+
+      {# --- Progress circles — clickable, open modals --- #}
+      {# Generate per-step keyframes for partial progress animation #}
+      {% localize off %}
+      {% for step in progress_steps %}
+        {% if step.active %}
+        <style>
+          @keyframes pulse-step-{{ step.step_index }} {
+            0%, 100% { opacity: {{ step.progress }}; }
+            50% { opacity: 1; }
+          }
+        </style>
+        {% endif %}
+      {% endfor %}
+      {% endlocalize %}
+      <div class="order-progress mb-3" data-status="{{ order.status }}"
+           id="order-tracker"
            data-order-id="{{ order.id }}"
            data-sse-url="{% url 'notifications:visitor_sse' order.id %}">
-        {% for ts in ticket_states %}
-        <div class="ticket-status-row" data-ticket-id="{{ ts.ticket_id }}">
-          <span class="ticket-icon" data-status="{{ ts.status }}">
-            {% if ts.status == 'done' %}✅{% elif ts.status == 'taken' %}👩‍🍳{% else %}⏳{% endif %}
-          </span>
-          <span class="ticket-dish">{{ ts.dish_title }} x{{ ts.quantity }}</span>
-          <span class="ticket-detail text-muted">
-            {% if ts.status == 'taken' and ts.cook_label %}
-              {{ ts.cook_label }} {% trans "готує" %}
-            {% elif ts.status == 'done' %}
-              {% trans "Готово — чекає офіціанта" %}
-            {% else %}
-              {% trans "В черзі" %}
-            {% endif %}
-          </span>
-        </div>
+        {% for step in progress_steps %}
+          <div class="progress-step {% if step.done %}done{% endif %} {% if step.active %}active{% endif %}"
+               data-step-index="{{ step.step_index }}"
+               data-bs-toggle="modal" data-bs-target="#stepModal{{ step.step_index }}"
+               style="cursor: pointer;">
+            <span class="step-icon"{% if step.active %} style="animation: pulse-step-{{ step.step_index }} 2s infinite;"{% endif %}>{{ step.icon }}</span>
+            <span class="step-label d-none d-sm-inline">{{ step.label }}</span>
+          </div>
+          {% if not forloop.last %}<div class="progress-line"></div>{% endif %}
         {% endfor %}
+      </div>
+
+      {# --- Terminal log --- #}
+      <div class="terminal-log" id="terminal-log"
+           data-order-id="{{ order.id }}"
+           data-sse-url="{% url 'notifications:visitor_sse' order.id %}">
       </div>
 
       <div id="order-global-status" class="mt-3 text-center d-none alert alert-success">
       </div>
+    </div>
+  </div>
+  <script>
+    var _terminalInitLines = [{% for line in event_log_lines %}"{{ line|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}];
+  </script>
 
-      {% if show_escalation_button %}
-      <div class="text-center mt-4">
-        <button class="btn btn-outline-warning btn-action"
-                data-bs-toggle="modal" data-bs-target="#escalationModal">
-          {% trans "Є проблема з замовленням" %}
-        </button>
-      </div>
-      <div class="modal fade" id="escalationModal" tabindex="-1">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">{% trans "Що сталося?" %}</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="post" action="{% url 'orders:escalate' order.id %}" class="form-needs-network">
-              {% csrf_token %}
-              <div class="modal-body">
-                <div class="mb-3">
-                  {% for value, label in escalation_reasons %}
-                  <label class="btn btn-outline-secondary text-start d-block mb-2">
-                    <input type="radio" name="reason" value="{{ value }}" class="me-2"
-                           {% if forloop.first %}checked{% endif %}>
-                    {{ label }}
-                  </label>
-                  {% endfor %}
-                </div>
-                <div class="mb-3">
-                  {% trans "Опишіть ситуацію..." as esc_placeholder %}
-                  <textarea name="message" class="form-control" rows="2" maxlength="300"
-                            placeholder="{{ esc_placeholder }}"></textarea>
-                </div>
+  {# --- Step detail modals --- #}
+  {% for step in progress_steps %}
+  <div class="modal fade" id="stepModal{{ step.step_index }}" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ step.icon }} {{ step.label }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          {% if step.step_key == "created" %}
+            <p>{% trans "Замовлення створено" %}: {{ order.created_at|date:"d.m.Y H:i:s" }}</p>
+            <p>{% trans "Кількість позицій:" %} {{ order.items.count }}</p>
+
+          {% elif step.step_key == "accepted" %}
+            {% if order.waiter %}
+              <p>{% trans "Офіціант:" %} {{ order.waiter.staff_label }}</p>
+              <p>{% trans "Прийнято:" %} {{ order.approved_at|date:"d.m.Y H:i:s"|default:"—" }}</p>
+            {% else %}
+              <p class="text-muted">{% trans "Очікує на офіціанта..." %}</p>
+            {% endif %}
+
+          {% elif step.step_key == "verified" %}
+            {% if order.approved_at %}
+              <p>{% trans "Верифіковано:" %} {{ order.approved_at|date:"d.m.Y H:i:s" }}</p>
+              <p>{% trans "Замовлення передано на кухню" %}</p>
+            {% else %}
+              <p class="text-muted">{% trans "Очікує верифікації..." %}</p>
+            {% endif %}
+
+          {% elif step.step_key == "cooking" %}
+            {% if ticket_states %}
+              {% for ts in ticket_states %}
+              <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                <span>
+                  {% if ts.status == 'done' %}✅{% elif ts.status == 'taken' %}👩‍🍳{% else %}⏳{% endif %}
+                  {{ ts.dish_title }} x{{ ts.quantity }}
+                </span>
+                <span class="text-muted small">
+                  {% if ts.status == 'taken' and ts.cook_label %}
+                    {{ ts.cook_label }} {% trans "готує" %}
+                  {% elif ts.status == 'done' %}
+                    {% trans "Готово" %}
+                  {% else %}
+                    {% trans "В черзі" %}
+                  {% endif %}
+                </span>
               </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Скасувати" %}</button>
-                <button type="submit" class="btn btn-warning">{% trans "Надіслати" %}</button>
-              </div>
-            </form>
-          </div>
+              {% endfor %}
+            {% else %}
+              <p class="text-muted">{% trans "Очікує передачі на кухню..." %}</p>
+            {% endif %}
+
+          {% elif step.step_key == "ready" %}
+            {% if order.ready_at %}
+              <p>{% trans "Усі страви готові:" %} {{ order.ready_at|date:"d.m.Y H:i:s" }}</p>
+            {% else %}
+              <p class="text-muted">{% trans "Страви ще готуються..." %}</p>
+            {% endif %}
+
+          {% elif step.step_key == "delivered" %}
+            {% if order.delivered_at %}
+              <p>{% trans "Доставлено:" %} {{ order.delivered_at|date:"d.m.Y H:i:s" }}</p>
+            {% else %}
+              <p class="text-muted">{% trans "Очікує доставки..." %}</p>
+            {% endif %}
+          {% endif %}
         </div>
       </div>
-      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
 
-      {% if active_escalation %}
-      <div class="alert alert-info mt-3">
-        <strong>{% trans "Ваше звернення:" %}</strong>
-        {{ active_escalation.get_reason_display }}
-        {% if active_escalation.status == 'acknowledged' %}
-          — <span class="text-success">{% trans "побачено, працюємо" %}</span>
-        {% elif active_escalation.status == 'open' %}
-          — <span class="text-warning">{% trans "надіслано" %}</span>
-        {% endif %}
-      </div>
-      {% endif %}
-
-      {# --- Feedback form (post-delivery) --- #}
-      {% if order.status == 'delivered' and not has_feedback %}
-      <div class="card mt-4 border-success" id="feedback-form">
-        <div class="card-body text-center">
-          <h5>{% trans "Як вам сподобалось?" %}</h5>
-          <form method="post" action="{% url 'feedback:submit' order.id %}" class="form-needs-network">
-            {% csrf_token %}
-            <div class="mood-selector mb-3">
-              {% for value, label in mood_choices %}
-              <label class="mood-option">
-                <input type="radio" name="mood" value="{{ value }}" class="d-none"
+  {# --- Escalation button --- #}
+  {% if show_escalation_button %}
+  <div class="text-center mb-3">
+    <button class="btn btn-outline-secondary btn-sm"
+            data-bs-toggle="modal" data-bs-target="#escalationModal">
+      <i class="bi bi-chat-dots"></i> {% trans "Маєш що сказати? Тисни тут" %}
+    </button>
+  </div>
+  <div class="modal fade" id="escalationModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{% trans "Що сталося?" %}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form method="post" action="{% url 'orders:escalate' order.id %}" class="form-needs-network">
+          {% csrf_token %}
+          <div class="modal-body">
+            <div class="mb-3">
+              {% for value, label in escalation_reasons %}
+              <label class="btn btn-outline-secondary text-start d-block mb-2">
+                <input type="radio" name="reason" value="{{ value }}" class="me-2"
                        {% if forloop.first %}checked{% endif %}>
-                <span class="mood-emoji">{{ label }}</span>
+                {{ label }}
               </label>
               {% endfor %}
             </div>
-            {% trans "Ваше ім'я (необов'язково)" as name_placeholder %}
             <div class="mb-3">
-              <input type="text" name="visitor_name" class="form-control"
-                     maxlength="50" placeholder="{{ name_placeholder }}">
+              {% trans "Опишіть ситуацію..." as esc_placeholder %}
+              <textarea name="message" class="form-control" rows="2" maxlength="300"
+                        placeholder="{{ esc_placeholder }}"></textarea>
             </div>
-            {% trans "Напишіть щось приємне... або корисне" as msg_placeholder %}
-            <div class="mb-3">
-              <textarea name="message" class="form-control" rows="2"
-                        maxlength="500" placeholder="{{ msg_placeholder }}"></textarea>
-            </div>
-            <button type="submit" class="btn btn-success btn-action">
-              {% trans "Надіслати відгук" %}
-            </button>
-          </form>
-        </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Скасувати" %}</button>
+            <button type="submit" class="btn btn-warning">{% trans "Надіслати" %}</button>
+          </div>
+        </form>
       </div>
-      {% elif has_feedback %}
-      <div class="alert alert-success mt-4 text-center">
-        <strong>{% trans "Дякуємо за відгук!" %}</strong> {{ feedback.get_mood_display }}
-        {% if feedback.message %}
-          <br><em>"{{ feedback.message|truncatechars:100 }}"</em>
-        {% endif %}
-      </div>
-      {% endif %}
-
-      {% else %}
-
-      {# --- Simple item list for submitted orders (waiting for waiter) --- #}
-      <h5 class="mt-3">{% trans "Позиції" %}</h5>
-      <ul class="list-group mb-3">
-        {% for item in order.items.all %}
-          <li class="list-group-item d-flex justify-content-between">
-            <span>{{ item.dish.title }} x{{ item.quantity }}</span>
-            <span>&euro;{{ item.subtotal|floatformat:2 }}</span>
-          </li>
-        {% endfor %}
-      </ul>
-      {% endif %}
-
-      <h5>{% trans "Разом:" %} &euro;{{ order.total_price|floatformat:2 }}</h5>
     </div>
   </div>
+  {% endif %}
 
+  {% if active_escalation %}
+  <div class="alert alert-info mb-3">
+    <strong>{% trans "Ваше звернення:" %}</strong>
+    {{ active_escalation.get_reason_display }}
+    {% if active_escalation.status == 'acknowledged' %}
+      — <span class="text-success">{% trans "побачено, працюємо" %}</span>
+    {% elif active_escalation.status == 'open' %}
+      — <span class="text-warning">{% trans "надіслано" %}</span>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {# --- Feedback form (post-delivery) --- #}
+  {% if order.status == 'delivered' and not has_feedback %}
+  <div class="card mb-3 border-success" id="feedback-form">
+    <div class="card-body text-center">
+      <h5>{% trans "Як вам сподобалось?" %}</h5>
+      <form method="post" action="{% url 'feedback:submit' order.id %}" class="form-needs-network">
+        {% csrf_token %}
+        <div class="mood-selector mb-3">
+          {% for value, label in mood_choices %}
+          <label class="mood-option">
+            <input type="radio" name="mood" value="{{ value }}" class="d-none"
+                   {% if forloop.first %}checked{% endif %}>
+            <span class="mood-emoji">{{ label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+        {% trans "Ваше ім'я (необов'язково)" as name_placeholder %}
+        <div class="mb-3">
+          <input type="text" name="visitor_name" class="form-control"
+                 maxlength="50" placeholder="{{ name_placeholder }}">
+        </div>
+        {% trans "Напишіть щось приємне... або корисне" as msg_placeholder %}
+        <div class="mb-3">
+          <textarea name="message" class="form-control" rows="2"
+                    maxlength="500" placeholder="{{ msg_placeholder }}"></textarea>
+        </div>
+        <button type="submit" class="btn btn-success btn-action">
+          {% trans "Надіслати відгук" %}
+        </button>
+      </form>
+    </div>
+  </div>
+  {% elif has_feedback %}
+  <div class="alert alert-success mb-3 text-center">
+    <strong>{% trans "Дякуємо за відгук!" %}</strong> {{ feedback.get_mood_display }}
+    {% if feedback.message %}
+      <br><em>"{{ feedback.message|truncatechars:100 }}"</em>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {# --- QR code with toggle --- #}
   {% if order.status == 'submitted' %}
-    <div class="text-center">
-      <p class="text-muted">{% trans "Покажіть QR-код або назвіть номер замовлення офіціанту" %}</p>
+  <div class="text-center mb-3">
+    <p class="text-muted">{% trans "Покажіть QR-код або назвіть номер замовлення офіціанту" %}</p>
+    <p class="display-4 fw-bold">#{{ order.id }}</p>
+    <button class="btn btn-outline-secondary btn-sm mb-2" id="qr-toggle"
+            onclick="var qr=document.getElementById('qr-block'); var btn=this; if(qr.classList.contains('d-none')){qr.classList.remove('d-none');btn.textContent='{% trans "Приховати QR-код" %}';}else{qr.classList.add('d-none');btn.textContent='{% trans "Показати QR-код" %}';}">
+      {% trans "Показати QR-код" %}
+    </button>
+    <div id="qr-block" class="d-none">
       <img src="{% url 'orders:order_qr' order.id %}"
            alt="QR #{{ order.id }}"
-           width="360" height="360"
-           loading="eager">
-      <p class="display-4 fw-bold mt-2">#{{ order.id }}</p>
+           width="300" height="300"
+           loading="lazy">
     </div>
+  </div>
   {% endif %}
 </div>
 {% endblock %}
@@ -196,5 +298,34 @@
 {% block extra_js %}
 {% if order.status != 'submitted' and order.status != 'delivered' %}
 <script src="{% static 'js/order_tracker.js' %}" defer></script>
+{% endif %}
+{% if event_log_lines %}
+<script src="{% static 'js/terminal_log.js' %}"></script>
+<script>
+(function () {
+    var container = document.getElementById("terminal-log");
+    if (!container || !window._terminalInitLines) return;
+
+    var term = new TerminalLog(container, { charDelay: 20, lineDelay: 300 });
+
+    var lines = window._terminalInitLines;
+    for (var i = 0; i < lines.length; i++) {
+        term.addLine(lines[i], true);
+    }
+
+    var sseUrl = container.dataset.sseUrl;
+    if (sseUrl) {
+        var src = new EventSource(sseUrl);
+        src.onmessage = function (e) {
+            try {
+                var data = JSON.parse(e.data);
+                if (data.type === "order_log" && data.log_line) {
+                    term.addLine(data.log_line);
+                }
+            } catch (err) { /* ignore keepalive */ }
+        };
+    }
+})();
+</script>
 {% endif %}
 {% endblock %}

@@ -1,0 +1,106 @@
+/* Terminal-style order event log */
+.terminal-log {
+    background: #0d1117;
+    color: #c9d1d9;
+    font-family: "Courier New", "Consolas", monospace;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    padding: 1rem;
+    border-radius: 8px;
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid #30363d;
+
+    /* Visible scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: #484f58 #0d1117;
+}
+
+.terminal-log::-webkit-scrollbar {
+    width: 8px;
+}
+
+.terminal-log::-webkit-scrollbar-track {
+    background: #161b22;
+    border-radius: 4px;
+}
+
+.terminal-log::-webkit-scrollbar-thumb {
+    background: #484f58;
+    border-radius: 4px;
+}
+
+.terminal-log::-webkit-scrollbar-thumb:hover {
+    background: #6e7681;
+}
+
+.terminal-line {
+    white-space: pre-wrap;
+    word-break: break-word;
+    padding: 1px 0;
+}
+
+/* Timestamp — dim */
+.terminal-line .ts {
+    color: #8b949e;
+}
+
+/* Default message color */
+.terminal-line .msg {
+    color: #c9d1d9;
+}
+
+/* Color highlights for key moments */
+/* Order created — green */
+.terminal-line .msg-created {
+    color: #39d353;
+}
+
+/* Waiter approved — blue */
+.terminal-line .msg-approved {
+    color: #58a6ff;
+}
+
+/* Kitchen took — yellow */
+.terminal-line .msg-kitchen {
+    color: #d29922;
+}
+
+/* Dish ready — bright green with checkmark */
+.terminal-line .msg-done {
+    color: #3fb950;
+}
+
+/* All ready — bright cyan */
+.terminal-line .msg-ready {
+    color: #56d4dd;
+    font-weight: bold;
+}
+
+/* Delivered — gold */
+.terminal-line .msg-delivered {
+    color: #f0883e;
+    font-weight: bold;
+}
+
+/* Payment — green bold */
+.terminal-line .msg-paid {
+    color: #3fb950;
+    font-weight: bold;
+}
+
+/* Blinking cursor */
+.terminal-cursor {
+    display: inline-block;
+    width: 7px;
+    height: 1em;
+    background: #39d353;
+    animation: terminal-blink 0.7s step-end infinite;
+    vertical-align: text-bottom;
+    margin-left: 1px;
+}
+
+@keyframes terminal-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}

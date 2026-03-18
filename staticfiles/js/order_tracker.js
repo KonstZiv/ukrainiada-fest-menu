@@ -10,10 +10,11 @@
     const STATUS_TO_STEP = {
         "draft": -1,
         "submitted": 0,
-        "approved": 1,
-        "in_progress": 2,
-        "ready": 3,
-        "delivered": 4,
+        "accepted": 1,
+        "verified": 2,
+        "in_progress": 3,
+        "ready": 4,
+        "delivered": 5,
     };
 
     class OrderTracker {

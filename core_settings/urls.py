@@ -26,6 +26,7 @@ urlpatterns = [
     path("order/", include("orders.urls")),
     path("waiter/", include("orders.waiter_urls")),
     path("kitchen/", include("kitchen.urls")),
+    path("manager/", include("orders.manager_urls")),
     path("feedback/", include("feedback.urls")),
     path("events/", include("notifications.urls")),
     path(

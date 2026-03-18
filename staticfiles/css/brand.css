@@ -326,6 +326,84 @@ body {
 
 
 /* =========================================================================== */
+/* Kitchen: urgency styles + order grouping + mobile tabs                      */
+/* =========================================================================== */
+
+/* Urgency border overrides */
+.kitchen-urgency-warn {
+  border-left: 4px solid #ffc107 !important;
+  background: rgba(255, 193, 7, 0.04);
+}
+
+.kitchen-urgency-critical {
+  border-left: 4px solid #dc3545 !important;
+  background: rgba(220, 53, 69, 0.06);
+  animation: pulse-border 2s infinite;
+}
+
+/* Order group — groups tickets of the same order */
+.kitchen-order-group {
+  border: 1px solid var(--brand-border);
+  border-radius: var(--radius-precise);
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+
+.kitchen-order-group-header {
+  background: var(--brand-bg-page);
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-bottom: 1px solid var(--brand-border);
+  color: var(--brand-text-muted);
+}
+
+.kitchen-order-group-header .badge {
+  font-size: 0.65rem;
+  vertical-align: middle;
+}
+
+/* Mobile tab pills */
+.kitchen-tab-pills .nav-link {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  color: var(--brand-text-muted);
+}
+
+.kitchen-tab-pills .nav-link.active {
+  background: var(--brand-primary);
+  color: #fff;
+}
+
+.kitchen-tab-pills .badge {
+  font-size: 0.65rem;
+  vertical-align: middle;
+}
+
+/* Sound activation banner */
+.kitchen-sound-banner {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: var(--radius-precise);
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: center;
+  transition: opacity 0.3s;
+}
+
+.kitchen-sound-banner:hover {
+  background: #ffe69c;
+}
+
+/* Team accordion — cook stats */
+.kitchen-team-stats .badge {
+  font-size: 0.7rem;
+}
+
+
+/* =========================================================================== */
 /* Waiter dashboard: table on desktop, cards on mobile/tablet                   */
 /* =========================================================================== */
 .waiter-order-table {
@@ -405,7 +483,7 @@ body {
 .progress-step.active .step-icon {
   background: #fff3cd;
   border-color: #ffc107;
-  animation: pulse-soft 2s infinite;
+  /* Animation set inline per-step via pulse-step-N keyframes */
 }
 
 .progress-line {

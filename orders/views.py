@@ -31,6 +31,7 @@ from orders.services import (
 class _EnrichedItem(TypedDict):
     dish: Dish
     quantity: int
+    subtotal: Decimal
 
 
 def _cart_json_response(request: HttpRequest, dish_id: int) -> HttpResponse:
@@ -44,8 +45,11 @@ def _cart_json_response(request: HttpRequest, dish_id: int) -> HttpResponse:
     dish_qty = quantities.get(dish_id, 0)
 
     total = Decimal("0")
+    dish_price = Decimal("0")
+    all_ids = set(quantities.keys()) | {dish_id}
+    prices = dict(Dish.objects.filter(id__in=all_ids).values_list("id", "price"))
+    dish_price = prices.get(dish_id, Decimal("0"))
     if quantities:
-        prices = dict(Dish.objects.filter(id__in=quantities).values_list("id", "price"))
         total = sum(
             (prices.get(did, Decimal("0")) * qty for did, qty in quantities.items()),
             Decimal("0"),
@@ -55,6 +59,7 @@ def _cart_json_response(request: HttpRequest, dish_id: int) -> HttpResponse:
         {
             "dish_id": dish_id,
             "dish_qty": dish_qty,
+            "dish_price": str(dish_price),
             "cart_count": cart_item_count(request),
             "cart_total": str(total),
         }
@@ -97,7 +102,11 @@ def cart_view(request: HttpRequest) -> HttpResponse:
     dish_ids = [item["dish_id"] for item in cart]
     dishes = {d.id: d for d in Dish.objects.filter(id__in=dish_ids)}
     enriched: list[_EnrichedItem] = [
-        {"dish": dishes[item["dish_id"]], "quantity": item["quantity"]}
+        {
+            "dish": dishes[item["dish_id"]],
+            "quantity": item["quantity"],
+            "subtotal": dishes[item["dish_id"]].price * item["quantity"],
+        }
         for item in cart
         if item["dish_id"] in dishes
     ]
@@ -106,6 +115,31 @@ def cart_view(request: HttpRequest) -> HttpResponse:
         Decimal("0"),
     )
     return render(request, "orders/cart.html", {"items": enriched, "total": total})
+
+
+def order_history(request: HttpRequest) -> HttpResponse:
+    """Display completed & paid order history."""
+    if request.user.is_authenticated:
+        orders = Order.objects.filter(
+            visitor=request.user,
+            status=Order.Status.DELIVERED,
+            payment_status=Order.PaymentStatus.PAID,
+        ).prefetch_related("items__dish")
+    else:
+        session_orders: dict[str, str] = request.session.get("my_orders", {})
+        order_ids = [int(oid) for oid in session_orders]
+        orders = Order.objects.filter(
+            id__in=order_ids,
+            status=Order.Status.DELIVERED,
+            payment_status=Order.PaymentStatus.PAID,
+        ).prefetch_related("items__dish")
+
+    is_anonymous = not request.user.is_authenticated
+    return render(
+        request,
+        "orders/order_history.html",
+        {"orders": orders, "show_register_prompt": is_anonymous},
+    )
 
 
 @require_POST
@@ -146,39 +180,88 @@ def order_qr(request: HttpRequest, order_id: int) -> HttpResponse:
     return HttpResponse(buffer.getvalue(), content_type="image/png")
 
 
-def _build_progress_steps(order_status: str) -> list[dict[str, object]]:
+def _build_progress_steps(
+    order_status: str,
+    taken_count: int = 0,
+    done_count: int = 0,
+    picked_up_count: int = 0,
+    delivered_count: int = 0,
+    total_tickets: int = 0,
+) -> list[dict[str, object]]:
     """Build progress bar steps for order detail template.
 
-    Maps 6 order statuses to 5 visual steps. submitted and approved
-    both map to step 1 ("Прийнято"). Uses gettext for i18n labels.
+    Maps 7 order statuses to 6 visual steps.
+    Partial-progress steps (cooking, ready, delivered) get a ``progress``
+    value between 0.0 and 1.0 reflecting per-dish completion.
     """
     status_to_step: dict[str, int] = {
         "draft": -1,
         "submitted": 0,
-        "approved": 1,
-        "in_progress": 2,
-        "ready": 3,
-        "delivered": 4,
+        "accepted": 1,
+        "verified": 2,
+        "in_progress": 3,
+        "ready": 4,
+        "delivered": 5,
     }
     current_step = status_to_step.get(order_status, -1)
 
+    # Per-step partial progress — each step has unique meaning:
+    #   Готується = how many dishes are COOKED (done)
+    #   Готово     = how many dishes LEFT the kitchen (picked up by waiter)
+    #   Доставлено = how many dishes are WITH the client (delivered)
+    if total_tickets > 0:
+        cooking_progress = done_count / total_tickets
+        ready_progress = picked_up_count / total_tickets
+        delivered_progress = delivered_count / total_tickets
+    else:
+        cooking_progress = 0.0
+        ready_progress = 0.0
+        delivered_progress = 1.0 if order_status == "delivered" else 0.0
+
+    partial_progress: dict[str, float] = {
+        "cooking": cooking_progress,
+        "ready": ready_progress,
+        "delivered": delivered_progress,
+    }
+
     steps_config = [
-        ("📝", _("Створено")),
-        ("👍", _("Прийнято")),
-        ("👩\u200d🍳", _("Готується")),
-        ("✅", _("Готово")),
-        ("🍽️", _("Доставлено")),
+        ("📝", _("Створено"), "created"),
+        ("👍", _("Прийнято"), "accepted"),
+        ("🔍", _("Верифіковано"), "verified"),
+        ("👩\u200d🍳", _("Готується"), "cooking"),
+        ("✅", _("Готово"), "ready"),
+        ("🍽️", _("Доставлено"), "delivered"),
     ]
-    return [
-        {
-            "icon": icon,
-            "label": label,
-            "done": i <= current_step,
-            "active": i == current_step,
-            "step_index": i,
-        }
-        for i, (icon, label) in enumerate(steps_config)
-    ]
+
+    result: list[dict[str, object]] = []
+    for i, (icon, label, key) in enumerate(steps_config):
+        is_partial = key in partial_progress
+
+        if is_partial:
+            # Partial step: progress reflects per-dish completion
+            # regardless of order-level status
+            p = partial_progress[key]
+            done = p >= 1.0
+            active = 0.0 < p < 1.0
+            progress_val = p
+        else:
+            # Binary step: done or not, never active (no blinking)
+            done = i <= current_step
+            active = False
+            progress_val = 1.0 if done else 0.0
+
+        result.append(
+            {
+                "icon": icon,
+                "label": label,
+                "step_key": key,
+                "done": done,
+                "active": active,
+                "progress": progress_val,
+                "step_index": i,
+            }
+        )
+    return result
 
 
 def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
@@ -186,8 +269,8 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
     order = get_object_or_404(
         Order.objects.prefetch_related(
             "items__dish",
-            "items__kitchen_ticket",
-            "items__kitchen_ticket__assigned_to",
+            "items__kitchen_tickets",
+            "items__kitchen_tickets__assigned_to",
         ),
         pk=order_id,
     )
@@ -202,28 +285,45 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
         request.session["my_orders"][str(order.id)] = str(order.access_token)
         request.session.modified = True
 
-    # Build ticket states for SSR (works without JS)
+    # Build ticket states for SSR — one entry per portion (ticket)
     ticket_states = []
     for item in order.items.all():
-        ticket = getattr(item, "kitchen_ticket", None)
-        ticket_states.append(
-            {
-                "item_id": item.id,
-                "dish_title": item.dish.title,
-                "quantity": item.quantity,
-                "ticket_id": ticket.pk if ticket else None,
-                "status": ticket.status if ticket else "pending",
-                "cook_label": (
-                    ticket.assigned_to.staff_label
-                    if ticket and ticket.assigned_to
-                    else None
-                ),
-            }
-        )
+        item_tickets = list(item.kitchen_tickets.all())
+        if item_tickets:
+            for ticket in item_tickets:
+                ticket_states.append(
+                    {
+                        "item_id": item.id,
+                        "dish_title": item.dish.title,
+                        "quantity": 1,
+                        "ticket_id": ticket.pk,
+                        "status": ticket.status,
+                        "is_handed_off": ticket.handed_off_at is not None,
+                        "is_delivered": ticket.is_delivered,
+                        "cook_label": (
+                            ticket.assigned_to.staff_label
+                            if ticket.assigned_to
+                            else None
+                        ),
+                    }
+                )
+        else:
+            # Pre-kitchen: no tickets yet
+            for _ in range(item.quantity):
+                ticket_states.append(
+                    {
+                        "item_id": item.id,
+                        "dish_title": item.dish.title,
+                        "quantity": 1,
+                        "ticket_id": None,
+                        "status": "pending",
+                        "cook_label": None,
+                    }
+                )
 
     now = timezone.now()
     can_escalate = (
-        order.status in ("approved", "in_progress", "ready")
+        order.status in ("accepted", "verified", "in_progress", "ready")
         and order.approved_at
         and (now - order.approved_at).total_seconds()
         > django_settings.ESCALATION_MIN_WAIT * 60
@@ -237,19 +337,40 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
     feedback_obj = GuestFeedback.objects.filter(order=order).first()
     has_feedback = feedback_obj is not None
 
+    # Event log for terminal display
+    from orders.models import OrderEvent
+
+    event_log_lines = [e.log_line for e in OrderEvent.objects.filter(order=order)]
+
     return render(
         request,
         "orders/order_detail.html",
         {
             "order": order,
             "ticket_states": ticket_states,
-            "progress_steps": _build_progress_steps(order.status),
+            "progress_steps": _build_progress_steps(
+                order.status,
+                taken_count=sum(
+                    1 for ts in ticket_states if ts["status"] in ("taken", "done")
+                ),
+                done_count=sum(1 for ts in ticket_states if ts["status"] == "done"),
+                picked_up_count=sum(
+                    1
+                    for ts in ticket_states
+                    if ts.get("is_handed_off") or ts.get("is_delivered")
+                ),
+                delivered_count=sum(
+                    1 for ts in ticket_states if ts.get("is_delivered")
+                ),
+                total_tickets=len(ticket_states),
+            ),
             "show_escalation_button": can_escalate and not active_escalation,
             "active_escalation": active_escalation,
             "escalation_reasons": VisitorEscalation.Reason.choices,
             "has_feedback": has_feedback,
             "feedback": feedback_obj,
             "mood_choices": GuestFeedback.Mood.choices if not has_feedback else [],
+            "event_log_lines": event_log_lines,
         },
     )
 

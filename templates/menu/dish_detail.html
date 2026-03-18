@@ -23,12 +23,7 @@
 {% block content %}
 <div class="container mt-3">
 
-  {# --- Кнопка "Назад" --- #}
-  {# javascript:history.back() — повертає на попередню сторінку в історії браузера. #}
-  {# Працює з будь-якого джерела переходу (category_list, tag_list, search тощо).  #}
-  <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm mb-3">
-    <i class="bi bi-arrow-left"></i> Назад
-  </a>
+  {% include "components/_back_button.html" %}
 
   {# ======================================================================= #}
   {# Responsive row: зображення + інформація                                  #}
