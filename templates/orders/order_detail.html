@@ -121,7 +121,7 @@
 
           {% elif step.step_key == "accepted" %}
             {% if order.waiter %}
-              <p>{% trans "Офіціант:" %} {{ order.waiter.staff_label }}</p>
+              <p>{{ order.waiter.staff_label }}</p>
               <p>{% trans "Прийнято:" %} {{ order.approved_at|date:"d.m.Y H:i:s"|default:"—" }}</p>
             {% else %}
               <p class="text-muted">{% trans "Очікує на офіціанта..." %}</p>

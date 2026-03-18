@@ -292,6 +292,36 @@ def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
 
 
 @role_required(*WAITER_ROLES)
+def waiter_poll_data(request: AuthenticatedHttpRequest) -> HttpResponse:
+    """Return waiter board counts as JSON for polling.
+
+    Temporary — remove when SSE/ASGI is deployed.
+    """
+    new_count = Order.objects.filter(status=Order.Status.SUBMITTED).count()
+    my_count = Order.objects.filter(
+        waiter=request.user,
+        status__in=[
+            Order.Status.ACCEPTED,
+            Order.Status.VERIFIED,
+            Order.Status.IN_PROGRESS,
+            Order.Status.READY,
+        ],
+    ).count()
+    unpaid_count = Order.objects.filter(
+        waiter=request.user,
+        status=Order.Status.DELIVERED,
+        payment_status=Order.PaymentStatus.UNPAID,
+    ).count()
+    return JsonResponse(
+        {
+            "new_count": new_count,
+            "my_count": my_count,
+            "unpaid_count": unpaid_count,
+        }
+    )
+
+
+@role_required(*WAITER_ROLES)
 def order_scan(request: AuthenticatedHttpRequest, order_id: int) -> HttpResponse:
     """Waiter scans QR — redirects to order detail for approval."""
     order = get_object_or_404(Order, pk=order_id)

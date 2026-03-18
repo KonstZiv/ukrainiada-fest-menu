@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}Jadran Sun — {% trans "Замовлення (офіціант)" %}{% endblock %}
 
@@ -26,18 +26,14 @@
       <a class="nav-link {% if active_tab == 'new' %}active{% endif %}"
          href="?tab=new" role="tab">
         {% trans "Нові" %}
-        {% if new_count %}
-          <span class="badge bg-danger ms-1">{{ new_count }}</span>
-        {% endif %}
+        <span class="badge bg-danger ms-1 {% if not new_count %}d-none{% endif %}" data-poll-count="new">{{ new_count }}</span>
       </a>
     </li>
     <li class="nav-item" role="presentation">
       <a class="nav-link {% if active_tab == 'my' %}active{% endif %}"
          href="?tab=my" role="tab">
         {% trans "Мої" %}
-        {% if my_count %}
-          <span class="badge bg-primary ms-1">{{ my_count }}</span>
-        {% endif %}
+        <span class="badge bg-primary ms-1 {% if not my_count %}d-none{% endif %}" data-poll-count="my">{{ my_count }}</span>
         {% if my_ready_count %}
           <span class="badge bg-success ms-1" title="{% trans 'Готові до доставки' %}">{{ my_ready_count }} ✅</span>
         {% endif %}
@@ -177,6 +173,7 @@
 
     {# Unpaid delivered #}
     {% if unpaid_delivered %}
+      <span class="d-none" data-poll-count="unpaid">{{ unpaid_delivered|length }}</span>
       <h5 class="mt-4 text-danger"><i class="bi bi-exclamation-triangle"></i> {% trans "Очікують оплати" %}</h5>
       <div class="accordion accordion-flush" id="accUnpaid">
         {% for order in unpaid_delivered %}
@@ -289,4 +286,9 @@
   {% endif %}
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>window.WAITER_POLL_URL = "{% url 'waiter:poll_data' %}";</script>
+<script src="{% static 'js/waiter_poll.js' %}" defer></script>
 {% endblock %}
