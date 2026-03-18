@@ -11,7 +11,7 @@
     {# --- Dish info --- #}
     <div class="flex-grow-1">
       <strong>{{ t.dish_title }}</strong>
-      <span class="text-muted">x{{ t.quantity }}</span>
+      <span class="text-muted" style="font-size: 0.75rem;">#{{ t.order_id }} · {{ t.waiter_label }}</span>
 
       {% if t.urgency == 'escalated' %}
         <span class="badge bg-danger">{{ t.ticket.get_escalation_level_display }}</span>
@@ -34,6 +34,7 @@
       {% if action_type == "take" %}
         <form method="post" action="{% url 'kitchen:ticket_take' t.ticket.id %}">
           {% csrf_token %}
+          <input type="hidden" name="tab" value="queue">
           <button type="submit" class="btn btn-primary btn-sm" style="min-height: 44px; min-width: 70px;">
             <i class="bi bi-hand-index"></i> Взяти
           </button>
@@ -41,6 +42,7 @@
       {% elif action_type == "done" %}
         <form method="post" action="{% url 'kitchen:ticket_done' t.ticket.id %}">
           {% csrf_token %}
+          <input type="hidden" name="tab" value="in_progress">
           <button type="submit" class="btn btn-success btn-sm" style="min-height: 44px; min-width: 70px;">
             <i class="bi bi-check-lg"></i> Готово
           </button>
@@ -51,8 +53,9 @@
              class="btn btn-outline-primary btn-sm" style="min-height: 44px;">
             <i class="bi bi-qr-code"></i>
           </a>
-          <form method="post" action="{% url 'kitchen:manual_handoff' t.ticket.id %}" class="d-inline">
+          <form method="post" action="{% url 'kitchen:manual_handoff' t.ticket.id %}" class="d-inline ajax-deliver">
             {% csrf_token %}
+            <input type="hidden" name="tab" value="done">
             <button type="submit" class="btn btn-outline-secondary btn-sm" style="min-height: 44px;">
               <i class="bi bi-hand-index"></i>
             </button>

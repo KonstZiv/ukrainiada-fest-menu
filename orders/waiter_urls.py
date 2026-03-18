@@ -29,6 +29,11 @@ urlpatterns = [
         name="order_delivered",
     ),
     path(
+        "ticket/<int:ticket_id>/delivered/",
+        waiter_views.ticket_mark_delivered,
+        name="ticket_delivered",
+    ),
+    path(
         "order/<int:order_id>/confirm-payment/",
         waiter_views.order_confirm_payment,
         name="confirm_payment",

@@ -134,6 +134,11 @@
           </a>
           <div class="vr-custom"></div>
         {% elif user.role == 'manager' %}
+          <a href="{% url 'manager:dashboard' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
+             style="font-size: 0.8rem; letter-spacing: 0.05em;">
+            {% trans "ПАНЕЛЬ" %}
+          </a>
+          <div class="vr-custom"></div>
           <a href="{% url 'waiter:order_list' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
              style="font-size: 0.8rem; letter-spacing: 0.05em;">
             {% trans "ЗАМОВЛЕННЯ" %}

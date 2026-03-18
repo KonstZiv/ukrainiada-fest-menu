@@ -8,6 +8,18 @@
 {% block content %}
 <div class="container mt-3">
 
+  {# --- Django messages --- #}
+  {% if messages %}
+  <div class="mb-2">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show py-2 mb-1" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   {# --- Tabs --- #}
   <ul class="nav nav-pills mb-3" role="tablist">
     <li class="nav-item" role="presentation">

@@ -180,10 +180,19 @@ def order_qr(request: HttpRequest, order_id: int) -> HttpResponse:
     return HttpResponse(buffer.getvalue(), content_type="image/png")
 
 
-def _build_progress_steps(order_status: str) -> list[dict[str, object]]:
+def _build_progress_steps(
+    order_status: str,
+    taken_count: int = 0,
+    done_count: int = 0,
+    picked_up_count: int = 0,
+    delivered_count: int = 0,
+    total_tickets: int = 0,
+) -> list[dict[str, object]]:
     """Build progress bar steps for order detail template.
 
     Maps 7 order statuses to 6 visual steps.
+    Partial-progress steps (cooking, ready, delivered) get a ``progress``
+    value between 0.0 and 1.0 reflecting per-dish completion.
     """
     status_to_step: dict[str, int] = {
         "draft": -1,
@@ -196,6 +205,25 @@ def _build_progress_steps(order_status: str) -> list[dict[str, object]]:
     }
     current_step = status_to_step.get(order_status, -1)
 
+    # Per-step partial progress — each step has unique meaning:
+    #   Готується = how many dishes are COOKED (done)
+    #   Готово     = how many dishes LEFT the kitchen (picked up by waiter)
+    #   Доставлено = how many dishes are WITH the client (delivered)
+    if total_tickets > 0:
+        cooking_progress = done_count / total_tickets
+        ready_progress = picked_up_count / total_tickets
+        delivered_progress = delivered_count / total_tickets
+    else:
+        cooking_progress = 0.0
+        ready_progress = 0.0
+        delivered_progress = 1.0 if order_status == "delivered" else 0.0
+
+    partial_progress: dict[str, float] = {
+        "cooking": cooking_progress,
+        "ready": ready_progress,
+        "delivered": delivered_progress,
+    }
+
     steps_config = [
         ("📝", _("Створено"), "created"),
         ("👍", _("Прийнято"), "accepted"),
@@ -204,17 +232,36 @@ def _build_progress_steps(order_status: str) -> list[dict[str, object]]:
         ("✅", _("Готово"), "ready"),
         ("🍽️", _("Доставлено"), "delivered"),
     ]
-    return [
-        {
-            "icon": icon,
-            "label": label,
-            "step_key": key,
-            "done": i <= current_step,
-            "active": i == current_step,
-            "step_index": i,
-        }
-        for i, (icon, label, key) in enumerate(steps_config)
-    ]
+
+    result: list[dict[str, object]] = []
+    for i, (icon, label, key) in enumerate(steps_config):
+        is_partial = key in partial_progress
+
+        if is_partial:
+            # Partial step: progress reflects per-dish completion
+            # regardless of order-level status
+            p = partial_progress[key]
+            done = p >= 1.0
+            active = 0.0 < p < 1.0
+            progress_val = p
+        else:
+            # Binary step: done or not, never active (no blinking)
+            done = i <= current_step
+            active = False
+            progress_val = 1.0 if done else 0.0
+
+        result.append(
+            {
+                "icon": icon,
+                "label": label,
+                "step_key": key,
+                "done": done,
+                "active": active,
+                "progress": progress_val,
+                "step_index": i,
+            }
+        )
+    return result
 
 
 def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
@@ -222,8 +269,8 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
     order = get_object_or_404(
         Order.objects.prefetch_related(
             "items__dish",
-            "items__kitchen_ticket",
-            "items__kitchen_ticket__assigned_to",
+            "items__kitchen_tickets",
+            "items__kitchen_tickets__assigned_to",
         ),
         pk=order_id,
     )
@@ -238,24 +285,41 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
         request.session["my_orders"][str(order.id)] = str(order.access_token)
         request.session.modified = True
 
-    # Build ticket states for SSR (works without JS)
+    # Build ticket states for SSR — one entry per portion (ticket)
     ticket_states = []
     for item in order.items.all():
-        ticket = getattr(item, "kitchen_ticket", None)
-        ticket_states.append(
-            {
-                "item_id": item.id,
-                "dish_title": item.dish.title,
-                "quantity": item.quantity,
-                "ticket_id": ticket.pk if ticket else None,
-                "status": ticket.status if ticket else "pending",
-                "cook_label": (
-                    ticket.assigned_to.staff_label
-                    if ticket and ticket.assigned_to
-                    else None
-                ),
-            }
-        )
+        item_tickets = list(item.kitchen_tickets.all())
+        if item_tickets:
+            for ticket in item_tickets:
+                ticket_states.append(
+                    {
+                        "item_id": item.id,
+                        "dish_title": item.dish.title,
+                        "quantity": 1,
+                        "ticket_id": ticket.pk,
+                        "status": ticket.status,
+                        "is_handed_off": ticket.handed_off_at is not None,
+                        "is_delivered": ticket.is_delivered,
+                        "cook_label": (
+                            ticket.assigned_to.staff_label
+                            if ticket.assigned_to
+                            else None
+                        ),
+                    }
+                )
+        else:
+            # Pre-kitchen: no tickets yet
+            for _ in range(item.quantity):
+                ticket_states.append(
+                    {
+                        "item_id": item.id,
+                        "dish_title": item.dish.title,
+                        "quantity": 1,
+                        "ticket_id": None,
+                        "status": "pending",
+                        "cook_label": None,
+                    }
+                )
 
     now = timezone.now()
     can_escalate = (
@@ -284,7 +348,22 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
         {
             "order": order,
             "ticket_states": ticket_states,
-            "progress_steps": _build_progress_steps(order.status),
+            "progress_steps": _build_progress_steps(
+                order.status,
+                taken_count=sum(
+                    1 for ts in ticket_states if ts["status"] in ("taken", "done")
+                ),
+                done_count=sum(1 for ts in ticket_states if ts["status"] == "done"),
+                picked_up_count=sum(
+                    1
+                    for ts in ticket_states
+                    if ts.get("is_handed_off") or ts.get("is_delivered")
+                ),
+                delivered_count=sum(
+                    1 for ts in ticket_states if ts.get("is_delivered")
+                ),
+                total_tickets=len(ticket_states),
+            ),
             "show_escalation_button": can_escalate and not active_escalation,
             "active_escalation": active_escalation,
             "escalation_reasons": VisitorEscalation.Reason.choices,

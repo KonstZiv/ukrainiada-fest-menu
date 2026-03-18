@@ -93,5 +93,33 @@
       </button>
     </form>
   {% endif %}
+
+  {# --- Out-of-flow actions — skip steps when reality diverges from system --- #}
+  {% if order.waiter == request.user and order.status != 'delivered' %}
+    {% if order.status == 'verified' or order.status == 'in_progress' %}
+    <div class="card border-warning mt-4">
+      <div class="card-header bg-warning bg-opacity-25 py-2">
+        <i class="bi bi-skip-forward"></i> {% trans "Позачергові дії" %}
+        <small class="text-muted d-block">{% trans "Якщо стандартний flow не був виконаний — зафіксуйте фактичний стан" %}</small>
+      </div>
+      <div class="card-body">
+        <form method="post" action="{% url 'waiter:order_delivered' order.id %}" class="mb-2">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-warning w-100">
+            <i class="bi bi-check2-all"></i> {% trans "Доставлено (без кухні)" %}
+          </button>
+        </form>
+        {% if order.payment_status == 'unpaid' %}
+        <form method="post" action="{% url 'waiter:confirm_payment' order.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-warning w-100">
+            <i class="bi bi-cash"></i> {% trans "Оплату прийнято (без кухні)" %}
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  {% endif %}
 </div>
 {% endblock %}

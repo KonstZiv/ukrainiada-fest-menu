@@ -67,7 +67,7 @@ def _enrich_tickets(
             {
                 "ticket": ticket,
                 "dish_title": ticket.order_item.dish.title,
-                "quantity": ticket.order_item.quantity,
+                "quantity": 1,
                 "order_id": ticket.order_item.order_id,
                 "waiter_label": waiter.staff_label if waiter else "—",
                 "age_min": age_min,
@@ -157,12 +157,12 @@ def kitchen_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
     taken_enriched = _enrich_tickets(taken_qs, now)
     taken_groups = _group_by_order(taken_enriched)
 
-    # --- Done today ---
+    # --- Done (still on kitchen, not handed to waiter yet) ---
     done_qs = (
         KitchenTicket.objects.filter(
             status=KitchenTicket.Status.DONE,
             assigned_to=user,
-            done_at__gte=_today_start(),
+            handed_off_at__isnull=True,
         )
         .select_related("order_item__dish", "order_item__order__waiter")
         .order_by("-done_at")
@@ -307,20 +307,27 @@ def ticket_take(request: AuthenticatedHttpRequest, ticket_id: int) -> HttpRespon
         take_ticket(ticket, kitchen_user=request.user)
     except ValueError as e:
         messages.error(request, str(e))
-    return redirect("kitchen:dashboard")
+    tab = request.POST.get("tab", "queue")
+    return redirect(f"{reverse('kitchen:dashboard')}?tab={tab}")
 
 
 @role_required(*KITCHEN_ROLES)
 @require_POST
 def ticket_done(request: AuthenticatedHttpRequest, ticket_id: int) -> HttpResponse:
-    """Kitchen staff marks a taken ticket as done."""
+    """Kitchen staff marks a ticket as done (auto-takes if PENDING)."""
     ticket = get_object_or_404(KitchenTicket, pk=ticket_id)
     try:
-        mark_ticket_done(ticket, kitchen_user=request.user)
-        messages.success(request, f"Страва '{ticket.order_item.dish.title}' готова!")
+        ticket, skipped = mark_ticket_done(ticket, kitchen_user=request.user)
+        if skipped:
+            dish_title = ticket.order_item.dish.title
+            messages.warning(
+                request,
+                f"'{dish_title}' — пропущено: {', '.join(skipped)}",
+            )
     except ValueError as e:
         messages.error(request, str(e))
-    return redirect("kitchen:dashboard")
+    tab = request.POST.get("tab", "in_progress")
+    return redirect(f"{reverse('kitchen:dashboard')}?tab={tab}")
 
 
 @role_required(*KITCHEN_ROLES)
@@ -392,10 +399,12 @@ def ticket_manual_handoff(
     )
     try:
         manual_handoff(ticket, kitchen_user=request.user)
-        messages.success(
-            request,
-            f"Передачу '{ticket.order_item.dish.title}' відмічено вручну.",
-        )
+        dish_title = ticket.order_item.dish.title
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"ok": True, "dish": dish_title})
     except ValueError as e:
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"ok": False, "error": str(e)}, status=400)
         messages.error(request, str(e))
-    return redirect("kitchen:dashboard")
+    tab = request.POST.get("tab", "done")
+    return redirect(f"{reverse('kitchen:dashboard')}?tab={tab}")

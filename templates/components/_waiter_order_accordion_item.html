@@ -1,6 +1,6 @@
 {% load i18n %}<div class="accordion-item {% if entry.has_overdue %}border-danger{% elif entry.order.status == 'ready' %}border-success{% endif %}">
   <h2 class="accordion-header">
-    <button class="accordion-button collapsed {% if entry.has_overdue %}bg-danger bg-opacity-10{% elif entry.order.status == 'ready' %}bg-success bg-opacity-10{% elif entry.done_dishes > 0 %}bg-info bg-opacity-10{% endif %}"
+    <button class="accordion-button {% if request.GET.open == entry.order.id|stringformat:'d' %}{% else %}collapsed{% endif %} {% if entry.has_overdue %}bg-danger bg-opacity-10{% elif entry.order.status == 'ready' %}bg-success bg-opacity-10{% elif entry.done_dishes > 0 %}bg-info bg-opacity-10{% endif %}"
             type="button" data-bs-toggle="collapse" data-bs-target="#{{ id_prefix }}Order{{ entry.order.id }}">
       <div class="flex-grow-1 me-2">
         {# Row 1: number + status badges #}
@@ -40,7 +40,7 @@
       </div>
     </button>
   </h2>
-  <div id="{{ id_prefix }}Order{{ entry.order.id }}" class="accordion-collapse collapse" data-bs-parent="#{{ parent_id }}">
+  <div id="{{ id_prefix }}Order{{ entry.order.id }}" class="accordion-collapse collapse {% if request.GET.open == entry.order.id|stringformat:'d' %}show{% endif %}" data-bs-parent="#{{ parent_id }}">
     <div class="accordion-body p-2">
       {# --- Per-dish status --- #}
       <div class="list-group list-group-flush mb-2">
@@ -49,23 +49,39 @@
                       {% if t.dish_urgency == 'critical' %}list-group-item-danger{% elif t.dish_urgency == 'warn' %}list-group-item-warning{% elif t.status == 'done' %}list-group-item-success{% endif %}">
             <div>
               <span class="me-1">
-                {% if t.dish_urgency == 'critical' %}🔥{% elif t.status == 'done' %}✅{% elif t.status == 'taken' %}👩‍🍳{% else %}⏳{% endif %}
+                {% if t.is_delivered %}🍽️{% elif t.location == 'waiter' %}🏃{% elif t.dish_urgency == 'critical' %}🔥{% elif t.status == 'done' %}✅{% elif t.status == 'taken' %}👩‍🍳{% else %}⏳{% endif %}
               </span>
               <strong>{{ t.dish_title }}</strong>
               <span class="text-muted ms-1">x{{ t.quantity }}</span>
-              {% if t.dish_urgency == 'critical' %}
+              {% if t.is_delivered %}
+                <div class="text-muted small">{% trans "У клієнта" %}</div>
+              {% elif t.location == 'waiter' %}
+                <div class="text-primary small fw-bold">{% trans "У вас — віднести клієнту" %}</div>
+              {% elif t.dish_urgency == 'critical' %}
                 <div class="text-danger small fw-bold">⚠️ {% trans "Готово" %} {{ t.done_min }} {% trans "хв тому — остигає!" %}</div>
               {% elif t.dish_urgency == 'warn' %}
                 <div class="text-warning small fw-bold">{% trans "Готово" %} {{ t.done_min }} {% trans "хв — забрати!" %}</div>
               {% elif t.status == 'taken' and t.cook_label %}
-                <div class="text-muted small">{{ t.cook_label }} {% trans "готує" %}</div>
+                <div class="text-muted small">🍳 {{ t.cook_label }} {% trans "готує" %}</div>
               {% elif t.status == 'done' %}
-                <div class="text-success small fw-bold">{% trans "Готово — забрати!" %}</div>
+                <div class="text-success small fw-bold">{% trans "Готово на кухні — забрати!" %}</div>
               {% elif t.status == 'pending' %}
-                <div class="text-muted small">{% trans "В черзі" %}</div>
+                <div class="text-muted small">🍳 {% trans "В черзі на кухні" %}</div>
               {% endif %}
             </div>
-            <span class="fw-bold">&euro;{{ t.subtotal|floatformat:2 }}</span>
+            <div class="d-flex align-items-center gap-2">
+              {% if t.ticket_id and not t.is_delivered %}
+                <form method="post" action="{% url 'waiter:ticket_delivered' t.ticket_id %}" class="d-inline ajax-deliver">
+                  {% csrf_token %}
+                  <button type="submit" class="btn {% if t.status == 'done' %}btn-success{% else %}btn-outline-warning{% endif %} btn-sm py-0 px-1" style="font-size: 0.75rem;">
+                    <i class="bi bi-check2"></i>
+                  </button>
+                </form>
+              {% elif t.is_delivered %}
+                <span class="badge bg-secondary" style="font-size: 0.65rem;">{% trans "віддано" %}</span>
+              {% endif %}
+              <span class="fw-bold">&euro;{{ t.subtotal|floatformat:2 }}</span>
+            </div>
           </div>
         {% endfor %}
       </div>

@@ -175,35 +175,72 @@ def approve_order(order: Order, waiter: User) -> Order:
     return verify_order(order, waiter)
 
 
-def deliver_order(order: Order, waiter: User) -> Order:
+def deliver_order(order: Order, waiter: User) -> tuple[Order, list[str]]:
     """Waiter marks order as delivered to visitor.
 
-    Validates that the order is READY and all kitchen tickets are DONE
-    before allowing delivery.
+    Supports soft flow: if order is VERIFIED/IN_PROGRESS, auto-completes
+    all kitchen tickets and sets READY before delivering.
+
+    Returns:
+        Tuple of (order, skipped_steps).
 
     Raises:
-        ValueError: if order is not READY, waiter is not assigned,
-            or some dishes are not yet ready from kitchen.
+        ValueError: if order is in an incompatible status (SUBMITTED/ACCEPTED/DELIVERED),
+            or waiter is not assigned.
 
     """
-    if order.status != Order.Status.READY:
-        msg = f"Order #{order.id} is not ready (status: {order.status})"
+    skipped: list[str] = []
+
+    if order.status == Order.Status.DELIVERED:
+        msg = "Замовлення вже доставлено"
+        raise ValueError(msg)
+    if order.status in (
+        Order.Status.DRAFT,
+        Order.Status.SUBMITTED,
+        Order.Status.ACCEPTED,
+    ):
+        msg = f"Замовлення #{order.id} ще не передано на кухню (статус: {order.get_status_display()})"
         raise ValueError(msg)
     if order.waiter_id != waiter.id:
         msg = "Only the assigned waiter can deliver the order"
         raise ValueError(msg)
 
-    unconfirmed = (
+    now = timezone.now()
+
+    # Soft flow: auto-complete kitchen tickets that are not DONE
+    unfinished_tickets = (
         KitchenTicket.objects.filter(order_item__order=order)
         .exclude(status=KitchenTicket.Status.DONE)
-        .count()
+        .select_related("order_item__dish")
     )
-    if unconfirmed > 0:
-        msg = f"{unconfirmed} dish(es) not yet ready from kitchen"
-        raise ValueError(msg)
+
+    for ticket in unfinished_tickets:
+        old_status = ticket.get_status_display()
+        ticket.status = KitchenTicket.Status.DONE
+        ticket.done_at = ticket.done_at or now
+        if not ticket.taken_at:
+            ticket.taken_at = now
+        ticket.save(update_fields=["status", "done_at", "taken_at"])
+        skipped.append(f"{ticket.order_item.dish.title} ({old_status} → Готово)")
+
+    if skipped:
+        log_event(
+            order,
+            f"⚠️ Авто: {waiter.staff_label} пропустив(ла) кухонний процес — "
+            f"страви авто-закриті ({len(skipped)} шт.)",
+            actor_label=waiter.staff_label,
+            is_auto_skip=True,
+        )
+
+    # Set READY if not already
+    if order.status != Order.Status.READY:
+        order.status = Order.Status.READY
+        order.ready_at = order.ready_at or now
+        order.save(update_fields=["status", "ready_at"])
+        skipped.append("Готово (кухня)")
 
     order.status = Order.Status.DELIVERED
-    order.delivered_at = timezone.now()
+    order.delivered_at = now
     order.save(update_fields=["status", "delivered_at"])
 
     log_event(
@@ -217,11 +254,104 @@ def deliver_order(order: Order, waiter: User) -> Order:
         event_type="order_delivered",
         data={"order_id": order.id, "waiter_label": waiter.staff_label},
     )
-    return order
+    return order, skipped
 
 
-def confirm_cash_payment(order: Order, waiter: User) -> Order:
+def deliver_ticket(ticket: KitchenTicket, waiter: User) -> KitchenTicket:
+    """Mark a single kitchen ticket (portion) as delivered to visitor.
+
+    Soft flow: if ticket is PENDING or TAKEN, auto-completes kitchen
+    steps before marking as delivered. Pressing "delivered" is the
+    waiter's verification that the dish has been physically handed over.
+
+    Automatically transitions the order to DELIVERED when all tickets
+    for the order are delivered.
+
+    Raises:
+        ValueError: if ticket is already delivered or waiter is not assigned.
+
+    """
+    if ticket.is_delivered:
+        msg = "Ця порція вже доставлена"
+        raise ValueError(msg)
+
+    order = ticket.order_item.order
+    if order.waiter_id != waiter.id:
+        msg = "Only the assigned waiter can deliver dishes"
+        raise ValueError(msg)
+
+    now = timezone.now()
+    dish_title = ticket.order_item.dish.title
+
+    # Soft flow: auto-complete kitchen steps if not DONE
+    if ticket.status != KitchenTicket.Status.DONE:
+        old_status = ticket.get_status_display()
+        ticket.status = KitchenTicket.Status.DONE
+        if not ticket.taken_at:
+            ticket.taken_at = now
+        ticket.done_at = ticket.done_at or now
+        ticket.save(update_fields=["status", "taken_at", "done_at"])
+        log_event(
+            order,
+            f"⚠️ Авто: {waiter.staff_label} доставив(ла) {dish_title} "
+            f"(кухня: {old_status} → Готово)",
+            actor_label=waiter.staff_label,
+            is_auto_skip=True,
+        )
+
+    ticket.is_delivered = True
+    ticket.delivered_at = now
+    if not ticket.handed_off_at:
+        ticket.handed_off_at = now
+    ticket.save(update_fields=["is_delivered", "delivered_at", "handed_off_at"])
+
+    log_event(
+        order,
+        f"{waiter.staff_label} доставив(ла) {dish_title}",
+        actor_label=waiter.staff_label,
+    )
+
+    push_visitor_event(
+        order_id=order.id,
+        event_type="dish_delivered",
+        data={
+            "ticket_id": ticket.pk,
+            "dish": dish_title[:40],
+            "waiter_label": waiter.staff_label,
+        },
+    )
+
+    # Check if all tickets are delivered → transition order to DELIVERED
+    all_delivered = not (
+        KitchenTicket.objects.filter(
+            order_item__order=order, is_delivered=False
+        ).exists()
+    )
+    if all_delivered and order.status != Order.Status.DELIVERED:
+        order.status = Order.Status.DELIVERED
+        order.delivered_at = now
+        order.save(update_fields=["status", "delivered_at"])
+        log_event(
+            order,
+            f"{waiter.staff_label} доставив(ла) замовлення (всі порції)",
+            actor_label=waiter.staff_label,
+        )
+        push_visitor_event(
+            order_id=order.id,
+            event_type="order_delivered",
+            data={"order_id": order.id, "waiter_label": waiter.staff_label},
+        )
+
+    return ticket
+
+
+def confirm_cash_payment(order: Order, waiter: User) -> tuple[Order, list[str]]:
     """Waiter confirms cash payment received.
+
+    Supports soft flow: if order is not DELIVERED, auto-delivers first.
+
+    Returns:
+        Tuple of (order, skipped_steps).
 
     Raises:
         ValueError: if order is already paid or waiter is not assigned.
@@ -233,6 +363,14 @@ def confirm_cash_payment(order: Order, waiter: User) -> Order:
     if order.waiter_id != waiter.id:
         msg = "Only the assigned waiter can confirm payment"
         raise ValueError(msg)
+
+    skipped: list[str] = []
+
+    # Soft flow: auto-deliver if not yet delivered
+    if order.status != Order.Status.DELIVERED:
+        order, delivery_skipped = deliver_order(order, waiter)
+        skipped.extend(delivery_skipped)
+        skipped.append("Доставка")
 
     order.payment_status = Order.PaymentStatus.PAID
     order.payment_method = Order.PaymentMethod.CASH
@@ -251,7 +389,7 @@ def confirm_cash_payment(order: Order, waiter: User) -> Order:
         f"Оплату готівкою €{order.total_price:.2f} прийняв(ла) {waiter.staff_label}",
         actor_label=waiter.staff_label,
     )
-    return order
+    return order, skipped
 
 
 def confirm_online_payment_stub(order: Order) -> Order:

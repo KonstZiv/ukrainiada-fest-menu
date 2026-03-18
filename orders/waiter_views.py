@@ -8,7 +8,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.contrib import messages
 from django.db import models, transaction
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -26,6 +26,7 @@ from orders.services import (
     confirm_cash_payment,
     confirm_payment_by_senior,
     deliver_order,
+    deliver_ticket,
     verify_order,
 )
 from user.decorators import role_required
@@ -35,57 +36,86 @@ SENIOR_ROLES = ("senior_waiter", "manager")
 
 
 def _enrich_orders(orders_qs, now, pickup_warn, pickup_critical):  # type: ignore[no-untyped-def]
-    """Build per-order dish/ticket stats for a queryset of orders."""
+    """Build per-order portion/ticket stats for a queryset of orders."""
     enriched = []
     ready_count = 0
     for order in orders_qs:
-        tickets = []
-        total_dishes = 0
-        done_dishes = 0
-        taken_dishes = 0
+        portions = []
+        total_portions = 0
+        done_portions = 0
+        taken_portions = 0
         has_overdue = False
         for item in order.items.all():
-            total_dishes += 1
-            ticket = getattr(item, "kitchen_ticket", None)
-            status = ticket.status if ticket else "pending"
-            done_min = 0
-            dish_urgency = "normal"
-            if status == "done":
-                done_dishes += 1
-                if ticket and ticket.done_at:
-                    done_min = int((now - ticket.done_at).total_seconds() / 60)
-                    if done_min >= pickup_critical:
-                        dish_urgency = "critical"
-                        has_overdue = True
-                    elif done_min >= pickup_warn:
-                        dish_urgency = "warn"
-                        has_overdue = True
-            elif status == "taken":
-                taken_dishes += 1
-            tickets.append(
-                {
-                    "dish_title": item.dish.title,
-                    "quantity": item.quantity,
-                    "subtotal": item.subtotal,
-                    "status": status,
-                    "cook_label": (
-                        ticket.assigned_to.staff_label
-                        if ticket and ticket.assigned_to
-                        else None
-                    ),
-                    "done_min": done_min,
-                    "dish_urgency": dish_urgency,
-                }
-            )
+            item_tickets = list(item.kitchen_tickets.all())
+            for ticket in item_tickets:
+                total_portions += 1
+                done_min = 0
+                dish_urgency = "normal"
+                if ticket.status == "done":
+                    done_portions += 1
+                    if ticket.done_at:
+                        done_min = int((now - ticket.done_at).total_seconds() / 60)
+                        if done_min >= pickup_critical:
+                            dish_urgency = "critical"
+                            has_overdue = True
+                        elif done_min >= pickup_warn:
+                            dish_urgency = "warn"
+                            has_overdue = True
+                elif ticket.status == "taken":
+                    taken_portions += 1
+                # Dish location: kitchen → waiter → visitor
+                if ticket.is_delivered:
+                    location = "visitor"
+                elif ticket.handed_off_at:
+                    location = "waiter"
+                else:
+                    location = "kitchen"
+
+                portions.append(
+                    {
+                        "dish_title": item.dish.title,
+                        "quantity": 1,
+                        "subtotal": item.dish.price,
+                        "status": ticket.status,
+                        "ticket_id": ticket.pk,
+                        "is_delivered": ticket.is_delivered,
+                        "location": location,
+                        "cook_label": (
+                            ticket.assigned_to.staff_label
+                            if ticket.assigned_to
+                            else None
+                        ),
+                        "done_min": done_min,
+                        "dish_urgency": dish_urgency,
+                    }
+                )
+            # If no tickets yet (pre-kitchen), show item as pending
+            if not item_tickets:
+                for _ in range(item.quantity):
+                    total_portions += 1
+                    portions.append(
+                        {
+                            "dish_title": item.dish.title,
+                            "quantity": 1,
+                            "subtotal": item.dish.price,
+                            "status": "pending",
+                            "ticket_id": None,
+                            "is_delivered": False,
+                            "location": "kitchen",
+                            "cook_label": None,
+                            "done_min": 0,
+                            "dish_urgency": "normal",
+                        }
+                    )
         if order.status == "ready":
             ready_count += 1
         enriched.append(
             {
                 "order": order,
-                "tickets": tickets,
-                "total_dishes": total_dishes,
-                "done_dishes": done_dishes,
-                "taken_dishes": taken_dishes,
+                "tickets": portions,
+                "total_dishes": total_portions,
+                "done_dishes": done_portions,
+                "taken_dishes": taken_portions,
                 "has_overdue": has_overdue,
             }
         )
@@ -112,8 +142,8 @@ def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
         )
         .prefetch_related(
             "items__dish",
-            "items__kitchen_ticket",
-            "items__kitchen_ticket__assigned_to",
+            "items__kitchen_tickets",
+            "items__kitchen_tickets__assigned_to",
         )
         .order_by("created_at")
     )
@@ -184,8 +214,8 @@ def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
             .select_related("waiter")
             .prefetch_related(
                 "items__dish",
-                "items__kitchen_ticket",
-                "items__kitchen_ticket__assigned_to",
+                "items__kitchen_tickets",
+                "items__kitchen_tickets__assigned_to",
             )
             .order_by("waiter_id", "created_at")
         )
@@ -275,7 +305,6 @@ def order_accept(request: AuthenticatedHttpRequest, order_id: int) -> HttpRespon
     order = get_object_or_404(Order, pk=order_id)
     try:
         accept_order(order, request.user)
-        messages.success(request, f"Замовлення #{order.id} — тепер ваше.")
     except ValueError as e:
         messages.error(request, str(e))
     return redirect("waiter:order_scan", order_id=order.id)
@@ -288,9 +317,6 @@ def order_verify(request: AuthenticatedHttpRequest, order_id: int) -> HttpRespon
     order = get_object_or_404(Order, pk=order_id)
     try:
         verify_order(order, request.user)
-        messages.success(
-            request, f"Замовлення #{order.id} верифіковано і передано на кухню."
-        )
     except ValueError as e:
         messages.error(request, str(e))
     return redirect("waiter:order_scan", order_id=order.id)
@@ -303,7 +329,6 @@ def order_approve(request: AuthenticatedHttpRequest, order_id: int) -> HttpRespo
     order = get_object_or_404(Order, pk=order_id)
     try:
         approve_order(order, request.user)
-        messages.success(request, f"Замовлення #{order.id} підтверджено.")
     except ValueError as e:
         messages.error(request, str(e))
     return redirect("waiter:order_scan", order_id=order.id)
@@ -320,11 +345,15 @@ def waiter_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
 def order_mark_delivered(
     request: AuthenticatedHttpRequest, order_id: int
 ) -> HttpResponse:
-    """Waiter marks a READY order as delivered to visitor."""
+    """Waiter marks order as delivered to visitor (soft flow: auto-completes if needed)."""
     order = get_object_or_404(Order, pk=order_id, waiter=request.user)
     try:
-        deliver_order(order, waiter=request.user)
-        messages.success(request, f"Замовлення #{order_id} передано відвідувачу.")
+        order, skipped = deliver_order(order, waiter=request.user)
+        if skipped:
+            messages.warning(
+                request,
+                f"#{order_id} — пропущені кроки: {', '.join(skipped)}",
+            )
     except ValueError as e:
         messages.error(request, str(e))
 
@@ -333,16 +362,42 @@ def order_mark_delivered(
 
 @role_required(*WAITER_ROLES)
 @require_POST
+def ticket_mark_delivered(
+    request: AuthenticatedHttpRequest, ticket_id: int
+) -> HttpResponse:
+    """Waiter marks a single portion as delivered to visitor."""
+    from kitchen.models import KitchenTicket
+
+    ticket = get_object_or_404(KitchenTicket, pk=ticket_id)
+    order_id = ticket.order_item.order_id
+    try:
+        deliver_ticket(ticket, waiter=request.user)
+        dish_title = ticket.order_item.dish.title
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"ok": True, "dish": dish_title})
+        messages.success(request, f"'{dish_title}' доставлено.")
+    except ValueError as e:
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"ok": False, "error": str(e)}, status=400)
+        messages.error(request, str(e))
+
+    return redirect(f"{reverse('waiter:order_list')}?tab=my&open={order_id}")
+
+
+@role_required(*WAITER_ROLES)
+@require_POST
 def order_confirm_payment(
     request: AuthenticatedHttpRequest, order_id: int
 ) -> HttpResponse:
-    """Waiter confirms cash payment for an order."""
+    """Waiter confirms cash payment (soft flow: auto-delivers if needed)."""
     order = get_object_or_404(Order, pk=order_id, waiter=request.user)
     try:
-        confirm_cash_payment(order, waiter=request.user)
-        messages.success(
-            request, f"Оплату замовлення #{order_id} підтверджено (готівка)."
-        )
+        order, skipped = confirm_cash_payment(order, waiter=request.user)
+        if skipped:
+            messages.warning(
+                request,
+                f"#{order_id} оплата — пропущені кроки: {', '.join(skipped)}",
+            )
     except ValueError as e:
         messages.error(request, str(e))
 
@@ -380,7 +435,6 @@ def handoff_confirm_view(
             handoff.save(update_fields=["is_confirmed", "confirmed_at"])
 
         dish_title = handoff.ticket.order_item.dish.title
-        messages.success(request, f"Прийом '{dish_title}' підтверджено.")
 
         # Notify visitor: waiter collected the dish
         push_visitor_event(

@@ -55,9 +55,10 @@ def test_create_tickets_for_order() -> None:
 
     tickets = create_tickets_for_order(order)
 
-    assert len(tickets) == 2
+    # dish1 x1 + dish2 x2 = 3 tickets (one per portion)
+    assert len(tickets) == 3
     assert all(t.status == KitchenTicket.Status.PENDING for t in tickets)
-    assert KitchenTicket.objects.filter(order_item__order=order).count() == 2
+    assert KitchenTicket.objects.filter(order_item__order=order).count() == 3
 
 
 @pytest.mark.django_db
@@ -331,10 +332,11 @@ def test_mark_done_success(django_user_model: Any) -> None:
     ticket = KitchenTicket.objects.create(order_item=item)
 
     ticket = take_ticket(ticket, kitchen_user=cook)
-    result = mark_ticket_done(ticket, kitchen_user=cook)
+    result, skipped = mark_ticket_done(ticket, kitchen_user=cook)
 
     assert result.status == KitchenTicket.Status.DONE
     assert result.done_at is not None
+    assert skipped == []
 
 
 @pytest.mark.django_db

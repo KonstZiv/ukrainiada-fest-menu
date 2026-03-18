@@ -98,11 +98,11 @@
             </td>
             <td>
               {% for item in order.items.all %}
-                {% if item.kitchen_ticket %}
-                  <span class="ticket-status badge bg-{% if item.kitchen_ticket.status == 'pending' %}warning text-dark{% elif item.kitchen_ticket.status == 'taken' %}info{% elif item.kitchen_ticket.status == 'done' %}success{% endif %}" style="font-size: 0.8rem;">
-                    {{ item.dish.title|truncatechars:10 }}: {{ item.kitchen_ticket.get_status_display }}
+                {% for ticket in item.kitchen_tickets.all %}
+                  <span class="ticket-status badge bg-{% if ticket.status == 'pending' %}warning text-dark{% elif ticket.status == 'taken' %}info{% elif ticket.status == 'done' %}success{% endif %}" style="font-size: 0.8rem;">
+                    {{ item.dish.title|truncatechars:10 }}: {{ ticket.get_status_display }}
                   </span>
-                {% endif %}
+                {% endfor %}
               {% endfor %}
             </td>
             <td>&euro;{{ order.total_annotated|floatformat:2 }}</td>
@@ -172,11 +172,11 @@
                 <span>{{ item.dish.title }}</span>
                 <span class="text-muted ms-1">x{{ item.quantity }}</span>
               </div>
-              {% if item.kitchen_ticket %}
-                <span class="ticket-status badge bg-{% if item.kitchen_ticket.status == 'pending' %}warning text-dark{% elif item.kitchen_ticket.status == 'taken' %}info{% elif item.kitchen_ticket.status == 'done' %}success{% endif %}">
-                  {{ item.kitchen_ticket.get_status_display }}
+              {% for ticket in item.kitchen_tickets.all %}
+                <span class="ticket-status badge bg-{% if ticket.status == 'pending' %}warning text-dark{% elif ticket.status == 'taken' %}info{% elif ticket.status == 'done' %}success{% endif %}">
+                  {{ ticket.get_status_display }}
                 </span>
-              {% endif %}
+              {% endfor %}
             </div>
           {% endfor %}
         </div>

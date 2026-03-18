@@ -308,7 +308,8 @@ def test_approve_order_creates_kitchen_tickets(
     order.refresh_from_db()
     assert order.status == Order.Status.VERIFIED
     assert order.waiter == waiter
-    assert KitchenTicket.objects.filter(order_item__order=order).count() == 1
+    # quantity=2 → 2 tickets (one per portion)
+    assert KitchenTicket.objects.filter(order_item__order=order).count() == 2
 
 
 @pytest.mark.django_db
@@ -395,9 +396,10 @@ def test_mark_delivered_changes_status(client: Client, django_user_model: Any) -
 
 
 @pytest.mark.django_db
-def test_cannot_mark_delivered_if_not_ready(
+def test_soft_flow_delivers_verified_order(
     client: Client, django_user_model: Any
 ) -> None:
+    """Soft flow: VERIFIED order can be delivered (auto-skips kitchen steps)."""
     waiter = django_user_model.objects.create_user(
         email="w@test.com", username="w", password="testpass123", role="waiter"
     )
@@ -407,7 +409,22 @@ def test_cannot_mark_delivered_if_not_ready(
     client.post(f"/waiter/order/{order.id}/delivered/")
 
     order.refresh_from_db()
-    assert order.status == Order.Status.VERIFIED
+    assert order.status == Order.Status.DELIVERED
+
+
+@pytest.mark.django_db
+def test_cannot_deliver_accepted_order(client: Client, django_user_model: Any) -> None:
+    """Delivery should fail for orders not yet sent to kitchen."""
+    waiter = django_user_model.objects.create_user(
+        email="w2@test.com", username="w2", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(waiter=waiter, status=Order.Status.ACCEPTED)
+
+    client.force_login(waiter)
+    client.post(f"/waiter/order/{order.id}/delivered/")
+
+    order.refresh_from_db()
+    assert order.status == Order.Status.ACCEPTED
 
 
 @pytest.mark.django_db
@@ -445,12 +462,13 @@ def test_confirm_cash_payment_success(django_user_model: Any) -> None:
         status=Order.Status.DELIVERED,
         payment_status=Order.PaymentStatus.UNPAID,
     )
-    result = confirm_cash_payment(order, waiter=waiter)
+    result, skipped = confirm_cash_payment(order, waiter=waiter)
 
     assert result.payment_status == Order.PaymentStatus.PAID
     assert result.payment_method == Order.PaymentMethod.CASH
     assert result.payment_confirmed_at is not None
     assert result.payment_escalation_level == 0
+    assert skipped == []  # already DELIVERED, no skip needed
 
 
 @pytest.mark.django_db

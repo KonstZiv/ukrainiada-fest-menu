@@ -50,24 +50,31 @@ def _make_ready_order(
 def test_deliver_order_success(django_user_model: Any) -> None:
     order, waiter = _make_ready_order(django_user_model)
 
-    result = deliver_order(order, waiter=waiter)
+    result, skipped = deliver_order(order, waiter=waiter)
 
     assert result.status == Order.Status.DELIVERED
     assert result.delivered_at is not None
+    assert skipped == []
 
 
 @pytest.mark.django_db
-def test_deliver_fails_if_ticket_not_done(django_user_model: Any) -> None:
+def test_deliver_auto_completes_unfinished_tickets(django_user_model: Any) -> None:
+    """Soft flow: delivering a READY order with non-DONE tickets auto-completes them."""
     order, waiter = _make_ready_order(django_user_model, ticket_status="taken")
 
-    with pytest.raises(ValueError, match="not yet ready"):
-        deliver_order(order, waiter=waiter)
+    result, skipped = deliver_order(order, waiter=waiter)
+
+    assert result.status == Order.Status.DELIVERED
+    assert len(skipped) == 1  # one ticket auto-completed
+    ticket = KitchenTicket.objects.get(order_item__order=order)
+    assert ticket.status == KitchenTicket.Status.DONE
 
 
 @pytest.mark.django_db
-def test_deliver_fails_if_not_ready_status(django_user_model: Any) -> None:
+def test_deliver_soft_flow_from_verified(django_user_model: Any) -> None:
+    """Soft flow: delivering a VERIFIED order auto-completes tickets and sets READY."""
     cat = Category.objects.create(title="Cat", description="", number_in_line=1)
-    Dish.objects.create(
+    dish = Dish.objects.create(
         title="D",
         description="",
         price=Decimal("5.00"),
@@ -79,8 +86,24 @@ def test_deliver_fails_if_not_ready_status(django_user_model: Any) -> None:
         email="w@test.com", username="wtest", password="testpass123", role="waiter"
     )
     order = Order.objects.create(waiter=waiter, status=Order.Status.VERIFIED)
+    item = OrderItem.objects.create(order=order, dish=dish, quantity=1)
+    KitchenTicket.objects.create(order_item=item, status="pending")
 
-    with pytest.raises(ValueError, match="not ready"):
+    result, skipped = deliver_order(order, waiter=waiter)
+
+    assert result.status == Order.Status.DELIVERED
+    assert len(skipped) >= 2  # ticket auto-completed + "Готово (кухня)"
+
+
+@pytest.mark.django_db
+def test_deliver_fails_if_not_sent_to_kitchen(django_user_model: Any) -> None:
+    """Delivery should fail for orders not yet sent to kitchen (SUBMITTED/ACCEPTED)."""
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="wtest", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(waiter=waiter, status=Order.Status.ACCEPTED)
+
+    with pytest.raises(ValueError, match="не передано на кухню"):
         deliver_order(order, waiter=waiter)
 
 
@@ -111,17 +134,21 @@ def test_deliver_view_success(client: Client, django_user_model: Any) -> None:
 
 
 @pytest.mark.django_db
-def test_deliver_view_shows_error_on_failure(
+def test_deliver_view_shows_error_for_accepted_order(
     client: Client, django_user_model: Any
 ) -> None:
-    order, waiter = _make_ready_order(django_user_model, ticket_status="taken")
+    """Delivery view should show error for orders not yet sent to kitchen."""
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="wtest", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(waiter=waiter, status=Order.Status.ACCEPTED)
 
     client.force_login(waiter)
     response = client.post(f"/waiter/order/{order.id}/delivered/", follow=True)
 
     assert response.status_code == 200
     order.refresh_from_db()
-    assert order.status == Order.Status.READY  # not changed
+    assert order.status == Order.Status.ACCEPTED  # not changed
 
 
 @pytest.mark.django_db
@@ -129,7 +156,7 @@ def test_unpaid_delivered_shown_on_dashboard(
     client: Client, django_user_model: Any
 ) -> None:
     order, waiter = _make_ready_order(django_user_model)
-    deliver_order(order, waiter=waiter)
+    deliver_order(order, waiter=waiter)  # returns tuple, but we ignore it here
 
     client.force_login(waiter)
     response = client.get("/waiter/dashboard/")
