@@ -8,7 +8,6 @@ from typing import Any
 
 from django.conf import settings
 from django.db.models import QuerySet
-from django.utils import timezone
 
 from kitchen.models import KitchenTicket
 
@@ -75,7 +74,10 @@ def group_by_order(
 
 
 def today_start() -> datetime.datetime:
-    """Return the start of today as an aware datetime."""
-    return timezone.make_aware(
-        datetime.datetime.combine(timezone.localdate(), datetime.time.min)
-    )
+    """Return the start of today as an aware datetime.
+
+    Delegates to orders.stats.period_range for consistency.
+    """
+    from orders.stats import period_range
+
+    return period_range("today")[0]

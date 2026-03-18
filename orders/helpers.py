@@ -5,10 +5,17 @@ from __future__ import annotations
 import datetime
 from typing import Any
 
+from collections.abc import Iterable
+
+from orders.models import Order
+
 
 def enrich_orders(
-    orders_qs, now: datetime.datetime, pickup_warn: int, pickup_critical: int
-) -> tuple[list[dict[str, Any]], int]:  # type: ignore[no-untyped-def]
+    orders_qs: Iterable[Order],
+    now: datetime.datetime,
+    pickup_warn: int,
+    pickup_critical: int,
+) -> tuple[list[dict[str, Any]], int]:
     """Build per-order portion/ticket stats for a queryset of orders."""
     enriched = []
     ready_count = 0
