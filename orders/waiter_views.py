@@ -16,6 +16,7 @@ from django.views.decorators.http import require_POST
 
 from core_settings.types import AuthenticatedHttpRequest
 from kitchen.models import KitchenHandoff
+from orders.helpers import enrich_orders
 from kitchen.stats import get_dish_queue_stats
 from notifications.events import push_visitor_event
 from orders.escalation_services import acknowledge_escalation, resolve_escalation
@@ -33,93 +34,6 @@ from user.constants import SENIOR_WAITER_ROLES, WAITER_ROLES
 from user.decorators import role_required
 
 SENIOR_ROLES = SENIOR_WAITER_ROLES
-
-
-def _enrich_orders(orders_qs, now, pickup_warn, pickup_critical):  # type: ignore[no-untyped-def]
-    """Build per-order portion/ticket stats for a queryset of orders."""
-    enriched = []
-    ready_count = 0
-    for order in orders_qs:
-        portions = []
-        total_portions = 0
-        done_portions = 0
-        taken_portions = 0
-        has_overdue = False
-        for item in order.items.all():
-            item_tickets = list(item.kitchen_tickets.all())
-            for ticket in item_tickets:
-                total_portions += 1
-                done_min = 0
-                dish_urgency = "normal"
-                if ticket.status == "done":
-                    done_portions += 1
-                    if ticket.done_at:
-                        done_min = int((now - ticket.done_at).total_seconds() / 60)
-                        if done_min >= pickup_critical:
-                            dish_urgency = "critical"
-                            has_overdue = True
-                        elif done_min >= pickup_warn:
-                            dish_urgency = "warn"
-                            has_overdue = True
-                elif ticket.status == "taken":
-                    taken_portions += 1
-                # Dish location: kitchen → waiter → visitor
-                if ticket.is_delivered:
-                    location = "visitor"
-                elif ticket.handed_off_at:
-                    location = "waiter"
-                else:
-                    location = "kitchen"
-
-                portions.append(
-                    {
-                        "dish_title": item.dish.title,
-                        "quantity": 1,
-                        "subtotal": item.dish.price,
-                        "status": ticket.status,
-                        "ticket_id": ticket.pk,
-                        "is_delivered": ticket.is_delivered,
-                        "location": location,
-                        "cook_label": (
-                            ticket.assigned_to.staff_label
-                            if ticket.assigned_to
-                            else None
-                        ),
-                        "done_min": done_min,
-                        "dish_urgency": dish_urgency,
-                    }
-                )
-            # If no tickets yet (pre-kitchen), show item as pending
-            if not item_tickets:
-                for _ in range(item.quantity):
-                    total_portions += 1
-                    portions.append(
-                        {
-                            "dish_title": item.dish.title,
-                            "quantity": 1,
-                            "subtotal": item.dish.price,
-                            "status": "pending",
-                            "ticket_id": None,
-                            "is_delivered": False,
-                            "location": "kitchen",
-                            "cook_label": None,
-                            "done_min": 0,
-                            "dish_urgency": "normal",
-                        }
-                    )
-        if order.status == "ready":
-            ready_count += 1
-        enriched.append(
-            {
-                "order": order,
-                "tickets": portions,
-                "total_dishes": total_portions,
-                "done_dishes": done_portions,
-                "taken_dishes": taken_portions,
-                "has_overdue": has_overdue,
-            }
-        )
-    return enriched, ready_count
 
 
 @role_required(*WAITER_ROLES)
@@ -151,7 +65,7 @@ def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
     now = timezone.now()
     pickup_warn = settings.DISH_PICKUP_WARN
     pickup_critical = settings.DISH_PICKUP_CRITICAL
-    my_orders_enriched, my_ready_count = _enrich_orders(
+    my_orders_enriched, my_ready_count = enrich_orders(
         my_orders_qs, now, pickup_warn, pickup_critical
     )
     # Unpaid delivered
@@ -267,7 +181,7 @@ def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
             if not orders_list or waiter_id is None:
                 continue
             waiter = orders_list[0].waiter
-            enriched, _ = _enrich_orders(orders_list, now, pickup_warn, pickup_critical)
+            enriched, _ = enrich_orders(orders_list, now, pickup_warn, pickup_critical)
             overdue_count = sum(1 for e in enriched if e["has_overdue"])
             team_data.append(
                 {
@@ -309,28 +223,30 @@ def waiter_poll_data(request: AuthenticatedHttpRequest) -> HttpResponse:
 
     Temporary — remove when SSE/ASGI is deployed.
     """
-    new_count = Order.objects.filter(status=Order.Status.SUBMITTED).count()
-    my_count = Order.objects.filter(
-        waiter=request.user,
-        status__in=[
-            Order.Status.ACCEPTED,
-            Order.Status.VERIFIED,
-            Order.Status.IN_PROGRESS,
-            Order.Status.READY,
-        ],
-    ).count()
-    unpaid_count = Order.objects.filter(
-        waiter=request.user,
-        status=Order.Status.DELIVERED,
-        payment_status=Order.PaymentStatus.UNPAID,
-    ).count()
-    return JsonResponse(
-        {
-            "new_count": new_count,
-            "my_count": my_count,
-            "unpaid_count": unpaid_count,
-        }
+    counts = Order.objects.aggregate(
+        new_count=models.Count("id", filter=models.Q(status=Order.Status.SUBMITTED)),
+        my_count=models.Count(
+            "id",
+            filter=models.Q(
+                waiter=request.user,
+                status__in=[
+                    Order.Status.ACCEPTED,
+                    Order.Status.VERIFIED,
+                    Order.Status.IN_PROGRESS,
+                    Order.Status.READY,
+                ],
+            ),
+        ),
+        unpaid_count=models.Count(
+            "id",
+            filter=models.Q(
+                waiter=request.user,
+                status=Order.Status.DELIVERED,
+                payment_status=Order.PaymentStatus.UNPAID,
+            ),
+        ),
     )
+    return JsonResponse(counts)
 
 
 @role_required(*WAITER_ROLES)
