@@ -157,6 +157,12 @@ def mark_ticket_done(
 
         dish_title = ticket.order_item.dish.title
         order = ticket.order_item.order
+
+        # Transition order to IN_PROGRESS (same as regular take_ticket)
+        if order.status == Order.Status.VERIFIED:
+            order.status = Order.Status.IN_PROGRESS
+            order.save(update_fields=["status"])
+
         log_event(
             order,
             f"⚠️ Авто: {kitchen_user.staff_label} пропустив(ла) крок "

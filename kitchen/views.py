@@ -250,9 +250,14 @@ def kitchen_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
 
 @role_required(*KITCHEN_ROLES)
 def kitchen_poll_data(request: AuthenticatedHttpRequest) -> HttpResponse:
-    """Return kitchen dashboard counts as JSON for polling."""
+    """Return kitchen dashboard counts as JSON for polling.
+
+    Optimized: single aggregate query for taken/done counts,
+    separate query for pending (role-dependent filter).
+    """
     user = request.user
 
+    # Pending count depends on role (regular cook sees only assigned dishes)
     if user.role == user.Role.KITCHEN:
         pending_count = get_pending_tickets_for_user(user.id).count()
     else:
@@ -260,33 +265,44 @@ def kitchen_poll_data(request: AuthenticatedHttpRequest) -> HttpResponse:
             status=KitchenTicket.Status.PENDING
         ).count()
 
-    taken_count = KitchenTicket.objects.filter(
-        status=KitchenTicket.Status.TAKEN,
-        assigned_to=user,
-    ).count()
-
-    done_count = KitchenTicket.objects.filter(
-        status=KitchenTicket.Status.DONE,
-        assigned_to=user,
-        done_at__gte=_today_start(),
-    ).count()
-
-    escalated_count = 0
-    if user.role in SUPERVISOR_ROLES:
-        level = (
-            KitchenTicket.EscalationLevel.SUPERVISOR
-            if user.role == user.Role.KITCHEN_SUPERVISOR
-            else KitchenTicket.EscalationLevel.MANAGER
-        )
-        escalated_count = KitchenTicket.objects.filter(
-            status=KitchenTicket.Status.PENDING,
-            escalation_level__gte=level,
-        ).count()
-
-    last_esc = KitchenTicket.objects.filter(
-        escalation_level__gte=KitchenTicket.EscalationLevel.SUPERVISOR,
-    ).aggregate(last_id=Max("id"))
-    last_escalation_id: int = last_esc["last_id"] or 0
+    # Single aggregate for taken + done + escalated + last_esc_id
+    is_supervisor = user.role in SUPERVISOR_ROLES
+    esc_level = (
+        KitchenTicket.EscalationLevel.SUPERVISOR
+        if user.role == user.Role.KITCHEN_SUPERVISOR
+        else KitchenTicket.EscalationLevel.MANAGER
+    )
+    counts = KitchenTicket.objects.aggregate(
+        taken_count=Count(
+            "id",
+            filter=Q(status=KitchenTicket.Status.TAKEN, assigned_to=user),
+        ),
+        done_count=Count(
+            "id",
+            filter=Q(
+                status=KitchenTicket.Status.DONE,
+                assigned_to=user,
+                handed_off_at__isnull=True,
+            ),
+        ),
+        escalated_count=Count(
+            "id",
+            filter=Q(
+                status=KitchenTicket.Status.PENDING,
+                escalation_level__gte=esc_level,
+            ),
+        ),
+        last_esc_id=Max(
+            "id",
+            filter=Q(
+                escalation_level__gte=KitchenTicket.EscalationLevel.SUPERVISOR,
+            ),
+        ),
+    )
+    taken_count: int = counts["taken_count"]
+    done_count: int = counts["done_count"]
+    escalated_count: int = counts["escalated_count"] if is_supervisor else 0
+    last_escalation_id: int = counts["last_esc_id"] or 0
 
     # Compare with client-side known state
     client_last = int(request.GET.get("last_esc", "0") or "0")
