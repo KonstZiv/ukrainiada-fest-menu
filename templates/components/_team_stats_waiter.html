@@ -15,7 +15,7 @@
       </div>
       <div class="col-4 col-md-2">
         <div class="text-muted">{% trans "Сер. чек" %}</div>
-        <div class="fs-5">€{{ team_stats_totals.avg_check|floatformat:0 }}</div>
+        <div class="fs-5">€{{ team_stats_totals.avg_check|floatformat:2 }}</div>
       </div>
       <div class="col-4 col-md-2">
         <div class="text-muted">{% trans "Сер. час" %}</div>
@@ -23,11 +23,11 @@
       </div>
       <div class="col-4 col-md-2">
         <div class="text-muted">{% trans "Готівка" %}</div>
-        <div class="fs-5">€{{ team_stats_totals.cash|floatformat:0 }}</div>
+        <div class="fs-5">€{{ team_stats_totals.cash|floatformat:2 }}</div>
       </div>
       <div class="col-4 col-md-2">
         <div class="text-muted">{% trans "Онлайн" %}</div>
-        <div class="fs-5">€{{ team_stats_totals.online|floatformat:0 }}</div>
+        <div class="fs-5">€{{ team_stats_totals.online|floatformat:2 }}</div>
       </div>
       <div class="col-4 col-md-2">
         <div class="text-muted">{% trans "Помилки" %}</div>
@@ -45,10 +45,10 @@
           {{ w.user.staff_label }}
         </div>
         <div class="col col-md-2">{{ w.orders }}</div>
-        <div class="col col-md-1">€{{ w.avg_check|floatformat:0 }}</div>
+        <div class="col col-md-1">€{{ w.avg_check|floatformat:2 }}</div>
         <div class="col col-md-1">{{ w.avg_speed_min }}{% trans "хв" %}</div>
-        <div class="col col-md-2">€{{ w.cash|floatformat:0 }}</div>
-        <div class="col col-md-2">€{{ w.online|floatformat:0 }}</div>
+        <div class="col col-md-2">€{{ w.cash|floatformat:2 }}</div>
+        <div class="col col-md-2">€{{ w.online|floatformat:2 }}</div>
         <div class="col col-md-2">
           {% if w.escalations %}<span class="badge bg-danger">{{ w.escalations }}</span>{% endif %}
           {% if w.auto_skips %}<span class="badge bg-warning text-dark">{{ w.auto_skips }}</span>{% endif %}

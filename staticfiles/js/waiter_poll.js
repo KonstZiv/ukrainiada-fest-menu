@@ -35,7 +35,7 @@
           location.reload();
         }
       })
-      .catch(function () { /* ignore network errors */ });
+      .catch(function (err) { console.warn("[waiter-poll]", err); });
   }
 
   initCounts();
