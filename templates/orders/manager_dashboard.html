@@ -8,7 +8,16 @@
 {% block content %}
 <div class="container-fluid mt-3 px-2 px-md-3">
 
-  <h2 class="mb-3"><i class="bi bi-speedometer2"></i> {% trans "Панель менеджера" %}</h2>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0"><i class="bi bi-speedometer2"></i> {% trans "Панель менеджера" %}</h2>
+    <div class="btn-group btn-group-sm">
+      {% for key, label in period_labels.items %}
+        <a href="?period={{ key }}" class="btn {% if current_period == key %}btn-primary{% else %}btn-outline-primary{% endif %}">
+          {{ label }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
 
   {# ================================================================== #}
   {# Summary cards                                                       #}
@@ -41,172 +50,22 @@
     <div class="col-6 col-md-3">
       <div class="card text-center">
         <div class="card-body py-2">
-          <div class="fs-3 fw-bold">€{{ waiter_totals.revenue|floatformat:0 }}</div>
-          <div class="small text-muted">{% trans "Виторг сьогодні" %}</div>
+          <div class="fs-3 fw-bold">€{{ waiter_totals.revenue|floatformat:2 }}</div>
+          <div class="small text-muted">{% trans "Виторг" %}</div>
         </div>
       </div>
     </div>
   </div>
 
   {# ================================================================== #}
-  {# Waiter team stats                                                    #}
+  {# Waiter team stats (reusable partial)                                #}
   {# ================================================================== #}
-  <div class="card mb-3">
-    <div class="card-header bg-primary text-white py-2">
-      <i class="bi bi-people"></i> {% trans "Офіціанти — сьогодні" %}
-    </div>
-
-    {# --- Totals row --- #}
-    <div class="card-body py-2 bg-light border-bottom">
-      <div class="row text-center small fw-semibold">
-        <div class="col-4 col-md-2">
-          <div class="text-muted">{% trans "Замовлень" %}</div>
-          <div class="fs-5">{{ waiter_totals.orders }}</div>
-        </div>
-        <div class="col-4 col-md-2">
-          <div class="text-muted">{% trans "Сер. чек" %}</div>
-          <div class="fs-5">€{{ waiter_totals.avg_check|floatformat:0 }}</div>
-        </div>
-        <div class="col-4 col-md-2">
-          <div class="text-muted">{% trans "Сер. час" %}</div>
-          <div class="fs-5">{{ waiter_totals.avg_speed_min }} {% trans "хв" %}</div>
-        </div>
-        <div class="col-4 col-md-2">
-          <div class="text-muted">{% trans "Готівка" %}</div>
-          <div class="fs-5">€{{ waiter_totals.cash|floatformat:0 }}</div>
-        </div>
-        <div class="col-4 col-md-2">
-          <div class="text-muted">{% trans "Онлайн" %}</div>
-          <div class="fs-5">€{{ waiter_totals.online|floatformat:0 }}</div>
-        </div>
-        <div class="col-4 col-md-2">
-          <div class="text-muted">{% trans "Помилки" %}</div>
-          <div class="fs-5 {% if waiter_totals.escalations or waiter_totals.auto_skips %}text-danger{% endif %}">
-            {{ waiter_totals.escalations }}+{{ waiter_totals.auto_skips }}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    {# --- Per-waiter detail --- #}
-    <div class="list-group list-group-flush">
-      {% for w in waiter_details %}
-      <div class="list-group-item px-2 py-2">
-        <div class="row align-items-center text-center small">
-          <div class="col-12 col-md-2 text-start fw-semibold mb-1 mb-md-0">
-            {% if w.user.avatar %}
-            <img src="{{ w.user.avatar.url }}" alt="" class="rounded me-1"
-                 style="width:22px;height:22px;object-fit:cover;">
-            {% endif %}
-            {{ w.user.staff_label }}
-          </div>
-          <div class="col col-md-2">
-            <span class="d-md-none text-muted">{% trans "Зам:" %} </span>{{ w.orders }}
-          </div>
-          <div class="col col-md-1">
-            <span class="d-md-none text-muted">{% trans "Чек:" %} </span>€{{ w.avg_check|floatformat:0 }}
-          </div>
-          <div class="col col-md-1">
-            <span class="d-md-none text-muted">{% trans "Час:" %} </span>{{ w.avg_speed_min }}{% trans "хв" %}
-          </div>
-          <div class="col col-md-2">
-            <span class="d-md-none text-muted">{% trans "Гот:" %} </span>€{{ w.cash|floatformat:0 }}
-          </div>
-          <div class="col col-md-2">
-            <span class="d-md-none text-muted">{% trans "Онл:" %} </span>€{{ w.online|floatformat:0 }}
-          </div>
-          <div class="col col-md-2">
-            {% if w.escalations %}
-            <span class="badge bg-danger" title="{% trans 'Ескалації' %}">{{ w.escalations }} <i class="bi bi-exclamation-triangle"></i></span>
-            {% endif %}
-            {% if w.auto_skips %}
-            <span class="badge bg-warning text-dark" title="{% trans 'Пропущені кроки' %}">{{ w.auto_skips }} <i class="bi bi-skip-forward"></i></span>
-            {% endif %}
-            {% if not w.escalations and not w.auto_skips %}
-            <span class="text-success"><i class="bi bi-check-circle"></i></span>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-      {% empty %}
-      <div class="list-group-item text-muted text-center small py-3">
-        {% trans "Немає офіціантів" %}
-      </div>
-      {% endfor %}
-    </div>
-  </div>
+  {% include "components/_team_stats_waiter.html" with team_stats_details=waiter_details team_stats_totals=waiter_totals %}
 
   {# ================================================================== #}
-  {# Kitchen team stats                                                   #}
+  {# Kitchen team stats (reusable partial)                               #}
   {# ================================================================== #}
-  <div class="card mb-3">
-    <div class="card-header bg-success text-white py-2">
-      <i class="bi bi-fire"></i> {% trans "Кухня — сьогодні" %}
-    </div>
-
-    {# --- Totals row --- #}
-    <div class="card-body py-2 bg-light border-bottom">
-      <div class="row text-center small fw-semibold">
-        <div class="col-3">
-          <div class="text-muted">{% trans "Страв" %}</div>
-          <div class="fs-5">{{ kitchen_totals.dishes }}</div>
-        </div>
-        <div class="col-3">
-          <div class="text-muted">{% trans "Сер. час" %}</div>
-          <div class="fs-5">{{ kitchen_totals.avg_speed_min }} {% trans "хв" %}</div>
-        </div>
-        <div class="col-3">
-          <div class="text-muted">{% trans "Ескалацій" %}</div>
-          <div class="fs-5 {% if kitchen_totals.escalations %}text-danger{% endif %}">{{ kitchen_totals.escalations }}</div>
-        </div>
-        <div class="col-3">
-          <div class="text-muted">{% trans "Пропуски" %}</div>
-          <div class="fs-5 {% if kitchen_totals.auto_skips %}text-warning{% endif %}">{{ kitchen_totals.auto_skips }}</div>
-        </div>
-      </div>
-    </div>
-
-    {# --- Per-cook detail --- #}
-    <div class="list-group list-group-flush">
-      {% for c in kitchen_details %}
-      <div class="list-group-item px-2 py-2">
-        <div class="row align-items-center text-center small">
-          <div class="col-12 col-md-3 text-start fw-semibold mb-1 mb-md-0">
-            {% if c.user.avatar %}
-            <img src="{{ c.user.avatar.url }}" alt="" class="rounded me-1"
-                 style="width:22px;height:22px;object-fit:cover;">
-            {% endif %}
-            {{ c.user.staff_label }}
-          </div>
-          <div class="col col-md-2">
-            <span class="d-md-none text-muted">{% trans "Страв:" %} </span>{{ c.dishes }}
-          </div>
-          <div class="col col-md-2">
-            <span class="d-md-none text-muted">{% trans "Час:" %} </span>{{ c.avg_speed_min }} {% trans "хв" %}
-          </div>
-          <div class="col col-md-2">
-            {% if c.escalations %}
-            <span class="badge bg-danger">{{ c.escalations }} <i class="bi bi-exclamation-triangle"></i></span>
-            {% else %}
-            <span class="text-muted">0</span>
-            {% endif %}
-          </div>
-          <div class="col col-md-3">
-            {% if c.auto_skips %}
-            <span class="badge bg-warning text-dark">{{ c.auto_skips }} <i class="bi bi-skip-forward"></i></span>
-            {% else %}
-            <span class="text-success"><i class="bi bi-check-circle"></i></span>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-      {% empty %}
-      <div class="list-group-item text-muted text-center small py-3">
-        {% trans "Немає кухарів" %}
-      </div>
-      {% endfor %}
-    </div>
-  </div>
+  {% include "components/_team_stats_kitchen.html" with team_stats_details=kitchen_details team_stats_totals=kitchen_totals %}
 
   {# ================================================================== #}
   {# Quick links                                                          #}

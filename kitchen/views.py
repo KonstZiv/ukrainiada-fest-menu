@@ -8,9 +8,8 @@ from itertools import groupby
 from typing import Any
 
 import qrcode  # type: ignore[import-untyped]
-from django.conf import settings
 from django.contrib import messages
-from django.db.models import Count, Max, Q, QuerySet
+from django.db.models import Count, Max, Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -18,6 +17,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from core_settings.types import AuthenticatedHttpRequest
+from kitchen.helpers import enrich_tickets, group_by_order
 from kitchen.models import KitchenTicket
 from kitchen.services import (
     create_handoff,
@@ -26,84 +26,11 @@ from kitchen.services import (
     mark_ticket_done,
     take_ticket,
 )
+from user.constants import KITCHEN_ROLES, KITCHEN_SUPERVISOR_ROLES
 from user.decorators import role_required
 from user.models import User
 
-KITCHEN_ROLES = ("kitchen", "kitchen_supervisor", "manager")
-SUPERVISOR_ROLES = ("kitchen_supervisor", "manager")
-
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-
-def _enrich_tickets(
-    tickets_qs: QuerySet[KitchenTicket],
-    now: datetime.datetime,
-) -> list[dict[str, Any]]:
-    """Annotate each ticket with urgency and display data."""
-    warn_min: int = settings.KITCHEN_WARN_MINUTES
-    critical_min: int = settings.KITCHEN_TIMEOUT
-    enriched: list[dict[str, Any]] = []
-
-    for ticket in tickets_qs:
-        if ticket.status == KitchenTicket.Status.TAKEN and ticket.taken_at:
-            age_min = int((now - ticket.taken_at).total_seconds() / 60)
-        else:
-            age_min = int((now - ticket.created_at).total_seconds() / 60)
-
-        if ticket.escalation_level >= KitchenTicket.EscalationLevel.SUPERVISOR:
-            urgency = "escalated"
-        elif age_min >= critical_min:
-            urgency = "critical"
-        elif age_min >= warn_min:
-            urgency = "warn"
-        else:
-            urgency = "normal"
-
-        waiter = ticket.order_item.order.waiter
-        enriched.append(
-            {
-                "ticket": ticket,
-                "dish_title": ticket.order_item.dish.title,
-                "quantity": 1,
-                "order_id": ticket.order_item.order_id,
-                "waiter_label": waiter.staff_label if waiter else "—",
-                "age_min": age_min,
-                "urgency": urgency,
-                "escalation_level": ticket.escalation_level,
-            }
-        )
-    return enriched
-
-
-def _group_by_order(
-    enriched_tickets: list[dict[str, Any]],
-) -> list[dict[str, Any]]:
-    """Group enriched tickets by order_id."""
-    urgency_rank = {"normal": 0, "warn": 1, "critical": 2, "escalated": 3}
-    sorted_tickets = sorted(enriched_tickets, key=lambda t: t["order_id"])
-    groups: list[dict[str, Any]] = []
-    for order_id, group_iter in groupby(sorted_tickets, key=lambda t: t["order_id"]):
-        tickets = list(group_iter)
-        max_urgency = max(tickets, key=lambda t: urgency_rank[t["urgency"]])["urgency"]
-        groups.append(
-            {
-                "order_id": order_id,
-                "waiter_label": tickets[0]["waiter_label"],
-                "tickets": tickets,
-                "max_urgency": max_urgency,
-            }
-        )
-    return groups
-
-
-def _today_start() -> datetime.datetime:
-    """Return the start of today as an aware datetime."""
-    return timezone.make_aware(
-        datetime.datetime.combine(timezone.localdate(), datetime.time.min)
-    )
+SUPERVISOR_ROLES = KITCHEN_SUPERVISOR_ROLES
 
 
 # ---------------------------------------------------------------------------
@@ -129,8 +56,8 @@ def kitchen_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
             status=KitchenTicket.Status.PENDING
         ).select_related("order_item__dish", "order_item__order__waiter")
 
-    pending_enriched = _enrich_tickets(pending_qs, now)
-    pending_groups = _group_by_order(pending_enriched)
+    pending_enriched = enrich_tickets(pending_qs, now)
+    pending_groups = group_by_order(pending_enriched)
 
     # --- Escalated (supervisor/manager only) ---
     escalated_groups: list[dict[str, Any]] = []
@@ -145,8 +72,8 @@ def kitchen_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
             status=KitchenTicket.Status.PENDING,
             escalation_level__gte=level,
         ).select_related("order_item__dish", "order_item__order__waiter")
-        escalated_enriched = _enrich_tickets(escalated_qs, now)
-        escalated_groups = _group_by_order(escalated_enriched)
+        escalated_enriched = enrich_tickets(escalated_qs, now)
+        escalated_groups = group_by_order(escalated_enriched)
         escalated_count = len(escalated_enriched)
 
     # --- Taken (in_progress) ---
@@ -154,8 +81,8 @@ def kitchen_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
         status=KitchenTicket.Status.TAKEN,
         assigned_to=user,
     ).select_related("order_item__dish", "order_item__order__waiter")
-    taken_enriched = _enrich_tickets(taken_qs, now)
-    taken_groups = _group_by_order(taken_enriched)
+    taken_enriched = enrich_tickets(taken_qs, now)
+    taken_groups = group_by_order(taken_enriched)
 
     # --- Done (still on kitchen, not handed to waiter yet) ---
     done_qs = (
@@ -167,13 +94,25 @@ def kitchen_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
         .select_related("order_item__dish", "order_item__order__waiter")
         .order_by("-done_at")
     )
-    done_enriched = _enrich_tickets(done_qs, now)
-    done_groups = _group_by_order(done_enriched)
+    done_enriched = enrich_tickets(done_qs, now)
+    done_groups = group_by_order(done_enriched)
 
     # --- Team data (supervisor/manager, only when tab == "team") ---
     team_data: list[dict[str, Any]] = []
+    team_stats_details: list[dict[str, Any]] = []
+    team_stats_totals: dict[str, Any] = {}
     if is_supervisor and tab == "team":
-        today = _today_start()
+        from orders.stats import period_range
+
+        today = period_range("today")[0]
+
+        from orders.stats import kitchen_stats, period_range
+
+        period = request.GET.get("period", "today")
+        if period not in ("today", "yesterday", "week"):
+            period = "today"
+        stats_since, stats_until = period_range(period)
+        team_stats_details, team_stats_totals = kitchen_stats(stats_since, stats_until)
         kitchen_users = (
             User.objects.filter(
                 role__in=[User.Role.KITCHEN, User.Role.KITCHEN_SUPERVISOR],
@@ -238,6 +177,8 @@ def kitchen_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
             "escalated_count": escalated_count,
             "is_supervisor": is_supervisor,
             "team_data": team_data,
+            "team_stats_details": team_stats_details,
+            "team_stats_totals": team_stats_totals,
             "last_escalation_id": last_escalation_id,
         },
     )

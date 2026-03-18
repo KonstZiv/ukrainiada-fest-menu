@@ -1,0 +1,62 @@
+{# Waiter team stats — reusable for senior waiter + manager #}
+{# Context: team_stats_details, team_stats_totals #}
+{% load i18n %}
+
+{% if team_stats_totals %}
+<div class="card mb-3">
+  <div class="card-header bg-primary bg-opacity-75 text-white py-2">
+    <i class="bi bi-bar-chart"></i> {% trans "Статистика офіціантів" %}
+  </div>
+  <div class="card-body py-2 bg-light border-bottom">
+    <div class="row text-center small fw-semibold">
+      <div class="col-4 col-md-2">
+        <div class="text-muted">{% trans "Замовлень" %}</div>
+        <div class="fs-5">{{ team_stats_totals.orders }}</div>
+      </div>
+      <div class="col-4 col-md-2">
+        <div class="text-muted">{% trans "Сер. чек" %}</div>
+        <div class="fs-5">€{{ team_stats_totals.avg_check|floatformat:2 }}</div>
+      </div>
+      <div class="col-4 col-md-2">
+        <div class="text-muted">{% trans "Сер. час" %}</div>
+        <div class="fs-5">{{ team_stats_totals.avg_speed_min }} {% trans "хв" %}</div>
+      </div>
+      <div class="col-4 col-md-2">
+        <div class="text-muted">{% trans "Готівка" %}</div>
+        <div class="fs-5">€{{ team_stats_totals.cash|floatformat:2 }}</div>
+      </div>
+      <div class="col-4 col-md-2">
+        <div class="text-muted">{% trans "Онлайн" %}</div>
+        <div class="fs-5">€{{ team_stats_totals.online|floatformat:2 }}</div>
+      </div>
+      <div class="col-4 col-md-2">
+        <div class="text-muted">{% trans "Помилки" %}</div>
+        <div class="fs-5 {% if team_stats_totals.escalations or team_stats_totals.auto_skips %}text-danger{% endif %}">
+          {{ team_stats_totals.escalations }}+{{ team_stats_totals.auto_skips }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="list-group list-group-flush">
+    {% for w in team_stats_details %}
+    <div class="list-group-item px-2 py-1">
+      <div class="row align-items-center text-center small">
+        <div class="col-12 col-md-2 text-start fw-semibold mb-1 mb-md-0">
+          {{ w.user.staff_label }}
+        </div>
+        <div class="col col-md-2">{{ w.orders }}</div>
+        <div class="col col-md-1">€{{ w.avg_check|floatformat:2 }}</div>
+        <div class="col col-md-1">{{ w.avg_speed_min }}{% trans "хв" %}</div>
+        <div class="col col-md-2">€{{ w.cash|floatformat:2 }}</div>
+        <div class="col col-md-2">€{{ w.online|floatformat:2 }}</div>
+        <div class="col col-md-2">
+          {% if w.escalations %}<span class="badge bg-danger">{{ w.escalations }}</span>{% endif %}
+          {% if w.auto_skips %}<span class="badge bg-warning text-dark">{{ w.auto_skips }}</span>{% endif %}
+          {% if not w.escalations and not w.auto_skips %}<span class="text-success"><i class="bi bi-check-circle"></i></span>{% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}

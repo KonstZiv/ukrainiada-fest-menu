@@ -6,6 +6,7 @@ app_name = "waiter"
 
 urlpatterns = [
     path("orders/", waiter_views.waiter_order_list, name="order_list"),
+    path("poll/", waiter_views.waiter_poll_data, name="poll_data"),
     path("order/<int:order_id>/scan/", waiter_views.order_scan, name="order_scan"),
     path(
         "order/<int:order_id>/accept/",
