@@ -1,0 +1,50 @@
+{# Kitchen team stats — reusable for kitchen supervisor + manager #}
+{# Context: team_stats_details, team_stats_totals #}
+{% load i18n %}
+
+{% if team_stats_totals %}
+<div class="card mb-3">
+  <div class="card-header bg-success bg-opacity-75 text-white py-2">
+    <i class="bi bi-bar-chart"></i> {% trans "Статистика кухні" %}
+  </div>
+  <div class="card-body py-2 bg-light border-bottom">
+    <div class="row text-center small fw-semibold">
+      <div class="col-3">
+        <div class="text-muted">{% trans "Страв" %}</div>
+        <div class="fs-5">{{ team_stats_totals.dishes }}</div>
+      </div>
+      <div class="col-3">
+        <div class="text-muted">{% trans "Сер. час" %}</div>
+        <div class="fs-5">{{ team_stats_totals.avg_speed_min }} {% trans "хв" %}</div>
+      </div>
+      <div class="col-3">
+        <div class="text-muted">{% trans "Ескалацій" %}</div>
+        <div class="fs-5 {% if team_stats_totals.escalations %}text-danger{% endif %}">{{ team_stats_totals.escalations }}</div>
+      </div>
+      <div class="col-3">
+        <div class="text-muted">{% trans "Пропуски" %}</div>
+        <div class="fs-5 {% if team_stats_totals.auto_skips %}text-warning{% endif %}">{{ team_stats_totals.auto_skips }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="list-group list-group-flush">
+    {% for c in team_stats_details %}
+    <div class="list-group-item px-2 py-1">
+      <div class="row align-items-center text-center small">
+        <div class="col-12 col-md-3 text-start fw-semibold mb-1 mb-md-0">
+          {{ c.user.staff_label }}
+        </div>
+        <div class="col col-md-2">{{ c.dishes }}</div>
+        <div class="col col-md-2">{{ c.avg_speed_min }} {% trans "хв" %}</div>
+        <div class="col col-md-2">
+          {% if c.escalations %}<span class="badge bg-danger">{{ c.escalations }}</span>{% else %}0{% endif %}
+        </div>
+        <div class="col col-md-3">
+          {% if c.auto_skips %}<span class="badge bg-warning text-dark">{{ c.auto_skips }}</span>{% else %}<span class="text-success"><i class="bi bi-check-circle"></i></span>{% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}

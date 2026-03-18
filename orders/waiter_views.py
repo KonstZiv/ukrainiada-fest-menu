@@ -198,8 +198,18 @@ def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
     # Team tab — only for senior/manager
     is_senior = request.user.role in SENIOR_ROLES
     team_data: list[dict] = []
+    team_stats_details: list[dict] = []
+    team_stats_totals: dict = {}
     if is_senior and tab == "team":
         from itertools import groupby
+
+        from orders.stats import period_range, waiter_stats
+
+        period = request.GET.get("period", "today")
+        if period not in ("today", "yesterday", "week"):
+            period = "today"
+        stats_since, stats_until = period_range(period)
+        team_stats_details, team_stats_totals = waiter_stats(stats_since, stats_until)
 
         all_active = (
             Order.objects.filter(
@@ -287,6 +297,8 @@ def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
             "active_tab": tab,
             "is_senior": is_senior,
             "team_data": team_data,
+            "team_stats_details": team_stats_details,
+            "team_stats_totals": team_stats_totals,
         },
     )
 

@@ -172,8 +172,18 @@ def kitchen_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
 
     # --- Team data (supervisor/manager, only when tab == "team") ---
     team_data: list[dict[str, Any]] = []
+    team_stats_details: list[dict[str, Any]] = []
+    team_stats_totals: dict[str, Any] = {}
     if is_supervisor and tab == "team":
         today = _today_start()
+
+        from orders.stats import kitchen_stats, period_range
+
+        period = request.GET.get("period", "today")
+        if period not in ("today", "yesterday", "week"):
+            period = "today"
+        stats_since, stats_until = period_range(period)
+        team_stats_details, team_stats_totals = kitchen_stats(stats_since, stats_until)
         kitchen_users = (
             User.objects.filter(
                 role__in=[User.Role.KITCHEN, User.Role.KITCHEN_SUPERVISOR],
@@ -238,6 +248,8 @@ def kitchen_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
             "escalated_count": escalated_count,
             "is_supervisor": is_supervisor,
             "team_data": team_data,
+            "team_stats_details": team_stats_details,
+            "team_stats_totals": team_stats_totals,
             "last_escalation_id": last_escalation_id,
         },
     )
