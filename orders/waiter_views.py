@@ -29,10 +29,10 @@ from orders.services import (
     deliver_ticket,
     verify_order,
 )
+from user.constants import SENIOR_WAITER_ROLES, WAITER_ROLES
 from user.decorators import role_required
 
-WAITER_ROLES = ("waiter", "senior_waiter", "manager")
-SENIOR_ROLES = ("senior_waiter", "manager")
+SENIOR_ROLES = SENIOR_WAITER_ROLES
 
 
 def _enrich_orders(orders_qs, now, pickup_warn, pickup_critical):  # type: ignore[no-untyped-def]
