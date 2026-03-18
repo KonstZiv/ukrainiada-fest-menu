@@ -370,14 +370,14 @@ def ticket_mark_delivered(
 
     ticket = get_object_or_404(KitchenTicket, pk=ticket_id)
     order_id = ticket.order_item.order_id
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
     try:
         deliver_ticket(ticket, waiter=request.user)
         dish_title = ticket.order_item.dish.title
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        if is_ajax:
             return JsonResponse({"ok": True, "dish": dish_title})
-        messages.success(request, f"'{dish_title}' доставлено.")
     except ValueError as e:
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        if is_ajax:
             return JsonResponse({"ok": False, "error": str(e)}, status=400)
         messages.error(request, str(e))
 

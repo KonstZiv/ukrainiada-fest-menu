@@ -424,13 +424,14 @@ def ticket_manual_handoff(
         assigned_to=request.user,
         status=KitchenTicket.Status.DONE,
     )
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
     try:
         manual_handoff(ticket, kitchen_user=request.user)
         dish_title = ticket.order_item.dish.title
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        if is_ajax:
             return JsonResponse({"ok": True, "dish": dish_title})
     except ValueError as e:
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        if is_ajax:
             return JsonResponse({"ok": False, "error": str(e)}, status=400)
         messages.error(request, str(e))
     tab = request.POST.get("tab", "done")
