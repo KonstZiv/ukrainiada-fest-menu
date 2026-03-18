@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import datetime
+from collections import defaultdict
 from decimal import Decimal
 from typing import Any
 
+from django.db.models import Avg, Count, F, Q, Sum
+from django.db.models.fields import DecimalField
 from django.utils import timezone
 
 from kitchen.models import KitchenTicket
@@ -36,24 +39,125 @@ def period_range(period: str) -> tuple[datetime.datetime, datetime.datetime | No
     return since, until
 
 
+def _time_q(
+    field: str,
+    since: datetime.datetime,
+    until: datetime.datetime | None,
+) -> Q:
+    """Build a Q filter for a time range on the given field."""
+    q = Q(**{f"{field}__gte": since})
+    if until:
+        q &= Q(**{f"{field}__lt": until})
+    return q
+
+
 def waiter_stats(
     since: datetime.datetime,
     until: datetime.datetime | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Calculate per-waiter and aggregated waiter team stats.
 
-    Args:
-        since: Start of period (inclusive).
-        until: End of period (exclusive). None means "now" (live).
-
-    Returns:
-        Tuple of (per_waiter_list, totals_dict).
-
+    Optimized: 4 bulk queries instead of N×4 per-waiter queries.
     """
-    waiters = User.objects.filter(
-        role__in=[User.Role.WAITER, User.Role.SENIOR_WAITER],
-    ).order_by("first_name", "email")
+    waiters = list(
+        User.objects.filter(
+            role__in=[User.Role.WAITER, User.Role.SENIOR_WAITER],
+        ).order_by("first_name", "email")
+    )
+    waiter_ids = [w.id for w in waiters]
 
+    if not waiter_ids:
+        empty_totals: dict[str, Any] = {
+            "orders": 0,
+            "revenue": Decimal("0"),
+            "cash": Decimal("0"),
+            "online": Decimal("0"),
+            "avg_check": Decimal("0"),
+            "avg_speed_min": 0,
+            "escalations": 0,
+            "auto_skips": 0,
+        }
+        return [], empty_totals
+
+    time_q_paid = _time_q("payment_confirmed_at", since, until)
+    time_q_delivered = _time_q("delivered_at", since, until)
+    time_q_esc = _time_q("created_at", since, until)
+    time_q_skip = _time_q("timestamp", since, until)
+
+    # Query 1: order counts + revenue per waiter (single aggregate query)
+    order_data = (
+        Order.objects.filter(
+            waiter_id__in=waiter_ids,
+            payment_status=Order.PaymentStatus.PAID,
+        )
+        .filter(time_q_paid)
+        .values("waiter_id")
+        .annotate(
+            order_count=Count("id"),
+            cash_revenue=Sum(
+                F("items__dish__price") * F("items__quantity"),
+                filter=Q(payment_method=Order.PaymentMethod.CASH),
+                output_field=DecimalField(),
+            ),
+            online_revenue=Sum(
+                F("items__dish__price") * F("items__quantity"),
+                filter=Q(payment_method=Order.PaymentMethod.ONLINE),
+                output_field=DecimalField(),
+            ),
+        )
+    )
+    order_by_waiter: dict[int, dict[str, Any]] = {
+        row["waiter_id"]: row for row in order_data
+    }
+
+    # Query 2: avg speed per waiter
+    speed_data = (
+        Order.objects.filter(
+            waiter_id__in=waiter_ids,
+            submitted_at__isnull=False,
+            delivered_at__isnull=False,
+        )
+        .filter(time_q_delivered)
+        .values("waiter_id")
+        .annotate(
+            avg_duration=Avg(F("delivered_at") - F("submitted_at")),
+        )
+    )
+    speed_by_waiter: dict[int, int] = {}
+    for row in speed_data:
+        if row["avg_duration"]:
+            speed_by_waiter[row["waiter_id"]] = int(
+                row["avg_duration"].total_seconds() / 60
+            )
+
+    # Query 3: escalation counts per waiter
+    esc_data = (
+        VisitorEscalation.objects.filter(
+            order__waiter_id__in=waiter_ids,
+        )
+        .filter(time_q_esc)
+        .values("order__waiter_id")
+        .annotate(cnt=Count("id"))
+    )
+    esc_by_waiter: dict[int, int] = {
+        row["order__waiter_id"]: row["cnt"] for row in esc_data
+    }
+
+    # Query 4: auto-skip counts per waiter
+    skip_data = (
+        OrderEvent.objects.filter(
+            order__waiter_id__in=waiter_ids,
+            is_auto_skip=True,
+        )
+        .filter(time_q_skip)
+        .values("order__waiter_id")
+        .annotate(cnt=Count("id"))
+    )
+    skip_by_waiter: dict[int, int] = {
+        row["order__waiter_id"]: row["cnt"] for row in skip_data
+    }
+
+    # Assemble per-waiter results
     per_waiter: list[dict[str, Any]] = []
     totals: dict[str, Any] = {
         "orders": 0,
@@ -66,77 +170,36 @@ def waiter_stats(
         "auto_skips": 0,
     }
 
-    time_filter = {"payment_confirmed_at__gte": since}
-    if until:
-        time_filter["payment_confirmed_at__lt"] = until
-
     for waiter in waiters:
-        orders_qs = Order.objects.filter(
-            waiter=waiter,
-            payment_status=Order.PaymentStatus.PAID,
-            **time_filter,
-        )
-        order_count = orders_qs.count()
-
-        cash_total = Decimal("0")
-        online_total = Decimal("0")
-        for o in orders_qs.prefetch_related("items__dish"):
-            price = o.total_price
-            if o.payment_method == Order.PaymentMethod.CASH:
-                cash_total += price
-            else:
-                online_total += price
-        revenue = cash_total + online_total
+        od = order_by_waiter.get(waiter.id, {})
+        order_count: int = od.get("order_count", 0)
+        cash = od.get("cash_revenue") or Decimal("0")
+        online = od.get("online_revenue") or Decimal("0")
+        revenue = cash + online
         avg_check = revenue / order_count if order_count else Decimal("0")
-
-        delivered_filter: dict[str, Any] = {
-            "waiter": waiter,
-            "delivered_at__gte": since,
-            "submitted_at__isnull": False,
-            "delivered_at__isnull": False,
-        }
-        if until:
-            delivered_filter["delivered_at__lt"] = until
-        speed_values: list[float] = []
-        for o in Order.objects.filter(**delivered_filter):
-            if o.delivered_at and o.submitted_at:
-                delta = (o.delivered_at - o.submitted_at).total_seconds() / 60
-                speed_values.append(delta)
-        avg_speed = int(sum(speed_values) / len(speed_values)) if speed_values else 0
-
-        esc_filter: dict[str, Any] = {"order__waiter": waiter, "created_at__gte": since}
-        if until:
-            esc_filter["created_at__lt"] = until
-        escalation_count = VisitorEscalation.objects.filter(**esc_filter).count()
-
-        skip_filter: dict[str, Any] = {
-            "order__waiter": waiter,
-            "is_auto_skip": True,
-            "timestamp__gte": since,
-        }
-        if until:
-            skip_filter["timestamp__lt"] = until
-        auto_skip_count = OrderEvent.objects.filter(**skip_filter).count()
+        avg_speed = speed_by_waiter.get(waiter.id, 0)
+        escalations = esc_by_waiter.get(waiter.id, 0)
+        auto_skips = skip_by_waiter.get(waiter.id, 0)
 
         entry: dict[str, Any] = {
             "user": waiter,
             "orders": order_count,
             "revenue": revenue,
-            "cash": cash_total,
-            "online": online_total,
+            "cash": cash,
+            "online": online,
             "avg_check": avg_check,
             "avg_speed_min": avg_speed,
-            "escalations": escalation_count,
-            "auto_skips": auto_skip_count,
+            "escalations": escalations,
+            "auto_skips": auto_skips,
         }
         per_waiter.append(entry)
 
         totals["orders"] += order_count
         totals["revenue"] += revenue
-        totals["cash"] += cash_total
-        totals["online"] += online_total
-        totals["escalations"] += escalation_count
-        totals["auto_skips"] += auto_skip_count
+        totals["cash"] += cash
+        totals["online"] += online
+        totals["escalations"] += escalations
+        totals["auto_skips"] += auto_skips
 
     if totals["orders"]:
         totals["avg_check"] = totals["revenue"] / totals["orders"]
@@ -155,18 +218,81 @@ def kitchen_stats(
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Calculate per-cook and aggregated kitchen team stats.
 
-    Args:
-        since: Start of period (inclusive).
-        until: End of period (exclusive). None means "now" (live).
-
-    Returns:
-        Tuple of (per_cook_list, totals_dict).
-
+    Optimized: 3 bulk queries instead of N×3 per-cook queries.
     """
-    cooks = User.objects.filter(
-        role__in=[User.Role.KITCHEN, User.Role.KITCHEN_SUPERVISOR],
-    ).order_by("first_name", "email")
+    cooks = list(
+        User.objects.filter(
+            role__in=[User.Role.KITCHEN, User.Role.KITCHEN_SUPERVISOR],
+        ).order_by("first_name", "email")
+    )
+    cook_ids = [c.id for c in cooks]
 
+    if not cook_ids:
+        empty_totals: dict[str, Any] = {
+            "dishes": 0,
+            "avg_speed_min": 0,
+            "escalations": 0,
+            "auto_skips": 0,
+        }
+        return [], empty_totals
+
+    time_q_done = _time_q("done_at", since, until)
+    time_q_created = _time_q("created_at", since, until)
+    time_q_skip = _time_q("timestamp", since, until)
+
+    # Query 1: dish count + avg cooking speed per cook
+    done_data = (
+        KitchenTicket.objects.filter(
+            assigned_to_id__in=cook_ids,
+            status=KitchenTicket.Status.DONE,
+        )
+        .filter(time_q_done)
+        .values("assigned_to_id")
+        .annotate(
+            dish_count=Count("id"),
+            avg_duration=Avg(
+                F("done_at") - F("taken_at"),
+                filter=Q(taken_at__isnull=False),
+            ),
+        )
+    )
+    done_by_cook: dict[int, dict[str, Any]] = {
+        row["assigned_to_id"]: row for row in done_data
+    }
+
+    # Query 2: escalation counts per cook (via kitchen_assignments)
+    esc_data = (
+        KitchenTicket.objects.filter(
+            order_item__dish__kitchen_assignments__kitchen_user_id__in=cook_ids,
+            escalation_level__gte=KitchenTicket.EscalationLevel.SUPERVISOR,
+        )
+        .filter(time_q_created)
+        .values("order_item__dish__kitchen_assignments__kitchen_user_id")
+        .annotate(cnt=Count("id"))
+    )
+    esc_by_cook: dict[int, int] = {
+        row["order_item__dish__kitchen_assignments__kitchen_user_id"]: row["cnt"]
+        for row in esc_data
+    }
+
+    # Query 3: auto-skip counts per cook (by actor_label)
+    cook_labels = {c.staff_label: c.id for c in cooks}
+    skip_data = (
+        OrderEvent.objects.filter(
+            is_auto_skip=True,
+            actor_label__in=cook_labels.keys(),
+        )
+        .filter(time_q_skip)
+        .values("actor_label")
+        .annotate(cnt=Count("id"))
+    )
+    skip_by_cook: dict[int, int] = defaultdict(int)
+    for row in skip_data:
+        cook_id = cook_labels.get(row["actor_label"])
+        if cook_id:
+            skip_by_cook[cook_id] = row["cnt"]
+
+    # Assemble per-cook results
     per_cook: list[dict[str, Any]] = []
     totals: dict[str, Any] = {
         "dishes": 0,
@@ -175,57 +301,26 @@ def kitchen_stats(
         "auto_skips": 0,
     }
 
-    done_filter_base: dict[str, Any] = {
-        "status": KitchenTicket.Status.DONE,
-        "done_at__gte": since,
-    }
-    if until:
-        done_filter_base["done_at__lt"] = until
-
     for cook in cooks:
-        done_tickets = KitchenTicket.objects.filter(
-            assigned_to=cook,
-            **done_filter_base,
-        )
-        dish_count = done_tickets.count()
-
-        speed_values: list[float] = []
-        for t in done_tickets.filter(taken_at__isnull=False, done_at__isnull=False):
-            if t.done_at and t.taken_at:
-                delta = (t.done_at - t.taken_at).total_seconds() / 60
-                speed_values.append(delta)
-        avg_speed = int(sum(speed_values) / len(speed_values)) if speed_values else 0
-
-        esc_filter: dict[str, Any] = {
-            "order_item__dish__kitchen_assignments__kitchen_user": cook,
-            "escalation_level__gte": KitchenTicket.EscalationLevel.SUPERVISOR,
-            "created_at__gte": since,
-        }
-        if until:
-            esc_filter["created_at__lt"] = until
-        escalation_count = KitchenTicket.objects.filter(**esc_filter).count()
-
-        skip_filter: dict[str, Any] = {
-            "is_auto_skip": True,
-            "actor_label": cook.staff_label,
-            "timestamp__gte": since,
-        }
-        if until:
-            skip_filter["timestamp__lt"] = until
-        auto_skip_count = OrderEvent.objects.filter(**skip_filter).count()
+        dd = done_by_cook.get(cook.id, {})
+        dish_count: int = dd.get("dish_count", 0)
+        avg_duration = dd.get("avg_duration")
+        avg_speed = int(avg_duration.total_seconds() / 60) if avg_duration else 0
+        escalations = esc_by_cook.get(cook.id, 0)
+        auto_skips = skip_by_cook.get(cook.id, 0)
 
         entry: dict[str, Any] = {
             "user": cook,
             "dishes": dish_count,
             "avg_speed_min": avg_speed,
-            "escalations": escalation_count,
-            "auto_skips": auto_skip_count,
+            "escalations": escalations,
+            "auto_skips": auto_skips,
         }
         per_cook.append(entry)
 
         totals["dishes"] += dish_count
-        totals["escalations"] += escalation_count
-        totals["auto_skips"] += auto_skip_count
+        totals["escalations"] += escalations
+        totals["auto_skips"] += auto_skips
 
     all_speeds = [c["avg_speed_min"] for c in per_cook if c["avg_speed_min"]]
     totals["avg_speed_min"] = (
