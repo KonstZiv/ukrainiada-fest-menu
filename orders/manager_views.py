@@ -7,14 +7,8 @@ from django.shortcuts import render
 
 from core_settings.types import AuthenticatedHttpRequest
 from orders.models import Order, VisitorEscalation
-from orders.stats import kitchen_stats, period_range, waiter_stats
+from orders.stats import PERIOD_LABELS, kitchen_stats, period_range, waiter_stats
 from user.decorators import role_required
-
-PERIOD_LABELS = {
-    "today": "Сьогодні",
-    "yesterday": "Вчора",
-    "week": "Тиждень",
-}
 
 
 @role_required("manager")

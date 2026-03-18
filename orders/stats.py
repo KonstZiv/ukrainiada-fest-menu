@@ -16,6 +16,13 @@ from orders.models import Order, OrderEvent, VisitorEscalation
 from user.models import User
 
 
+PERIOD_LABELS: dict[str, str] = {
+    "today": "Сьогодні",
+    "yesterday": "Вчора",
+    "week": "Тиждень",
+}
+
+
 def period_range(period: str) -> tuple[datetime.datetime, datetime.datetime | None]:
     """Return (since, until) for a named period.
 

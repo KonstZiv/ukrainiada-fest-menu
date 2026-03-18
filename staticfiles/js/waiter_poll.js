@@ -7,7 +7,7 @@
 (function () {
   "use strict";
 
-  var POLL_INTERVAL = 15000; // 15 seconds
+  var POLL_INTERVAL = window.WAITER_POLL_INTERVAL || 15000;
   var pollUrl = window.WAITER_POLL_URL;
   if (!pollUrl) return;
 
