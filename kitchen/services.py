@@ -22,6 +22,13 @@ if TYPE_CHECKING:
     from user.models import User
 
 
+def _activate_order(order: Order) -> None:
+    """Transition order VERIFIED → IN_PROGRESS on first ticket take."""
+    if order.status == Order.Status.VERIFIED:
+        order.status = Order.Status.IN_PROGRESS
+        order.save(update_fields=["status"])
+
+
 def create_tickets_for_order(order: Order) -> list[KitchenTicket]:
     """Create one KitchenTicket per portion (quantity) of each OrderItem.
 
@@ -79,10 +86,7 @@ def take_ticket(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket:
     dish_title = ticket.order_item.dish.title
     order = ticket.order_item.order
 
-    # Transition order to IN_PROGRESS on first ticket take
-    if order.status == Order.Status.VERIFIED:
-        order.status = Order.Status.IN_PROGRESS
-        order.save(update_fields=["status"])
+    _activate_order(order)
 
     log_event(
         order,
@@ -158,10 +162,7 @@ def mark_ticket_done(
         dish_title = ticket.order_item.dish.title
         order = ticket.order_item.order
 
-        # Transition order to IN_PROGRESS (same as regular take_ticket)
-        if order.status == Order.Status.VERIFIED:
-            order.status = Order.Status.IN_PROGRESS
-            order.save(update_fields=["status"])
+        _activate_order(order)
 
         log_event(
             order,
