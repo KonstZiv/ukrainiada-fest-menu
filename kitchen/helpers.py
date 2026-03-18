@@ -71,13 +71,3 @@ def group_by_order(
             }
         )
     return groups
-
-
-def today_start() -> datetime.datetime:
-    """Return the start of today as an aware datetime.
-
-    Delegates to orders.stats.period_range for consistency.
-    """
-    from orders.stats import period_range
-
-    return period_range("today")[0]

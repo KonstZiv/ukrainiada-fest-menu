@@ -5,13 +5,15 @@ from __future__ import annotations
 import datetime
 from typing import Any
 
-from collections.abc import Iterable
+from collections.abc import Sequence
+
+from django.db.models import QuerySet
 
 from orders.models import Order
 
 
 def enrich_orders(
-    orders_qs: Iterable[Order],
+    orders_qs: QuerySet[Order] | Sequence[Order],
     now: datetime.datetime,
     pickup_warn: int,
     pickup_critical: int,

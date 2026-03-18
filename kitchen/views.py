@@ -17,7 +17,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from core_settings.types import AuthenticatedHttpRequest
-from kitchen.helpers import enrich_tickets, group_by_order, today_start
+from kitchen.helpers import enrich_tickets, group_by_order
 from kitchen.models import KitchenTicket
 from kitchen.services import (
     create_handoff,
@@ -102,7 +102,9 @@ def kitchen_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
     team_stats_details: list[dict[str, Any]] = []
     team_stats_totals: dict[str, Any] = {}
     if is_supervisor and tab == "team":
-        today = today_start()
+        from orders.stats import period_range
+
+        today = period_range("today")[0]
 
         from orders.stats import kitchen_stats, period_range
 
