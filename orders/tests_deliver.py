@@ -1,4 +1,4 @@
-"""Tests for order delivery to visitor (Task 5.4)."""
+"""Tests for order delivery — including soft flow and per-ticket delivery."""
 
 from __future__ import annotations
 
@@ -11,8 +11,8 @@ from django.utils import timezone
 
 from kitchen.models import KitchenTicket
 from menu.models import Category, Dish
-from orders.models import Order, OrderItem
-from orders.services import deliver_order
+from orders.models import Order, OrderEvent, OrderItem
+from orders.services import deliver_order, deliver_ticket
 
 
 def _make_ready_order(
@@ -164,3 +164,132 @@ def test_unpaid_delivered_shown_on_dashboard(
     content = response.content.decode()
     assert "НЕ ОПЛАЧЕНО" in content
     assert f"#{order.id}" in content
+
+
+# --- Soft flow tests ---
+
+
+@pytest.mark.django_db
+def test_deliver_ticket_done_status(django_user_model: Any) -> None:
+    """deliver_ticket marks a DONE ticket as delivered."""
+    order, waiter = _make_ready_order(django_user_model)
+    ticket = KitchenTicket.objects.get(order_item__order=order)
+
+    result = deliver_ticket(ticket, waiter=waiter)
+
+    assert result.is_delivered is True
+    assert result.delivered_at is not None
+    assert result.handed_off_at is not None
+
+
+@pytest.mark.django_db
+def test_deliver_ticket_soft_flow_from_pending(django_user_model: Any) -> None:
+    """deliver_ticket auto-completes PENDING ticket (soft flow)."""
+    cat = Category.objects.create(title="Cat", description="", number_in_line=1)
+    dish = Dish.objects.create(
+        title="D",
+        description="",
+        price=Decimal("5.00"),
+        weight=100,
+        calorie=100,
+        category=cat,
+    )
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="wtest", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.VERIFIED,
+    )
+    item = OrderItem.objects.create(order=order, dish=dish, quantity=1)
+    ticket = KitchenTicket.objects.create(order_item=item, status="pending")
+
+    result = deliver_ticket(ticket, waiter=waiter)
+
+    assert result.status == KitchenTicket.Status.DONE
+    assert result.is_delivered is True
+    assert result.taken_at is not None
+    assert result.done_at is not None
+    # Auto-skip event should be logged
+    assert OrderEvent.objects.filter(order=order, is_auto_skip=True).exists()
+
+
+@pytest.mark.django_db
+def test_deliver_ticket_soft_flow_from_taken(django_user_model: Any) -> None:
+    """deliver_ticket auto-completes TAKEN ticket (soft flow)."""
+    cat = Category.objects.create(title="Cat", description="", number_in_line=1)
+    dish = Dish.objects.create(
+        title="D",
+        description="",
+        price=Decimal("5.00"),
+        weight=100,
+        calorie=100,
+        category=cat,
+    )
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="wtest", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.IN_PROGRESS,
+    )
+    item = OrderItem.objects.create(order=order, dish=dish, quantity=1)
+    ticket = KitchenTicket.objects.create(
+        order_item=item,
+        status="taken",
+        taken_at=timezone.now(),
+    )
+
+    result = deliver_ticket(ticket, waiter=waiter)
+
+    assert result.status == KitchenTicket.Status.DONE
+    assert result.is_delivered is True
+    assert OrderEvent.objects.filter(order=order, is_auto_skip=True).exists()
+
+
+@pytest.mark.django_db
+def test_deliver_all_tickets_transitions_order(django_user_model: Any) -> None:
+    """Order becomes DELIVERED when all tickets are delivered."""
+    cat = Category.objects.create(title="Cat", description="", number_in_line=1)
+    dish = Dish.objects.create(
+        title="D",
+        description="",
+        price=Decimal("5.00"),
+        weight=100,
+        calorie=100,
+        category=cat,
+    )
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="wtest", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.READY,
+    )
+    item = OrderItem.objects.create(order=order, dish=dish, quantity=2)
+    t1 = KitchenTicket.objects.create(
+        order_item=item, status="done", done_at=timezone.now()
+    )
+    t2 = KitchenTicket.objects.create(
+        order_item=item, status="done", done_at=timezone.now()
+    )
+
+    deliver_ticket(t1, waiter=waiter)
+    order.refresh_from_db()
+    assert order.status != Order.Status.DELIVERED  # not yet, one ticket left
+
+    deliver_ticket(t2, waiter=waiter)
+    order.refresh_from_db()
+    assert order.status == Order.Status.DELIVERED
+    assert order.delivered_at is not None
+
+
+@pytest.mark.django_db
+def test_deliver_ticket_already_delivered(django_user_model: Any) -> None:
+    """deliver_ticket raises for already delivered ticket."""
+    order, waiter = _make_ready_order(django_user_model)
+    ticket = KitchenTicket.objects.get(order_item__order=order)
+    deliver_ticket(ticket, waiter=waiter)
+
+    with pytest.raises(ValueError, match="вже доставлена"):
+        deliver_ticket(ticket, waiter=waiter)

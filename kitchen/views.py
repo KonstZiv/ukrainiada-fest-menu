@@ -10,7 +10,7 @@ from typing import Any
 import qrcode  # type: ignore[import-untyped]
 from django.conf import settings
 from django.contrib import messages
-from django.db.models import Max, QuerySet
+from django.db.models import Count, Max, Q, QuerySet
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -173,36 +173,47 @@ def kitchen_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
     # --- Team data (supervisor/manager, only when tab == "team") ---
     team_data: list[dict[str, Any]] = []
     if is_supervisor and tab == "team":
-        kitchen_users = User.objects.filter(
-            role__in=[User.Role.KITCHEN, User.Role.KITCHEN_SUPERVISOR],
-        ).order_by("first_name", "email")
-
+        today = _today_start()
+        kitchen_users = (
+            User.objects.filter(
+                role__in=[User.Role.KITCHEN, User.Role.KITCHEN_SUPERVISOR],
+            )
+            .annotate(
+                pending_count=Count(
+                    "kitchen_assignments__dish__order_items__kitchen_tickets",
+                    filter=Q(
+                        kitchen_assignments__dish__order_items__kitchen_tickets__status=KitchenTicket.Status.PENDING,
+                    ),
+                ),
+                taken_count=Count(
+                    "kitchen_tickets",
+                    filter=Q(kitchen_tickets__status=KitchenTicket.Status.TAKEN),
+                ),
+                done_count=Count(
+                    "kitchen_tickets",
+                    filter=Q(
+                        kitchen_tickets__status=KitchenTicket.Status.DONE,
+                        kitchen_tickets__done_at__gte=today,
+                    ),
+                ),
+                escalated_count=Count(
+                    "kitchen_assignments__dish__order_items__kitchen_tickets",
+                    filter=Q(
+                        kitchen_assignments__dish__order_items__kitchen_tickets__status=KitchenTicket.Status.PENDING,
+                        kitchen_assignments__dish__order_items__kitchen_tickets__escalation_level__gte=KitchenTicket.EscalationLevel.SUPERVISOR,
+                    ),
+                ),
+            )
+            .order_by("first_name", "email")
+        )
         for cook in kitchen_users:
-            cook_pending = KitchenTicket.objects.filter(
-                status=KitchenTicket.Status.PENDING,
-                order_item__dish__kitchen_assignments__kitchen_user=cook,
-            ).count()
-            cook_taken = KitchenTicket.objects.filter(
-                status=KitchenTicket.Status.TAKEN,
-                assigned_to=cook,
-            ).count()
-            cook_done = KitchenTicket.objects.filter(
-                status=KitchenTicket.Status.DONE,
-                assigned_to=cook,
-                done_at__gte=_today_start(),
-            ).count()
-            cook_escalated = KitchenTicket.objects.filter(
-                status=KitchenTicket.Status.PENDING,
-                order_item__dish__kitchen_assignments__kitchen_user=cook,
-                escalation_level__gte=KitchenTicket.EscalationLevel.SUPERVISOR,
-            ).count()
             team_data.append(
                 {
                     "cook": cook,
-                    "pending": cook_pending,
-                    "taken": cook_taken,
-                    "done": cook_done,
-                    "escalated": cook_escalated,
+                    "pending": cook.pending_count,
+                    "taken": cook.taken_count,
+                    "done": cook.done_count,
+                    "escalated": cook.escalated_count,
                 }
             )
 
