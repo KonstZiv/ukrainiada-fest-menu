@@ -79,6 +79,7 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     submitted_at = models.DateTimeField(null=True, blank=True)
+    accepted_at = models.DateTimeField(null=True, blank=True)
     approved_at = models.DateTimeField(null=True, blank=True)
     ready_at = models.DateTimeField(null=True, blank=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
@@ -237,3 +238,83 @@ class VisitorEscalation(models.Model):
         return (
             f"Escalation #{self.pk} Order#{self.order_id} [{self.get_status_display()}]"
         )
+
+
+class StepEscalation(models.Model):
+    """Blame-tracking escalation for each lifecycle step.
+
+    Each step has an "owner" — the person responsible for completing it
+    on time.  A missed deadline creates a level-1 (senior) record; if
+    the senior doesn't resolve it within SENIOR_RESPONSE_TIMEOUT, a
+    level-2 (manager) record is created with ``caused_by`` pointing to
+    the senior.
+    """
+
+    class Step(models.TextChoices):
+        SUBMIT_ACCEPT = "submit_accept", "Прийняття замовлення"
+        ACCEPT_VERIFY = "accept_verify", "Верифікація"
+        PENDING_TAKEN = "pending_taken", "Взяття тікета кухарем"
+        TAKEN_DONE = "taken_done", "Приготування"
+        DONE_HANDOFF = "done_handoff", "Передача офіціанту"
+        DELIVER_PAY = "deliver_pay", "Оплата"
+
+    class Level(models.IntegerChoices):
+        SENIOR = 1, "Старший"
+        MANAGER = 2, "Менеджер"
+
+    step = models.CharField(max_length=20, choices=Step.choices, db_index=True)
+    level = models.IntegerField(choices=Level.choices)
+
+    # Blame target — specific person or pool role
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="step_escalations_owned",
+    )
+    owner_role = models.CharField(
+        max_length=30,
+        blank=True,
+        help_text="Pool blame role, e.g. 'senior_waiter', 'kitchen_supervisor'",
+    )
+
+    # What was escalated
+    order = models.ForeignKey(
+        "orders.Order",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="step_escalations",
+    )
+    ticket = models.ForeignKey(
+        "kitchen.KitchenTicket",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="step_escalations",
+    )
+
+    # For level=2: who failed to resolve the senior escalation
+    caused_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="step_escalations_caused",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["step", "level", "resolved_at"]),
+        ]
+
+    def __str__(self) -> str:
+        target = (
+            f"Order#{self.order_id}" if self.order_id else f"Ticket#{self.ticket_id}"
+        )
+        return f"StepEsc {self.step}:{self.level} {target}"

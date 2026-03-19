@@ -32,9 +32,11 @@
               <div class="text-muted" style="font-size: 0.65rem;">{% trans "виторг" %}</div>
             </div>
             <div class="col">
-              {% if team_stats_totals.escalations or team_stats_totals.auto_skips %}
-                <div class="fs-5 fw-bold text-danger">
-                  {{ team_stats_totals.escalations }}+{{ team_stats_totals.auto_skips }}
+              {% if team_stats_totals.errors or team_stats_totals.warnings or team_stats_totals.escalations %}
+                <div class="d-flex justify-content-center gap-1">
+                  {% if team_stats_totals.errors %}<span class="badge bg-danger">{{ team_stats_totals.errors }}</span>{% endif %}
+                  {% if team_stats_totals.warnings %}<span class="badge bg-warning text-dark">{{ team_stats_totals.warnings }}</span>{% endif %}
+                  {% if team_stats_totals.escalations %}<span class="badge bg-danger bg-opacity-75">{{ team_stats_totals.escalations }}<i class="bi bi-exclamation-triangle-fill ms-1" style="font-size: 0.55rem;"></i></span>{% endif %}
                 </div>
                 <div class="text-muted" style="font-size: 0.65rem;">{% trans "помилки" %}</div>
               {% else %}
@@ -69,9 +71,10 @@
                 <div class="text-muted" style="font-size: 0.55rem;">{% trans "онлайн" %}</div>
               </div>
               <div class="col">
-                {% if w.escalations %}<span class="badge bg-danger">{{ w.escalations }}</span>{% endif %}
-                {% if w.auto_skips %}<span class="badge bg-warning text-dark">{{ w.auto_skips }}</span>{% endif %}
-                {% if not w.escalations and not w.auto_skips %}<span class="text-success"><i class="bi bi-check-circle"></i></span>{% endif %}
+                {% if w.errors %}<span class="badge bg-danger">{{ w.errors }}</span>{% endif %}
+                {% if w.warnings %}<span class="badge bg-warning text-dark">{{ w.warnings }}</span>{% endif %}
+                {% if w.escalations %}<span class="badge bg-danger bg-opacity-75">{{ w.escalations }}<i class="bi bi-exclamation-triangle-fill ms-1" style="font-size: 0.55rem;"></i></span>{% endif %}
+                {% if not w.errors and not w.warnings and not w.escalations %}<span class="text-success"><i class="bi bi-check-circle"></i></span>{% endif %}
               </div>
             </div>
           </div>

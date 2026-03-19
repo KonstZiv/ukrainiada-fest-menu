@@ -1,0 +1,96 @@
+{# Period filter — preset buttons + custom date range picker #}
+{# Context: current_period, base_url (optional), extra_params (optional), btn_color (optional) #}
+{# date_from, date_to — for custom range persistence #}
+{% load i18n %}
+
+{% with color=btn_color|default:"primary" %}
+<div>
+  <div class="d-flex flex-wrap align-items-center gap-2">
+    <div class="btn-group btn-group-sm">
+      <a href="{{ base_url }}?{{ extra_params }}period=today"
+         class="btn {% if current_period == 'today' %}btn-{{ color }}{% else %}btn-outline-{{ color }}{% endif %}">
+        {% trans "Сьогодні" %}
+      </a>
+      <a href="{{ base_url }}?{{ extra_params }}period=yesterday"
+         class="btn {% if current_period == 'yesterday' %}btn-{{ color }}{% else %}btn-outline-{{ color }}{% endif %}">
+        {% trans "Вчора" %}
+      </a>
+      <a href="{{ base_url }}?{{ extra_params }}period=week"
+         class="btn {% if current_period == 'week' %}btn-{{ color }}{% else %}btn-outline-{{ color }}{% endif %}">
+        {% trans "Тиждень" %}
+      </a>
+      <a href="{{ base_url }}?{{ extra_params }}period=month"
+         class="btn {% if current_period == 'month' %}btn-{{ color }}{% else %}btn-outline-{{ color }}{% endif %}">
+        {% trans "Місяць" %}
+      </a>
+      <button type="button" id="customDateToggle"
+              class="btn {% if current_period == 'custom' %}btn-{{ color }}{% else %}btn-outline-{{ color }}{% endif %}"
+              aria-expanded="false">
+        <i class="bi bi-calendar-range"></i>
+      </button>
+    </div>
+  </div>
+
+  {% if current_period == 'custom' and date_from and date_to %}
+    <div class="mt-1">
+      <span class="badge bg-{{ color }} bg-opacity-75" style="font-size: 0.75rem;">
+        {{ date_from }} — {{ date_to }}
+      </span>
+    </div>
+  {% endif %}
+
+  <div class="mt-2" id="customDateRange" style="display: none;">
+    <form method="get" action="{{ base_url }}" class="d-flex flex-wrap align-items-end gap-2">
+      {% for param in extra_params_list %}
+        <input type="hidden" name="{{ param.0 }}" value="{{ param.1 }}">
+      {% endfor %}
+      <input type="hidden" name="period" value="custom">
+      <div>
+        <label for="date_from" class="form-label mb-0" style="font-size: 0.75rem;">{% trans "Від" %}</label>
+        <input type="date" id="date_from" name="date_from" class="form-control form-control-sm"
+               value="{{ date_from }}" required>
+      </div>
+      <div>
+        <label for="date_to" class="form-label mb-0" style="font-size: 0.75rem;">{% trans "До" %}</label>
+        <input type="date" id="date_to" name="date_to" class="form-control form-control-sm"
+               value="{{ date_to }}" required>
+      </div>
+      <button type="submit" class="btn btn-sm btn-{{ color }}">
+        <i class="bi bi-check-lg"></i> {% trans "Застосувати" %}
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+(function() {
+  const today = new Date().toISOString().split('T')[0];
+  const fromEl = document.getElementById('date_from');
+  const toEl = document.getElementById('date_to');
+  const toggleBtn = document.getElementById('customDateToggle');
+  const rangeDiv = document.getElementById('customDateRange');
+
+  if (toggleBtn && rangeDiv) {
+    toggleBtn.addEventListener('click', function() {
+      const visible = rangeDiv.style.display !== 'none';
+      rangeDiv.style.display = visible ? 'none' : 'flex';
+    });
+  }
+
+  if (fromEl && toEl) {
+    toEl.max = today;
+    fromEl.addEventListener('change', function() {
+      if (toEl.value && fromEl.value > toEl.value) toEl.value = fromEl.value;
+      toEl.min = fromEl.value;
+    });
+    toEl.addEventListener('change', function() {
+      if (fromEl.value && toEl.value < fromEl.value) fromEl.value = toEl.value;
+      fromEl.max = toEl.value;
+    });
+    if (fromEl.value) toEl.min = fromEl.value;
+    if (toEl.value) fromEl.max = toEl.value;
+    else fromEl.max = today;
+  }
+})();
+</script>
+{% endwith %}

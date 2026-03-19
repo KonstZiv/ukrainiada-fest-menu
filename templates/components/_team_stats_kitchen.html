@@ -24,20 +24,15 @@
               <div class="text-muted" style="font-size: 0.65rem;">{% trans "сер. час" %}</div>
             </div>
             <div class="col">
-              {% if team_stats_totals.escalations %}
-                <div class="fs-5 fw-bold text-danger">{{ team_stats_totals.escalations }}</div>
+              {% if team_stats_totals.errors or team_stats_totals.warnings %}
+                <div class="d-flex justify-content-center gap-1">
+                  {% if team_stats_totals.errors %}<span class="badge bg-danger">{{ team_stats_totals.errors }}</span>{% endif %}
+                  {% if team_stats_totals.warnings %}<span class="badge bg-warning text-dark">{{ team_stats_totals.warnings }}</span>{% endif %}
+                </div>
               {% else %}
                 <div class="fs-5 text-success"><i class="bi bi-check-circle"></i></div>
               {% endif %}
-              <div class="text-muted" style="font-size: 0.65rem;">{% trans "ескалацій" %}</div>
-            </div>
-            <div class="col">
-              {% if team_stats_totals.auto_skips %}
-                <div class="fs-5 fw-bold text-warning">{{ team_stats_totals.auto_skips }}</div>
-              {% else %}
-                <div class="fs-5 text-success"><i class="bi bi-check-circle"></i></div>
-              {% endif %}
-              <div class="text-muted" style="font-size: 0.65rem;">{% trans "пропуски" %}</div>
+              <div class="text-muted" style="font-size: 0.65rem;">{% trans "помилки" %}</div>
             </div>
           </div>
         </div>
@@ -57,10 +52,9 @@
                 <div class="fw-bold">{{ c.avg_speed_min }}<small class="fw-normal" style="font-size: 0.6rem;">{% trans "хв" %}</small></div>
               </div>
               <div class="col">
-                {% if c.escalations %}<span class="badge bg-danger">{{ c.escalations }}</span>{% else %}0{% endif %}
-              </div>
-              <div class="col">
-                {% if c.auto_skips %}<span class="badge bg-warning text-dark">{{ c.auto_skips }}</span>{% else %}<span class="text-success"><i class="bi bi-check-circle"></i></span>{% endif %}
+                {% if c.errors %}<span class="badge bg-danger">{{ c.errors }}</span>{% endif %}
+                {% if c.warnings %}<span class="badge bg-warning text-dark">{{ c.warnings }}</span>{% endif %}
+                {% if not c.errors and not c.warnings %}<span class="text-success"><i class="bi bi-check-circle"></i></span>{% endif %}
               </div>
             </div>
           </div>

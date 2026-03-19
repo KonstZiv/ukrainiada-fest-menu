@@ -1,4 +1,4 @@
-"""Celery tasks for order payment escalation."""
+"""Celery tasks for order escalation (payment, visitor, step ownership)."""
 
 from __future__ import annotations
 
@@ -13,7 +13,11 @@ from notifications.events import (
     push_staff_escalation,
     push_visitor_event,
 )
-from orders.models import Order, VisitorEscalation
+from orders.escalation_ownership import (
+    create_step_escalation,
+    promote_stale_seniors,
+)
+from orders.models import Order, StepEscalation, VisitorEscalation
 
 
 @shared_task(name="orders.escalate_unpaid_orders")
@@ -58,12 +62,34 @@ def escalate_unpaid_orders() -> dict[str, int]:
         payment_escalation_level=1
     )
 
+    # Create StepEscalation records for blame tracking
+    if senior_order_ids:
+        for order in Order.objects.filter(id__in=senior_order_ids).select_related(
+            "waiter"
+        ):
+            create_step_escalation(
+                StepEscalation.Step.DELIVER_PAY,
+                StepEscalation.Level.SENIOR,
+                order=order,
+                owner=order.waiter,
+            )
+
     for oid in manager_order_ids:
         push_payment_escalation(order_id=oid, level=2)
     for oid in senior_order_ids:
         push_payment_escalation(order_id=oid, level=1)
 
-    return {"senior_waiter": senior_count, "manager": manager_count}
+    # Promote stale senior escalations → manager
+    promoted = promote_stale_seniors(
+        StepEscalation.Step.DELIVER_PAY,
+        settings.SENIOR_RESPONSE_TIMEOUT,
+    )
+
+    return {
+        "senior_waiter": senior_count,
+        "manager": manager_count,
+        "promoted": promoted,
+    }
 
 
 @shared_task(name="orders.escalate_visitor_issues")
@@ -125,3 +151,83 @@ def escalate_visitor_issues() -> dict[str, int]:
             )
 
     return {"to_senior": senior_count, "to_manager": manager_count}
+
+
+@shared_task(name="orders.escalate_unaccepted_orders")
+def escalate_unaccepted_orders() -> dict[str, int]:
+    """Escalate SUBMITTED orders not accepted within ACCEPT_TIMEOUT.
+
+    Blame: senior_waiter pool (no specific owner — it's a pool step).
+    Runs via Celery Beat every minute.
+    """
+    now = timezone.now()
+    threshold = now - timedelta(minutes=settings.ACCEPT_TIMEOUT)
+
+    stale_orders = Order.objects.filter(
+        status=Order.Status.SUBMITTED,
+        submitted_at__isnull=False,
+        submitted_at__lte=threshold,
+    ).exclude(
+        step_escalations__step=StepEscalation.Step.SUBMIT_ACCEPT,
+        step_escalations__level=StepEscalation.Level.SENIOR,
+        step_escalations__resolved_at__isnull=True,
+    )
+
+    created = 0
+    for order in stale_orders:
+        create_step_escalation(
+            StepEscalation.Step.SUBMIT_ACCEPT,
+            StepEscalation.Level.SENIOR,
+            order=order,
+            owner_role="senior_waiter",
+        )
+        created += 1
+
+    promoted = promote_stale_seniors(
+        StepEscalation.Step.SUBMIT_ACCEPT,
+        settings.SENIOR_RESPONSE_TIMEOUT,
+    )
+
+    return {"senior": created, "promoted": promoted}
+
+
+@shared_task(name="orders.escalate_unverified_orders")
+def escalate_unverified_orders() -> dict[str, int]:
+    """Escalate ACCEPTED orders not verified within VERIFY_TIMEOUT.
+
+    Blame: the waiter who accepted the order (order.waiter).
+    Runs via Celery Beat every minute.
+    """
+    now = timezone.now()
+    threshold = now - timedelta(minutes=settings.VERIFY_TIMEOUT)
+
+    stale_orders = (
+        Order.objects.filter(
+            status=Order.Status.ACCEPTED,
+            accepted_at__isnull=False,
+            accepted_at__lte=threshold,
+        )
+        .exclude(
+            step_escalations__step=StepEscalation.Step.ACCEPT_VERIFY,
+            step_escalations__level=StepEscalation.Level.SENIOR,
+            step_escalations__resolved_at__isnull=True,
+        )
+        .select_related("waiter")
+    )
+
+    created = 0
+    for order in stale_orders:
+        create_step_escalation(
+            StepEscalation.Step.ACCEPT_VERIFY,
+            StepEscalation.Level.SENIOR,
+            order=order,
+            owner=order.waiter,
+        )
+        created += 1
+
+    promoted = promote_stale_seniors(
+        StepEscalation.Step.ACCEPT_VERIFY,
+        settings.SENIOR_RESPONSE_TIMEOUT,
+    )
+
+    return {"senior": created, "promoted": promoted}

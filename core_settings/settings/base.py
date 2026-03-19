@@ -170,6 +170,22 @@ CELERY_BEAT_SCHEDULE = {
         "task": "orders.escalate_visitor_issues",
         "schedule": 60.0,
     },
+    "escalate-unaccepted-orders": {
+        "task": "orders.escalate_unaccepted_orders",
+        "schedule": 60.0,
+    },
+    "escalate-unverified-orders": {
+        "task": "orders.escalate_unverified_orders",
+        "schedule": 60.0,
+    },
+    "escalate-cooking-tickets": {
+        "task": "kitchen.escalate_cooking_tickets",
+        "schedule": 60.0,
+    },
+    "escalate-handoff-tickets": {
+        "task": "kitchen.escalate_handoff_tickets",
+        "schedule": 60.0,
+    },
 }
 
 # ---------------------------------------------------------------------------
@@ -210,3 +226,10 @@ DISH_PICKUP_WARN: int = config(
 DISH_PICKUP_CRITICAL: int = config(
     "DISH_PICKUP_CRITICAL", default=10, cast=int
 )  # minutes — dish ready, escalate to senior
+
+# Step escalation ownership timeouts (minutes)
+ACCEPT_TIMEOUT: int = config("ACCEPT_TIMEOUT", default=5, cast=int)
+VERIFY_TIMEOUT: int = config("VERIFY_TIMEOUT", default=5, cast=int)
+COOKING_TIMEOUT: int = config("COOKING_TIMEOUT", default=15, cast=int)
+HANDOFF_TIMEOUT: int = config("HANDOFF_TIMEOUT", default=10, cast=int)
+SENIOR_RESPONSE_TIMEOUT: int = config("SENIOR_RESPONSE_TIMEOUT", default=10, cast=int)

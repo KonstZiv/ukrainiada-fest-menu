@@ -15,8 +15,9 @@ from notifications.events import (
     push_ticket_taken,
     push_visitor_event,
 )
+from orders.escalation_ownership import resolve_step_escalations
 from orders.event_log import log_event
-from orders.models import Order
+from orders.models import Order, StepEscalation
 
 if TYPE_CHECKING:
     from user.models import User
@@ -87,6 +88,7 @@ def take_ticket(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket:
     order = ticket.order_item.order
 
     _activate_order(order)
+    resolve_step_escalations(StepEscalation.Step.PENDING_TAKEN, ticket=ticket)
 
     log_event(
         order,
@@ -178,6 +180,8 @@ def mark_ticket_done(
     ticket.done_at = timezone.now()
     ticket.save(update_fields=["status", "done_at"])
 
+    resolve_step_escalations(StepEscalation.Step.TAKEN_DONE, ticket=ticket)
+
     dish_title = ticket.order_item.dish.title
     order = ticket.order_item.order
     log_event(
@@ -264,6 +268,8 @@ def manual_handoff(ticket: KitchenTicket, kitchen_user: User) -> None:
     if not ticket.handed_off_at:
         ticket.handed_off_at = now
         ticket.save(update_fields=["handed_off_at"])
+
+        resolve_step_escalations(StepEscalation.Step.DONE_HANDOFF, ticket=ticket)
 
         dish_title = ticket.order_item.dish.title
         order = ticket.order_item.order

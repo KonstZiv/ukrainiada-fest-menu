@@ -37,6 +37,7 @@
     osc.stop(_audioCtx.currentTime + (duration || 0.4));
   }
 
+  var MAX_RECONNECT = 3;
   var reconnectAttempts = 0;
   var source = new EventSource(window.SSE_STREAM_URL || '/events/stream/');
 
@@ -60,6 +61,10 @@
     reconnectAttempts++;
     setConnectionStatus(false);
     console.warn('[SSE] Connection lost, attempt ' + reconnectAttempts);
+    if (reconnectAttempts >= MAX_RECONNECT) {
+      source.close();
+      console.warn('[SSE] Max reconnect attempts reached, giving up');
+    }
   };
 
   function setConnectionStatus(connected) {

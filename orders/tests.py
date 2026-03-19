@@ -565,6 +565,7 @@ def test_escalate_to_senior_waiter(django_user_model: Any) -> None:
 
     with patch("orders.tasks.settings") as mock_settings:
         mock_settings.PAY_TIMEOUT = 10
+        mock_settings.SENIOR_RESPONSE_TIMEOUT = 10
         result = escalate_unpaid_orders()
 
     order.refresh_from_db()
@@ -588,6 +589,7 @@ def test_escalate_to_manager(django_user_model: Any) -> None:
 
     with patch("orders.tasks.settings") as mock_settings:
         mock_settings.PAY_TIMEOUT = 10
+        mock_settings.SENIOR_RESPONSE_TIMEOUT = 10
         result = escalate_unpaid_orders()
 
     order.refresh_from_db()
@@ -650,6 +652,7 @@ def test_payment_escalation_pushes_event(django_user_model: Any) -> None:
         patch("orders.tasks.push_payment_escalation") as mock_push,
     ):
         mock_settings.PAY_TIMEOUT = 10
+        mock_settings.SENIOR_RESPONSE_TIMEOUT = 10
         escalate_unpaid_orders()
 
     mock_push.assert_called_once_with(order_id=order.pk, level=1)
