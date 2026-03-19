@@ -27,8 +27,15 @@ def create_step_escalation(
     """Create a new StepEscalation record.
 
     Either ``owner`` (specific person) or ``owner_role`` (pool blame)
-    should be provided for meaningful blame attribution.
+    must be provided for meaningful blame attribution.
+
+    Raises:
+        ValueError: if neither owner nor owner_role is provided.
+
     """
+    if not owner and not owner_role:
+        msg = "Either 'owner' or 'owner_role' must be provided for StepEscalation."
+        raise ValueError(msg)
     return StepEscalation.objects.create(
         step=step,
         level=level,
