@@ -27,3 +27,22 @@ def cart_context(request: HttpRequest) -> dict[str, Any]:
         "cart_total": total,
         "cart_quantities": quantities,
     }
+
+
+def manager_context(request: HttpRequest) -> dict[str, int]:
+    """Provide open escalation count for manager navbar badge."""
+    if not hasattr(request, "user") or not request.user.is_authenticated:
+        return {}
+    if getattr(request.user, "role", None) != "manager":
+        return {}
+
+    from orders.models import VisitorEscalation
+
+    return {
+        "manager_escalation_count": VisitorEscalation.objects.filter(
+            status__in=[
+                VisitorEscalation.Status.OPEN,
+                VisitorEscalation.Status.ACKNOWLEDGED,
+            ],
+        ).count(),
+    }

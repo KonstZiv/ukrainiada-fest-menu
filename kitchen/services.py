@@ -92,6 +92,7 @@ def take_ticket(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket:
         order,
         f"Кухня: {kitchen_user.staff_label} прийняв(ла) в роботу {dish_title}",
         actor_label=kitchen_user.staff_label,
+        actor=kitchen_user,
     )
 
     waiter_id = order.waiter_id
@@ -169,6 +170,7 @@ def mark_ticket_done(
             f"⚠️ Авто: {kitchen_user.staff_label} пропустив(ла) крок "
             f"'Взяти' для {dish_title}",
             actor_label=kitchen_user.staff_label,
+            actor=kitchen_user,
             is_auto_skip=True,
         )
 
@@ -182,6 +184,7 @@ def mark_ticket_done(
         order,
         f"Кухня: {kitchen_user.staff_label} приготував(ла) {dish_title} ✅",
         actor_label=kitchen_user.staff_label,
+        actor=kitchen_user,
     )
 
     waiter_id = order.waiter_id
@@ -268,6 +271,7 @@ def manual_handoff(ticket: KitchenTicket, kitchen_user: User) -> None:
             order,
             f"Кухня: {kitchen_user.staff_label} передав(ла) {dish_title} офіціанту",
             actor_label=kitchen_user.staff_label,
+            actor=kitchen_user,
         )
 
     # Cancel any pending QR-based handoff

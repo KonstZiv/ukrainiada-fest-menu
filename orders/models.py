@@ -146,6 +146,13 @@ class OrderEvent(models.Model):
     )
     timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
     message = models.CharField(max_length=300)
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="order_events",
+    )
     actor_label = models.CharField(
         max_length=100,
         blank=True,

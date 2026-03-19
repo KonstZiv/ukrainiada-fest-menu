@@ -281,22 +281,17 @@ def kitchen_stats(
         row["assigned_to_id"]: row["cnt"] for row in esc_data
     }
 
-    # Query 3: auto-skip counts per cook (by actor_label)
-    cook_labels = {c.staff_label: c.id for c in cooks}
+    # Query 3: auto-skip counts per cook (by actor FK)
     skip_data = (
         OrderEvent.objects.filter(
             is_auto_skip=True,
-            actor_label__in=cook_labels.keys(),
+            actor_id__in=cook_ids,
         )
         .filter(time_q_skip)
-        .values("actor_label")
+        .values("actor_id")
         .annotate(cnt=Count("id"))
     )
-    skip_by_cook: dict[int, int] = defaultdict(int)
-    for row in skip_data:
-        cook_id = cook_labels.get(row["actor_label"])
-        if cook_id:
-            skip_by_cook[cook_id] = row["cnt"]
+    skip_by_cook: dict[int, int] = {row["actor_id"]: row["cnt"] for row in skip_data}
 
     # Assemble per-cook results
     per_cook: list[dict[str, Any]] = []

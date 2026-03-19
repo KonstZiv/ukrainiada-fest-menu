@@ -1,62 +1,84 @@
-{# Waiter team stats — reusable for senior waiter + manager #}
+{# Waiter team stats — accordion with summary header + expandable details #}
 {# Context: team_stats_details, team_stats_totals #}
 {% load i18n %}
 
 {% if team_stats_totals %}
-<div class="card mb-3">
-  <div class="card-header bg-primary bg-opacity-75 text-white py-2">
-    <i class="bi bi-bar-chart"></i> {% trans "Статистика офіціантів" %}
-  </div>
-  <div class="card-body py-2 bg-light border-bottom">
-    <div class="row text-center small fw-semibold">
-      <div class="col-4 col-md-2">
-        <div class="text-muted">{% trans "Замовлень" %}</div>
-        <div class="fs-5">{{ team_stats_totals.orders }}</div>
-      </div>
-      <div class="col-4 col-md-2">
-        <div class="text-muted">{% trans "Сер. чек" %}</div>
-        <div class="fs-5">€{{ team_stats_totals.avg_check|floatformat:2 }}</div>
-      </div>
-      <div class="col-4 col-md-2">
-        <div class="text-muted">{% trans "Сер. час" %}</div>
-        <div class="fs-5">{{ team_stats_totals.avg_speed_min }} {% trans "хв" %}</div>
-      </div>
-      <div class="col-4 col-md-2">
-        <div class="text-muted">{% trans "Готівка" %}</div>
-        <div class="fs-5">€{{ team_stats_totals.cash|floatformat:2 }}</div>
-      </div>
-      <div class="col-4 col-md-2">
-        <div class="text-muted">{% trans "Онлайн" %}</div>
-        <div class="fs-5">€{{ team_stats_totals.online|floatformat:2 }}</div>
-      </div>
-      <div class="col-4 col-md-2">
-        <div class="text-muted">{% trans "Помилки" %}</div>
-        <div class="fs-5 {% if team_stats_totals.escalations or team_stats_totals.auto_skips %}text-danger{% endif %}">
-          {{ team_stats_totals.escalations }}+{{ team_stats_totals.auto_skips }}
+<div class="accordion mb-3" id="waiterStatsAccordion">
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button collapsed py-2 px-3" type="button"
+              data-bs-toggle="collapse" data-bs-target="#waiterStatsBody"
+              aria-expanded="false" aria-controls="waiterStatsBody">
+        <div class="w-100">
+          <div class="d-flex align-items-center mb-2">
+            <i class="bi bi-people-fill text-primary me-2"></i>
+            <span class="fw-semibold">{% trans "Офіціанти" %}</span>
+          </div>
+          <div class="row text-center gx-1">
+            <div class="col">
+              <div class="fs-5 fw-bold">{{ team_stats_totals.orders }}</div>
+              <div class="text-muted" style="font-size: 0.65rem;">{% trans "замовлень" %}</div>
+            </div>
+            <div class="col">
+              <div class="fs-5 fw-bold">€{{ team_stats_totals.avg_check|floatformat:2 }}</div>
+              <div class="text-muted" style="font-size: 0.65rem;">{% trans "сер. чек" %}</div>
+            </div>
+            <div class="col">
+              <div class="fs-5 fw-bold">{{ team_stats_totals.avg_speed_min }}<small class="fw-normal" style="font-size: 0.6rem;">{% trans "хв" %}</small></div>
+              <div class="text-muted" style="font-size: 0.65rem;">{% trans "сер. час" %}</div>
+            </div>
+            <div class="col">
+              <div class="fs-5 fw-bold">€{{ team_stats_totals.revenue|floatformat:2 }}</div>
+              <div class="text-muted" style="font-size: 0.65rem;">{% trans "виторг" %}</div>
+            </div>
+            <div class="col">
+              {% if team_stats_totals.escalations or team_stats_totals.auto_skips %}
+                <div class="fs-5 fw-bold text-danger">
+                  {{ team_stats_totals.escalations }}+{{ team_stats_totals.auto_skips }}
+                </div>
+                <div class="text-muted" style="font-size: 0.65rem;">{% trans "помилки" %}</div>
+              {% else %}
+                <div class="fs-5 text-success"><i class="bi bi-check-circle"></i></div>
+                <div class="text-muted" style="font-size: 0.65rem;">{% trans "помилки" %}</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </button>
+    </h2>
+    <div id="waiterStatsBody" class="accordion-collapse collapse" data-bs-parent="#waiterStatsAccordion">
+      <div class="accordion-body p-0">
+        <div class="list-group list-group-flush">
+          {% for w in team_stats_details %}
+          <div class="list-group-item px-3 py-2">
+            <div class="fw-semibold small mb-1">{{ w.user.staff_label }}</div>
+            <div class="row text-center gx-1">
+              <div class="col">
+                <div class="fw-bold">{{ w.orders }}</div>
+              </div>
+              <div class="col">
+                <div class="fw-bold">€{{ w.avg_check|floatformat:2 }}</div>
+              </div>
+              <div class="col">
+                <div class="fw-bold">{{ w.avg_speed_min }}<small class="fw-normal" style="font-size: 0.6rem;">{% trans "хв" %}</small></div>
+              </div>
+              <div class="col">
+                <div class="fw-bold">€{{ w.cash|floatformat:2 }}</div>
+                <div class="text-muted" style="font-size: 0.55rem;">{% trans "готівка" %}</div>
+                <div class="fw-bold">€{{ w.online|floatformat:2 }}</div>
+                <div class="text-muted" style="font-size: 0.55rem;">{% trans "онлайн" %}</div>
+              </div>
+              <div class="col">
+                {% if w.escalations %}<span class="badge bg-danger">{{ w.escalations }}</span>{% endif %}
+                {% if w.auto_skips %}<span class="badge bg-warning text-dark">{{ w.auto_skips }}</span>{% endif %}
+                {% if not w.escalations and not w.auto_skips %}<span class="text-success"><i class="bi bi-check-circle"></i></span>{% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
         </div>
       </div>
     </div>
-  </div>
-  <div class="list-group list-group-flush">
-    {% for w in team_stats_details %}
-    <div class="list-group-item px-2 py-1">
-      <div class="row align-items-center text-center small">
-        <div class="col-12 col-md-2 text-start fw-semibold mb-1 mb-md-0">
-          {{ w.user.staff_label }}
-        </div>
-        <div class="col col-md-2">{{ w.orders }}</div>
-        <div class="col col-md-1">€{{ w.avg_check|floatformat:2 }}</div>
-        <div class="col col-md-1">{{ w.avg_speed_min }}{% trans "хв" %}</div>
-        <div class="col col-md-2">€{{ w.cash|floatformat:2 }}</div>
-        <div class="col col-md-2">€{{ w.online|floatformat:2 }}</div>
-        <div class="col col-md-2">
-          {% if w.escalations %}<span class="badge bg-danger">{{ w.escalations }}</span>{% endif %}
-          {% if w.auto_skips %}<span class="badge bg-warning text-dark">{{ w.auto_skips }}</span>{% endif %}
-          {% if not w.escalations and not w.auto_skips %}<span class="text-success"><i class="bi bi-check-circle"></i></span>{% endif %}
-        </div>
-      </div>
-    </div>
-    {% endfor %}
   </div>
 </div>
 {% endif %}
