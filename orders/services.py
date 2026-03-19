@@ -16,8 +16,9 @@ from notifications.events import push_order_approved, push_visitor_event
 if TYPE_CHECKING:
     from user.models import User
 from orders.cart import clear_cart, get_cart
+from orders.escalation_ownership import resolve_step_escalations
 from orders.event_log import log_event
-from orders.models import Order, OrderItem
+from orders.models import Order, OrderItem, StepEscalation
 
 
 def can_access_order(request: HttpRequest, order: Order) -> bool:
@@ -114,12 +115,16 @@ def accept_order(order: Order, waiter: User) -> Order:
 
     order.status = Order.Status.ACCEPTED
     order.waiter = waiter
-    order.save(update_fields=["status", "waiter"])
+    order.accepted_at = timezone.now()
+    order.save(update_fields=["status", "waiter", "accepted_at"])
+
+    resolve_step_escalations(StepEscalation.Step.SUBMIT_ACCEPT, order=order)
 
     log_event(
         order,
         f"{waiter.staff_label} прийняв(ла) замовлення",
         actor_label=waiter.staff_label,
+        actor=waiter,
     )
     push_visitor_event(
         order_id=order.id,
@@ -149,10 +154,13 @@ def verify_order(order: Order, waiter: User) -> Order:
         order.save(update_fields=["status", "approved_at"])
         create_tickets_for_order(order)
 
+    resolve_step_escalations(StepEscalation.Step.ACCEPT_VERIFY, order=order)
+
     log_event(
         order,
         f"{waiter.staff_label} верифікував(ла) замовлення і передав(ла) на кухню",
         actor_label=waiter.staff_label,
+        actor=waiter,
     )
 
     push_order_approved(order_id=order.id)
@@ -229,6 +237,7 @@ def deliver_order(order: Order, waiter: User) -> tuple[Order, list[str]]:
             f"⚠️ Авто: {waiter.staff_label} пропустив(ла) кухонний процес — "
             f"страви авто-закриті ({len(skipped)} шт.)",
             actor_label=waiter.staff_label,
+            actor=waiter,
             is_auto_skip=True,
         )
 
@@ -239,6 +248,21 @@ def deliver_order(order: Order, waiter: User) -> tuple[Order, list[str]]:
         order.save(update_fields=["status", "ready_at"])
         skipped.append("Готово (кухня)")
 
+    # Mark all tickets as delivered (including already-DONE ones)
+    remaining = KitchenTicket.objects.filter(
+        order_item__order=order,
+        is_delivered=False,
+    )
+    remaining.filter(handed_off_at__isnull=True).update(
+        is_delivered=True,
+        delivered_at=now,
+        handed_off_at=now,
+    )
+    remaining.filter(handed_off_at__isnull=False).update(
+        is_delivered=True,
+        delivered_at=now,
+    )
+
     order.status = Order.Status.DELIVERED
     order.delivered_at = now
     order.save(update_fields=["status", "delivered_at"])
@@ -247,6 +271,7 @@ def deliver_order(order: Order, waiter: User) -> tuple[Order, list[str]]:
         order,
         f"{waiter.staff_label} доставив(ла) замовлення",
         actor_label=waiter.staff_label,
+        actor=waiter,
     )
 
     push_visitor_event(
@@ -296,6 +321,7 @@ def deliver_ticket(ticket: KitchenTicket, waiter: User) -> KitchenTicket:
             f"⚠️ Авто: {waiter.staff_label} доставив(ла) {dish_title} "
             f"(кухня: {old_status} → Готово)",
             actor_label=waiter.staff_label,
+            actor=waiter,
             is_auto_skip=True,
         )
 
@@ -309,6 +335,7 @@ def deliver_ticket(ticket: KitchenTicket, waiter: User) -> KitchenTicket:
         order,
         f"{waiter.staff_label} доставив(ла) {dish_title}",
         actor_label=waiter.staff_label,
+        actor=waiter,
     )
 
     push_visitor_event(
@@ -335,6 +362,7 @@ def deliver_ticket(ticket: KitchenTicket, waiter: User) -> KitchenTicket:
             order,
             f"{waiter.staff_label} доставив(ла) замовлення (всі порції)",
             actor_label=waiter.staff_label,
+            actor=waiter,
         )
         push_visitor_event(
             order_id=order.id,
@@ -384,10 +412,14 @@ def confirm_cash_payment(order: Order, waiter: User) -> tuple[Order, list[str]]:
             "payment_escalation_level",
         ]
     )
+
+    resolve_step_escalations(StepEscalation.Step.DELIVER_PAY, order=order)
+
     log_event(
         order,
         f"Оплату готівкою €{order.total_price:.2f} прийняв(ла) {waiter.staff_label}",
         actor_label=waiter.staff_label,
+        actor=waiter,
     )
     return order, skipped
 
@@ -452,6 +484,9 @@ def confirm_payment_by_senior(order: Order, method: str) -> Order:
             "payment_escalation_level",
         ]
     )
+
+    resolve_step_escalations(StepEscalation.Step.DELIVER_PAY, order=order)
+
     method_label = "готівкою" if method == "cash" else "онлайн"
     log_event(
         order,

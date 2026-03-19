@@ -7,17 +7,18 @@ from django.shortcuts import render
 
 from core_settings.types import AuthenticatedHttpRequest
 from orders.models import Order, VisitorEscalation
-from orders.stats import PERIOD_LABELS, kitchen_stats, period_range, waiter_stats
+from orders.stats import PERIOD_LABELS, kitchen_stats, resolve_period, waiter_stats
 from user.decorators import role_required
 
 
 @role_required("manager")
 def manager_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
     """Render the manager dashboard with team performance overview."""
-    period = request.GET.get("period", "today")
-    if period not in PERIOD_LABELS:
-        period = "today"
-    since, until = period_range(period)
+    period, since, until, date_from, date_to = resolve_period(
+        request.GET.get("period", "today"),
+        request.GET.get("date_from", ""),
+        request.GET.get("date_to", ""),
+    )
 
     waiter_details, waiter_totals = waiter_stats(since, until)
     kitchen_details, kitchen_totals = kitchen_stats(since, until)
@@ -58,5 +59,7 @@ def manager_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
             "open_escalations": open_escalations,
             "current_period": period,
             "period_labels": PERIOD_LABELS,
+            "date_from": date_from,
+            "date_to": date_to,
         },
     )

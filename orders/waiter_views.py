@@ -114,15 +114,19 @@ def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
     team_data: list[dict] = []
     team_stats_details: list[dict] = []
     team_stats_totals: dict = {}
+    period = ""
+    date_from = ""
+    date_to = ""
     if is_senior and tab == "team":
         from itertools import groupby
 
-        from orders.stats import period_range, waiter_stats
+        from orders.stats import resolve_period, waiter_stats
 
-        period = request.GET.get("period", "today")
-        if period not in ("today", "yesterday", "week"):
-            period = "today"
-        stats_since, stats_until = period_range(period)
+        period, stats_since, stats_until, date_from, date_to = resolve_period(
+            request.GET.get("period", "today"),
+            request.GET.get("date_from", ""),
+            request.GET.get("date_to", ""),
+        )
         team_stats_details, team_stats_totals = waiter_stats(stats_since, stats_until)
 
         all_active = (
@@ -213,6 +217,10 @@ def waiter_order_list(request: AuthenticatedHttpRequest) -> HttpResponse:
             "team_data": team_data,
             "team_stats_details": team_stats_details,
             "team_stats_totals": team_stats_totals,
+            "current_period": period,
+            "date_from": date_from,
+            "date_to": date_to,
+            "extra_params_list": [("tab", "team")],
         },
     )
 

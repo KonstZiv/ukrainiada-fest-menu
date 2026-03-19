@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from orders.models import Order, OrderEvent, OrderItem
+from orders.models import Order, OrderEvent, OrderItem, StepEscalation
 
 
 class OrderEventInline(admin.TabularInline):
@@ -37,6 +37,7 @@ class OrderAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
         "submitted_at",
+        "accepted_at",
         "approved_at",
         "ready_at",
         "delivered_at",
@@ -49,3 +50,21 @@ class OrderAdmin(admin.ModelAdmin):
         return f"\u20ac{obj.total_price:.2f}"
 
     total_price_display.short_description = "Сума"  # type: ignore[attr-defined]
+
+
+@admin.register(StepEscalation)
+class StepEscalationAdmin(admin.ModelAdmin):
+    list_display = [
+        "id",
+        "step",
+        "level",
+        "owner",
+        "owner_role",
+        "order",
+        "ticket",
+        "created_at",
+        "resolved_at",
+    ]
+    list_filter = ["step", "level"]
+    readonly_fields = ["created_at"]
+    raw_id_fields = ["order", "ticket", "owner", "caused_by"]

@@ -97,11 +97,7 @@
       {% include "kitchen/_column_content.html" with groups=done_groups action_type="handoff" empty_text="Ще нічого не приготовлено" %}
     {% elif active_tab == "team" and is_supervisor %}
       <div class="d-flex justify-content-end mb-2">
-        <div class="btn-group btn-group-sm">
-          <a href="?tab=team&period=today" class="btn {% if request.GET.period == 'yesterday' or request.GET.period == 'week' %}btn-outline-success{% else %}btn-success{% endif %}">{% trans "Сьогодні" %}</a>
-          <a href="?tab=team&period=yesterday" class="btn {% if request.GET.period == 'yesterday' %}btn-success{% else %}btn-outline-success{% endif %}">{% trans "Вчора" %}</a>
-          <a href="?tab=team&period=week" class="btn {% if request.GET.period == 'week' %}btn-success{% else %}btn-outline-success{% endif %}">{% trans "Тиждень" %}</a>
-        </div>
+        {% include "components/_period_filter.html" with base_url="" extra_params="tab=team&" extra_params_list=extra_params_list btn_color="success" %}
       </div>
       {% include "components/_team_stats_kitchen.html" %}
       {% include "kitchen/_team_section.html" %}

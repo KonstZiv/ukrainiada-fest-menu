@@ -15,8 +15,9 @@ from notifications.events import (
     push_ticket_taken,
     push_visitor_event,
 )
+from orders.escalation_ownership import resolve_step_escalations
 from orders.event_log import log_event
-from orders.models import Order
+from orders.models import Order, StepEscalation
 
 if TYPE_CHECKING:
     from user.models import User
@@ -87,11 +88,13 @@ def take_ticket(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket:
     order = ticket.order_item.order
 
     _activate_order(order)
+    resolve_step_escalations(StepEscalation.Step.PENDING_TAKEN, ticket=ticket)
 
     log_event(
         order,
         f"Кухня: {kitchen_user.staff_label} прийняв(ла) в роботу {dish_title}",
         actor_label=kitchen_user.staff_label,
+        actor=kitchen_user,
     )
 
     waiter_id = order.waiter_id
@@ -169,6 +172,7 @@ def mark_ticket_done(
             f"⚠️ Авто: {kitchen_user.staff_label} пропустив(ла) крок "
             f"'Взяти' для {dish_title}",
             actor_label=kitchen_user.staff_label,
+            actor=kitchen_user,
             is_auto_skip=True,
         )
 
@@ -176,12 +180,15 @@ def mark_ticket_done(
     ticket.done_at = timezone.now()
     ticket.save(update_fields=["status", "done_at"])
 
+    resolve_step_escalations(StepEscalation.Step.TAKEN_DONE, ticket=ticket)
+
     dish_title = ticket.order_item.dish.title
     order = ticket.order_item.order
     log_event(
         order,
         f"Кухня: {kitchen_user.staff_label} приготував(ла) {dish_title} ✅",
         actor_label=kitchen_user.staff_label,
+        actor=kitchen_user,
     )
 
     waiter_id = order.waiter_id
@@ -262,12 +269,15 @@ def manual_handoff(ticket: KitchenTicket, kitchen_user: User) -> None:
         ticket.handed_off_at = now
         ticket.save(update_fields=["handed_off_at"])
 
+        resolve_step_escalations(StepEscalation.Step.DONE_HANDOFF, ticket=ticket)
+
         dish_title = ticket.order_item.dish.title
         order = ticket.order_item.order
         log_event(
             order,
             f"Кухня: {kitchen_user.staff_label} передав(ла) {dish_title} офіціанту",
             actor_label=kitchen_user.staff_label,
+            actor=kitchen_user,
         )
 
     # Cancel any pending QR-based handoff

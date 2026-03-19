@@ -521,6 +521,7 @@ def test_escalate_to_supervisor() -> None:
     with patch("kitchen.tasks.settings") as mock_settings:
         mock_settings.KITCHEN_TIMEOUT = 5
         mock_settings.MANAGER_TIMEOUT = 5
+        mock_settings.SENIOR_RESPONSE_TIMEOUT = 10
         result = escalate_pending_tickets()
 
     ticket.refresh_from_db()
@@ -539,6 +540,7 @@ def test_escalate_to_manager() -> None:
     with patch("kitchen.tasks.settings") as mock_settings:
         mock_settings.KITCHEN_TIMEOUT = 5
         mock_settings.MANAGER_TIMEOUT = 5
+        mock_settings.SENIOR_RESPONSE_TIMEOUT = 10
         result = escalate_pending_tickets()
 
     ticket.refresh_from_db()
@@ -578,6 +580,7 @@ def test_pending_ticket_not_old_enough_stays_none() -> None:
     with patch("kitchen.tasks.settings") as mock_settings:
         mock_settings.KITCHEN_TIMEOUT = 5
         mock_settings.MANAGER_TIMEOUT = 5
+        mock_settings.SENIOR_RESPONSE_TIMEOUT = 10
         result = escalate_pending_tickets()
 
     ticket.refresh_from_db()
@@ -600,6 +603,7 @@ def test_escalation_pushes_event() -> None:
     ):
         mock_settings.KITCHEN_TIMEOUT = 5
         mock_settings.MANAGER_TIMEOUT = 5
+        mock_settings.SENIOR_RESPONSE_TIMEOUT = 10
         escalate_pending_tickets()
 
     mock_push.assert_called_once_with(ticket_id=ticket.pk, level=1)

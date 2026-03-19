@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import datetime
-from collections import defaultdict
 from decimal import Decimal
 from typing import Any
 
@@ -12,7 +11,7 @@ from django.db.models.fields import DecimalField
 from django.utils import timezone
 
 from kitchen.models import KitchenTicket
-from orders.models import Order, OrderEvent, VisitorEscalation
+from orders.models import Order, OrderEvent, StepEscalation, VisitorEscalation
 from user.models import User
 
 
@@ -20,7 +19,10 @@ PERIOD_LABELS: dict[str, str] = {
     "today": "Сьогодні",
     "yesterday": "Вчора",
     "week": "Тиждень",
+    "month": "Місяць",
 }
+
+PRESET_PERIODS: set[str] = set(PERIOD_LABELS) | {"custom"}
 
 
 def period_range(period: str) -> tuple[datetime.datetime, datetime.datetime | None]:
@@ -28,7 +30,7 @@ def period_range(period: str) -> tuple[datetime.datetime, datetime.datetime | No
 
     ``until=None`` means "now" (open-ended / live).
 
-    Supported periods: today, yesterday, week.
+    Supported periods: today, yesterday, week, month.
     """
     today = timezone.make_aware(
         datetime.datetime.combine(timezone.localdate(), datetime.time.min)
@@ -40,10 +42,64 @@ def period_range(period: str) -> tuple[datetime.datetime, datetime.datetime | No
     elif period == "week":
         since = today - datetime.timedelta(days=7)
         until = None
+    elif period == "month":
+        since = today.replace(day=1)
+        until = None
     else:  # "today" (default)
         since = today
         until = None
     return since, until
+
+
+def custom_period_range(
+    date_from: datetime.date,
+    date_to: datetime.date,
+) -> tuple[datetime.datetime, datetime.datetime]:
+    """Return (since, until) for a custom date range.
+
+    Both boundaries are inclusive: date_to is included by setting
+    until to midnight of the next day.
+    """
+    since = timezone.make_aware(datetime.datetime.combine(date_from, datetime.time.min))
+    until = timezone.make_aware(
+        datetime.datetime.combine(
+            date_to + datetime.timedelta(days=1), datetime.time.min
+        )
+    )
+    return since, until
+
+
+def resolve_period(
+    period: str,
+    date_from_str: str,
+    date_to_str: str,
+) -> tuple[str, datetime.datetime, datetime.datetime | None, str, str]:
+    """Parse period parameters from GET request.
+
+    Returns (period, since, until, date_from_str, date_to_str).
+    Falls back to "today" on invalid input.
+    """
+    if period == "custom" and date_from_str and date_to_str:
+        try:
+            d_from = datetime.date.fromisoformat(date_from_str)
+            d_to = datetime.date.fromisoformat(date_to_str)
+        except ValueError:
+            since, until = period_range("today")
+            return "today", since, until, "", ""
+
+        today = timezone.localdate()
+        if d_to > today:
+            d_to = today
+        if d_from > d_to:
+            d_from = d_to
+
+        since, until_dt = custom_period_range(d_from, d_to)
+        return "custom", since, until_dt, d_from.isoformat(), d_to.isoformat()
+
+    if period not in PERIOD_LABELS:
+        period = "today"
+    since, until = period_range(period)
+    return period, since, until, "", ""
 
 
 def _time_q(
@@ -82,14 +138,14 @@ def waiter_stats(
             "avg_check": Decimal("0"),
             "avg_speed_min": 0,
             "escalations": 0,
-            "auto_skips": 0,
+            "errors": 0,
+            "warnings": 0,
         }
         return [], empty_totals
 
     time_q_paid = _time_q("payment_confirmed_at", since, until)
     time_q_delivered = _time_q("delivered_at", since, until)
     time_q_esc = _time_q("created_at", since, until)
-    time_q_skip = _time_q("timestamp", since, until)
 
     # Query 1: order counts + revenue per waiter (single aggregate query)
     order_data = (
@@ -100,7 +156,7 @@ def waiter_stats(
         .filter(time_q_paid)
         .values("waiter_id")
         .annotate(
-            order_count=Count("id"),
+            order_count=Count("id", distinct=True),
             cash_revenue=Sum(
                 F("items__dish__price") * F("items__quantity"),
                 filter=Q(payment_method=Order.PaymentMethod.CASH),
@@ -150,7 +206,25 @@ def waiter_stats(
         row["order__waiter_id"]: row["cnt"] for row in esc_data
     }
 
-    # Query 4: auto-skip counts per waiter
+    # Query 4: step escalation (blame) counts per waiter
+    step_esc_data = (
+        StepEscalation.objects.filter(
+            owner_id__in=waiter_ids,
+            step__in=[
+                StepEscalation.Step.ACCEPT_VERIFY,
+                StepEscalation.Step.DELIVER_PAY,
+            ],
+        )
+        .filter(time_q_esc)
+        .values("owner_id")
+        .annotate(cnt=Count("id"))
+    )
+    step_esc_by_waiter: dict[int, int] = {
+        row["owner_id"]: row["cnt"] for row in step_esc_data
+    }
+
+    # Query 5: auto-skip (process violation) counts per waiter
+    time_q_skip = _time_q("timestamp", since, until)
     skip_data = (
         OrderEvent.objects.filter(
             order__waiter_id__in=waiter_ids,
@@ -174,7 +248,8 @@ def waiter_stats(
         "avg_check": Decimal("0"),
         "avg_speed_min": 0,
         "escalations": 0,
-        "auto_skips": 0,
+        "errors": 0,
+        "warnings": 0,
     }
 
     for waiter in waiters:
@@ -186,7 +261,8 @@ def waiter_stats(
         avg_check = revenue / order_count if order_count else Decimal("0")
         avg_speed = speed_by_waiter.get(waiter.id, 0)
         escalations = esc_by_waiter.get(waiter.id, 0)
-        auto_skips = skip_by_waiter.get(waiter.id, 0)
+        errors = step_esc_by_waiter.get(waiter.id, 0)
+        warnings = skip_by_waiter.get(waiter.id, 0)
 
         entry: dict[str, Any] = {
             "user": waiter,
@@ -197,7 +273,8 @@ def waiter_stats(
             "avg_check": avg_check,
             "avg_speed_min": avg_speed,
             "escalations": escalations,
-            "auto_skips": auto_skips,
+            "errors": errors,
+            "warnings": warnings,
         }
         per_waiter.append(entry)
 
@@ -206,7 +283,8 @@ def waiter_stats(
         totals["cash"] += cash
         totals["online"] += online
         totals["escalations"] += escalations
-        totals["auto_skips"] += auto_skips
+        totals["errors"] += errors
+        totals["warnings"] += warnings
 
     if totals["orders"]:
         totals["avg_check"] = totals["revenue"] / totals["orders"]
@@ -238,14 +316,13 @@ def kitchen_stats(
         empty_totals: dict[str, Any] = {
             "dishes": 0,
             "avg_speed_min": 0,
-            "escalations": 0,
-            "auto_skips": 0,
+            "errors": 0,
+            "warnings": 0,
         }
         return [], empty_totals
 
     time_q_done = _time_q("done_at", since, until)
-    time_q_created = _time_q("created_at", since, until)
-    time_q_skip = _time_q("timestamp", since, until)
+    time_q_esc = _time_q("created_at", since, until)
 
     # Query 1: dish count + avg cooking speed per cook
     done_data = (
@@ -267,44 +344,43 @@ def kitchen_stats(
         row["assigned_to_id"]: row for row in done_data
     }
 
-    # Query 2: escalation counts per cook (by assigned_to — actual executor)
-    esc_data = (
-        KitchenTicket.objects.filter(
-            assigned_to_id__in=cook_ids,
-            escalation_level__gte=KitchenTicket.EscalationLevel.SUPERVISOR,
+    # Query 2: step escalation (blame) counts per cook
+    step_esc_data = (
+        StepEscalation.objects.filter(
+            owner_id__in=cook_ids,
+            step__in=[
+                StepEscalation.Step.TAKEN_DONE,
+                StepEscalation.Step.DONE_HANDOFF,
+            ],
         )
-        .filter(time_q_created)
-        .values("assigned_to_id")
+        .filter(time_q_esc)
+        .values("owner_id")
         .annotate(cnt=Count("id"))
     )
-    esc_by_cook: dict[int, int] = {
-        row["assigned_to_id"]: row["cnt"] for row in esc_data
+    step_esc_by_cook: dict[int, int] = {
+        row["owner_id"]: row["cnt"] for row in step_esc_data
     }
 
-    # Query 3: auto-skip counts per cook (by actor_label)
-    cook_labels = {c.staff_label: c.id for c in cooks}
+    # Query 3: auto-skip (process violation) counts per cook
+    time_q_skip = _time_q("timestamp", since, until)
     skip_data = (
         OrderEvent.objects.filter(
             is_auto_skip=True,
-            actor_label__in=cook_labels.keys(),
+            actor_id__in=cook_ids,
         )
         .filter(time_q_skip)
-        .values("actor_label")
+        .values("actor_id")
         .annotate(cnt=Count("id"))
     )
-    skip_by_cook: dict[int, int] = defaultdict(int)
-    for row in skip_data:
-        cook_id = cook_labels.get(row["actor_label"])
-        if cook_id:
-            skip_by_cook[cook_id] = row["cnt"]
+    skip_by_cook: dict[int, int] = {row["actor_id"]: row["cnt"] for row in skip_data}
 
     # Assemble per-cook results
     per_cook: list[dict[str, Any]] = []
     totals: dict[str, Any] = {
         "dishes": 0,
         "avg_speed_min": 0,
-        "escalations": 0,
-        "auto_skips": 0,
+        "errors": 0,
+        "warnings": 0,
     }
 
     for cook in cooks:
@@ -312,21 +388,21 @@ def kitchen_stats(
         dish_count: int = dd.get("dish_count", 0)
         avg_duration = dd.get("avg_duration")
         avg_speed = int(avg_duration.total_seconds() / 60) if avg_duration else 0
-        escalations = esc_by_cook.get(cook.id, 0)
-        auto_skips = skip_by_cook.get(cook.id, 0)
+        errors = step_esc_by_cook.get(cook.id, 0)
+        warnings = skip_by_cook.get(cook.id, 0)
 
         entry: dict[str, Any] = {
             "user": cook,
             "dishes": dish_count,
             "avg_speed_min": avg_speed,
-            "escalations": escalations,
-            "auto_skips": auto_skips,
+            "errors": errors,
+            "warnings": warnings,
         }
         per_cook.append(entry)
 
         totals["dishes"] += dish_count
-        totals["escalations"] += escalations
-        totals["auto_skips"] += auto_skips
+        totals["errors"] += errors
+        totals["warnings"] += warnings
 
     all_speeds = [c["avg_speed_min"] for c in per_cook if c["avg_speed_min"]]
     totals["avg_speed_min"] = (

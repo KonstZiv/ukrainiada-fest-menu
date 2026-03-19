@@ -58,7 +58,7 @@
       <button onclick="location.reload()" class="btn btn-sm btn-outline-secondary me-2 p-0 px-1" style="font-size: 0.7rem;" title="{% trans "Оновити" %}">
         <i class="bi bi-arrow-clockwise"></i>
       </button>
-      {% if user.is_staff or user.role == 'manager' %}
+      {% if user.is_staff and user.role != 'manager' %}
       <div class="dropdown me-2">
         <button class="btn btn-sm text-primary fw-semibold p-0 dropdown-toggle"
                 type="button"
@@ -134,19 +134,10 @@
           </a>
           <div class="vr-custom"></div>
         {% elif user.role == 'manager' %}
-          <a href="{% url 'manager:dashboard' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
+          <a href="{% url 'manager:dashboard' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none d-flex align-items-center gap-1"
              style="font-size: 0.8rem; letter-spacing: 0.05em;">
-            {% trans "ПАНЕЛЬ" %}
-          </a>
-          <div class="vr-custom"></div>
-          <a href="{% url 'waiter:order_list' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
-             style="font-size: 0.8rem; letter-spacing: 0.05em;">
-            {% trans "ЗАМОВЛЕННЯ" %}
-          </a>
-          <div class="vr-custom"></div>
-          <a href="{% url 'kitchen:dashboard' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
-             style="font-size: 0.8rem; letter-spacing: 0.05em;">
-            {% trans "КУХНЯ" %}
+            {% trans "МОНІТОРИНГ" %}
+            {% if manager_escalation_count %}<span class="badge bg-danger" style="font-size: 0.65rem;">{{ manager_escalation_count }}</span>{% endif %}
           </a>
           <div class="vr-custom"></div>
         {% endif %}

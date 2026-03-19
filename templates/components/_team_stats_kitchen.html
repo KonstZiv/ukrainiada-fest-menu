@@ -1,50 +1,67 @@
-{# Kitchen team stats — reusable for kitchen supervisor + manager #}
+{# Kitchen team stats — accordion with summary header + expandable details #}
 {# Context: team_stats_details, team_stats_totals #}
 {% load i18n %}
 
 {% if team_stats_totals %}
-<div class="card mb-3">
-  <div class="card-header bg-success bg-opacity-75 text-white py-2">
-    <i class="bi bi-bar-chart"></i> {% trans "Статистика кухні" %}
-  </div>
-  <div class="card-body py-2 bg-light border-bottom">
-    <div class="row text-center small fw-semibold">
-      <div class="col-3">
-        <div class="text-muted">{% trans "Страв" %}</div>
-        <div class="fs-5">{{ team_stats_totals.dishes }}</div>
-      </div>
-      <div class="col-3">
-        <div class="text-muted">{% trans "Сер. час" %}</div>
-        <div class="fs-5">{{ team_stats_totals.avg_speed_min }} {% trans "хв" %}</div>
-      </div>
-      <div class="col-3">
-        <div class="text-muted">{% trans "Ескалацій" %}</div>
-        <div class="fs-5 {% if team_stats_totals.escalations %}text-danger{% endif %}">{{ team_stats_totals.escalations }}</div>
-      </div>
-      <div class="col-3">
-        <div class="text-muted">{% trans "Пропуски" %}</div>
-        <div class="fs-5 {% if team_stats_totals.auto_skips %}text-warning{% endif %}">{{ team_stats_totals.auto_skips }}</div>
+<div class="accordion mb-3" id="kitchenStatsAccordion">
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button collapsed py-2 px-3" type="button"
+              data-bs-toggle="collapse" data-bs-target="#kitchenStatsBody"
+              aria-expanded="false" aria-controls="kitchenStatsBody">
+        <div class="w-100">
+          <div class="d-flex align-items-center mb-2">
+            <i class="bi bi-fire text-success me-2"></i>
+            <span class="fw-semibold">{% trans "Кухня" %}</span>
+          </div>
+          <div class="row text-center gx-1">
+            <div class="col">
+              <div class="fs-5 fw-bold">{{ team_stats_totals.dishes }}</div>
+              <div class="text-muted" style="font-size: 0.65rem;">{% trans "страв" %}</div>
+            </div>
+            <div class="col">
+              <div class="fs-5 fw-bold">{{ team_stats_totals.avg_speed_min }}<small class="fw-normal" style="font-size: 0.6rem;">{% trans "хв" %}</small></div>
+              <div class="text-muted" style="font-size: 0.65rem;">{% trans "сер. час" %}</div>
+            </div>
+            <div class="col">
+              {% if team_stats_totals.errors or team_stats_totals.warnings %}
+                <div class="d-flex justify-content-center gap-1">
+                  {% if team_stats_totals.errors %}<span class="badge bg-danger">{{ team_stats_totals.errors }}</span>{% endif %}
+                  {% if team_stats_totals.warnings %}<span class="badge bg-warning text-dark">{{ team_stats_totals.warnings }}</span>{% endif %}
+                </div>
+              {% else %}
+                <div class="fs-5 text-success"><i class="bi bi-check-circle"></i></div>
+              {% endif %}
+              <div class="text-muted" style="font-size: 0.65rem;">{% trans "помилки" %}</div>
+            </div>
+          </div>
+        </div>
+      </button>
+    </h2>
+    <div id="kitchenStatsBody" class="accordion-collapse collapse" data-bs-parent="#kitchenStatsAccordion">
+      <div class="accordion-body p-0">
+        <div class="list-group list-group-flush">
+          {% for c in team_stats_details %}
+          <div class="list-group-item px-3 py-2">
+            <div class="fw-semibold small mb-1">{{ c.user.staff_label }}</div>
+            <div class="row text-center gx-1">
+              <div class="col">
+                <div class="fw-bold">{{ c.dishes }}</div>
+              </div>
+              <div class="col">
+                <div class="fw-bold">{{ c.avg_speed_min }}<small class="fw-normal" style="font-size: 0.6rem;">{% trans "хв" %}</small></div>
+              </div>
+              <div class="col">
+                {% if c.errors %}<span class="badge bg-danger">{{ c.errors }}</span>{% endif %}
+                {% if c.warnings %}<span class="badge bg-warning text-dark">{{ c.warnings }}</span>{% endif %}
+                {% if not c.errors and not c.warnings %}<span class="text-success"><i class="bi bi-check-circle"></i></span>{% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
       </div>
     </div>
-  </div>
-  <div class="list-group list-group-flush">
-    {% for c in team_stats_details %}
-    <div class="list-group-item px-2 py-1">
-      <div class="row align-items-center text-center small">
-        <div class="col-12 col-md-3 text-start fw-semibold mb-1 mb-md-0">
-          {{ c.user.staff_label }}
-        </div>
-        <div class="col col-md-2">{{ c.dishes }}</div>
-        <div class="col col-md-2">{{ c.avg_speed_min }} {% trans "хв" %}</div>
-        <div class="col col-md-2">
-          {% if c.escalations %}<span class="badge bg-danger">{{ c.escalations }}</span>{% else %}0{% endif %}
-        </div>
-        <div class="col col-md-3">
-          {% if c.auto_skips %}<span class="badge bg-warning text-dark">{{ c.auto_skips }}</span>{% else %}<span class="text-success"><i class="bi bi-check-circle"></i></span>{% endif %}
-        </div>
-      </div>
-    </div>
-    {% endfor %}
   </div>
 </div>
 {% endif %}

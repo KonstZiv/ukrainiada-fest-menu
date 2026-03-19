@@ -26,6 +26,7 @@
         }
 
         connect() {
+            this._reconnectAttempts = 0;
             this.source = new EventSource(this.sseUrl);
             this.source.onmessage = (event) => {
                 try {
@@ -35,8 +36,14 @@
                     // Ignore non-JSON keepalive messages
                 }
             };
+            this.source.onopen = () => {
+                this._reconnectAttempts = 0;
+            };
             this.source.onerror = () => {
-                // EventSource auto-reconnects
+                this._reconnectAttempts++;
+                if (this._reconnectAttempts >= 3) {
+                    this.source.close();
+                }
             };
         }
 

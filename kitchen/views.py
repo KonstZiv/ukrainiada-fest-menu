@@ -18,6 +18,7 @@ from django.views.decorators.http import require_POST
 
 from core_settings.types import AuthenticatedHttpRequest
 from kitchen.helpers import enrich_tickets, group_by_order
+from orders.stats import PERIOD_LABELS
 from kitchen.models import KitchenTicket
 from kitchen.services import (
     create_handoff,
@@ -101,17 +102,19 @@ def kitchen_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
     team_data: list[dict[str, Any]] = []
     team_stats_details: list[dict[str, Any]] = []
     team_stats_totals: dict[str, Any] = {}
+    period = ""
+    date_from = ""
+    date_to = ""
     if is_supervisor and tab == "team":
-        from orders.stats import period_range
+        from orders.stats import kitchen_stats, period_range, resolve_period
 
         today = period_range("today")[0]
 
-        from orders.stats import kitchen_stats, period_range
-
-        period = request.GET.get("period", "today")
-        if period not in ("today", "yesterday", "week"):
-            period = "today"
-        stats_since, stats_until = period_range(period)
+        period, stats_since, stats_until, date_from, date_to = resolve_period(
+            request.GET.get("period", "today"),
+            request.GET.get("date_from", ""),
+            request.GET.get("date_to", ""),
+        )
         team_stats_details, team_stats_totals = kitchen_stats(stats_since, stats_until)
         kitchen_users = (
             User.objects.filter(
@@ -179,6 +182,10 @@ def kitchen_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
             "team_data": team_data,
             "team_stats_details": team_stats_details,
             "team_stats_totals": team_stats_totals,
+            "current_period": period,
+            "date_from": date_from,
+            "date_to": date_to,
+            "extra_params_list": [("tab", "team")],
             "last_escalation_id": last_escalation_id,
         },
     )

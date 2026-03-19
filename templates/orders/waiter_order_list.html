@@ -228,11 +228,7 @@
 
     {# --- Period filter + stats --- #}
     <div class="d-flex justify-content-end mb-2">
-      <div class="btn-group btn-group-sm">
-        <a href="?tab=team&period=today" class="btn {% if request.GET.period == 'yesterday' or request.GET.period == 'week' %}btn-outline-primary{% else %}btn-primary{% endif %}">{% trans "Сьогодні" %}</a>
-        <a href="?tab=team&period=yesterday" class="btn {% if request.GET.period == 'yesterday' %}btn-primary{% else %}btn-outline-primary{% endif %}">{% trans "Вчора" %}</a>
-        <a href="?tab=team&period=week" class="btn {% if request.GET.period == 'week' %}btn-primary{% else %}btn-outline-primary{% endif %}">{% trans "Тиждень" %}</a>
-      </div>
+      {% include "components/_period_filter.html" with base_url="" extra_params="tab=team&" extra_params_list=extra_params_list btn_color="primary" %}
     </div>
     {% include "components/_team_stats_waiter.html" %}
 
