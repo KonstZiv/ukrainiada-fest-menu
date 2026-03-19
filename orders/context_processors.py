@@ -36,13 +36,18 @@ def manager_context(request: HttpRequest) -> dict[str, int]:
     if getattr(request.user, "role", None) != "manager":
         return {}
 
-    from orders.models import VisitorEscalation
+    from orders.models import StepEscalation, VisitorEscalation
 
+    visitor = VisitorEscalation.objects.filter(
+        status__in=[
+            VisitorEscalation.Status.OPEN,
+            VisitorEscalation.Status.ACKNOWLEDGED,
+        ],
+    ).count()
+    step = StepEscalation.objects.filter(
+        level=StepEscalation.Level.MANAGER,
+        resolved_at__isnull=True,
+    ).count()
     return {
-        "manager_escalation_count": VisitorEscalation.objects.filter(
-            status__in=[
-                VisitorEscalation.Status.OPEN,
-                VisitorEscalation.Status.ACKNOWLEDGED,
-            ],
-        ).count(),
+        "manager_escalation_count": visitor + step,
     }
