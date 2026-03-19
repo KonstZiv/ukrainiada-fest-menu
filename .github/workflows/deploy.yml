@@ -1,0 +1,103 @@
+# ---------------------------------------------------------------------------
+# Deploy Pipeline (GitHub Actions)
+#
+# Trigger: push to main (after PR merge)
+#
+# Steps:
+#   1. Build Docker image
+#   2. Push to GitHub Container Registry (ghcr.io)
+#   3. SSH to VPS and pull + restart containers
+#
+# Required secrets:
+#   REMOTE_HOST     — VPS IP or hostname
+#   REMOTE_USER     — SSH user (rest-service)
+#   SSH_PRIVATE_KEY — Private SSH key for deployment
+#   CR_PAT          — GitHub PAT with read:packages scope (for docker pull on VPS)
+# ---------------------------------------------------------------------------
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    name: Build & Push Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    name: Deploy to VPS
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Copy compose file to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "compose.prod.yml"
+          target: "~/ukrainiada-fest-menu/"
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/ukrainiada-fest-menu
+
+            # Login to GHCR with Personal Access Token
+            echo ${{ secrets.CR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Pull latest images and restart
+            docker compose -f compose.prod.yml pull
+            docker compose -f compose.prod.yml up -d --remove-orphans
+
+            # Wait for health check
+            sleep 10
+            docker compose -f compose.prod.yml ps
+
+            # Cleanup old images
+            docker image prune -f

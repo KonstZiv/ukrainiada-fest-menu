@@ -8,7 +8,7 @@ from django.urls import re_path
 
 import django_eventstream.routing
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core_settings.settings.dev")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core_settings.settings.prod")
 
 django_asgi_app = get_asgi_application()
 
