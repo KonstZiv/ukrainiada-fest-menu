@@ -49,6 +49,20 @@ body {
   color: var(--brand-text);
   font-family: 'Outfit', sans-serif;
   padding-bottom: 110px;
+  overflow-x: hidden;
+}
+
+/* Carousel image — responsive height */
+.carousel-img {
+  height: 280px;
+}
+
+@media (min-width: 576px) {
+  .carousel-img { height: 400px; }
+}
+
+@media (min-width: 992px) {
+  .carousel-img { height: 600px; }
 }
 
 
