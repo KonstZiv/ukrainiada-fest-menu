@@ -218,6 +218,12 @@ EVENTSTREAM_STORAGE_CONNECTION = {
     "port": config("REDIS_PORT", default=6379, cast=int),
     "db": config("REDIS_SSE_DB", default=2, cast=int),
 }
+# Pub-sub for cross-worker event notification (separate from storage)
+EVENTSTREAM_REDIS = {
+    "host": config("REDIS_HOST", default="localhost"),
+    "port": config("REDIS_PORT", default=6379, cast=int),
+    "db": config("REDIS_SSE_DB", default=2, cast=int),
+}
 EVENTSTREAM_KEEPALIVE = 15  # seconds — less than typical 30s proxy timeout
 
 # ---------------------------------------------------------------------------
