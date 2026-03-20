@@ -79,6 +79,19 @@ body {
   backdrop-filter: saturate(180%) blur(12px);
   padding: 12px 16px;
   border-bottom: 1px solid var(--brand-border);
+  overflow-x: hidden;
+}
+
+/* Navbar: prevent overflow on narrow screens */
+@media (max-width: 400px) {
+  .sticky-header .btn-sm,
+  .sticky-header .language-switcher-btn {
+    font-size: 0.65rem !important;
+    letter-spacing: 0 !important;
+  }
+  .sticky-header .vr-custom {
+    margin: 0 4px;
+  }
 }
 
 
@@ -220,7 +233,7 @@ body {
 /* =========================================================================== */
 .btn-fab-order {
   position: fixed;
-  bottom: 24px;
+  bottom: 40px;
   left: 16px;
   right: 16px;
   background: var(--brand-primary);
