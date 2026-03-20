@@ -13,10 +13,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic import RedirectView
 
 from core_settings.views import health_check, offline_page
 
 urlpatterns = [
+    path("", RedirectView.as_view(url="/menu/", permanent=False)),
     path("health/", health_check, name="health_check"),
     path("i18n/", include("django.conf.urls.i18n")),
     path("offline/", offline_page, name="offline"),
