@@ -296,7 +296,7 @@
 {% endblock %}
 
 {% block extra_js %}
-{% if order.status != 'submitted' and order.status != 'delivered' %}
+{% if order.status != 'delivered' %}
 <script src="{% static 'js/order_tracker.js' %}" defer></script>
 {% endif %}
 {% if event_log_lines %}
