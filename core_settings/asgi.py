@@ -1,4 +1,9 @@
-"""ASGI config for core_settings project."""
+"""ASGI config for core_settings project.
+
+django-eventstream 5.x works through standard Django URL patterns
+(no channels routing needed).  Cross-worker event delivery is handled
+by EVENTSTREAM_STORAGE_CLASS=RedisStorage in settings.
+"""
 
 import os
 

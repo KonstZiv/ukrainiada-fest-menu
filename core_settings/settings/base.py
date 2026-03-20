@@ -196,7 +196,11 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 # ---------------------------------------------------------------------------
-# Channels (SSE via django-eventstream)
+# Channels + django-eventstream (SSE)
+#
+# EVENTSTREAM_STORAGE_CLASS: Redis storage is REQUIRED for multi-worker
+# uvicorn.  Default in-memory storage only works within a single process —
+# send_event() in worker A cannot reach SSE connections in worker B.
 # ---------------------------------------------------------------------------
 
 CHANNEL_LAYERS = {
@@ -208,6 +212,12 @@ CHANNEL_LAYERS = {
     },
 }
 
+EVENTSTREAM_STORAGE_CLASS = "django_eventstream.storage.RedisStorage"
+EVENTSTREAM_REDIS = {
+    "host": config("REDIS_HOST", default="localhost"),
+    "port": config("REDIS_PORT", default=6379, cast=int),
+    "db": config("REDIS_SSE_DB", default=2, cast=int),
+}
 EVENTSTREAM_KEEPALIVE = 15  # seconds — less than typical 30s proxy timeout
 
 # ---------------------------------------------------------------------------
