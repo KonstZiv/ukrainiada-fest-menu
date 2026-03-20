@@ -4,7 +4,9 @@ import logging
 
 from django.conf import settings
 from django.db import connection
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from collections.abc import AsyncIterator
+
+from django.http import HttpRequest, HttpResponse, JsonResponse, StreamingHttpResponse
 from django.shortcuts import render
 
 logger = logging.getLogger(__name__)
@@ -77,3 +79,17 @@ def health_check(request: HttpRequest) -> JsonResponse:
                 pass
 
     return JsonResponse(data, status=status)
+
+
+async def sse_test(request: HttpRequest) -> StreamingHttpResponse:
+    """Minimal SSE test — pure async generator, no django-eventstream."""
+    import asyncio
+
+    async def _stream() -> AsyncIterator[str]:
+        yield "event: stream-open\ndata:\n\n"
+        for i in range(1, 11):
+            await asyncio.sleep(2)
+            yield f'data: {{"count": {i}, "msg": "test event"}}\n\n'
+        yield "event: stream-close\ndata:\n\n"
+
+    return StreamingHttpResponse(_stream(), content_type="text/event-stream")

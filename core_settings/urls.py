@@ -15,11 +15,12 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView
 
-from core_settings.views import health_check, offline_page
+from core_settings.views import health_check, offline_page, sse_test
 
 urlpatterns = [
     path("", RedirectView.as_view(url="/menu/", permanent=False)),
     path("health/", health_check, name="health_check"),
+    path("sse-test/", sse_test, name="sse_test"),
     path("i18n/", include("django.conf.urls.i18n")),
     path("offline/", offline_page, name="offline"),
     path("admin/", admin.site.urls),
