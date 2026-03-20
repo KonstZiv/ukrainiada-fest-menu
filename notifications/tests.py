@@ -147,11 +147,11 @@ def test_sse_js_contains_event_handlers() -> None:
     assert "setConnectionStatus" in content
 
 
-def test_keepalive_setting_exists() -> None:
+def test_eventstream_redis_setting_exists() -> None:
     from django.conf import settings
 
-    assert hasattr(settings, "EVENTSTREAM_KEEPALIVE")
-    assert settings.EVENTSTREAM_KEEPALIVE == 15
+    assert hasattr(settings, "EVENTSTREAM_REDIS")
+    assert "host" in settings.EVENTSTREAM_REDIS
 
 
 def test_gzip_middleware_enabled() -> None:
