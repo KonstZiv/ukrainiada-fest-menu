@@ -1,8 +1,10 @@
 """Async SSE endpoints for real-time updates per user role and visitor order.
 
-Django 6 ASGI requires async views for proper StreamingHttpResponse with
-async generators.  django-eventstream's ``events()`` is sync and fails to
-stream in ASGI — we bypass it and call ``stream()`` directly.
+Django 6 ASGI requires the StreamingHttpResponse with async generator
+to be created directly in the async view — NOT inside sync_to_async.
+Only the ORM-touching parts (EventRequest, auth checks) run via
+sync_to_async; the response itself is assembled in the async context
+so Django's ASGI handler properly iterates the async generator.
 """
 
 from __future__ import annotations
@@ -19,38 +21,25 @@ from orders.models import Order
 from orders.services import can_access_order
 
 
-def _make_sse_response(
+def _build_event_request(
     request: HttpRequest,
     channels: list[str],
-) -> StreamingHttpResponse:
-    """Build a StreamingHttpResponse with django-eventstream's async stream.
+) -> EventRequest:
+    """Create EventRequest (sync — touches ORM internals)."""
+    return EventRequest(request, view_kwargs={"channels": channels})
 
-    Must be called from a sync context (or via sync_to_async) because
-    EventRequest accesses Django ORM internals synchronously.
-    """
-    event_request = EventRequest(request, view_kwargs={"channels": channels})
 
-    listener = Listener()
-    listener.user_id = (
-        request.user.pk
-        if hasattr(request, "user") and request.user.is_authenticated
-        else "anonymous"
-    )
-    listener.channels = event_request.channels
-
-    response = StreamingHttpResponse(
-        stream(event_request, listener),
-        content_type="text/event-stream",
-    )
-    add_default_headers(response, request=request)
-    return response
+def _get_user_id(request: HttpRequest) -> str:
+    """Extract user ID for listener (sync — touches request.user)."""
+    if hasattr(request, "user") and request.user.is_authenticated:
+        return str(request.user.pk)
+    return "anonymous"
 
 
 async def user_events(request: HttpRequest) -> HttpResponse | StreamingHttpResponse:
     """SSE stream for the current user's channels.
 
-    Returns 403 if user has no channels (e.g. visitor role).
-    Requires authentication.
+    Returns 401 if not authenticated, 403 if no channels for role.
     """
     user = await sync_to_async(lambda: request.user)()
     is_authenticated = await sync_to_async(lambda: user.is_authenticated)()
@@ -61,7 +50,19 @@ async def user_events(request: HttpRequest) -> HttpResponse | StreamingHttpRespo
     if not channels:
         return HttpResponse("No channels for your role", status=403)
 
-    return await sync_to_async(_make_sse_response)(request, channels)
+    event_request = await sync_to_async(_build_event_request)(request, channels)
+    user_id = await sync_to_async(_get_user_id)(request)
+
+    listener = Listener()
+    listener.user_id = user_id
+    listener.channels = event_request.channels
+
+    response = StreamingHttpResponse(
+        stream(event_request, listener),
+        content_type="text/event-stream",
+    )
+    await sync_to_async(add_default_headers)(response, request=request)
+    return response
 
 
 async def visitor_order_events(
@@ -77,4 +78,15 @@ async def visitor_order_events(
         return HttpResponse("Access denied", status=403)
 
     channel = visitor_order_channel(order_id)
-    return await sync_to_async(_make_sse_response)(request, [channel])
+    event_request = await sync_to_async(_build_event_request)(request, [channel])
+
+    listener = Listener()
+    listener.user_id = "anonymous"
+    listener.channels = event_request.channels
+
+    response = StreamingHttpResponse(
+        stream(event_request, listener),
+        content_type="text/event-stream",
+    )
+    await sync_to_async(add_default_headers)(response, request=request)
+    return response
