@@ -78,7 +78,7 @@
       <div class="order-progress mb-3" data-status="{{ order.status }}"
            id="order-tracker"
            data-order-id="{{ order.id }}"
-           data-sse-url="{% url 'notifications:visitor_sse' order.id %}">
+           data-sse-url="{% url 'notifications:visitor_sse' order.id %}?token={{ order.access_token }}">
         {% for step in progress_steps %}
           <div class="progress-step {% if step.done %}done{% endif %} {% if step.active %}active{% endif %}"
                data-step-index="{{ step.step_index }}"
@@ -94,7 +94,7 @@
       {# --- Terminal log --- #}
       <div class="terminal-log" id="terminal-log"
            data-order-id="{{ order.id }}"
-           data-sse-url="{% url 'notifications:visitor_sse' order.id %}">
+           data-sse-url="{% url 'notifications:visitor_sse' order.id %}?token={{ order.access_token }}">
       </div>
 
       <div id="order-global-status" class="mt-3 text-center d-none alert alert-success">
