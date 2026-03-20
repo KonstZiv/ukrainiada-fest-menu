@@ -421,6 +421,11 @@ def confirm_cash_payment(order: Order, waiter: User) -> tuple[Order, list[str]]:
         actor_label=waiter.staff_label,
         actor=waiter,
     )
+    push_visitor_event(
+        order_id=order.id,
+        event_type="order_paid",
+        data={"order_id": order.id, "method": "cash"},
+    )
     return order, skipped
 
 
@@ -447,6 +452,11 @@ def confirm_online_payment_stub(order: Order) -> Order:
         ]
     )
     log_event(order, f"Оплата онлайн €{order.total_price:.2f} — успішно 💳")
+    push_visitor_event(
+        order_id=order.id,
+        event_type="order_paid",
+        data={"order_id": order.id, "method": "online"},
+    )
     return order
 
 
@@ -491,5 +501,10 @@ def confirm_payment_by_senior(order: Order, method: str) -> Order:
     log_event(
         order,
         f"Оплату {method_label} €{order.total_price:.2f} закрив(ла) старший офіціант",
+    )
+    push_visitor_event(
+        order_id=order.id,
+        event_type="order_paid",
+        data={"order_id": order.id, "method": method},
     )
     return order

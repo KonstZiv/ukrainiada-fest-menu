@@ -279,6 +279,11 @@ def manual_handoff(ticket: KitchenTicket, kitchen_user: User) -> None:
             actor_label=kitchen_user.staff_label,
             actor=kitchen_user,
         )
+        push_visitor_event(
+            order_id=order.id,
+            event_type="dish_collecting",
+            data={"dish": dish_title, "cook_label": kitchen_user.staff_label},
+        )
 
     # Cancel any pending QR-based handoff
     KitchenHandoff.objects.filter(ticket=ticket, is_confirmed=False).update(
