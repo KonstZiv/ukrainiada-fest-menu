@@ -6,7 +6,13 @@ from .env import config
 DEBUG = False
 
 # ---------------------------------------------------------------------------
-# Database — PostgreSQL with persistent connections
+# Database — short-lived connections (safe for ASGI + Celery)
+#
+# CONN_MAX_AGE=0: close connection after each request.
+# ASGI (uvicorn) runs sync views in a thread pool — each thread gets its own
+# DB connection.  With CONN_MAX_AGE>0 those connections stay open indefinitely
+# because thread-local storage is never cleaned up, eventually exhausting
+# PostgreSQL max_connections.
 # ---------------------------------------------------------------------------
 
 DATABASES = {
@@ -17,9 +23,21 @@ DATABASES = {
         "PASSWORD": config("DB_PASSWORD"),
         "HOST": config("DB_HOST"),
         "PORT": config("DB_PORT", default="5432"),
-        "CONN_MAX_AGE": 60,
+        "CONN_MAX_AGE": 0,
+        "CONN_HEALTH_CHECKS": True,
+        # PgBouncer transaction pooling requires this — server-side cursors
+        # span multiple queries (DECLARE/FETCH/CLOSE) and with transaction
+        # pooling each query may hit a different backend connection.
+        "DISABLE_SERVER_SIDE_CURSORS": True,
     }
 }
+
+# ---------------------------------------------------------------------------
+# Connection monitoring thresholds
+# ---------------------------------------------------------------------------
+
+DB_CONNECTIONS_WARN: int = config("DB_CONNECTIONS_WARN", default=60, cast=int)
+DB_CONNECTIONS_CRITICAL: int = config("DB_CONNECTIONS_CRITICAL", default=80, cast=int)
 
 # ---------------------------------------------------------------------------
 # Security — HTTPS hardening

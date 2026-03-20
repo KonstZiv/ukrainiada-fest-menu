@@ -156,6 +156,9 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
+CELERY_WORKER_MAX_TASKS_PER_CHILD: int = (
+    50  # recycle workers to prevent connection leaks
+)
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_BEAT_SCHEDULE = {
     "escalate-kitchen-tickets": {
@@ -185,6 +188,10 @@ CELERY_BEAT_SCHEDULE = {
     "escalate-handoff-tickets": {
         "task": "kitchen.escalate_handoff_tickets",
         "schedule": 60.0,
+    },
+    "monitor-db-connections": {
+        "task": "core_settings.monitor_db_connections",
+        "schedule": 120.0,
     },
 }
 
