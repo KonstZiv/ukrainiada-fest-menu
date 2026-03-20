@@ -213,7 +213,7 @@ CHANNEL_LAYERS = {
 }
 
 EVENTSTREAM_STORAGE_CLASS = "django_eventstream.storage.RedisStorage"
-EVENTSTREAM_REDIS = {
+EVENTSTREAM_STORAGE_CONNECTION = {
     "host": config("REDIS_HOST", default="localhost"),
     "port": config("REDIS_PORT", default=6379, cast=int),
     "db": config("REDIS_SSE_DB", default=2, cast=int),
