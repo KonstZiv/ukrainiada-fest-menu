@@ -65,8 +65,7 @@ def test_channels_for_manager() -> None:
 @pytest.mark.django_db
 def test_sse_requires_auth(client: Client) -> None:
     response = client.get("/events/stream/")
-    assert response.status_code == 302
-    assert "/accounts/login/" in response["Location"]
+    assert response.status_code == 401
 
 
 @pytest.mark.django_db
