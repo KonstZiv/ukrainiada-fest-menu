@@ -75,6 +75,9 @@ services:
       DEFAULT_POOL_SIZE: 25
       MAX_CLIENT_CONN: 400
       MAX_DB_CONNECTIONS: 50
+      # plain auth: PgBouncer stores password as-is, negotiates
+      # scram-sha-256 with PostgreSQL 18 automatically.
+      AUTH_TYPE: plain
       # Logging
       LOG_CONNECTIONS: 0
       LOG_DISCONNECTIONS: 0
