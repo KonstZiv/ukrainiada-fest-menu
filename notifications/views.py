@@ -163,4 +163,8 @@ async def sse_stream(
     )
     response["Cache-Control"] = "no-cache"
     response["X-Accel-Buffering"] = "no"
+    # Prevent GZipMiddleware and nginx from compressing the SSE stream.
+    # Gzip breaks real-time delivery — browser waits for a full gzip
+    # block before decoding, so events arrive in bursts, not immediately.
+    response["Content-Encoding"] = "identity"
     return response
