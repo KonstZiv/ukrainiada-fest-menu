@@ -24,6 +24,12 @@ DATABASES = {
 # Django Debug Toolbar
 # ---------------------------------------------------------------------------
 
+# Use plain static storage in dev — ManifestStaticFilesStorage needs collectstatic
+STORAGES = {  # noqa: F405
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}
+
 INSTALLED_APPS += ["debug_toolbar"]  # noqa: F405
 MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")  # noqa: F405
 INTERNAL_IPS: list[str] = ["127.0.0.1"]

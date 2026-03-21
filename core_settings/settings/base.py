@@ -124,6 +124,17 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "staticfiles"]
 STATIC_ROOT = BASE_DIR / "static_collected"
 
+# Hash-based filenames for cache busting (order_tracker.js → order_tracker.abc123.js).
+# {% static 'js/file.js' %} resolves to the hashed name via staticfiles.json manifest.
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
+    },
+}
+
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
