@@ -206,7 +206,7 @@ def test_sse_redis_setting_exists() -> None:
 def test_gzip_middleware_enabled() -> None:
     from django.conf import settings
 
-    assert "django.middleware.gzip.GZipMiddleware" in settings.MIDDLEWARE
+    assert "core_settings.middleware.SSEAwareGZipMiddleware" in settings.MIDDLEWARE
 
 
 @pytest.mark.django_db
