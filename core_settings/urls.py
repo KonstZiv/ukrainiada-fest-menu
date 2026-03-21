@@ -8,7 +8,6 @@
 #   https://docs.djangoproject.com/en/stable/topics/http/urls/
 # ---------------------------------------------------------------------------
 
-import django_eventstream
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -32,11 +31,6 @@ urlpatterns = [
     path("manager/", include("orders.manager_urls")),
     path("feedback/", include("feedback.urls")),
     path("events/", include("notifications.urls")),
-    path(
-        "events/<str:channel>/",
-        include(django_eventstream.urls),
-        {"format-error": "json"},
-    ),
 ]
 
 if settings.DEBUG:

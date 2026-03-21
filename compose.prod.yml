@@ -17,6 +17,7 @@ services:
     volumes:
       - static:/app/static_collected
       - media:/app/media
+      - logs:/app/logs
     depends_on:
       pgbouncer:
         condition: service_healthy
@@ -108,6 +109,8 @@ services:
       - .env
     environment:
       DJANGO_SETTINGS_MODULE: core_settings.settings.prod
+    volumes:
+      - logs:/app/logs
     command: >
       celery -A core_settings worker -l info --concurrency=2
     depends_on:
@@ -147,6 +150,7 @@ volumes:
   redis_data:
   static:
   media:
+  logs:
 
 networks:
   shared-net:

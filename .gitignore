@@ -1,6 +1,7 @@
 ### Project ###
 db.sqlite3
 static_collected/
+logs/
 .ruff_cache/
 
 ### Django ###

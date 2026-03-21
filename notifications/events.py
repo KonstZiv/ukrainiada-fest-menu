@@ -2,26 +2,22 @@
 
 from __future__ import annotations
 
-import logging
 from typing import Any
-
-from django_eventstream import send_event
 
 from notifications.channels import (
     manager_channel,
     visitor_order_channel,
     waiter_channel,
 )
-
-logger = logging.getLogger("notifications")
+from notifications.redis_publish import publish_sse_event
 
 
 def _push(channel: str, event_type: str, data: dict[str, Any]) -> None:
-    """Send SSE event. Never raises — logs and continues on failure."""
+    """Publish SSE event via Redis. Never raises."""
     try:
-        send_event(channel, "message", {"type": event_type, **data})
+        publish_sse_event(channel, event_type, data)
     except Exception:  # noqa: BLE001
-        logger.warning("SSE push failed: channel=%s type=%s", channel, event_type)
+        pass  # publish_sse_event logs internally; this is a safety net
 
 
 def push_order_approved(order_id: int) -> None:
@@ -56,7 +52,7 @@ def push_order_ready(order_id: int, waiter_id: int) -> None:
 
 def push_kitchen_escalation(ticket_id: int, level: int) -> None:
     """Kitchen ticket escalated to supervisor/manager."""
-    data = {"ticket_id": ticket_id, "level": level}
+    data: dict[str, Any] = {"ticket_id": ticket_id, "level": level}
     _push(manager_channel(), "kitchen_escalation", data)
     _push("kitchen-broadcast", "kitchen_escalation", data)
 
@@ -90,7 +86,7 @@ def push_staff_escalation(
     level: int,
 ) -> None:
     """Notify staff about visitor escalation at appropriate level."""
-    payload = {
+    payload: dict[str, Any] = {
         "escalation_id": escalation_id,
         "order_id": order_id,
         "reason": reason,

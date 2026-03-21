@@ -62,3 +62,71 @@ CSRF_TRUSTED_ORIGINS: list[str] = [
 # ---------------------------------------------------------------------------
 
 STATIC_ROOT = BASE_DIR / "static_collected"  # noqa: F405
+
+# ---------------------------------------------------------------------------
+# Logging — file handlers with daily rotation, 14 days retention
+# ---------------------------------------------------------------------------
+
+import copy  # noqa: E402
+
+LOGGING = copy.deepcopy(LOGGING)  # noqa: F405
+LOG_DIR.mkdir(parents=True, exist_ok=True)  # noqa: F405
+
+LOGGING["handlers"]["app_file"] = {  # type: ignore[index]
+    "class": "logging.handlers.TimedRotatingFileHandler",
+    "filename": str(LOG_DIR / "app.log"),  # noqa: F405
+    "when": "midnight",
+    "backupCount": 14,
+    "formatter": "verbose",
+    "encoding": "utf-8",
+}
+
+LOGGING["handlers"]["sse_file"] = {  # type: ignore[index]
+    "class": "logging.handlers.TimedRotatingFileHandler",
+    "filename": str(LOG_DIR / "sse.log"),  # noqa: F405
+    "when": "midnight",
+    "backupCount": 14,
+    "formatter": "sse",
+    "encoding": "utf-8",
+}
+
+LOGGING["handlers"]["error_file"] = {  # type: ignore[index]
+    "class": "logging.handlers.TimedRotatingFileHandler",
+    "filename": str(LOG_DIR / "errors.log"),  # noqa: F405
+    "when": "midnight",
+    "backupCount": 14,
+    "formatter": "verbose",
+    "level": "WARNING",
+    "encoding": "utf-8",
+}
+
+LOGGING["handlers"]["mail_admins"] = {  # type: ignore[index]
+    "class": "django.utils.log.AdminEmailHandler",
+    "level": "ERROR",
+    "include_html": False,
+}
+
+LOGGING["loggers"]["notifications"]["handlers"] = ["console", "app_file"]  # type: ignore[index]
+LOGGING["loggers"]["notifications.sse"]["handlers"] = ["console", "sse_file"]  # type: ignore[index]
+LOGGING["loggers"]["db.monitor"]["handlers"] = ["console", "app_file"]  # type: ignore[index]
+LOGGING["loggers"]["django.request"]["handlers"] = [  # type: ignore[index]
+    "console",
+    "error_file",
+    "mail_admins",
+]
+LOGGING["root"]["handlers"] = ["console", "error_file"]  # type: ignore[index]
+
+# ---------------------------------------------------------------------------
+# Email — production SMTP for admin error alerts
+# ---------------------------------------------------------------------------
+
+ADMINS: list[tuple[str, str]] = [
+    ("Festival Manager", config("ADMIN_EMAIL", default="admin@fest.ua")),
+]
+SERVER_EMAIL = config("SERVER_EMAIL", default="noreply@fest.ua")
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = config("EMAIL_HOST", default="localhost")
+EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")

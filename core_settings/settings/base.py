@@ -37,8 +37,6 @@ INSTALLED_APPS = [
     "feedback",
     # Third-party
     "django_celery_beat",
-    "channels",
-    "django_eventstream",
 ]
 
 MIDDLEWARE = [
@@ -140,6 +138,66 @@ LOGIN_REDIRECT_URL = "user:profile"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # ---------------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------------
+
+LOG_DIR = BASE_DIR / "logs"
+
+LOGGING: dict[str, object] = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{asctime} {levelname} {name} {message}",
+            "style": "{",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
+        "sse": {
+            "format": "{asctime} {levelname} {message}",
+            "style": "{",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "notifications.sse": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "notifications": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "db.monitor": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+}
+
+# ---------------------------------------------------------------------------
 # User avatar settings
 # ---------------------------------------------------------------------------
 
@@ -196,24 +254,14 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 # ---------------------------------------------------------------------------
-# SSE (django-eventstream pub-sub + custom _sse_stream subscriber)
+# SSE — Redis pub-sub
 #
-# We use django-eventstream ONLY for send_event() which publishes to
-# Redis pub-sub.  Our notifications/views.py subscribes via redis.asyncio.
-# Storage is disabled — RedisStorage has a bug with current redis library.
+# Publishing: notifications.redis_publish.publish_sse_event() pushes flat
+# JSON to Redis channel "events_channel".
+# Subscribing: notifications.views._sse_stream() reads via redis.asyncio.
 # ---------------------------------------------------------------------------
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [config("REDIS_URL", default="redis://localhost:6379/1")],
-        },
-    },
-}
-
-# Redis pub-sub for send_event() → redis_client.publish("events_channel", ...)
-EVENTSTREAM_REDIS = {
+SSE_REDIS = {
     "host": config("REDIS_HOST", default="localhost"),
     "port": config("REDIS_PORT", default=6379, cast=int),
     "db": config("REDIS_SSE_DB", default=2, cast=int),

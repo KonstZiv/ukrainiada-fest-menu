@@ -1,8 +1,7 @@
 """ASGI config for core_settings project.
 
-django-eventstream 5.x works through standard Django URL patterns
-(no channels routing needed).  Cross-worker event delivery is handled
-by EVENTSTREAM_STORAGE_CLASS=RedisStorage in settings.
+SSE is handled via custom async views in notifications.views using
+Redis pub-sub for cross-worker event delivery.
 """
 
 import os

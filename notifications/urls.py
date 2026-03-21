@@ -5,6 +5,6 @@ from notifications import views
 app_name = "notifications"
 
 urlpatterns = [
-    path("stream/", views.user_events, name="user_events"),
-    path("visitor/<int:order_id>/", views.visitor_order_events, name="visitor_sse"),
+    path("stream/", views.sse_stream, name="sse_stream"),
+    path("visitor/<int:order_id>/", views.sse_stream, name="visitor_sse"),
 ]

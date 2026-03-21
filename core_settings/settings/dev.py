@@ -27,3 +27,21 @@ DATABASES = {
 INSTALLED_APPS += ["debug_toolbar"]  # noqa: F405
 MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")  # noqa: F405
 INTERNAL_IPS: list[str] = ["127.0.0.1"]
+
+# ---------------------------------------------------------------------------
+# Logging — verbose console for development
+# ---------------------------------------------------------------------------
+
+import copy  # noqa: E402
+
+LOGGING = copy.deepcopy(LOGGING)  # noqa: F405
+
+for _logger_name in ("notifications", "notifications.sse", "db.monitor"):
+    LOGGING["loggers"][_logger_name]["level"] = "DEBUG"  # type: ignore[index]
+
+# Uncomment to see SQL queries:
+# LOGGING["loggers"]["django.db.backends"] = {  # type: ignore[index]
+#     "handlers": ["console"],
+#     "level": "DEBUG",
+#     "propagate": False,
+# }
