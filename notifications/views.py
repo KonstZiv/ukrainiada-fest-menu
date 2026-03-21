@@ -83,6 +83,10 @@ async def _sse_stream(
                 message = None
 
             if message is None:
+                # Yield SSE comment every poll cycle to keep the streaming
+                # response alive — silent for EventSource but produces
+                # data on the wire so Django/uvicorn won't close idle conn.
+                yield ":\n"
                 if loop.time() - last_yield >= keepalive_seconds:
                     yield "event: keep-alive\ndata:\n\n"
                     last_yield = loop.time()
