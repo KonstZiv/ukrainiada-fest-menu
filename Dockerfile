@@ -37,6 +37,10 @@ WORKDIR /app
 
 COPY --from=builder /app /app
 
+# Pre-create log dir owned by app — Docker named volumes inherit
+# permissions from the container directory on first mount.
+RUN mkdir -p /app/logs && chown app:app /app/logs
+
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PATH="/app/.venv/bin:$PATH"

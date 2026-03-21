@@ -70,51 +70,62 @@ STATIC_ROOT = BASE_DIR / "static_collected"  # noqa: F405
 import copy  # noqa: E402
 
 LOGGING = copy.deepcopy(LOGGING)  # noqa: F405
-LOG_DIR.mkdir(parents=True, exist_ok=True)  # noqa: F405
 
-LOGGING["handlers"]["app_file"] = {  # type: ignore[index]
-    "class": "logging.handlers.TimedRotatingFileHandler",
-    "filename": str(LOG_DIR / "app.log"),  # noqa: F405
-    "when": "midnight",
-    "backupCount": 14,
-    "formatter": "verbose",
-    "encoding": "utf-8",
-}
+# Only add file handlers if log directory is writable.
+# Docker volume may not be mounted yet during image build or in CI.
+_log_dir_ok = False
+try:
+    LOG_DIR.mkdir(parents=True, exist_ok=True)  # noqa: F405
+    (LOG_DIR / ".probe").touch()  # noqa: F405
+    (LOG_DIR / ".probe").unlink(missing_ok=True)  # noqa: F405
+    _log_dir_ok = True
+except OSError:
+    pass
 
-LOGGING["handlers"]["sse_file"] = {  # type: ignore[index]
-    "class": "logging.handlers.TimedRotatingFileHandler",
-    "filename": str(LOG_DIR / "sse.log"),  # noqa: F405
-    "when": "midnight",
-    "backupCount": 14,
-    "formatter": "sse",
-    "encoding": "utf-8",
-}
+if _log_dir_ok:
+    LOGGING["handlers"]["app_file"] = {  # type: ignore[index]
+        "class": "logging.handlers.TimedRotatingFileHandler",
+        "filename": str(LOG_DIR / "app.log"),  # noqa: F405
+        "when": "midnight",
+        "backupCount": 14,
+        "formatter": "verbose",
+        "encoding": "utf-8",
+    }
 
-LOGGING["handlers"]["error_file"] = {  # type: ignore[index]
-    "class": "logging.handlers.TimedRotatingFileHandler",
-    "filename": str(LOG_DIR / "errors.log"),  # noqa: F405
-    "when": "midnight",
-    "backupCount": 14,
-    "formatter": "verbose",
-    "level": "WARNING",
-    "encoding": "utf-8",
-}
+    LOGGING["handlers"]["sse_file"] = {  # type: ignore[index]
+        "class": "logging.handlers.TimedRotatingFileHandler",
+        "filename": str(LOG_DIR / "sse.log"),  # noqa: F405
+        "when": "midnight",
+        "backupCount": 14,
+        "formatter": "sse",
+        "encoding": "utf-8",
+    }
 
-LOGGING["handlers"]["mail_admins"] = {  # type: ignore[index]
-    "class": "django.utils.log.AdminEmailHandler",
-    "level": "ERROR",
-    "include_html": False,
-}
+    LOGGING["handlers"]["error_file"] = {  # type: ignore[index]
+        "class": "logging.handlers.TimedRotatingFileHandler",
+        "filename": str(LOG_DIR / "errors.log"),  # noqa: F405
+        "when": "midnight",
+        "backupCount": 14,
+        "formatter": "verbose",
+        "level": "WARNING",
+        "encoding": "utf-8",
+    }
 
-LOGGING["loggers"]["notifications"]["handlers"] = ["console", "app_file"]  # type: ignore[index]
-LOGGING["loggers"]["notifications.sse"]["handlers"] = ["console", "sse_file"]  # type: ignore[index]
-LOGGING["loggers"]["db.monitor"]["handlers"] = ["console", "app_file"]  # type: ignore[index]
-LOGGING["loggers"]["django.request"]["handlers"] = [  # type: ignore[index]
-    "console",
-    "error_file",
-    "mail_admins",
-]
-LOGGING["root"]["handlers"] = ["console", "error_file"]  # type: ignore[index]
+    LOGGING["handlers"]["mail_admins"] = {  # type: ignore[index]
+        "class": "django.utils.log.AdminEmailHandler",
+        "level": "ERROR",
+        "include_html": False,
+    }
+
+    LOGGING["loggers"]["notifications"]["handlers"] = ["console", "app_file"]  # type: ignore[index]
+    LOGGING["loggers"]["notifications.sse"]["handlers"] = ["console", "sse_file"]  # type: ignore[index]
+    LOGGING["loggers"]["db.monitor"]["handlers"] = ["console", "app_file"]  # type: ignore[index]
+    LOGGING["loggers"]["django.request"]["handlers"] = [  # type: ignore[index]
+        "console",
+        "error_file",
+        "mail_admins",
+    ]
+    LOGGING["root"]["handlers"] = ["console", "error_file"]  # type: ignore[index]
 
 # ---------------------------------------------------------------------------
 # Email — production SMTP for admin error alerts
