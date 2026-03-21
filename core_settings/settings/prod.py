@@ -71,13 +71,16 @@ import copy  # noqa: E402
 
 LOGGING = copy.deepcopy(LOGGING)  # noqa: F405
 
-# Only add file handlers if log directory is writable.
-# Docker volume may not be mounted yet during image build or in CI.
+# Only add file handlers if log files are writable.
+# Docker volume may not be mounted, or files may be owned by root from
+# a previous failed start.  Probe by opening in append mode — same as
+# what logging.FileHandler does.
 _log_dir_ok = False
 try:
     LOG_DIR.mkdir(parents=True, exist_ok=True)  # noqa: F405
-    (LOG_DIR / ".probe").touch()  # noqa: F405
-    (LOG_DIR / ".probe").unlink(missing_ok=True)  # noqa: F405
+    for _fname in ("app.log", "sse.log", "errors.log"):
+        with open(LOG_DIR / _fname, "a"):  # noqa: F405, SIM115
+            pass
     _log_dir_ok = True
 except OSError:
     pass
