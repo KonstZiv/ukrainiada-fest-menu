@@ -40,6 +40,7 @@
   var MAX_RECONNECT = 3;
   var reconnectAttempts = 0;
   var source = new EventSource(window.SSE_STREAM_URL || '/events/stream/');
+  console.log('[SSE] connecting to', window.SSE_STREAM_URL || '/events/stream/');
 
   source.addEventListener('message', function (e) {
     var data;
@@ -49,6 +50,7 @@
       console.error('[SSE] Parse error:', err);
       return;
     }
+    console.log('[SSE] event:', data.type, data);
     handleEvent(data);
   });
 

@@ -29,9 +29,11 @@
         connect() {
             this._reconnectAttempts = 0;
             this.source = new EventSource(this.sseUrl);
+            console.log("[OrderTracker] connecting to", this.sseUrl);
             this.source.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
+                    console.log("[OrderTracker] event:", data.type, data);
                     this.handleEvent(data);
                 } catch (e) {
                     // Ignore non-JSON keepalive messages
@@ -39,16 +41,20 @@
             };
             this.source.onopen = () => {
                 this._reconnectAttempts = 0;
+                console.log("[OrderTracker] connected");
             };
             this.source.onerror = () => {
                 this._reconnectAttempts++;
+                console.warn("[OrderTracker] error, attempt", this._reconnectAttempts);
                 if (this._reconnectAttempts >= 3) {
                     this.source.close();
+                    console.warn("[OrderTracker] gave up after 3 attempts");
                 }
             };
         }
 
         handleEvent(data) {
+            console.log("[OrderTracker] handleEvent:", data.type, "progress update →", data.type === "ticket_taken" ? "in_progress" : data.type.replace("order_", ""));
             switch (data.type) {
                 case "ticket_taken":
                     this.setTicketStatus(data.ticket_id, "taken", "\uD83D\uDC69\u200D\uD83C\uDF73", data.cook_label + " \u0433\u043E\u0442\u0443\u0454");
