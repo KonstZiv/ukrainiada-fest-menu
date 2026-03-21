@@ -70,15 +70,23 @@ async def _sse_stream(
 
     channel_set = set(channels)
 
+    last_yield = loop.time()
+
     try:
         while True:
-            message = await asyncio.wait_for(
-                pubsub.get_message(ignore_subscribe_messages=True, timeout=1.0),
-                timeout=keepalive_seconds,
-            )
+            try:
+                message = await asyncio.wait_for(
+                    pubsub.get_message(ignore_subscribe_messages=True, timeout=1.0),
+                    timeout=2.0,  # safety net if get_message hangs
+                )
+            except TimeoutError:
+                message = None
+
             if message is None:
-                yield "event: keep-alive\ndata:\n\n"
-                logger.debug("[SSE:sub] keepalive %s", client_label)
+                if loop.time() - last_yield >= keepalive_seconds:
+                    yield "event: keep-alive\ndata:\n\n"
+                    last_yield = loop.time()
+                    logger.debug("[SSE:sub] keepalive %s", client_label)
                 continue
 
             if message["type"] != "message":
@@ -96,6 +104,7 @@ async def _sse_stream(
             # data is now {"type": "ticket_done", ...} — forward as-is
             yield f"event: message\ndata: {json.dumps(data)}\n\n"
             events_delivered += 1
+            last_yield = loop.time()
 
     except asyncio.CancelledError:
         pass
