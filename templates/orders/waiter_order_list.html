@@ -293,8 +293,3 @@
 
 </div>
 {% endblock %}
-
-{% block extra_js %}
-<script>window.WAITER_POLL_URL = "{% url 'waiter:poll_data' %}";</script>
-<script src="{% static 'js/waiter_poll.js' %}" defer></script>
-{% endblock %}

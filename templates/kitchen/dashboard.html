@@ -162,13 +162,3 @@
 
 </div>
 {% endblock %}
-
-
-{% block extra_js %}
-{# TODO: remove when SSE/ASGI is deployed #}
-<script>
-  window.KITCHEN_POLL_URL = "{% url 'kitchen:poll_data' %}";
-  window.KITCHEN_LAST_ESCALATION_ID = {{ last_escalation_id|default:0 }};
-</script>
-<script src="{% static 'js/kitchen_poll.js' %}" defer></script>
-{% endblock %}
