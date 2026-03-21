@@ -90,11 +90,12 @@
       case 'ticket_taken':
         onTicketTaken(data);
         break;
-      case 'order_approved':
+      case 'order_approved':  // from verify_order() — order enters kitchen queue
         onOrderApproved(data);
         break;
       case 'kitchen_escalation':
       case 'payment_escalation':
+      case 'visitor_escalation':
         onEscalation(data);
         break;
     }
