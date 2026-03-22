@@ -472,14 +472,19 @@ body {
 
 
 /* =========================================================================== */
-/* Order progress bar — horizontal on tablet+, vertical on mobile              */
+/* Order progress bar — horizontal on tablet+, 2 rows on mobile               */
 /* =========================================================================== */
 .order-progress {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  padding: 1rem 0;
-  margin-bottom: 1rem;
+  padding: 1rem 1rem;
+  margin-bottom: 0.5rem;
+  gap: 0.25rem 0;
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .progress-step {
@@ -497,60 +502,114 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: var(--brand-bg-page);
-  border: 2px solid var(--brand-border);
+  background: transparent;
+  border: 2px dashed var(--brand-border);
+  opacity: 0.25;
   transition: all 0.3s;
 }
 
+/* Done: solid green circle */
 .progress-step.done .step-icon {
   background: #d1e7dd;
-  border-color: #198754;
+  border: 2px solid #198754;
+  opacity: 1;
 }
 
+/* Active (partial progress): yellow circle, PWM animation set by JS */
 .progress-step.active .step-icon {
   background: #fff3cd;
-  border-color: #ffc107;
-  /* Animation set inline per-step via pulse-step-N keyframes */
+  border: 2px solid #ffc107;
+  opacity: 1;
 }
 
+/* --- Arrows between steps --- */
 .progress-line {
+  position: relative;
   flex: 1;
-  height: 3px;
+  height: 2px;
   background: var(--brand-border);
-  min-width: 1rem;
-  max-width: 3.75rem;
+  min-width: 0.75rem;
+  max-width: 3rem;
+  opacity: 0.25;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s ease-out, opacity 0.3s;
+}
+
+/* Arrow appears when previous step is done or active */
+.progress-step.done + .progress-line,
+.progress-step.active + .progress-line {
+  transform: scaleX(1);
+  opacity: 1;
 }
 
 .progress-step.done + .progress-line {
   background: #198754;
 }
 
-.step-label {
-  font-size: 0.7rem;
-  margin-top: 0.25rem;
-  color: var(--brand-text-muted);
+.progress-step.active + .progress-line {
+  background: #ffc107;
 }
 
-/* Mobile: vertical */
+/* Arrowhead */
+.progress-line::after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 4px solid transparent;
+  border-left-color: inherit;
+  border-left-width: 5px;
+}
+
+.progress-step.done + .progress-line::after {
+  border-left-color: #198754;
+}
+
+.progress-step.active + .progress-line::after {
+  border-left-color: #ffc107;
+}
+
+.step-label {
+  font-size: 0.65rem;
+  margin-top: 0.2rem;
+  color: var(--brand-text-muted);
+  text-align: center;
+  line-height: 1.1;
+}
+
+/* Mobile: 2 rows of 3 steps */
 @media (max-width: 575.98px) {
   .order-progress {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .progress-step {
-    flex-direction: row;
-    gap: 0.5rem;
-  }
-  .progress-line {
-    width: 3px;
-    height: 1.25rem;
-    min-width: 3px;
-    max-width: none;
-    margin-left: 1.125rem;
+    padding: 0.75rem 0.75rem;
+    gap: 0.5rem 0;
+    max-width: 320px;
   }
   .step-label {
     display: inline !important;
   }
+}
+
+/* --- Payment strip under pipeline --- */
+.pipeline-payment-strip {
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  padding: 0.35rem 1rem;
+  border-radius: var(--radius-sm, 4px);
+  margin-bottom: 1rem;
+}
+
+.pipeline-payment-strip.unpaid {
+  background: #f1f5f9;
+  color: #94a3b8;
+}
+
+.pipeline-payment-strip.paid {
+  background: #d1e7dd;
+  color: #198754;
 }
 
 

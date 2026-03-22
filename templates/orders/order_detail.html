@@ -62,33 +62,36 @@
       <h5 class="mb-3"><i class="bi bi-activity"></i> {% trans "Стан обробки замовлення" %}</h5>
 
       {# --- Progress circles — clickable, open modals --- #}
-      {# Generate per-step keyframes for partial progress animation #}
-      {% localize off %}
-      {% for step in progress_steps %}
-        {% if step.active %}
-        <style>
-          @keyframes pulse-step-{{ step.step_index }} {
-            0%, 100% { opacity: {{ step.progress }}; }
-            50% { opacity: 1; }
-          }
-        </style>
-        {% endif %}
-      {% endfor %}
-      {% endlocalize %}
-      <div class="order-progress mb-3" data-status="{{ order.status }}"
+      <div class="order-progress" data-status="{{ order.status }}"
            id="order-tracker"
            data-order-id="{{ order.id }}"
-           data-sse-url="{% url 'notifications:visitor_sse' order.id %}?token={{ order.access_token }}">
+           data-sse-url="{% url 'notifications:visitor_sse' order.id %}?token={{ order.access_token }}"
+           data-total-tickets="{{ pipeline_counts.total }}"
+           data-taken-count="{{ pipeline_counts.taken }}"
+           data-done-count="{{ pipeline_counts.done }}"
+           data-delivered-count="{{ pipeline_counts.delivered }}">
         {% for step in progress_steps %}
           <div class="progress-step {% if step.done %}done{% endif %} {% if step.active %}active{% endif %}"
                data-step-index="{{ step.step_index }}"
+               data-step-key="{{ step.step_key }}"
                data-bs-toggle="modal" data-bs-target="#stepModal{{ step.step_index }}"
                style="cursor: pointer;">
-            <span class="step-icon"{% if step.active %} style="animation: pulse-step-{{ step.step_index }} 2s infinite;"{% endif %}>{{ step.icon }}</span>
-            <span class="step-label d-none d-sm-inline">{{ step.label }}</span>
+            <span class="step-icon">{{ step.icon }}</span>
+            <span class="step-label">{{ step.label }}</span>
           </div>
           {% if not forloop.last %}<div class="progress-line"></div>{% endif %}
         {% endfor %}
+      </div>
+
+      {# --- Payment strip --- #}
+      <div class="pipeline-payment-strip {% if order.payment_status == 'paid' %}paid{% else %}unpaid{% endif %}"
+           id="payment-strip"
+           data-paid-text="{% trans 'СПЛАЧЕНО' %}"
+        {% if order.payment_status == 'paid' %}
+          {% trans "СПЛАЧЕНО" %}
+        {% else %}
+          {% trans "ОЧІКУЄ ОПЛАТИ" %}
+        {% endif %}
       </div>
 
       {# --- Terminal log --- #}

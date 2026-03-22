@@ -342,27 +342,33 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
 
     event_log_lines = [e.log_line for e in OrderEvent.objects.filter(order=order)]
 
+    total_tickets = len(ticket_states)
+    taken_count = sum(1 for ts in ticket_states if ts["status"] in ("taken", "done"))
+    done_count = sum(1 for ts in ticket_states if ts["status"] == "done")
+    picked_up_count = sum(
+        1 for ts in ticket_states if ts.get("is_handed_off") or ts.get("is_delivered")
+    )
+    delivered_count = sum(1 for ts in ticket_states if ts.get("is_delivered"))
+
     return render(
         request,
         "orders/order_detail.html",
         {
             "order": order,
             "ticket_states": ticket_states,
+            "pipeline_counts": {
+                "total": total_tickets,
+                "taken": taken_count,
+                "done": done_count,
+                "delivered": delivered_count,
+            },
             "progress_steps": _build_progress_steps(
                 order.status,
-                taken_count=sum(
-                    1 for ts in ticket_states if ts["status"] in ("taken", "done")
-                ),
-                done_count=sum(1 for ts in ticket_states if ts["status"] == "done"),
-                picked_up_count=sum(
-                    1
-                    for ts in ticket_states
-                    if ts.get("is_handed_off") or ts.get("is_delivered")
-                ),
-                delivered_count=sum(
-                    1 for ts in ticket_states if ts.get("is_delivered")
-                ),
-                total_tickets=len(ticket_states),
+                taken_count=taken_count,
+                done_count=done_count,
+                picked_up_count=picked_up_count,
+                delivered_count=delivered_count,
+                total_tickets=total_tickets,
             ),
             "show_escalation_button": can_escalate and not active_escalation,
             "active_escalation": active_escalation,

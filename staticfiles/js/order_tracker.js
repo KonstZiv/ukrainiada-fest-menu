@@ -1,6 +1,7 @@
 /**
  * OrderTracker — SSE client for live order tracking on order_detail page.
- * Updates ticket statuses and progress bar without page reload.
+ * Updates ticket statuses, progress bar with PWM partial animation,
+ * and payment strip without page reload.
  * Uses textContent (not innerHTML) for XSS safety.
  */
 (function () {
@@ -15,14 +16,35 @@
         "in_progress": 3,
         "ready": 4,
         "delivered": 5,
-        "paid": 6,
+    };
+
+    // Step keys that support partial progress (PWM pulse)
+    const PARTIAL_STEP_KEYS = {
+        "cooking": { counterField: "doneCount" },
+        "ready": { counterField: "doneCount" },
+        "delivered": { counterField: "deliveredCount" },
     };
 
     class OrderTracker {
-        constructor(orderId, sseUrl) {
+        constructor(orderId, sseUrl, container) {
             this.orderId = orderId;
             this.sseUrl = sseUrl;
             this.source = null;
+
+            // Read ticket counts from data attributes for partial progress
+            this.totalTickets = parseInt(container.dataset.totalTickets || "0", 10);
+            this.takenCount = parseInt(container.dataset.takenCount || "0", 10);
+            this.doneCount = parseInt(container.dataset.doneCount || "0", 10);
+            this.deliveredCount = parseInt(container.dataset.deliveredCount || "0", 10);
+
+            console.log("[OrderTracker] init total=" + this.totalTickets +
+                " taken=" + this.takenCount +
+                " done=" + this.doneCount +
+                " delivered=" + this.deliveredCount);
+
+            // Apply initial partial progress animations
+            this._applyPartialProgress();
+
             this.connect();
         }
 
@@ -54,17 +76,27 @@
         }
 
         handleEvent(data) {
-            console.log("[OrderTracker] handleEvent:", data.type, "progress update →", data.type === "ticket_taken" ? "in_progress" : data.type.replace("order_", ""));
             switch (data.type) {
                 case "ticket_taken":
-                    this.setTicketStatus(data.ticket_id, "taken", "\uD83D\uDC69\u200D\uD83C\uDF73", data.cook_label + " \u0433\u043E\u0442\u0443\u0454");
+                    this.takenCount++;
                     this.updateProgress("in_progress");
+                    this._applyPartialProgress();
+                    console.log("[OrderTracker] ticket_taken → taken=" + this.takenCount);
                     break;
                 case "ticket_done":
-                    this.setTicketStatus(data.ticket_id, "done", "\u2705", "\u0413\u043E\u0442\u043E\u0432\u043E");
+                    this.doneCount++;
+                    if (this.doneCount >= this.totalTickets) {
+                        this.updateProgress("ready");
+                    }
+                    this._applyPartialProgress();
+                    console.log("[OrderTracker] ticket_done → done=" + this.doneCount + "/" + this.totalTickets);
                     break;
                 case "dish_collecting":
-                    this.setTicketStatus(data.ticket_id, "collecting", "\uD83C\uDFC3", data.waiter_label);
+                    break;
+                case "dish_delivered":
+                    this.deliveredCount++;
+                    this._applyPartialProgress();
+                    console.log("[OrderTracker] dish_delivered → delivered=" + this.deliveredCount + "/" + this.totalTickets);
                     break;
                 case "order_accepted":
                     this.updateProgress("accepted");
@@ -74,16 +106,17 @@
                     break;
                 case "order_ready":
                     this.updateProgress("ready");
+                    this._applyPartialProgress();
                     this.showGlobalMessage("\uD83C\uDF89 \u0412\u0441\u0456 \u0441\u0442\u0440\u0430\u0432\u0438 \u0433\u043E\u0442\u043E\u0432\u0456!");
-                    break;
-                case "dish_delivered":
-                    this.setTicketStatus(data.ticket_id, "delivered", "\u2705", data.waiter_label || "");
                     break;
                 case "order_delivered":
                     this.updateProgress("delivered");
+                    this.deliveredCount = this.totalTickets;
+                    this._applyPartialProgress();
                     this.showGlobalMessage("\u2705 \u0417\u0430\u043C\u043E\u0432\u043B\u0435\u043D\u043D\u044F \u0434\u043E\u0441\u0442\u0430\u0432\u043B\u0435\u043D\u043E! \u0421\u043C\u0430\u0447\u043D\u043E\u0433\u043E!");
                     break;
                 case "order_paid":
+                    this._updatePaymentStrip(true);
                     this.showGlobalMessage("\u2705 \u041E\u043F\u043B\u0430\u0442\u0443 \u043F\u0440\u0438\u0439\u043D\u044F\u0442\u043E. \u0414\u044F\u043A\u0443\u0454\u043C\u043E!");
                     this.disconnect();
                     break;
@@ -101,11 +134,7 @@
 
         setTicketStatus(ticketId, status, icon, text) {
             const row = document.querySelector('[data-ticket-id="' + ticketId + '"]');
-            console.log("[OrderTracker] setTicketStatus ticket=" + ticketId + " status=" + status + " icon=" + icon + " text=" + text + " row_found=" + !!row);
-            if (!row) {
-                console.debug("[OrderTracker] setTicketStatus — no [data-ticket-id=" + ticketId + "] element (expected on visitor page)");
-                return;
-            }
+            if (!row) return;
             const iconEl = row.querySelector(".ticket-icon");
             const detailEl = row.querySelector(".ticket-detail");
             if (iconEl) {
@@ -122,31 +151,109 @@
         updateProgress(newStatus) {
             const bar = document.querySelector(".order-progress");
             const targetStep = STATUS_TO_STEP[newStatus];
-            console.log("[OrderTracker] updateProgress status=" + newStatus + " targetStep=" + targetStep + " bar_found=" + !!bar);
-            if (!bar) {
-                console.warn("[OrderTracker] updateProgress — .order-progress NOT FOUND");
-                return;
-            }
-            if (targetStep === undefined) {
-                console.warn("[OrderTracker] updateProgress — unknown status: " + newStatus);
-                return;
-            }
+            console.log("[OrderTracker] updateProgress status=" + newStatus + " targetStep=" + targetStep);
+            if (!bar || targetStep === undefined) return;
 
             bar.querySelectorAll(".progress-step").forEach((step) => {
                 const idx = parseInt(step.dataset.stepIndex, 10);
-                step.classList.remove("done", "active");
-                if (idx <= targetStep) step.classList.add("done");
-                if (idx === targetStep) step.classList.add("active");
+                const key = step.dataset.stepKey;
+
+                // For binary steps: done if index <= target
+                if (!PARTIAL_STEP_KEYS[key]) {
+                    step.classList.remove("done", "active");
+                    if (idx <= targetStep) step.classList.add("done");
+                }
+                // Partial steps handled by _applyPartialProgress
             });
+        }
+
+        /**
+         * Apply PWM-like pulse animation to partial-progress steps.
+         * Duty cycle = (completed / total) of the animation cycle is "bright",
+         * rest is "faded". When progress reaches 1.0, step becomes solid "done".
+         */
+        _applyPartialProgress() {
+            if (this.totalTickets === 0) return;
+
+            const progressMap = {
+                "cooking": this.doneCount / this.totalTickets,
+                "ready": this.doneCount / this.totalTickets,
+                "delivered": this.deliveredCount / this.totalTickets,
+            };
+
+            const bar = document.querySelector(".order-progress");
+            if (!bar) return;
+
+            bar.querySelectorAll(".progress-step").forEach((step) => {
+                const key = step.dataset.stepKey;
+                if (!(key in progressMap)) return;
+
+                const progress = Math.min(progressMap[key], 1.0);
+                const iconEl = step.querySelector(".step-icon");
+                if (!iconEl) return;
+
+                step.classList.remove("done", "active");
+
+                if (progress >= 1.0) {
+                    // Fully done
+                    step.classList.add("done");
+                    iconEl.style.animation = "";
+                    console.log("[OrderTracker] partial " + key + " = 1.0 → done");
+                } else if (progress > 0) {
+                    // Partial — apply PWM animation
+                    step.classList.add("active");
+                    this._injectPWMKeyframes(key, progress);
+                    iconEl.style.animation = "pwm-" + key + " 3s infinite step-end";
+                    console.log("[OrderTracker] partial " + key + " = " + progress.toFixed(2) + " → PWM pulse");
+                } else {
+                    // Not started — stays faded (default CSS)
+                    iconEl.style.animation = "";
+                }
+            });
+        }
+
+        /**
+         * Inject CSS @keyframes for PWM-style pulse.
+         * At `progress` fraction of cycle: icon is bright (opacity 1).
+         * At remaining fraction: icon is faded (opacity 0.15).
+         */
+        _injectPWMKeyframes(stepKey, progress) {
+            const id = "pwm-keyframes-" + stepKey;
+            let styleEl = document.getElementById(id);
+            if (!styleEl) {
+                styleEl = document.createElement("style");
+                styleEl.id = id;
+                document.head.appendChild(styleEl);
+            }
+
+            const pct = Math.round(progress * 100);
+            const pctNext = Math.min(pct + 1, 100);
+
+            styleEl.textContent =
+                "@keyframes pwm-" + stepKey + " {" +
+                "  0% { opacity: 1; }" +
+                "  " + pct + "% { opacity: 1; }" +
+                "  " + pctNext + "% { opacity: 0.15; }" +
+                "  100% { opacity: 0.15; }" +
+                "}";
+        }
+
+        _updatePaymentStrip(isPaid) {
+            const strip = document.getElementById("payment-strip");
+            if (!strip) return;
+            console.log("[OrderTracker] updatePaymentStrip paid=" + isPaid);
+            strip.classList.remove("paid", "unpaid");
+            if (isPaid) {
+                strip.classList.add("paid");
+                strip.textContent = strip.dataset.paidText || "\u0421\u041F\u041B\u0410\u0427\u0415\u041D\u041E";
+            } else {
+                strip.classList.add("unpaid");
+            }
         }
 
         showGlobalMessage(text) {
             const el = document.getElementById("order-global-status");
-            console.log("[OrderTracker] showGlobalMessage text=" + text + " el_found=" + !!el);
-            if (!el) {
-                console.warn("[OrderTracker] showGlobalMessage — #order-global-status NOT FOUND");
-                return;
-            }
+            if (!el) return;
             el.textContent = text;
             el.classList.remove("d-none");
         }
@@ -167,7 +274,7 @@
         const orderId = parseInt(container.dataset.orderId, 10);
         const sseUrl = container.dataset.sseUrl;
         if (orderId && sseUrl) {
-            window.orderTracker = new OrderTracker(orderId, sseUrl);
+            window.orderTracker = new OrderTracker(orderId, sseUrl, container);
         }
     });
 })();
