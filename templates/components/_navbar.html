@@ -122,15 +122,17 @@
       {#   https://docs.djangoproject.com/en/stable/topics/auth/default/#authentication-in-web-requests #}
       {% if user.is_authenticated %}
         {% if user.role == 'waiter' or user.role == 'senior_waiter' %}
-          <a href="{% url 'waiter:order_list' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
+          <a href="{% url 'waiter:order_list' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none d-flex align-items-center gap-1"
              style="font-size: 0.8rem; letter-spacing: 0.05em;">
             {% trans "ЗАМОВЛЕННЯ" %}
+            <span id="nav-badge-orders" class="badge bg-danger" style="font-size: 0.65rem; display: none;"></span>
           </a>
           <div class="vr-custom"></div>
         {% elif user.role == 'kitchen' or user.role == 'kitchen_supervisor' %}
-          <a href="{% url 'kitchen:dashboard' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
+          <a href="{% url 'kitchen:dashboard' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none d-flex align-items-center gap-1"
              style="font-size: 0.8rem; letter-spacing: 0.05em;">
             {% trans "КУХНЯ" %}
+            <span id="nav-badge-kitchen" class="badge bg-danger" style="font-size: 0.65rem; display: none;"></span>
           </a>
           <div class="vr-custom"></div>
         {% elif user.role == 'manager' %}

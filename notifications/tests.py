@@ -43,14 +43,14 @@ def test_channels_for_waiter() -> None:
     user = MagicMock(spec=User)
     user.id = 7
     user.role = User.Role.WAITER
-    assert channels_for_user(user) == ["waiter-7"]
+    assert channels_for_user(user) == ["waiter-7", "waiter-broadcast"]
 
 
 def test_channels_for_senior_waiter() -> None:
     user = MagicMock(spec=User)
     user.id = 9
     user.role = User.Role.SENIOR_WAITER
-    assert channels_for_user(user) == ["waiter-9"]
+    assert channels_for_user(user) == ["waiter-9", "waiter-broadcast"]
 
 
 def test_channels_for_manager() -> None:

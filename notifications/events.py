@@ -24,6 +24,11 @@ def _push(channel: str, event_type: str, data: dict[str, Any]) -> None:
         logger.exception("[SSE:push] FAILED channel=%s type=%s", channel, event_type)
 
 
+def push_order_submitted(order_id: int) -> None:
+    """Notify all waiters: new order waiting to be picked up."""
+    _push("waiter-broadcast", "order_submitted", {"order_id": order_id})
+
+
 def push_order_approved(order_id: int) -> None:
     """Notify kitchen: new order in the queue."""
     _push("kitchen-broadcast", "order_approved", {"order_id": order_id})
@@ -65,6 +70,15 @@ def push_payment_escalation(order_id: int, level: int) -> None:
     """Unpaid order escalated to senior waiter/manager."""
     _push(
         manager_channel(), "payment_escalation", {"order_id": order_id, "level": level}
+    )
+
+
+def push_ticket_delivered(ticket_id: int, order_id: int, dish_title: str) -> None:
+    """Notify kitchen: dish was delivered by waiter (remove from Готово tab)."""
+    _push(
+        "kitchen-broadcast",
+        "ticket_delivered",
+        {"ticket_id": ticket_id, "order_id": order_id, "dish": dish_title[:40]},
     )
 
 

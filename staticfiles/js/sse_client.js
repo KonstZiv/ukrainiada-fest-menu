@@ -1,6 +1,7 @@
 /**
  * Festival Menu SSE Client
  * Connects to /events/stream/ and updates DOM on incoming events.
+ * Includes navbar badge system for persistent unseen event tracking.
  * Vanilla JS — no dependencies.
  */
 (function () {
@@ -23,6 +24,45 @@
     _reloadScheduled = true;
     console.log('[SSE] scheduling page reload in ' + delayMs + 'ms');
     setTimeout(function () { location.reload(); }, delayMs);
+  }
+
+  // --- Navbar badge system (localStorage-backed) ---
+  var BADGE_ORDERS_KEY = 'sse_unseen_orders';
+  var BADGE_KITCHEN_KEY = 'sse_unseen_kitchen';
+
+  function updateNavBadge(elementId, storageKey, delta) {
+    var count = parseInt(localStorage.getItem(storageKey) || '0', 10) + delta;
+    if (count < 0) count = 0;
+    localStorage.setItem(storageKey, String(count));
+    _renderBadge(elementId, count);
+  }
+
+  function clearNavBadge(elementId, storageKey) {
+    localStorage.removeItem(storageKey);
+    _renderBadge(elementId, 0);
+  }
+
+  function _renderBadge(elementId, count) {
+    var badge = document.getElementById(elementId);
+    if (!badge) return;
+    if (count > 0) {
+      badge.textContent = count;
+      badge.style.display = '';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  // Restore badges from localStorage on page load
+  _renderBadge('nav-badge-orders', parseInt(localStorage.getItem(BADGE_ORDERS_KEY) || '0', 10));
+  _renderBadge('nav-badge-kitchen', parseInt(localStorage.getItem(BADGE_KITCHEN_KEY) || '0', 10));
+
+  // Clear badge when user is on the relevant dashboard
+  if (_isWaiterDashboard) {
+    clearNavBadge('nav-badge-orders', BADGE_ORDERS_KEY);
+  }
+  if (_isKitchenDashboard) {
+    clearNavBadge('nav-badge-kitchen', BADGE_KITCHEN_KEY);
   }
 
   // --- Audio beep via Web Audio API ---
@@ -101,6 +141,9 @@
 
   function handleEvent(data) {
     switch (data.type) {
+      case 'order_submitted':
+        onOrderSubmitted(data);
+        break;
       case 'ticket_done':
         onTicketDone(data);
         break;
@@ -110,14 +153,27 @@
       case 'ticket_taken':
         onTicketTaken(data);
         break;
-      case 'order_approved':  // from verify_order() — order enters kitchen queue
+      case 'order_approved':
         onOrderApproved(data);
+        break;
+      case 'ticket_delivered':
+        onTicketDelivered(data);
         break;
       case 'kitchen_escalation':
       case 'payment_escalation':
       case 'visitor_escalation':
         onEscalation(data);
         break;
+    }
+  }
+
+  function onOrderSubmitted(data) {
+    console.log('[SSE] onOrderSubmitted order=' + data.order_id);
+    showFlash('Нове замовлення #' + data.order_id + ' від клієнта', 'info');
+    sseBeep(660, 0.2);
+    updateNavBadge('nav-badge-orders', BADGE_ORDERS_KEY, 1);
+    if (_isWaiterDashboard) {
+      scheduleReload(2000);
     }
   }
 
@@ -131,7 +187,7 @@
       el.className = 'ticket-status badge bg-success';
     }
     showFlash('Страва готова: ' + (data.dish || '#' + data.ticket_id), 'success');
-    // Waiter dashboard: reload to update order status
+    updateNavBadge('nav-badge-orders', BADGE_ORDERS_KEY, 1);
     if (_isWaiterDashboard) {
       scheduleReload(2000);
     }
@@ -147,7 +203,7 @@
       if (btn) btn.style.display = 'block';
     }
     showFlash('Замовлення #' + data.order_id + ' готове!', 'success');
-    // Waiter dashboard: reload to show "ready" badge and deliver button
+    updateNavBadge('nav-badge-orders', BADGE_ORDERS_KEY, 1);
     if (_isWaiterDashboard) {
       scheduleReload(2000);
     }
@@ -171,9 +227,17 @@
     if (counter) {
       counter.textContent = parseInt(counter.textContent || '0', 10) + 1;
     }
-    showFlash('Нове замовлення #' + data.order_id, 'info');
-    sseBeep(660, 0.2); // soft beep for new order
-    // Kitchen dashboard: reload to show new tickets in queue
+    showFlash('Замовлення #' + data.order_id + ' на кухні', 'info');
+    sseBeep(660, 0.2);
+    updateNavBadge('nav-badge-kitchen', BADGE_KITCHEN_KEY, 1);
+    if (_isKitchenDashboard) {
+      scheduleReload(2000);
+    }
+  }
+
+  function onTicketDelivered(data) {
+    console.log('[SSE] onTicketDelivered ticket=' + data.ticket_id + ' dish=' + data.dish);
+    updateNavBadge('nav-badge-kitchen', BADGE_KITCHEN_KEY, 1);
     if (_isKitchenDashboard) {
       scheduleReload(2000);
     }
@@ -192,10 +256,8 @@
     var badge = document.getElementById('escalation-badge');
     console.log('[SSE] onEscalation badge_found=' + !!badge);
     if (badge) badge.style.display = 'inline';
-    // Audio alert — double beep for escalation
     sseBeep(880, 0.3);
     setTimeout(function () { sseBeep(1046, 0.3); }, 350);
-    // Dashboard: reload to show escalation details
     if (_isKitchenDashboard || _isWaiterDashboard) {
       scheduleReload(2000);
     }

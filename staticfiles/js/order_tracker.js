@@ -68,7 +68,6 @@
                     break;
                 case "order_accepted":
                     this.updateProgress("accepted");
-                    this.showGlobalMessage("\uD83D\uDC4D " + (data.waiter_label || ""));
                     break;
                 case "order_verified":
                     this.updateProgress("verified");

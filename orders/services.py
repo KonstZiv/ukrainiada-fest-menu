@@ -12,7 +12,12 @@ from django.utils import timezone
 from kitchen.models import KitchenTicket
 from kitchen.services import create_tickets_for_order
 from menu.models import Dish
-from notifications.events import push_order_approved, push_visitor_event
+from notifications.events import (
+    push_order_approved,
+    push_order_submitted,
+    push_ticket_delivered,
+    push_visitor_event,
+)
 from orders.cart import clear_cart, get_cart
 from orders.escalation_ownership import resolve_step_escalations
 from orders.event_log import log_event
@@ -94,6 +99,7 @@ def submit_order_from_cart(request: HttpRequest) -> Order | None:
         f"{dishes[i['dish_id']].title} x{i['quantity']}" for i in valid_items
     )
     log_event(order, f"Замовлення сформовано і передано в систему: {items_summary}")
+    push_order_submitted(order.id)
 
     # Store access token in session for anonymous order tracking
     if "my_orders" not in request.session:
@@ -366,6 +372,11 @@ def deliver_ticket(ticket: KitchenTicket, waiter: User) -> KitchenTicket:
         actor=waiter,
     )
 
+    push_ticket_delivered(
+        ticket_id=ticket.pk,
+        order_id=order.id,
+        dish_title=dish_title,
+    )
     push_visitor_event(
         order_id=order.id,
         event_type="dish_delivered",
