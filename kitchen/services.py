@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 from django.db import transaction
@@ -21,6 +22,8 @@ from orders.models import Order, StepEscalation
 
 if TYPE_CHECKING:
     from user.models import User
+
+logger = logging.getLogger("notifications")
 
 
 def _activate_order(order: Order) -> None:
@@ -69,6 +72,12 @@ def take_ticket(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket:
         ValueError: if ticket is not PENDING or already taken.
 
     """
+    logger.info(
+        "[kitchen:take] ticket=%d cook=%s status=%s",
+        ticket.pk,
+        kitchen_user.staff_label,
+        ticket.status,
+    )
     if ticket.status != KitchenTicket.Status.PENDING:
         msg = f"Cannot take ticket in status '{ticket.status}'"
         raise ValueError(msg)
@@ -137,6 +146,12 @@ def mark_ticket_done(
         ValueError: if ticket is already DONE or assigned to another cook.
 
     """
+    logger.info(
+        "[kitchen:done] ticket=%d cook=%s status=%s",
+        ticket.pk,
+        kitchen_user.staff_label,
+        ticket.status,
+    )
     skipped: list[str] = []
 
     if ticket.status == KitchenTicket.Status.DONE:
@@ -212,6 +227,12 @@ def mark_ticket_done(
     )
 
     order_ready = _check_order_ready(ticket)
+    logger.info(
+        "[kitchen:done] DONE ticket=%d order_ready=%s skipped=%s",
+        ticket.pk,
+        order_ready,
+        skipped,
+    )
     if order_ready:
         log_event(order, "Усі страви готові! Очікуємо офіціанта для доставки 🍽️")
         if waiter_id:
@@ -255,6 +276,12 @@ def manual_handoff(ticket: KitchenTicket, kitchen_user: User) -> None:
         ValueError: if ticket is not DONE or not assigned to this cook.
 
     """
+    logger.info(
+        "[kitchen:handoff] ticket=%d cook=%s status=%s",
+        ticket.pk,
+        kitchen_user.staff_label,
+        ticket.status,
+    )
     if ticket.status != KitchenTicket.Status.DONE:
         msg = f"Cannot handoff ticket in status '{ticket.status}'"
         raise ValueError(msg)

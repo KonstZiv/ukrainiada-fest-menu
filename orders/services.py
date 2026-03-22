@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 from django.db import transaction
@@ -12,13 +13,15 @@ from kitchen.models import KitchenTicket
 from kitchen.services import create_tickets_for_order
 from menu.models import Dish
 from notifications.events import push_order_approved, push_visitor_event
-
-if TYPE_CHECKING:
-    from user.models import User
 from orders.cart import clear_cart, get_cart
 from orders.escalation_ownership import resolve_step_escalations
 from orders.event_log import log_event
 from orders.models import Order, OrderItem, StepEscalation
+
+if TYPE_CHECKING:
+    from user.models import User
+
+logger = logging.getLogger("notifications")
 
 
 def can_access_order(request: HttpRequest, order: Order) -> bool:
@@ -109,6 +112,12 @@ def accept_order(order: Order, waiter: User) -> Order:
         ValueError: if order is not in SUBMITTED status.
 
     """
+    logger.info(
+        "[order:accept] order=%d waiter=%s status=%s",
+        order.id,
+        waiter.staff_label,
+        order.status,
+    )
     if order.status != Order.Status.SUBMITTED:
         msg = f"Cannot accept order in status '{order.status}'"
         raise ValueError(msg)
@@ -141,6 +150,12 @@ def verify_order(order: Order, waiter: User) -> Order:
         ValueError: if order is not in ACCEPTED status or wrong waiter.
 
     """
+    logger.info(
+        "[order:verify] order=%d waiter=%s status=%s",
+        order.id,
+        waiter.staff_label,
+        order.status,
+    )
     if order.status != Order.Status.ACCEPTED:
         msg = f"Cannot verify order in status '{order.status}'"
         raise ValueError(msg)
@@ -197,6 +212,12 @@ def deliver_order(order: Order, waiter: User) -> tuple[Order, list[str]]:
             or waiter is not assigned.
 
     """
+    logger.info(
+        "[order:deliver] order=%d waiter=%s status=%s",
+        order.id,
+        waiter.staff_label,
+        order.status,
+    )
     skipped: list[str] = []
 
     if order.status == Order.Status.DELIVERED:
@@ -279,6 +300,7 @@ def deliver_order(order: Order, waiter: User) -> tuple[Order, list[str]]:
         event_type="order_delivered",
         data={"order_id": order.id, "waiter_label": waiter.staff_label},
     )
+    logger.info("[order:deliver] DONE order=%d skipped=%s", order.id, skipped)
     return order, skipped
 
 
@@ -296,6 +318,12 @@ def deliver_ticket(ticket: KitchenTicket, waiter: User) -> KitchenTicket:
         ValueError: if ticket is already delivered or waiter is not assigned.
 
     """
+    logger.info(
+        "[ticket:deliver] ticket=%d waiter=%s delivered=%s",
+        ticket.pk,
+        waiter.staff_label,
+        ticket.is_delivered,
+    )
     if ticket.is_delivered:
         msg = "Ця порція вже доставлена"
         raise ValueError(msg)
@@ -385,6 +413,12 @@ def confirm_cash_payment(order: Order, waiter: User) -> tuple[Order, list[str]]:
         ValueError: if order is already paid or waiter is not assigned.
 
     """
+    logger.info(
+        "[order:pay_cash] order=%d waiter=%s payment=%s",
+        order.id,
+        waiter.staff_label,
+        order.payment_status,
+    )
     if order.payment_status == Order.PaymentStatus.PAID:
         msg = "Order is already paid"
         raise ValueError(msg)

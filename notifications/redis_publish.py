@@ -24,11 +24,13 @@ def _get_redis() -> Redis:
     global _redis_client  # noqa: PLW0603
     if _redis_client is None:
         conf: dict[str, Any] = getattr(settings, "SSE_REDIS", {})
-        _redis_client = Redis(
-            host=str(conf.get("host", "localhost")),
-            port=int(str(conf.get("port", 6379))),
-            db=int(str(conf.get("db", 0))),
+        host = str(conf.get("host", "localhost"))
+        port = int(str(conf.get("port", 6379)))
+        db = int(str(conf.get("db", 0)))
+        logger.info(
+            "[SSE:redis] initializing client host=%s port=%d db=%d", host, port, db
         )
+        _redis_client = Redis(host=host, port=port, db=db)
     return _redis_client
 
 

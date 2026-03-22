@@ -102,7 +102,11 @@
 
         setTicketStatus(ticketId, status, icon, text) {
             const row = document.querySelector('[data-ticket-id="' + ticketId + '"]');
-            if (!row) return;
+            console.log("[OrderTracker] setTicketStatus ticket=" + ticketId + " status=" + status + " icon=" + icon + " text=" + text + " row_found=" + !!row);
+            if (!row) {
+                console.warn("[OrderTracker] setTicketStatus — row NOT FOUND for ticket_id=" + ticketId);
+                return;
+            }
             const iconEl = row.querySelector(".ticket-icon");
             const detailEl = row.querySelector(".ticket-detail");
             if (iconEl) {
@@ -118,9 +122,16 @@
 
         updateProgress(newStatus) {
             const bar = document.querySelector(".order-progress");
-            if (!bar) return;
             const targetStep = STATUS_TO_STEP[newStatus];
-            if (targetStep === undefined) return;
+            console.log("[OrderTracker] updateProgress status=" + newStatus + " targetStep=" + targetStep + " bar_found=" + !!bar);
+            if (!bar) {
+                console.warn("[OrderTracker] updateProgress — .order-progress NOT FOUND");
+                return;
+            }
+            if (targetStep === undefined) {
+                console.warn("[OrderTracker] updateProgress — unknown status: " + newStatus);
+                return;
+            }
 
             bar.querySelectorAll(".progress-step").forEach((step) => {
                 const idx = parseInt(step.dataset.stepIndex, 10);
@@ -132,12 +143,17 @@
 
         showGlobalMessage(text) {
             const el = document.getElementById("order-global-status");
-            if (!el) return;
+            console.log("[OrderTracker] showGlobalMessage text=" + text + " el_found=" + !!el);
+            if (!el) {
+                console.warn("[OrderTracker] showGlobalMessage — #order-global-status NOT FOUND");
+                return;
+            }
             el.textContent = text;
             el.classList.remove("d-none");
         }
 
         disconnect() {
+            console.log("[OrderTracker] disconnect — closing SSE connection");
             if (this.source) {
                 this.source.close();
                 this.source = null;

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from notifications.channels import (
@@ -11,13 +12,16 @@ from notifications.channels import (
 )
 from notifications.redis_publish import publish_sse_event
 
+logger = logging.getLogger("notifications.sse")
+
 
 def _push(channel: str, event_type: str, data: dict[str, Any]) -> None:
     """Publish SSE event via Redis. Never raises."""
+    logger.debug("[SSE:push] channel=%s type=%s data=%s", channel, event_type, data)
     try:
         publish_sse_event(channel, event_type, data)
-    except Exception:  # noqa: BLE001
-        pass  # publish_sse_event logs internally; this is a safety net
+    except Exception:
+        logger.exception("[SSE:push] FAILED channel=%s type=%s", channel, event_type)
 
 
 def push_order_approved(order_id: int) -> None:

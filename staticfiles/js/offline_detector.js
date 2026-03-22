@@ -9,6 +9,7 @@
     const BANNER_ID = "offline-banner";
 
     function showOfflineBanner() {
+        console.warn("[Offline] network LOST — showing offline banner");
         if (document.getElementById(BANNER_ID)) return;
 
         const banner = document.createElement("div");
@@ -33,6 +34,7 @@
     }
 
     function hideOfflineBanner() {
+        console.log("[Offline] network RESTORED — hiding offline banner");
         const banner = document.getElementById(BANNER_ID);
         if (banner) banner.remove();
 

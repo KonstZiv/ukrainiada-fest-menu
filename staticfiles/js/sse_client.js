@@ -71,6 +71,7 @@
 
   function setConnectionStatus(connected) {
     var indicator = document.getElementById('connection-indicator');
+    console.log('[SSE] setConnectionStatus connected=' + connected + ' indicator_found=' + !!indicator);
     if (!indicator) return;
     if (connected) {
       indicator.className = 'badge bg-success';
@@ -107,18 +108,25 @@
     var el = document.querySelector(
       '[data-ticket-id="' + data.ticket_id + '"] .ticket-status'
     );
+    console.log('[SSE] onTicketDone ticket=' + data.ticket_id + ' el_found=' + !!el);
     if (el) {
       el.textContent = 'Готово';
       el.className = 'ticket-status badge bg-success';
+    } else {
+      console.warn('[SSE] onTicketDone — DOM element NOT FOUND for ticket_id=' + data.ticket_id + ', page may need reload');
     }
   }
 
   function onOrderReady(data) {
     var card = document.querySelector('[data-order-id="' + data.order_id + '"]');
+    console.log('[SSE] onOrderReady order=' + data.order_id + ' card_found=' + !!card);
     if (card) {
       card.classList.add('border-success');
       var btn = card.querySelector('.btn-deliver');
+      console.log('[SSE] onOrderReady btn-deliver found=' + !!btn);
       if (btn) btn.style.display = 'block';
+    } else {
+      console.warn('[SSE] onOrderReady — card NOT FOUND for order_id=' + data.order_id + ', page may need reload');
     }
     showFlash('Замовлення #' + data.order_id + ' готове!', 'success');
   }
@@ -127,16 +135,23 @@
     var el = document.querySelector(
       '[data-ticket-id="' + data.ticket_id + '"] .ticket-status'
     );
+    console.log('[SSE] onTicketTaken ticket=' + data.ticket_id + ' by=' + data.by + ' el_found=' + !!el);
     if (el) {
       el.textContent = 'Готується (' + data.by + ')';
       el.className = 'ticket-status badge bg-info';
+    } else {
+      console.warn('[SSE] onTicketTaken — DOM element NOT FOUND for ticket_id=' + data.ticket_id + ', page may need reload');
     }
   }
 
   function onOrderApproved(data) {
     var counter = document.getElementById('pending-count');
+    var oldCount = counter ? counter.textContent : 'N/A';
+    console.log('[SSE] onOrderApproved order=' + data.order_id + ' pending_counter_found=' + !!counter + ' old_count=' + oldCount);
     if (counter) {
       counter.textContent = parseInt(counter.textContent || '0', 10) + 1;
+    } else {
+      console.warn('[SSE] onOrderApproved — #pending-count NOT FOUND, page may need reload');
     }
     showFlash('Нове замовлення #' + data.order_id, 'info');
     sseBeep(660, 0.2); // soft beep for new order
@@ -150,8 +165,10 @@
   function onEscalation(data) {
     var id = data.ticket_id || data.order_id;
     var label = escalationLabels[data.type] || data.type;
+    console.log('[SSE] onEscalation type=' + data.type + ' id=' + id + ' level=' + data.level);
     showFlash('Ескалація! ' + label + ' #' + id, 'danger');
     var badge = document.getElementById('escalation-badge');
+    console.log('[SSE] onEscalation badge_found=' + !!badge);
     if (badge) badge.style.display = 'inline';
     // Audio alert — double beep for escalation
     sseBeep(880, 0.3);
@@ -160,6 +177,7 @@
 
   function showFlash(message, type) {
     var container = document.getElementById('flash-container');
+    console.log('[SSE] showFlash type=' + type + ' msg="' + message + '" container_found=' + !!container);
     if (!container) return;
     var el = document.createElement('div');
     el.className = 'alert alert-' + type + ' alert-dismissible fade show';

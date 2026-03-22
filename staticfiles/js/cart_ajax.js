@@ -18,6 +18,7 @@
         var url = form.action;
         var csrfToken = form.querySelector('[name="csrfmiddlewaretoken"]').value;
         var formData = new FormData(form);
+        console.log("[CartAjax] submit intercepted url=" + url);
 
         fetch(url, {
             method: "POST",
@@ -28,9 +29,11 @@
             body: formData,
         })
             .then(function (resp) {
+                console.log("[CartAjax] response status=" + resp.status);
                 return resp.json();
             })
             .then(function (data) {
+                console.log("[CartAjax] data:", JSON.stringify(data));
                 updateDishControls(data.dish_id, data.dish_qty, data.dish_price);
                 updateCartTotal(data.cart_total);
                 updateFab(data.cart_count, data.cart_total);
@@ -38,18 +41,22 @@
                     removeCartRow(data.dish_id);
                 }
             })
-            .catch(function () {
+            .catch(function (err) {
+                console.error("[CartAjax] fetch failed, fallback to form.submit():", err);
                 form.submit();
             });
     });
 
     function updateDishControls(dishId, qty, dishPrice) {
-        document.querySelectorAll('[data-dish-id="' + dishId + '"]').forEach(function (container) {
+        var containers = document.querySelectorAll('[data-dish-id="' + dishId + '"]');
+        console.log("[CartAjax] updateDishControls dish=" + dishId + " qty=" + qty + " price=" + dishPrice + " containers=" + containers.length);
+        containers.forEach(function (container) {
             var minusBtn = container.querySelector(".cart-minus");
             var qtySpan = container.querySelector(".cart-qty");
 
             if (qty > 0) {
                 if (!minusBtn) {
+                    console.warn("[CartAjax] .cart-minus not found for dish=" + dishId + ", reloading page");
                     location.reload();
                     return;
                 }
@@ -83,6 +90,7 @@
 
     function removeCartRow(dishId) {
         var row = document.querySelector('[data-cart-row="' + dishId + '"]');
+        console.log("[CartAjax] removeCartRow dish=" + dishId + " found=" + !!row);
         if (row) {
             row.remove();
         }
@@ -94,6 +102,7 @@
     }
 
     function showEmptyCart() {
+        console.log("[CartAjax] showEmptyCart — cart is now empty");
         var cartItems = document.getElementById("cart-items");
         var cartFooter = document.getElementById("cart-footer");
         var heading = document.querySelector("h5.text-muted");
@@ -122,6 +131,7 @@
 
     function updateFab(count, total) {
         var fab = document.querySelector(".btn-fab-order");
+        console.log("[CartAjax] updateFab count=" + count + " total=" + total + " fabFound=" + !!fab);
         if (!fab) return;
 
         var pill = fab.querySelector(".cart-pill");

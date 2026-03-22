@@ -314,11 +314,20 @@
     }
 
     var sseUrl = container.dataset.sseUrl;
+    console.log("[TerminalSSE] sseUrl=" + sseUrl + " initLines=" + lines.length);
     if (sseUrl) {
         var src = new EventSource(sseUrl);
+        console.log("[TerminalSSE] connecting to " + sseUrl);
+        src.onopen = function () {
+            console.log("[TerminalSSE] connected");
+        };
+        src.onerror = function () {
+            console.warn("[TerminalSSE] connection error");
+        };
         src.onmessage = function (e) {
             try {
                 var data = JSON.parse(e.data);
+                console.log("[TerminalSSE] event:", data.type, data);
                 if (data.type === "order_log" && data.log_line) {
                     term.addLine(data.log_line);
                 }

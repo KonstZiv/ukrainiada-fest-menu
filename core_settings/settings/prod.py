@@ -71,6 +71,11 @@ import copy  # noqa: E402
 
 LOGGING = copy.deepcopy(LOGGING)  # noqa: F405
 
+# Aggressive debug logging for SSE troubleshooting — TEMPORARY
+# TODO: revert to INFO after SSE debugging is complete
+LOGGING["loggers"]["notifications"]["level"] = "DEBUG"  # type: ignore[index]
+LOGGING["loggers"]["notifications.sse"]["level"] = "DEBUG"  # type: ignore[index]
+
 # Only add file handlers if log files are writable.
 # Docker volume may not be mounted, or files may be owned by root from
 # a previous failed start.  Probe by opening in append mode — same as

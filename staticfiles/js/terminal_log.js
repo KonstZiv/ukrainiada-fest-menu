@@ -23,6 +23,7 @@
     }
 
     TerminalLog.prototype.addLine = function (text, instant) {
+        console.log("[Terminal] addLine instant=" + !!instant + " text=" + text.substring(0, 80));
         if (instant) {
             this._appendLine(text);
         } else {

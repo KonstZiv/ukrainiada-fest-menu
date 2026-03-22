@@ -8,6 +8,8 @@ document.addEventListener("submit", function (e) {
   if (!form) return;
   e.preventDefault();
 
+  console.log("[AjaxDeliver] submit intercepted url=" + form.action);
+
   const btn = form.querySelector("button[type=submit]");
   if (btn) btn.disabled = true;
 
@@ -17,8 +19,12 @@ document.addEventListener("submit", function (e) {
     headers: { "X-Requested-With": "XMLHttpRequest" },
     body: formData,
   })
-    .then(function (resp) { return resp.json(); })
+    .then(function (resp) {
+      console.log("[AjaxDeliver] response status=" + resp.status);
+      return resp.json();
+    })
     .then(function (data) {
+      console.log("[AjaxDeliver] data:", JSON.stringify(data));
       if (data.ok) {
         // Replace button with "віддано" badge
         var parent = form.parentElement;
@@ -28,16 +34,22 @@ document.addEventListener("submit", function (e) {
         badge.style.fontSize = "0.65rem";
         badge.textContent = "віддано";
         parent.insertBefore(badge, parent.firstChild);
+        console.log("[AjaxDeliver] badge inserted, form removed");
 
         // Update row styling
         var row = parent.closest(".list-group-item");
         if (row) {
           row.classList.remove("list-group-item-danger", "list-group-item-warning", "list-group-item-success");
           row.style.opacity = "0.5";
+          console.log("[AjaxDeliver] row faded out");
         }
+      } else {
+        console.warn("[AjaxDeliver] response data.ok is falsy:", data);
+        if (btn) btn.disabled = false;
       }
     })
-    .catch(function () {
+    .catch(function (err) {
+      console.error("[AjaxDeliver] fetch failed:", err);
       if (btn) btn.disabled = false;
     });
 });
