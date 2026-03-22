@@ -8,6 +8,23 @@
 
   if (typeof EventSource === 'undefined') return;
 
+  // --- Dashboard detection ---
+  var _isKitchenDashboard = !!(
+    document.querySelector('.kitchen-kanban') ||
+    document.querySelector('.kitchen-tab-pills')
+  );
+  var _isWaiterDashboard = !!document.querySelector('[data-poll-count]');
+  console.log('[SSE] dashboard detection: kitchen=' + _isKitchenDashboard + ' waiter=' + _isWaiterDashboard);
+
+  var _reloadScheduled = false;
+
+  function scheduleReload(delayMs) {
+    if (_reloadScheduled) return;
+    _reloadScheduled = true;
+    console.log('[SSE] scheduling page reload in ' + delayMs + 'ms');
+    setTimeout(function () { location.reload(); }, delayMs);
+  }
+
   // --- Audio beep via Web Audio API ---
   var _audioCtx = null;
   var _soundReady = false;
@@ -112,8 +129,11 @@
     if (el) {
       el.textContent = 'Готово';
       el.className = 'ticket-status badge bg-success';
-    } else {
-      console.warn('[SSE] onTicketDone — DOM element NOT FOUND for ticket_id=' + data.ticket_id + ', page may need reload');
+    }
+    showFlash('Страва готова: ' + (data.dish || '#' + data.ticket_id), 'success');
+    // Waiter dashboard: reload to update order status
+    if (_isWaiterDashboard) {
+      scheduleReload(2000);
     }
   }
 
@@ -125,10 +145,12 @@
       var btn = card.querySelector('.btn-deliver');
       console.log('[SSE] onOrderReady btn-deliver found=' + !!btn);
       if (btn) btn.style.display = 'block';
-    } else {
-      console.warn('[SSE] onOrderReady — card NOT FOUND for order_id=' + data.order_id + ', page may need reload');
     }
     showFlash('Замовлення #' + data.order_id + ' готове!', 'success');
+    // Waiter dashboard: reload to show "ready" badge and deliver button
+    if (_isWaiterDashboard) {
+      scheduleReload(2000);
+    }
   }
 
   function onTicketTaken(data) {
@@ -139,8 +161,6 @@
     if (el) {
       el.textContent = 'Готується (' + data.by + ')';
       el.className = 'ticket-status badge bg-info';
-    } else {
-      console.warn('[SSE] onTicketTaken — DOM element NOT FOUND for ticket_id=' + data.ticket_id + ', page may need reload');
     }
   }
 
@@ -150,11 +170,13 @@
     console.log('[SSE] onOrderApproved order=' + data.order_id + ' pending_counter_found=' + !!counter + ' old_count=' + oldCount);
     if (counter) {
       counter.textContent = parseInt(counter.textContent || '0', 10) + 1;
-    } else {
-      console.warn('[SSE] onOrderApproved — #pending-count NOT FOUND, page may need reload');
     }
     showFlash('Нове замовлення #' + data.order_id, 'info');
     sseBeep(660, 0.2); // soft beep for new order
+    // Kitchen dashboard: reload to show new tickets in queue
+    if (_isKitchenDashboard) {
+      scheduleReload(2000);
+    }
   }
 
   var escalationLabels = {
@@ -173,6 +195,10 @@
     // Audio alert — double beep for escalation
     sseBeep(880, 0.3);
     setTimeout(function () { sseBeep(1046, 0.3); }, 350);
+    // Dashboard: reload to show escalation details
+    if (_isKitchenDashboard || _isWaiterDashboard) {
+      scheduleReload(2000);
+    }
   }
 
   function showFlash(message, type) {

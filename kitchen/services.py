@@ -108,11 +108,10 @@ def take_ticket(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket:
 
     waiter_id = order.waiter_id
     if waiter_id:
-        cook_name = kitchen_user.get_full_name() or kitchen_user.email
         push_ticket_taken(
             ticket_id=ticket.pk,
             waiter_id=waiter_id,
-            kitchen_user_name=cook_name,
+            kitchen_user_name=kitchen_user.staff_label,
         )
 
     # Notify visitor

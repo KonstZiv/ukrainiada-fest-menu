@@ -104,7 +104,7 @@
             const row = document.querySelector('[data-ticket-id="' + ticketId + '"]');
             console.log("[OrderTracker] setTicketStatus ticket=" + ticketId + " status=" + status + " icon=" + icon + " text=" + text + " row_found=" + !!row);
             if (!row) {
-                console.warn("[OrderTracker] setTicketStatus — row NOT FOUND for ticket_id=" + ticketId);
+                console.debug("[OrderTracker] setTicketStatus — no [data-ticket-id=" + ticketId + "] element (expected on visitor page)");
                 return;
             }
             const iconEl = row.querySelector(".ticket-icon");
