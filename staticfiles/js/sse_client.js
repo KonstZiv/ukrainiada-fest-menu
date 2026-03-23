@@ -218,6 +218,9 @@
       el.textContent = 'Готується (' + data.by + ')';
       el.className = 'ticket-status badge bg-info';
     }
+    if (_isWaiterDashboard) {
+      scheduleReload(2000);
+    }
   }
 
   function onOrderApproved(data) {
