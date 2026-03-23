@@ -25,15 +25,32 @@
   function updateBadge(key, delta) {
     var sel = BADGE_MAP[key];
     if (!sel) return;
-    [sel.desktop, sel.mobile].forEach(function (s) {
-      var el = document.querySelector(s);
-      if (!el) return;
-      var val = Math.max(0, (parseInt(el.textContent, 10) || 0) + delta);
-      el.textContent = val;
-      // Hide badge if zero
-      if (val === 0) el.style.display = "none";
-      else el.style.display = "";
-    });
+
+    // Desktop badge (always has ID)
+    var desktopEl = document.querySelector(sel.desktop);
+    if (desktopEl) {
+      var dVal = Math.max(0, (parseInt(desktopEl.textContent, 10) || 0) + delta);
+      desktopEl.textContent = dVal;
+    }
+
+    // Mobile pill badge — may need to be created
+    var mobileEl = document.querySelector(sel.mobile);
+    if (mobileEl) {
+      var mVal = Math.max(0, (parseInt(mobileEl.textContent, 10) || 0) + delta);
+      mobileEl.textContent = mVal;
+      mobileEl.style.display = mVal === 0 ? "none" : "";
+    } else if (delta > 0) {
+      // Badge span doesn't exist — create it
+      var linkSel = sel.mobile.replace(" .badge", "");
+      var link = document.querySelector(linkSel);
+      if (link) {
+        var badge = document.createElement("span");
+        var isActive = link.classList.contains("active");
+        badge.className = "badge " + (isActive ? "bg-light text-primary" : "bg-primary") + " ms-1";
+        badge.textContent = String(delta);
+        link.appendChild(badge);
+      }
+    }
   }
 
   function removeTicketCard(ticketId) {
