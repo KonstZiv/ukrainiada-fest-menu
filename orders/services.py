@@ -276,19 +276,26 @@ def deliver_order(order: Order, waiter: User) -> tuple[Order, list[str]]:
         skipped.append("Готово (кухня)")
 
     # Mark all tickets as delivered (including already-DONE ones)
-    remaining = KitchenTicket.objects.filter(
-        order_item__order=order,
-        is_delivered=False,
+    remaining = list(
+        KitchenTicket.objects.filter(
+            order_item__order=order,
+            is_delivered=False,
+        ).select_related("order_item__dish")
     )
-    remaining.filter(handed_off_at__isnull=True).update(
-        is_delivered=True,
-        delivered_at=now,
-        handed_off_at=now,
-    )
-    remaining.filter(handed_off_at__isnull=False).update(
-        is_delivered=True,
-        delivered_at=now,
-    )
+    KitchenTicket.objects.filter(pk__in=[t.pk for t in remaining]).filter(
+        handed_off_at__isnull=True
+    ).update(is_delivered=True, delivered_at=now, handed_off_at=now)
+    KitchenTicket.objects.filter(pk__in=[t.pk for t in remaining]).filter(
+        handed_off_at__isnull=False
+    ).update(is_delivered=True, delivered_at=now)
+
+    # Notify kitchen about each delivered ticket
+    for ticket in remaining:
+        push_ticket_delivered(
+            ticket_id=ticket.pk,
+            order_id=order.id,
+            dish_title=ticket.order_item.dish.title,
+        )
 
     order.status = Order.Status.DELIVERED
     order.delivered_at = now

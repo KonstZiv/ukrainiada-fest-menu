@@ -239,7 +239,33 @@
     console.log('[SSE] onTicketDelivered ticket=' + data.ticket_id + ' dish=' + data.dish);
     updateNavBadge('nav-badge-kitchen', BADGE_KITCHEN_KEY, 1);
     if (_isKitchenDashboard) {
-      scheduleReload(2000);
+      // Remove ticket card via kitchen_ajax helper (no reload)
+      var card = document.querySelector('[data-ticket-id="' + data.ticket_id + '"]');
+      if (card) {
+        card.style.transition = 'opacity 0.3s';
+        card.style.opacity = '0';
+        setTimeout(function () {
+          var group = card.closest('.kitchen-order-group');
+          card.remove();
+          if (group && group.querySelectorAll('[data-ticket-id]').length === 0) {
+            group.remove();
+          }
+        }, 300);
+        // Update done badge
+        var doneDesktop = document.getElementById('done-count');
+        if (doneDesktop) {
+          doneDesktop.textContent = Math.max(0, parseInt(doneDesktop.textContent, 10) - 1);
+        }
+        var doneMobile = document.querySelector(".kitchen-tab-pills a[href='?tab=done'] .badge");
+        if (doneMobile) {
+          var val = Math.max(0, parseInt(doneMobile.textContent, 10) - 1);
+          doneMobile.textContent = val;
+          if (val === 0) doneMobile.style.display = 'none';
+        }
+      } else {
+        // Card not visible (different tab) — reload to sync
+        scheduleReload(2000);
+      }
     }
   }
 
