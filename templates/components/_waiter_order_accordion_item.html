@@ -54,7 +54,7 @@
               {% elif t.location == 'waiter' %}
                 <div class="text-primary small fw-bold">{% trans "У вас — віднести клієнту" %}</div>
               {% elif t.dish_urgency == 'critical' %}
-                <div class="text-danger small fw-bold">⚠️ {% trans "Готово" %} {{ t.done_min }} {% trans "хв тому — остигає!" %}</div>
+                <div class="text-danger small fw-bold">⚠️ {% trans "Готово" %} {{ t.done_min }} {% trans "хв тому — забрати негайно!" %}</div>
               {% elif t.dish_urgency == 'warn' %}
                 <div class="text-warning small fw-bold">{% trans "Готово" %} {{ t.done_min }} {% trans "хв — забрати!" %}</div>
               {% elif t.status == 'taken' and t.cook_label %}

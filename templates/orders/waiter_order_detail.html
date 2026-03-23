@@ -109,14 +109,6 @@
             <i class="bi bi-check2-all"></i> {% trans "Доставлено (без кухні)" %}
           </button>
         </form>
-        {% if order.payment_status == 'unpaid' %}
-        <form method="post" action="{% url 'waiter:confirm_payment' order.id %}">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-outline-warning w-100">
-            <i class="bi bi-cash"></i> {% trans "Оплату прийнято (без кухні)" %}
-          </button>
-        </form>
-        {% endif %}
       </div>
     </div>
     {% endif %}
