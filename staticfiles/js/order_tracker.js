@@ -20,7 +20,7 @@
 
     // Step keys that support partial progress (PWM pulse)
     const PARTIAL_STEP_KEYS = {
-        "cooking": { counterField: "doneCount" },
+        "cooking": { counterField: "takenCount" },
         "ready": { counterField: "doneCount" },
         "delivered": { counterField: "deliveredCount" },
     };
@@ -95,6 +95,9 @@
                     break;
                 case "dish_delivered":
                     this.deliveredCount++;
+                    // Soft flow: server auto-completes take+done when waiter delivers
+                    if (this.takenCount < this.deliveredCount) this.takenCount = this.deliveredCount;
+                    if (this.doneCount < this.deliveredCount) this.doneCount = this.deliveredCount;
                     this._applyPartialProgress();
                     console.log("[OrderTracker] dish_delivered → delivered=" + this.deliveredCount + "/" + this.totalTickets);
                     break;
@@ -111,11 +114,20 @@
                     break;
                 case "order_delivered":
                     this.updateProgress("delivered");
+                    // Force-complete all counters (soft flow may have skipped events)
+                    this.takenCount = this.totalTickets;
+                    this.doneCount = this.totalTickets;
                     this.deliveredCount = this.totalTickets;
                     this._applyPartialProgress();
                     this.showGlobalMessage("\u2705 \u0417\u0430\u043C\u043E\u0432\u043B\u0435\u043D\u043D\u044F \u0434\u043E\u0441\u0442\u0430\u0432\u043B\u0435\u043D\u043E! \u0421\u043C\u0430\u0447\u043D\u043E\u0433\u043E!");
                     break;
                 case "order_paid":
+                    // Force-complete everything before showing paid
+                    this.takenCount = this.totalTickets;
+                    this.doneCount = this.totalTickets;
+                    this.deliveredCount = this.totalTickets;
+                    this.updateProgress("delivered");
+                    this._applyPartialProgress();
                     this._updatePaymentStrip(true);
                     this.showGlobalMessage("\u2705 \u041E\u043F\u043B\u0430\u0442\u0443 \u043F\u0440\u0438\u0439\u043D\u044F\u0442\u043E. \u0414\u044F\u043A\u0443\u0454\u043C\u043E!");
                     this.disconnect();
@@ -176,7 +188,7 @@
             if (this.totalTickets === 0) return;
 
             const progressMap = {
-                "cooking": this.doneCount / this.totalTickets,
+                "cooking": this.takenCount / this.totalTickets,
                 "ready": this.doneCount / this.totalTickets,
                 "delivered": this.deliveredCount / this.totalTickets,
             };
