@@ -12,6 +12,8 @@ from django.utils import timezone
 from kitchen.models import KitchenTicket
 from menu.models import Category, Dish
 from orders.models import Order, OrderEvent, OrderItem
+from unittest.mock import patch
+
 from orders.services import deliver_order, deliver_ticket
 
 
@@ -93,6 +95,51 @@ def test_deliver_soft_flow_from_verified(django_user_model: Any) -> None:
 
     assert result.status == Order.Status.DELIVERED
     assert len(skipped) >= 2  # ticket auto-completed + "Готово (кухня)"
+
+
+@pytest.mark.django_db
+def test_deliver_order_pushes_ticket_delivered_with_prev_status(
+    django_user_model: Any,
+) -> None:
+    """Z30: deliver_order sends push_ticket_delivered for each ticket with prev_status."""
+    order, waiter = _make_ready_order(django_user_model)
+
+    with patch("orders.services.push_ticket_delivered") as mock_push:
+        deliver_order(order, waiter=waiter)
+
+    assert mock_push.call_count == 1
+    call_kwargs = mock_push.call_args
+    assert call_kwargs[1]["prev_status"] == "done"  # ticket was DONE before delivery
+
+
+@pytest.mark.django_db
+def test_deliver_order_soft_flow_sends_pending_prev_status(
+    django_user_model: Any,
+) -> None:
+    """Z30: soft flow deliver sends prev_status='pending' for unfinished tickets."""
+    cat = Category.objects.create(title="Cat", description="", number_in_line=1)
+    dish = Dish.objects.create(
+        title="D",
+        description="",
+        price=Decimal("5.00"),
+        weight=100,
+        calorie=100,
+        category=cat,
+    )
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="wtest", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(waiter=waiter, status=Order.Status.VERIFIED)
+    item = OrderItem.objects.create(order=order, dish=dish, quantity=1)
+    KitchenTicket.objects.create(order_item=item, status="pending")
+
+    with patch("orders.services.push_ticket_delivered") as mock_push:
+        deliver_order(order, waiter=waiter)
+
+    assert mock_push.call_count == 1
+    call_kwargs = mock_push.call_args
+    # Ticket was pending before soft-flow auto-completed it
+    assert call_kwargs[1]["prev_status"] == "pending"
 
 
 @pytest.mark.django_db

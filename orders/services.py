@@ -242,6 +242,14 @@ def deliver_order(order: Order, waiter: User) -> tuple[Order, list[str]]:
 
     now = timezone.now()
 
+    # Capture pre-delivery statuses for SSE prev_status field
+    pre_delivery_status: dict[int, str] = {
+        t.pk: t.status
+        for t in KitchenTicket.objects.filter(
+            order_item__order=order, is_delivered=False
+        )
+    }
+
     # Soft flow: auto-complete kitchen tickets that are not DONE
     unfinished_tickets = (
         KitchenTicket.objects.filter(order_item__order=order)
@@ -289,13 +297,13 @@ def deliver_order(order: Order, waiter: User) -> tuple[Order, list[str]]:
         handed_off_at__isnull=False
     ).update(is_delivered=True, delivered_at=now)
 
-    # Notify kitchen about each delivered ticket (status captured before bulk update)
+    # Notify kitchen about each delivered ticket
     for ticket in remaining:
         push_ticket_delivered(
             ticket_id=ticket.pk,
             order_id=order.id,
             dish_title=ticket.order_item.dish.title,
-            prev_status=ticket.status,
+            prev_status=pre_delivery_status.get(ticket.pk, "done"),
         )
 
     order.status = Order.Status.DELIVERED

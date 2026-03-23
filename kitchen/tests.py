@@ -461,6 +461,53 @@ def test_ticket_done_view_post(client: Client, django_user_model: Any) -> None:
     assert ticket.status == KitchenTicket.Status.DONE
 
 
+# --- AJAX response tests ---
+
+
+@pytest.mark.django_db
+def test_ticket_take_ajax_returns_json(client: Client, django_user_model: Any) -> None:
+    """Z11: ticket_take returns JSON with ticket_id when AJAX."""
+    cook = django_user_model.objects.create_user(
+        email="c@test.com", username="cook", password="testpass123", role="kitchen"
+    )
+    client.force_login(cook)
+    _, _, item = _make_dish_and_order()
+    ticket = KitchenTicket.objects.create(order_item=item)
+
+    response = client.post(
+        f"/kitchen/ticket/{ticket.id}/take/",
+        HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["ok"] is True
+    assert data["ticket_id"] == ticket.id
+    assert "dish" in data
+
+
+@pytest.mark.django_db
+def test_ticket_done_ajax_returns_json(client: Client, django_user_model: Any) -> None:
+    """Z11: ticket_done returns JSON with ticket_id and skipped when AJAX."""
+    cook = django_user_model.objects.create_user(
+        email="c@test.com", username="cook", password="testpass123", role="kitchen"
+    )
+    client.force_login(cook)
+    _, _, item = _make_dish_and_order()
+    ticket = KitchenTicket.objects.create(
+        order_item=item, status=KitchenTicket.Status.TAKEN, assigned_to=cook
+    )
+
+    response = client.post(
+        f"/kitchen/ticket/{ticket.id}/done/",
+        HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["ok"] is True
+    assert data["ticket_id"] == ticket.id
+    assert isinstance(data["skipped"], list)
+
+
 # --- Stats tests ---
 
 

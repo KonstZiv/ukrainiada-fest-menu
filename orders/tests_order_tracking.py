@@ -205,3 +205,36 @@ def test_pipeline_counts_in_template(client: Client, django_user_model: Any) -> 
     content = response.content.decode()
     assert 'data-taken-count="1"' in content
     assert 'data-total-tickets="1"' in content
+
+
+@pytest.mark.django_db
+def test_waiter_detail_single_payment_button(
+    client: Client, django_user_model: Any
+) -> None:
+    """Z7: waiter order detail shows exactly one payment button, not two."""
+    cat = Category.objects.create(title_uk="C", description_uk="", number_in_line=1)
+    dish = Dish.objects.create(
+        title_uk="D",
+        description_uk="",
+        price=Decimal("5.00"),
+        weight=100,
+        calorie=100,
+        category=cat,
+    )
+    waiter = django_user_model.objects.create_user(
+        email="w@test.com", username="w", password="testpass123", role="waiter"
+    )
+    order = Order.objects.create(
+        waiter=waiter,
+        status=Order.Status.VERIFIED,
+        payment_status="unpaid",
+    )
+    OrderItem.objects.create(order=order, dish=dish, quantity=1)
+    client.force_login(waiter)
+    response = client.get(f"/waiter/order/{order.id}/scan/")
+    assert response.status_code == 200
+    content = response.content.decode()
+    # Template should render payment section
+    assert "Оплату прийнято" in content
+    # Only one payment form should exist (not two)
+    assert content.count("confirm-payment") == 1
