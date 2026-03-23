@@ -73,12 +73,22 @@ def push_payment_escalation(order_id: int, level: int) -> None:
     )
 
 
-def push_ticket_delivered(ticket_id: int, order_id: int, dish_title: str) -> None:
-    """Notify kitchen: dish was delivered by waiter (remove from Готово tab)."""
+def push_ticket_delivered(
+    ticket_id: int,
+    order_id: int,
+    dish_title: str,
+    prev_status: str = "done",
+) -> None:
+    """Notify kitchen: dish was delivered by waiter (remove from tab)."""
     _push(
         "kitchen-broadcast",
         "ticket_delivered",
-        {"ticket_id": ticket_id, "order_id": order_id, "dish": dish_title[:40]},
+        {
+            "ticket_id": ticket_id,
+            "order_id": order_id,
+            "dish": dish_title[:40],
+            "prev_status": prev_status,
+        },
     )
 
 

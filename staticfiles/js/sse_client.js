@@ -236,10 +236,16 @@
   }
 
   function onTicketDelivered(data) {
-    console.log('[SSE] onTicketDelivered ticket=' + data.ticket_id + ' dish=' + data.dish);
+    console.log('[SSE] onTicketDelivered ticket=' + data.ticket_id + ' status=' + data.prev_status);
     updateNavBadge('nav-badge-kitchen', BADGE_KITCHEN_KEY, 1);
     if (_isKitchenDashboard) {
-      // Remove ticket card via kitchen_ajax helper (no reload)
+      // Determine which badge to decrement based on prev_status
+      var statusToBadge = { pending: 'pending', taken: 'taken', done: 'done' };
+      var badgeKey = statusToBadge[data.prev_status] || 'done';
+      var badgeIds = { pending: 'pending-count', taken: 'taken-count', done: 'done-count' };
+      var tabHrefs = { pending: '?tab=queue', taken: '?tab=in_progress', done: '?tab=done' };
+
+      // Remove ticket card if visible
       var card = document.querySelector('[data-ticket-id="' + data.ticket_id + '"]');
       if (card) {
         card.style.transition = 'opacity 0.3s';
@@ -251,20 +257,21 @@
             group.remove();
           }
         }, 300);
-        // Update done badge
-        var doneDesktop = document.getElementById('done-count');
-        if (doneDesktop) {
-          doneDesktop.textContent = Math.max(0, parseInt(doneDesktop.textContent, 10) - 1);
-        }
-        var doneMobile = document.querySelector(".kitchen-tab-pills a[href='?tab=done'] .badge");
-        if (doneMobile) {
-          var val = Math.max(0, parseInt(doneMobile.textContent, 10) - 1);
-          doneMobile.textContent = val;
-          if (val === 0) doneMobile.style.display = 'none';
-        }
-      } else {
-        // Card not visible (different tab) — reload to sync
-        scheduleReload(2000);
+      }
+
+      // Update badge for the correct column (desktop)
+      var desktopBadge = document.getElementById(badgeIds[badgeKey]);
+      if (desktopBadge) {
+        desktopBadge.textContent = Math.max(0, parseInt(desktopBadge.textContent, 10) - 1);
+      }
+      // Update badge (mobile pill)
+      var mobileBadge = document.querySelector(
+        ".kitchen-tab-pills a[href='" + tabHrefs[badgeKey] + "'] .badge"
+      );
+      if (mobileBadge) {
+        var val = Math.max(0, parseInt(mobileBadge.textContent, 10) - 1);
+        mobileBadge.textContent = val;
+        if (val === 0) mobileBadge.style.display = 'none';
       }
     }
   }

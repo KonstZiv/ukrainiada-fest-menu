@@ -289,12 +289,13 @@ def deliver_order(order: Order, waiter: User) -> tuple[Order, list[str]]:
         handed_off_at__isnull=False
     ).update(is_delivered=True, delivered_at=now)
 
-    # Notify kitchen about each delivered ticket
+    # Notify kitchen about each delivered ticket (status captured before bulk update)
     for ticket in remaining:
         push_ticket_delivered(
             ticket_id=ticket.pk,
             order_id=order.id,
             dish_title=ticket.order_item.dish.title,
+            prev_status=ticket.status,
         )
 
     order.status = Order.Status.DELIVERED
