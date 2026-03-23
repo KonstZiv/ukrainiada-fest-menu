@@ -212,10 +212,14 @@
                     iconEl.style.animation = "";
                     console.log("[OrderTracker] partial " + key + " = 1.0 → done");
                 } else if (progress > 0) {
-                    // Partial — apply PWM animation
+                    // Partial — apply PWM animation with random phase offset
                     step.classList.add("active");
                     this._injectPWMKeyframes(key, progress);
-                    iconEl.style.animation = "pwm-" + key + " 3s infinite step-end";
+                    if (!this._pwmDelays) this._pwmDelays = {};
+                    if (!(key in this._pwmDelays)) {
+                        this._pwmDelays[key] = (Math.random() * 0.5).toFixed(2);
+                    }
+                    iconEl.style.animation = "pwm-" + key + " 3s " + this._pwmDelays[key] + "s infinite linear";
                     console.log("[OrderTracker] partial " + key + " = " + progress.toFixed(2) + " → PWM pulse");
                 } else {
                     // Not started — stays faded (default CSS)
@@ -226,8 +230,8 @@
 
         /**
          * Inject CSS @keyframes for PWM-style pulse.
-         * At `progress` fraction of cycle: icon is bright (opacity 1).
-         * At remaining fraction: icon is faded (opacity 0.15).
+         * Bright phase = progress fraction, then smooth fade to dim.
+         * 5% transition zones for gradual opacity changes.
          */
         _injectPWMKeyframes(stepKey, progress) {
             const id = "pwm-keyframes-" + stepKey;
@@ -239,14 +243,15 @@
             }
 
             const pct = Math.round(progress * 100);
-            const pctNext = Math.min(pct + 1, 100);
-
+            const fadeOut = Math.min(pct + 5, 95);
+            // Bright → fade out → dim → fade in → loop
             styleEl.textContent =
                 "@keyframes pwm-" + stepKey + " {" +
                 "  0% { opacity: 1; }" +
                 "  " + pct + "% { opacity: 1; }" +
-                "  " + pctNext + "% { opacity: 0.15; }" +
-                "  100% { opacity: 0.15; }" +
+                "  " + fadeOut + "% { opacity: 0.15; }" +
+                "  93% { opacity: 0.15; }" +
+                "  100% { opacity: 1; }" +
                 "}";
         }
 

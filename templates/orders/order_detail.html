@@ -86,7 +86,7 @@
       {# --- Payment strip --- #}
       <div class="pipeline-payment-strip {% if order.payment_status == 'paid' %}paid{% else %}unpaid{% endif %}"
            id="payment-strip"
-           data-paid-text="{% trans 'СПЛАЧЕНО' %}"
+           data-paid-text="{% trans 'СПЛАЧЕНО' %}">
         {% if order.payment_status == 'paid' %}
           {% trans "СПЛАЧЕНО" %}
         {% else %}
