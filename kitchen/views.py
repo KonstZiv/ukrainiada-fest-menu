@@ -11,6 +11,7 @@ import qrcode  # type: ignore[import-untyped]
 from django.contrib import messages
 from django.db.models import Count, Max, Q
 from django.http import HttpResponse, JsonResponse
+from django.conf import settings as django_settings
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -186,6 +187,8 @@ def kitchen_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
             "date_from": date_from,
             "date_to": date_to,
             "extra_params_list": [("tab", "team")],
+            "warn_min": django_settings.KITCHEN_WARN_MINUTES,
+            "critical_min": django_settings.KITCHEN_TIMEOUT,
             "last_escalation_id": last_escalation_id,
         },
     )
@@ -278,9 +281,20 @@ def kitchen_poll_data(request: AuthenticatedHttpRequest) -> HttpResponse:
 def ticket_take(request: AuthenticatedHttpRequest, ticket_id: int) -> HttpResponse:
     """Kitchen staff takes a pending ticket."""
     ticket = get_object_or_404(KitchenTicket, pk=ticket_id)
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
     try:
         take_ticket(ticket, kitchen_user=request.user)
+        if is_ajax:
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "ticket_id": ticket.pk,
+                    "dish": ticket.order_item.dish.title,
+                }
+            )
     except ValueError as e:
+        if is_ajax:
+            return JsonResponse({"ok": False, "error": str(e)}, status=400)
         messages.error(request, str(e))
     tab = request.POST.get("tab", "queue")
     return redirect(f"{reverse('kitchen:dashboard')}?tab={tab}")
@@ -291,8 +305,18 @@ def ticket_take(request: AuthenticatedHttpRequest, ticket_id: int) -> HttpRespon
 def ticket_done(request: AuthenticatedHttpRequest, ticket_id: int) -> HttpResponse:
     """Kitchen staff marks a ticket as done (auto-takes if PENDING)."""
     ticket = get_object_or_404(KitchenTicket, pk=ticket_id)
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
     try:
         ticket, skipped = mark_ticket_done(ticket, kitchen_user=request.user)
+        if is_ajax:
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "ticket_id": ticket.pk,
+                    "dish": ticket.order_item.dish.title,
+                    "skipped": skipped,
+                }
+            )
         if skipped:
             dish_title = ticket.order_item.dish.title
             messages.warning(
@@ -300,6 +324,8 @@ def ticket_done(request: AuthenticatedHttpRequest, ticket_id: int) -> HttpRespon
                 f"'{dish_title}' — пропущено: {', '.join(skipped)}",
             )
     except ValueError as e:
+        if is_ajax:
+            return JsonResponse({"ok": False, "error": str(e)}, status=400)
         messages.error(request, str(e))
     tab = request.POST.get("tab", "in_progress")
     return redirect(f"{reverse('kitchen:dashboard')}?tab={tab}")

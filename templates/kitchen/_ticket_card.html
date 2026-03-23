@@ -5,7 +5,9 @@
      {% if t.urgency == 'critical' or t.urgency == 'escalated' %}kitchen-urgency-critical
      {% elif t.urgency == 'warn' %}kitchen-urgency-warn
      {% else %}ticket-card-{{ t.ticket.status }}{% endif %}"
-     data-ticket-id="{{ t.ticket.id }}">
+     data-ticket-id="{{ t.ticket.id }}"
+     data-age-min="{{ t.age_min }}"
+     data-urgency="{{ t.urgency }}">
 
   <div class="d-flex justify-content-between align-items-center gap-2">
     {# --- Dish info --- #}

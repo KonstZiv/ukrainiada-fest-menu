@@ -6,7 +6,9 @@
 {% block title %}Jadran Sun — {% trans "Кухня" %}{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-3 px-2 px-md-3">
+<div class="container-fluid mt-3 px-2 px-md-3"
+     data-warn-min="{{ warn_min }}" data-critical-min="{{ critical_min }}"
+     id="kitchen-dashboard">
 
   {# --- Page heading --- #}
   <div class="d-flex justify-content-between align-items-center mb-3">
