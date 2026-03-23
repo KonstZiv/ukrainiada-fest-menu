@@ -357,6 +357,7 @@ def deliver_ticket(ticket: KitchenTicket, waiter: User) -> KitchenTicket:
 
     now = timezone.now()
     dish_title = ticket.order_item.dish.title
+    original_status = ticket.status  # capture before soft-flow changes it
 
     # Soft flow: auto-complete kitchen steps if not DONE
     if ticket.status != KitchenTicket.Status.DONE:
@@ -392,6 +393,7 @@ def deliver_ticket(ticket: KitchenTicket, waiter: User) -> KitchenTicket:
         ticket_id=ticket.pk,
         order_id=order.id,
         dish_title=dish_title,
+        prev_status=original_status,
     )
     push_visitor_event(
         order_id=order.id,

@@ -43,6 +43,12 @@ document.addEventListener("submit", function (e) {
           row.style.opacity = "0.5";
           console.log("[AjaxDeliver] row faded out");
         }
+
+        // Reload page when all dishes delivered (updates order status + badges)
+        if (data.all_delivered) {
+          console.log("[AjaxDeliver] all_delivered — reloading in 500ms");
+          setTimeout(function () { location.reload(); }, 500);
+        }
       } else {
         console.warn("[AjaxDeliver] response data.ok is falsy:", data);
         if (btn) btn.disabled = false;

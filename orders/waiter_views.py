@@ -341,7 +341,16 @@ def ticket_mark_delivered(
         deliver_ticket(ticket, waiter=request.user)
         dish_title = ticket.order_item.dish.title
         if is_ajax:
-            return JsonResponse({"ok": True, "dish": dish_title})
+            all_done = not KitchenTicket.objects.filter(
+                order_item__order_id=order_id, is_delivered=False
+            ).exists()
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "dish": dish_title,
+                    "all_delivered": all_done,
+                }
+            )
     except ValueError as e:
         if is_ajax:
             return JsonResponse({"ok": False, "error": str(e)}, status=400)
