@@ -579,16 +579,89 @@ body {
   line-height: 1.1;
 }
 
-/* Mobile: 2 rows of 3 steps */
+/* Mobile: zigzag layout (6 steps in 2 staggered rows) */
 @media (max-width: 575.98px) {
   .order-progress {
-    padding: 0.75rem 0.75rem;
-    gap: 0.5rem 0;
-    max-width: 320px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: auto auto;
+    row-gap: 0.5rem;
+    padding: 0.75rem;
+    max-width: 340px;
+    justify-items: center;
   }
+
+  /* Hide horizontal connectors — replaced by diagonal arrows */
+  .order-progress .progress-line {
+    display: none;
+  }
+
+  /* Row 1 (top): steps 0, 2, 4 — child positions 1, 5, 9 */
+  .order-progress > :nth-child(1)  { grid-column: 1; grid-row: 1; }
+  .order-progress > :nth-child(5)  { grid-column: 3; grid-row: 1; }
+  .order-progress > :nth-child(9)  { grid-column: 5; grid-row: 1; }
+
+  /* Row 2 (bottom): steps 1, 3, 5 — child positions 3, 7, 11 */
+  .order-progress > :nth-child(3)  { grid-column: 2; grid-row: 2; }
+  .order-progress > :nth-child(7)  { grid-column: 4; grid-row: 2; }
+  .order-progress > :nth-child(11) { grid-column: 6; grid-row: 2; }
+
   .step-label {
-    display: inline !important;
+    font-size: 0.55rem;
   }
+
+  /* Diagonal arrows between zigzag steps */
+  .order-progress > .progress-step {
+    position: relative;
+  }
+
+  .order-progress > .progress-step::after {
+    content: "";
+    position: absolute;
+    width: 1rem;
+    height: 2px;
+    background: var(--brand-border);
+    opacity: 0.3;
+  }
+
+  /* ↘ arrows from row-1 steps (down-right) */
+  .order-progress > :nth-child(1)::after,
+  .order-progress > :nth-child(5)::after,
+  .order-progress > :nth-child(9)::after {
+    right: -0.7rem;
+    bottom: 0.6rem;
+    transform: rotate(40deg);
+    transform-origin: left center;
+  }
+
+  /* ↗ arrows from row-2 steps (up-right) */
+  .order-progress > :nth-child(3)::after,
+  .order-progress > :nth-child(7)::after {
+    right: -0.7rem;
+    top: 0.6rem;
+    transform: rotate(-40deg);
+    transform-origin: left center;
+  }
+
+  /* Last step — no arrow */
+  .order-progress > :nth-child(11)::after {
+    display: none;
+  }
+
+  /* Arrow color follows step state */
+  .order-progress > .progress-step.done::after {
+    background: #198754;
+    opacity: 1;
+  }
+  .order-progress > .progress-step.active::after {
+    background: #ffc107;
+    opacity: 1;
+  }
+}
+
+/* --- Delivered dish row (waiter order detail) --- */
+.delivered-dish {
+  opacity: 0.5;
 }
 
 /* --- Payment strip under pipeline --- */

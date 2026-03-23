@@ -206,11 +206,11 @@ def _build_progress_steps(
     current_step = status_to_step.get(order_status, -1)
 
     # Per-step partial progress — each step has unique meaning:
-    #   Готується = how many dishes are COOKED (done)
+    #   Готується = how many dishes are IN the kitchen (taken for cooking)
     #   Готово     = how many dishes LEFT the kitchen (picked up by waiter)
     #   Доставлено = how many dishes are WITH the client (delivered)
     if total_tickets > 0:
-        cooking_progress = done_count / total_tickets
+        cooking_progress = taken_count / total_tickets
         ready_progress = picked_up_count / total_tickets
         delivered_progress = delivered_count / total_tickets
     else:

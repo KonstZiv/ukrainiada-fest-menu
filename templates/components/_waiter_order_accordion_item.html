@@ -9,9 +9,6 @@
           <span class="badge bg-{% if entry.order.status == 'accepted' %}info{% elif entry.order.status == 'verified' %}primary{% elif entry.order.status == 'ready' %}success{% else %}secondary{% endif %} ms-1">
             {{ entry.order.get_status_display }}
           </span>
-          {% if entry.taken_dishes > 0 %}
-            <span class="badge bg-warning text-dark ms-1">{{ entry.taken_dishes }} {% trans "готується" %}</span>
-          {% endif %}
           {% if entry.done_dishes > 0 %}
             <span class="badge bg-success ms-1">{{ entry.done_dishes }} {% trans "готово" %}</span>
           {% endif %}
@@ -46,7 +43,7 @@
       <div class="list-group list-group-flush mb-2">
         {% for t in entry.tickets %}
           <div class="list-group-item d-flex justify-content-between align-items-center py-2
-                      {% if t.dish_urgency == 'critical' %}list-group-item-danger{% elif t.dish_urgency == 'warn' %}list-group-item-warning{% elif t.status == 'done' %}list-group-item-success{% endif %}">
+                      {% if t.is_delivered %}delivered-dish{% elif t.dish_urgency == 'critical' %}list-group-item-danger{% elif t.dish_urgency == 'warn' %}list-group-item-warning{% elif t.status == 'done' %}list-group-item-success{% endif %}">
             <div>
               <span class="me-1">
                 {% if t.is_delivered %}🍽️{% elif t.location == 'waiter' %}🏃{% elif t.dish_urgency == 'critical' %}🔥{% elif t.status == 'done' %}✅{% elif t.status == 'taken' %}👩‍🍳{% else %}⏳{% endif %}
@@ -54,7 +51,6 @@
               <strong>{{ t.dish_title }}</strong>
               <span class="text-muted ms-1">x{{ t.quantity }}</span>
               {% if t.is_delivered %}
-                <div class="text-muted small">{% trans "У клієнта" %}</div>
               {% elif t.location == 'waiter' %}
                 <div class="text-primary small fw-bold">{% trans "У вас — віднести клієнту" %}</div>
               {% elif t.dish_urgency == 'critical' %}
@@ -78,7 +74,7 @@
                   </button>
                 </form>
               {% elif t.is_delivered %}
-                <span class="badge bg-secondary" style="font-size: 0.65rem;">{% trans "віддано" %}</span>
+                <span class="badge bg-secondary" style="font-size: 0.65rem;">{% trans "доставлено" %}</span>
               {% endif %}
               <span class="fw-bold">&euro;{{ t.subtotal|floatformat:2 }}</span>
             </div>
