@@ -29,6 +29,15 @@ def push_order_submitted(order_id: int) -> None:
     _push("waiter-broadcast", "order_submitted", {"order_id": order_id})
 
 
+def push_order_accepted(order_id: int, waiter_id: int) -> None:
+    """Notify all waiters: order was accepted (remove from 'Нові' tab)."""
+    _push(
+        "waiter-broadcast",
+        "order_accepted",
+        {"order_id": order_id, "waiter_id": waiter_id},
+    )
+
+
 def push_order_updated(order_id: int, actor_id: int | None = None) -> None:
     """Notify waiters: order items changed before verification."""
     _push(

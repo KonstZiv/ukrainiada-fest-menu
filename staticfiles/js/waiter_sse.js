@@ -146,6 +146,26 @@
 
   window.SSE_HANDLERS = window.SSE_HANDLERS || {};
 
+  window.SSE_HANDLERS["order_accepted"] = function (data) {
+    console.log("[WaiterSSE] order_accepted order=" + data.order_id + " waiter=" + data.waiter_id);
+    if (data.waiter_id && data.waiter_id === window.SSE_CURRENT_USER_ID) {
+      console.log("[WaiterSSE] self-triggered accept, skip");
+      return;
+    }
+    // Remove from "Нові" tab
+    var newItem = document.querySelector(
+      '#new-orders-list [data-order-id="' + data.order_id + '"]'
+    );
+    if (newItem) {
+      newItem.style.transition = "opacity 0.3s";
+      newItem.style.opacity = "0";
+      setTimeout(function () { newItem.remove(); }, 300);
+    }
+    var modal = document.getElementById("newOrderModal" + data.order_id);
+    if (modal) modal.remove();
+    updateBadgeCounts();
+  };
+
   window.SSE_HANDLERS["order_submitted"] = function (data) {
     console.log("[WaiterSSE] order_submitted order=" + data.order_id);
     u.showFlash(

@@ -13,6 +13,7 @@ from kitchen.models import KitchenTicket
 from kitchen.services import create_tickets_for_order
 from menu.models import Dish
 from notifications.events import (
+    push_order_accepted,
     push_order_approved,
     push_order_cancelled,
     push_order_submitted,
@@ -148,6 +149,7 @@ def accept_order(order: Order, waiter: User) -> Order:
         event_type="order_accepted",
         data={"order_id": order.id, "waiter_label": waiter.staff_label},
     )
+    push_order_accepted(order.id, waiter_id=waiter.id)
     return order
 
 
