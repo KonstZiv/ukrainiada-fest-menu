@@ -168,7 +168,10 @@
   <div id="flash-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1080;"></div>
 
   {% if user.is_authenticated and not debug %}
-  <script>window.SSE_STREAM_URL = "{% url 'notifications:sse_stream' %}";</script>
+  <script>
+    window.SSE_STREAM_URL = "{% url 'notifications:sse_stream' %}";
+    window.SSE_CURRENT_USER_ID = {{ user.id }};
+  </script>
   <script src="{% static 'js/sse_client.js' %}"></script>
   {% endif %}
 

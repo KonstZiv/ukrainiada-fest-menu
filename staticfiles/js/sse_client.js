@@ -147,6 +147,11 @@
   }
 
   function handleEvent(data) {
+    // Page-specific handler registry (used by waiter_sse.js)
+    if (window.SSE_HANDLERS && window.SSE_HANDLERS[data.type]) {
+      window.SSE_HANDLERS[data.type](data);
+      return;
+    }
     switch (data.type) {
       case 'order_submitted':
         onOrderSubmitted(data);
@@ -346,4 +351,14 @@
       if (el.parentNode) el.remove();
     }, 8000);
   }
+
+  // Export utilities for page-specific SSE handlers (waiter_sse.js)
+  window.SSE_UTILS = {
+    showFlash: showFlash,
+    updateNavBadge: updateNavBadge,
+    sseBeep: sseBeep,
+    scheduleReload: scheduleReload,
+    BADGE_ORDERS_KEY: BADGE_ORDERS_KEY,
+    BADGE_KITCHEN_KEY: BADGE_KITCHEN_KEY,
+  };
 })();

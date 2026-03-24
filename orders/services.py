@@ -679,7 +679,7 @@ def update_order_items(
         actor_label=actor_label,
         actor=actor,
     )
-    push_order_updated(order.id)
+    push_order_updated(order.id, actor_id=actor.id if actor else None)
     push_visitor_event(
         order_id=order.id,
         event_type="order_updated",
@@ -709,7 +709,7 @@ def cancel_order(order: Order, request: HttpRequest) -> Order:
         actor_label=actor_label,
         actor=actor,
     )
-    push_order_cancelled(order.id)
+    push_order_cancelled(order.id, actor_id=actor.id if actor else None)
     push_visitor_event(
         order_id=order.id,
         event_type="order_cancelled",

@@ -10,6 +10,7 @@ from django.contrib import messages
 from django.db import models, transaction
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -528,6 +529,71 @@ def senior_confirm_payment(
     except ValueError as e:
         messages.error(request, str(e))
     return redirect("waiter:senior_dashboard")
+
+
+# ---------------------------------------------------------------------------
+# Variant B: Partial rendering for AJAX DOM-patch
+# ---------------------------------------------------------------------------
+
+
+@role_required(*WAITER_ROLES)
+def waiter_accordion_partial(
+    request: AuthenticatedHttpRequest, order_id: int
+) -> HttpResponse:
+    """Return rendered HTML for a single accordion item (AJAX partial)."""
+    order = get_object_or_404(
+        Order.objects.prefetch_related(
+            "items__dish",
+            "items__kitchen_tickets",
+            "items__kitchen_tickets__assigned_to",
+        ),
+        pk=order_id,
+    )
+    now = timezone.now()
+    pickup_warn = settings.DISH_PICKUP_WARN
+    pickup_critical = settings.DISH_PICKUP_CRITICAL
+    enriched_list, _ = enrich_orders([order], now, pickup_warn, pickup_critical)
+    if not enriched_list:
+        return HttpResponse("", status=404)
+
+    entry = enriched_list[0]
+    id_prefix = request.GET.get("id_prefix", "my")
+    parent_id = request.GET.get("parent_id", "accMyOrders")
+
+    html = render_to_string(
+        "components/_waiter_order_accordion_item.html",
+        {
+            "entry": entry,
+            "id_prefix": id_prefix,
+            "parent_id": parent_id,
+            "request": request,
+        },
+        request=request,
+    )
+    response = HttpResponse(html)
+    response["X-Order-Status"] = order.status
+    return response
+
+
+@role_required(*WAITER_ROLES)
+def waiter_detail_partial(
+    request: AuthenticatedHttpRequest, order_id: int
+) -> HttpResponse:
+    """Return rendered HTML for the detail card section (AJAX partial)."""
+    from orders.services import can_edit_order
+
+    order = get_object_or_404(
+        Order.objects.prefetch_related("items__dish"),
+        pk=order_id,
+    )
+    can_edit = can_edit_order(order, request)
+
+    html = render_to_string(
+        "components/_waiter_order_detail_card.html",
+        {"order": order, "can_edit": can_edit, "request": request},
+        request=request,
+    )
+    return HttpResponse(html)
 
 
 # ---------------------------------------------------------------------------

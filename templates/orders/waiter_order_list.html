@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% load i18n static %}
 
+{% block extra_js %}
+<script src="{% static 'js/waiter_sse.js' %}" defer></script>
+{% endblock %}
+
 {% block title %}Jadran Sun — {% trans "Замовлення (офіціант)" %}{% endblock %}
 
 {% block header %}{% include "components/_navbar.html" with show_search=False %}{% endblock %}
@@ -54,10 +58,11 @@
   {# ================================================================ #}
   {% if active_tab == "new" %}
     {% if new_orders_with_wait %}
-      <div class="list-group">
+      <div class="list-group" id="new-orders-list">
         {% for entry in new_orders_with_wait %}
           <div class="list-group-item d-flex justify-content-between align-items-center
-                      {% if entry.urgency == 'critical' %}list-group-item-danger{% elif entry.urgency == 'overdue' %}list-group-item-warning{% endif %}">
+                      {% if entry.urgency == 'critical' %}list-group-item-danger{% elif entry.urgency == 'overdue' %}list-group-item-warning{% endif %}"
+               data-order-id="{{ entry.order.id }}">
             <div class="flex-grow-1" style="cursor: pointer;"
                  data-bs-toggle="modal" data-bs-target="#newOrderModal{{ entry.order.id }}">
               <strong>#{{ entry.order.id }}</strong>

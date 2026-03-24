@@ -1,4 +1,4 @@
-{% load i18n %}<div class="accordion-item {% if entry.has_overdue %}border-danger{% elif entry.order.status == 'ready' %}border-success{% endif %}">
+{% load i18n %}<div class="accordion-item {% if entry.has_overdue %}border-danger{% elif entry.order.status == 'ready' %}border-success{% endif %}" data-order-id="{{ entry.order.id }}">
   <h2 class="accordion-header">
     <button class="accordion-button {% if request.GET.open == entry.order.id|stringformat:'d' %}{% else %}collapsed{% endif %} {% if entry.has_overdue %}bg-danger bg-opacity-10{% elif entry.order.status == 'ready' %}bg-success bg-opacity-10{% elif entry.done_dishes > 0 %}bg-info bg-opacity-10{% endif %}"
             type="button" data-bs-toggle="collapse" data-bs-target="#{{ id_prefix }}Order{{ entry.order.id }}">

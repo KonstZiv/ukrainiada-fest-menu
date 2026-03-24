@@ -64,6 +64,16 @@ urlpatterns = [
         waiter_views.waiter_cancel_order,
         name="order_cancel",
     ),
+    path(
+        "order/<int:order_id>/partial/accordion/",
+        waiter_views.waiter_accordion_partial,
+        name="accordion_partial",
+    ),
+    path(
+        "order/<int:order_id>/partial/detail/",
+        waiter_views.waiter_detail_partial,
+        name="detail_partial",
+    ),
     path("senior/", waiter_views.senior_waiter_dashboard, name="senior_dashboard"),
     path(
         "senior/order/<int:order_id>/confirm-payment/",
