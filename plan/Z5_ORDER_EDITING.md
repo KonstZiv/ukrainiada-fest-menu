@@ -82,10 +82,12 @@ push_order_cancelled(order_id, actor_label)
 ### Waiter order detail (`waiter_order_detail.html`)
 - Аналогічний UI коли status == ACCEPTED
 - AJAX
-- **Варіант B (Z10):** додати `data-ticket-id` + `.ticket-status` до кожного item, щоб SSE `ticket_taken`/`ticket_done` могли inline-оновлювати статус страви без reload. Потрібно:
+- **Варіант B (Z10):** замінити `scheduleReload` на AJAX DOM-patch для waiter сторінок:
+  - Додати `data-ticket-id` + `.ticket-status` до кожного item
   - Queryset: `prefetch_related('items__tickets')` для доступу до тікетів
   - Шаблон: показувати статус готування кожної страви (Черга/Готується/Готово)
   - JS: inline DOM-update замість reload (як у kitchen)
+  - **UX-проблема**: reload закриває всі відкриті акордеони на дашборді — неприйнятно при кількох замовленнях. AJAX DOM-patch вирішує це повністю
 
 ### SSE handlers
 - `sse_client.js`: `onOrderUpdated` — waiter dashboards (reload або DOM patch)
@@ -112,6 +114,15 @@ push_order_cancelled(order_id, actor_label)
 - `test_cancel_pushes_sse_event` — mock push_order_cancelled called
 - `test_edit_pushes_sse_event` — mock push_order_updated called
 - `test_edit_logs_order_event` — OrderEvent with change details
+
+## Додатково: SSE архітектура review
+
+Під час Z5 пройтись по структурі SSE цілісно:
+- Як побудована "шина" (Redis pub-sub channels) — один `events_channel` з фільтрацією по logical channel vs окремі Redis channels
+- Чи потрібно декілька шин (staff, visitor, manager)
+- Контрольованість: які events ходять, хто підписаний, як дебажити
+- Документація event flow (хто публікує → яка шина → хто слухає → що робить)
+- Мета: підтримуваність і прозорість SSE інфраструктури
 
 ## Оцінка
 
