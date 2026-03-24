@@ -51,7 +51,7 @@
       <div class="list-group mb-3" id="order-items-list">
         {% for item in order.items.all %}
           <div class="list-group-item d-flex justify-content-between align-items-center"
-               data-order-item-id="{{ item.id }}" data-dish-price="{{ item.dish.price }}">
+               data-order-item-id="{{ item.id }}" data-dish-price="{{ item.dish.price|stringformat:'.2f' }}">
             <div class="flex-grow-1 me-2">
               <strong>{{ item.dish.title }}</strong>
               {% if can_edit %}
