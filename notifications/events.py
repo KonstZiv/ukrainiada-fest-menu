@@ -34,12 +34,14 @@ def push_order_approved(order_id: int) -> None:
     _push("kitchen-broadcast", "order_approved", {"order_id": order_id})
 
 
-def push_ticket_taken(ticket_id: int, waiter_id: int, kitchen_user_name: str) -> None:
+def push_ticket_taken(
+    ticket_id: int, order_id: int, waiter_id: int, kitchen_user_name: str
+) -> None:
     """Notify waiter: someone took their dish."""
     _push(
         waiter_channel(waiter_id),
         "ticket_taken",
-        {"ticket_id": ticket_id, "by": kitchen_user_name},
+        {"ticket_id": ticket_id, "order_id": order_id, "by": kitchen_user_name},
     )
 
 

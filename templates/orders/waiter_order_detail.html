@@ -6,7 +6,7 @@
 {% block header %}{% include "components/_navbar.html" with show_search=False %}{% endblock %}
 
 {% block content %}
-<div class="container mt-3">
+<div class="container mt-3" data-poll-count data-order-id="{{ order.id }}">
   {% include "components/_back_button.html" %}
 
   <div class="d-flex justify-content-between align-items-baseline mb-2">

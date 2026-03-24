@@ -15,7 +15,14 @@
     document.querySelector('.kitchen-tab-pills')
   );
   var _isWaiterDashboard = !!document.querySelector('[data-poll-count]');
-  console.log('[SSE] dashboard detection: kitchen=' + _isKitchenDashboard + ' waiter=' + _isWaiterDashboard);
+  var _detailOrderEl = document.querySelector('[data-order-id]');
+  var _detailOrderId = _detailOrderEl ? _detailOrderEl.getAttribute('data-order-id') : null;
+  console.log('[SSE] dashboard detection: kitchen=' + _isKitchenDashboard + ' waiter=' + _isWaiterDashboard + ' detailOrder=' + _detailOrderId);
+
+  /** True when no detail page filter OR order_id matches the open detail page. */
+  function _matchesDetailOrder(orderId) {
+    return !_detailOrderId || String(orderId) === _detailOrderId;
+  }
 
   var _reloadScheduled = false;
 
@@ -188,7 +195,7 @@
     }
     showFlash('Страва готова: ' + (data.dish || '#' + data.ticket_id), 'success');
     updateNavBadge('nav-badge-orders', BADGE_ORDERS_KEY, 1);
-    if (_isWaiterDashboard) {
+    if (_isWaiterDashboard && _matchesDetailOrder(data.order_id)) {
       scheduleReload(2000);
     }
   }
@@ -204,7 +211,7 @@
     }
     showFlash('Замовлення #' + data.order_id + ' готове!', 'success');
     updateNavBadge('nav-badge-orders', BADGE_ORDERS_KEY, 1);
-    if (_isWaiterDashboard) {
+    if (_isWaiterDashboard && _matchesDetailOrder(data.order_id)) {
       scheduleReload(2000);
     }
   }
@@ -213,12 +220,12 @@
     var el = document.querySelector(
       '[data-ticket-id="' + data.ticket_id + '"] .ticket-status'
     );
-    console.log('[SSE] onTicketTaken ticket=' + data.ticket_id + ' by=' + data.by + ' el_found=' + !!el);
+    console.log('[SSE] onTicketTaken ticket=' + data.ticket_id + ' order=' + data.order_id + ' by=' + data.by + ' el_found=' + !!el);
     if (el) {
       el.textContent = 'Готується (' + data.by + ')';
       el.className = 'ticket-status badge bg-info';
     }
-    if (_isWaiterDashboard) {
+    if (_isWaiterDashboard && _matchesDetailOrder(data.order_id)) {
       scheduleReload(2000);
     }
   }

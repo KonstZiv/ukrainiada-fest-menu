@@ -110,6 +110,7 @@ def take_ticket(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket:
     if waiter_id:
         push_ticket_taken(
             ticket_id=ticket.pk,
+            order_id=order.pk,
             waiter_id=waiter_id,
             kitchen_user_name=kitchen_user.staff_label,
         )
