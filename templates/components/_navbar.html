@@ -159,6 +159,14 @@
         {% include "registration/_logout.html" %}
 
       {% else %}
+        {% if active_orders %}
+        <a href="{% url 'orders:order_history' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none d-flex align-items-center gap-1"
+           style="font-size: 0.8rem; letter-spacing: 0.05em;">
+          {% trans "ЗАМОВЛЕННЯ" %}
+          <span class="badge bg-primary" style="font-size: 0.65rem;">{{ active_orders|length }}</span>
+        </a>
+        <div class="vr-custom"></div>
+        {% endif %}
         <a href="{% url 'login' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none"
            style="font-size: 0.8rem; letter-spacing: 0.05em;">
           {% trans "УВІЙТИ" %}

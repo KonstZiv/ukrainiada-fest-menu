@@ -121,27 +121,39 @@ def cart_view(request: HttpRequest) -> HttpResponse:
 
 
 def order_history(request: HttpRequest) -> HttpResponse:
-    """Display completed & paid order history."""
+    """Display all visitor orders — active first, then completed."""
+    session_orders: dict[str, str] = request.session.get("my_orders", {})
+
     if request.user.is_authenticated:
-        orders = Order.objects.filter(
-            visitor=request.user,
-            status=Order.Status.DELIVERED,
-            payment_status=Order.PaymentStatus.PAID,
-        ).prefetch_related("items__dish")
+        qs = Order.objects.filter(visitor=request.user)
+    elif session_orders:
+        qs = Order.objects.filter(id__in=[int(oid) for oid in session_orders])
     else:
-        session_orders: dict[str, str] = request.session.get("my_orders", {})
-        order_ids = [int(oid) for oid in session_orders]
-        orders = Order.objects.filter(
-            id__in=order_ids,
-            status=Order.Status.DELIVERED,
-            payment_status=Order.PaymentStatus.PAID,
-        ).prefetch_related("items__dish")
+        qs = Order.objects.none()
+
+    all_orders = (
+        qs.exclude(status=Order.Status.DRAFT)
+        .prefetch_related("items__dish")
+        .order_by("-created_at")
+    )
+
+    terminal = {Order.Status.DELIVERED, Order.Status.CANCELLED}
+    active = [o for o in all_orders if o.status not in terminal]
+    completed = [o for o in all_orders if o.status in terminal]
+
+    # Build token map for anonymous access links
+    tokens = {int(k): v for k, v in session_orders.items()}
 
     is_anonymous = not request.user.is_authenticated
     return render(
         request,
         "orders/order_history.html",
-        {"orders": orders, "show_register_prompt": is_anonymous},
+        {
+            "active_orders_list": active,
+            "completed_orders": completed,
+            "tokens": tokens,
+            "show_register_prompt": is_anonymous,
+        },
     )
 
 
