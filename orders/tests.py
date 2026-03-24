@@ -37,6 +37,7 @@ def test_order_status_flow_values() -> None:
         "in_progress",
         "ready",
         "delivered",
+        "cancelled",
     }
     assert statuses == expected
 

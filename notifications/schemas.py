@@ -5,6 +5,18 @@ from __future__ import annotations
 from typing import TypedDict
 
 
+class OrderUpdatedPayload(TypedDict):
+    """Broadcast to waiters: order items changed before verification."""
+
+    order_id: int
+
+
+class OrderCancelledPayload(TypedDict):
+    """Broadcast to waiters: order cancelled before verification."""
+
+    order_id: int
+
+
 class OrderApprovedPayload(TypedDict):
     """Broadcast to kitchen: a new order entered the queue."""
 

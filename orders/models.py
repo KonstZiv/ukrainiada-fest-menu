@@ -18,6 +18,7 @@ class Order(models.Model):
         IN_PROGRESS = "in_progress", "Готується"
         READY = "ready", "Готово"
         DELIVERED = "delivered", "Доставлено"
+        CANCELLED = "cancelled", "Скасовано"
 
     class PaymentStatus(models.TextChoices):
         UNPAID = "unpaid", "Не оплачено"
@@ -84,6 +85,7 @@ class Order(models.Model):
     ready_at = models.DateTimeField(null=True, blank=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
     payment_confirmed_at = models.DateTimeField(null=True, blank=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["-created_at"]

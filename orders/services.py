@@ -14,7 +14,9 @@ from kitchen.services import create_tickets_for_order
 from menu.models import Dish
 from notifications.events import (
     push_order_approved,
+    push_order_cancelled,
     push_order_submitted,
+    push_order_updated,
     push_ticket_delivered,
     push_visitor_event,
 )
@@ -569,5 +571,148 @@ def confirm_payment_by_senior(order: Order, method: str) -> Order:
         order_id=order.id,
         event_type="order_paid",
         data={"order_id": order.id, "method": method},
+    )
+    return order
+
+
+# ---------------------------------------------------------------------------
+# Z5: Edit / Cancel orders before verification
+# ---------------------------------------------------------------------------
+
+
+def _is_order_owner(order: Order, request: HttpRequest) -> bool:
+    """Check if current user/session is the visitor who created this order."""
+    user = request.user
+    if user.is_authenticated and order.visitor_id == user.id:
+        return True
+    session_orders: dict[str, str] = request.session.get("my_orders", {})
+    if session_orders.get(str(order.id)) == str(order.access_token):
+        return True
+    url_token = request.GET.get("token", "")
+    if url_token and str(order.access_token) == url_token:
+        return True
+    return False
+
+
+def can_edit_order(order: Order, request: HttpRequest) -> bool:
+    """Check if the current user can edit/cancel this order.
+
+    SUBMITTED: only visitor-owner.
+    ACCEPTED: visitor-owner OR assigned waiter.
+    VERIFIED+: nobody.
+    """
+    if order.status not in (Order.Status.SUBMITTED, Order.Status.ACCEPTED):
+        return False
+
+    is_owner = _is_order_owner(order, request)
+
+    if order.status == Order.Status.SUBMITTED:
+        return is_owner
+
+    # ACCEPTED: owner OR assigned waiter
+    if is_owner:
+        return True
+    user = request.user
+    if user.is_authenticated and order.waiter_id == user.id:
+        return True
+
+    return False
+
+
+def _get_actor_label(request: HttpRequest) -> str:
+    """Human-readable label for the actor performing the action."""
+    user = request.user
+    if user.is_authenticated and hasattr(user, "staff_label"):
+        return user.staff_label  # type: ignore[union-attr]
+    if user.is_authenticated:
+        return user.get_full_name() or getattr(user, "email", "")
+    return "Відвідувач"
+
+
+def update_order_items(
+    order: Order,
+    changes: dict[int, int],
+    request: HttpRequest,
+) -> Order:
+    """Update item quantities. changes = {item_id: new_quantity}.
+
+    Quantity 0 removes the item. If all items removed, cancels the order.
+    Raises ValueError if order cannot be edited.
+    """
+    if not can_edit_order(order, request):
+        raise ValueError("Замовлення не можна редагувати")
+
+    summary_parts: list[str] = []
+
+    with transaction.atomic():
+        items = (
+            OrderItem.objects.filter(order=order, id__in=changes.keys())
+            .select_related("dish")
+            .select_for_update()
+        )
+        for item in items:
+            new_qty = changes[item.id]
+            if new_qty < 0:
+                raise ValueError(f"Некоректна кількість: {new_qty}")
+            old_qty = item.quantity
+            if new_qty == 0:
+                summary_parts.append(f"{item.dish.title}: {old_qty} → видалено")
+                item.delete()
+            elif new_qty != old_qty:
+                summary_parts.append(f"{item.dish.title}: {old_qty} → {new_qty}")
+                item.quantity = new_qty
+                item.save(update_fields=["quantity"])
+
+        # If no items left — cancel
+        if not order.items.exists():
+            return cancel_order(order, request)
+
+    if not summary_parts:
+        return order
+
+    actor = request.user if request.user.is_authenticated else None
+    actor_label = _get_actor_label(request)
+
+    log_event(
+        order,
+        f"Замовлення змінено: {'; '.join(summary_parts)}",
+        actor_label=actor_label,
+        actor=actor,
+    )
+    push_order_updated(order.id)
+    push_visitor_event(
+        order_id=order.id,
+        event_type="order_updated",
+        data={"order_id": order.id},
+    )
+    return order
+
+
+def cancel_order(order: Order, request: HttpRequest) -> Order:
+    """Cancel order (set CANCELLED status).
+
+    Raises ValueError if order cannot be cancelled.
+    """
+    if not can_edit_order(order, request):
+        raise ValueError("Замовлення не можна скасувати")
+
+    order.status = Order.Status.CANCELLED
+    order.cancelled_at = timezone.now()
+    order.save(update_fields=["status", "cancelled_at"])
+
+    actor = request.user if request.user.is_authenticated else None
+    actor_label = _get_actor_label(request)
+
+    log_event(
+        order,
+        "Замовлення скасовано",
+        actor_label=actor_label,
+        actor=actor,
+    )
+    push_order_cancelled(order.id)
+    push_visitor_event(
+        order_id=order.id,
+        event_type="order_cancelled",
+        data={"order_id": order.id},
     )
     return order

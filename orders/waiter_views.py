@@ -24,10 +24,12 @@ from orders.models import Order, VisitorEscalation
 from orders.services import (
     accept_order,
     approve_order,
+    cancel_order,
     confirm_cash_payment,
     confirm_payment_by_senior,
     deliver_order,
     deliver_ticket,
+    update_order_items,
     verify_order,
 )
 from user.constants import SENIOR_WAITER_ROLES, WAITER_ROLES
@@ -260,8 +262,15 @@ def waiter_poll_data(request: AuthenticatedHttpRequest) -> HttpResponse:
 @role_required(*WAITER_ROLES)
 def order_scan(request: AuthenticatedHttpRequest, order_id: int) -> HttpResponse:
     """Waiter scans QR — redirects to order detail for approval."""
+    from orders.services import can_edit_order
+
     order = get_object_or_404(Order, pk=order_id)
-    return render(request, "orders/waiter_order_detail.html", {"order": order})
+    can_edit = can_edit_order(order, request)
+    return render(
+        request,
+        "orders/waiter_order_detail.html",
+        {"order": order, "can_edit": can_edit},
+    )
 
 
 @role_required(*WAITER_ROLES)
@@ -519,3 +528,68 @@ def senior_confirm_payment(
     except ValueError as e:
         messages.error(request, str(e))
     return redirect("waiter:senior_dashboard")
+
+
+# ---------------------------------------------------------------------------
+# Z5: Edit / Cancel orders (waiter AJAX)
+# ---------------------------------------------------------------------------
+
+
+@role_required(*WAITER_ROLES)
+@require_POST
+def waiter_edit_items(request: AuthenticatedHttpRequest, order_id: int) -> HttpResponse:
+    """Waiter edits item quantities (AJAX, JSON body)."""
+    import json
+
+    order = get_object_or_404(
+        Order.objects.prefetch_related("items__dish"),
+        pk=order_id,
+        waiter=request.user,
+    )
+
+    try:
+        body = json.loads(request.body)
+        changes: dict[int, int] = {
+            int(k): int(v) for k, v in body.get("items", {}).items()
+        }
+    except json.JSONDecodeError, ValueError, TypeError:
+        return JsonResponse({"ok": False, "error": "Invalid data"}, status=400)
+
+    try:
+        order = update_order_items(order, changes, request)
+    except ValueError as e:
+        return JsonResponse({"ok": False, "error": str(e)}, status=400)
+
+    items_data = [
+        {
+            "id": item.id,
+            "dish_title": item.dish.title,
+            "quantity": item.quantity,
+            "subtotal": str(item.subtotal),
+        }
+        for item in order.items.select_related("dish")
+    ]
+    return JsonResponse(
+        {
+            "ok": True,
+            "status": order.status,
+            "total_price": str(order.total_price),
+            "items": items_data,
+        }
+    )
+
+
+@role_required(*WAITER_ROLES)
+@require_POST
+def waiter_cancel_order(
+    request: AuthenticatedHttpRequest, order_id: int
+) -> HttpResponse:
+    """Waiter cancels order (AJAX)."""
+    order = get_object_or_404(Order, pk=order_id, waiter=request.user)
+
+    try:
+        cancel_order(order, request)
+    except ValueError as e:
+        return JsonResponse({"ok": False, "error": str(e)}, status=400)
+
+    return JsonResponse({"ok": True, "status": "cancelled"})

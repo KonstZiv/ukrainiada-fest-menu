@@ -19,4 +19,6 @@ urlpatterns = [
         views.create_escalation_view,
         name="escalate",
     ),
+    path("<int:order_id>/edit/", views.order_edit_items, name="order_edit"),
+    path("<int:order_id>/cancel/", views.order_cancel_view, name="order_cancel"),
 ]

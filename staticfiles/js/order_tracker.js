@@ -132,6 +132,13 @@
                     this.showGlobalMessage("\u2705 \u041E\u043F\u043B\u0430\u0442\u0443 \u043F\u0440\u0438\u0439\u043D\u044F\u0442\u043E. \u0414\u044F\u043A\u0443\u0454\u043C\u043E!");
                     this.disconnect();
                     break;
+                case "order_updated":
+                    location.reload();
+                    break;
+                case "order_cancelled":
+                    this.showGlobalMessage("\u274C \u0417\u0430\u043C\u043E\u0432\u043B\u0435\u043D\u043D\u044F \u0441\u043A\u0430\u0441\u043E\u0432\u0430\u043D\u043E");
+                    this.disconnect();
+                    break;
                 case "escalation_created":
                     this.showGlobalMessage("\u26A0\uFE0F \u0412\u0430\u0448\u0435 \u0437\u0432\u0435\u0440\u043D\u0435\u043D\u043D\u044F \u043F\u0440\u0438\u0439\u043D\u044F\u0442\u043E");
                     break;

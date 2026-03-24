@@ -166,6 +166,12 @@
       case 'ticket_delivered':
         onTicketDelivered(data);
         break;
+      case 'order_updated':
+        onOrderUpdated(data);
+        break;
+      case 'order_cancelled':
+        onOrderCancelled(data);
+        break;
       case 'kitchen_escalation':
       case 'payment_escalation':
       case 'visitor_escalation':
@@ -290,6 +296,21 @@
     kitchen_escalation: 'Кухня',
     payment_escalation: 'Оплата',
   };
+
+  function onOrderUpdated(data) {
+    console.log('[SSE] onOrderUpdated order=' + data.order_id);
+    if (_isWaiterDashboard && _matchesDetailOrder(data.order_id)) {
+      scheduleReload(2000);
+    }
+  }
+
+  function onOrderCancelled(data) {
+    console.log('[SSE] onOrderCancelled order=' + data.order_id);
+    showFlash('Замовлення #' + data.order_id + ' скасовано', 'warning');
+    if (_isWaiterDashboard) {
+      scheduleReload(2000);
+    }
+  }
 
   function onEscalation(data) {
     var id = data.ticket_id || data.order_id;

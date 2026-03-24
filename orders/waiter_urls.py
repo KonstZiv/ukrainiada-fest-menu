@@ -54,6 +54,16 @@ urlpatterns = [
         waiter_views.escalation_resolve,
         name="escalation_resolve",
     ),
+    path(
+        "order/<int:order_id>/edit-items/",
+        waiter_views.waiter_edit_items,
+        name="order_edit_items",
+    ),
+    path(
+        "order/<int:order_id>/cancel/",
+        waiter_views.waiter_cancel_order,
+        name="order_cancel",
+    ),
     path("senior/", waiter_views.senior_waiter_dashboard, name="senior_dashboard"),
     path(
         "senior/order/<int:order_id>/confirm-payment/",

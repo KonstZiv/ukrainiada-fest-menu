@@ -9,7 +9,7 @@ from typing import TypedDict
 import qrcode
 from django.conf import settings as django_settings
 from django.contrib import messages
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -23,8 +23,11 @@ from orders.escalation_services import create_escalation
 from orders.models import Order, VisitorEscalation
 from orders.services import (
     can_access_order,
+    can_edit_order,
+    cancel_order,
     confirm_online_payment_stub,
     submit_order_from_cart,
+    update_order_items,
 )
 
 
@@ -377,6 +380,7 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
             "feedback": feedback_obj,
             "mood_choices": GuestFeedback.Mood.choices if not has_feedback else [],
             "event_log_lines": event_log_lines,
+            "can_edit": can_edit_order(order, request),
         },
     )
 
@@ -413,3 +417,66 @@ def create_escalation_view(request: HttpRequest, order_id: int) -> HttpResponse:
     except ValueError as e:
         messages.warning(request, str(e))
     return redirect("orders:order_detail", order_id=order_id)
+
+
+# ---------------------------------------------------------------------------
+# Z5: Edit / Cancel orders (visitor AJAX)
+# ---------------------------------------------------------------------------
+
+
+@require_POST
+def order_edit_items(request: HttpRequest, order_id: int) -> HttpResponse:
+    """Visitor edits item quantities (AJAX, JSON body)."""
+    import json
+
+    order = get_object_or_404(
+        Order.objects.prefetch_related("items__dish"), pk=order_id
+    )
+    if not can_access_order(request, order):
+        return JsonResponse({"ok": False, "error": "Forbidden"}, status=403)
+
+    try:
+        body = json.loads(request.body)
+        changes: dict[int, int] = {
+            int(k): int(v) for k, v in body.get("items", {}).items()
+        }
+    except json.JSONDecodeError, ValueError, TypeError:
+        return JsonResponse({"ok": False, "error": "Invalid data"}, status=400)
+
+    try:
+        order = update_order_items(order, changes, request)
+    except ValueError as e:
+        return JsonResponse({"ok": False, "error": str(e)}, status=400)
+
+    items_data = [
+        {
+            "id": item.id,
+            "dish_title": item.dish.title,
+            "quantity": item.quantity,
+            "subtotal": str(item.subtotal),
+        }
+        for item in order.items.select_related("dish")
+    ]
+    return JsonResponse(
+        {
+            "ok": True,
+            "status": order.status,
+            "total_price": str(order.total_price),
+            "items": items_data,
+        }
+    )
+
+
+@require_POST
+def order_cancel_view(request: HttpRequest, order_id: int) -> HttpResponse:
+    """Visitor cancels order (AJAX)."""
+    order = get_object_or_404(Order, pk=order_id)
+    if not can_access_order(request, order):
+        return JsonResponse({"ok": False, "error": "Forbidden"}, status=403)
+
+    try:
+        cancel_order(order, request)
+    except ValueError as e:
+        return JsonResponse({"ok": False, "error": str(e)}, status=400)
+
+    return JsonResponse({"ok": True, "status": "cancelled"})

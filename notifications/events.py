@@ -29,6 +29,16 @@ def push_order_submitted(order_id: int) -> None:
     _push("waiter-broadcast", "order_submitted", {"order_id": order_id})
 
 
+def push_order_updated(order_id: int) -> None:
+    """Notify waiters: order items changed before verification."""
+    _push("waiter-broadcast", "order_updated", {"order_id": order_id})
+
+
+def push_order_cancelled(order_id: int) -> None:
+    """Notify waiters: order cancelled before verification."""
+    _push("waiter-broadcast", "order_cancelled", {"order_id": order_id})
+
+
 def push_order_approved(order_id: int) -> None:
     """Notify kitchen: new order in the queue."""
     _push("kitchen-broadcast", "order_approved", {"order_id": order_id})
