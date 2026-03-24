@@ -12,6 +12,18 @@
 {% block content %}
 <div class="container mt-3">
   {% include "components/_back_button.html" %}
+
+  {% if active_orders|length > 1 %}
+  <div class="d-flex gap-2 mb-2 flex-wrap">
+    {% for ao in active_orders %}
+      <a href="{% url 'orders:order_detail' ao.id %}?token={{ ao.token }}"
+         class="btn btn-sm {% if ao.id == order.id %}btn-primary{% else %}btn-outline-primary{% endif %}">
+        #{{ ao.id }} · {{ ao.status_display }}
+      </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   <div class="d-flex justify-content-between align-items-baseline mb-2">
     <h2 class="mb-0">{% blocktrans with order_id=order.id %}Замовлення #{{ order_id }}{% endblocktrans %}</h2>
     <span class="text-muted" style="font-size: 0.85rem;">{{ order.created_at|date:"d.m.Y H:i" }}</span>

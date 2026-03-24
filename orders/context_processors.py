@@ -7,6 +7,7 @@ from django.http import HttpRequest
 
 from menu.models import Dish
 from orders.cart import cart_item_count, get_cart
+from orders.models import Order
 
 
 def cart_context(request: HttpRequest) -> dict[str, Any]:
@@ -22,10 +23,31 @@ def cart_context(request: HttpRequest) -> dict[str, Any]:
             Decimal("0"),
         )
 
+    # Active orders from session (for visitor order switcher)
+    session_orders: dict[str, str] = request.session.get("my_orders", {})
+    active_orders: list[dict[str, Any]] = []
+    if session_orders:
+        terminal_statuses = {
+            Order.Status.DELIVERED,
+            Order.Status.CANCELLED,
+        }
+        for order in Order.objects.filter(
+            id__in=[int(oid) for oid in session_orders],
+        ).only("id", "status", "created_at"):
+            if order.status not in terminal_statuses:
+                active_orders.append(
+                    {
+                        "id": order.id,
+                        "status_display": order.get_status_display(),
+                        "token": session_orders[str(order.id)],
+                    }
+                )
+
     return {
         "cart_count": cart_item_count(request),
         "cart_total": total,
         "cart_quantities": quantities,
+        "active_orders": active_orders,
     }
 
 
