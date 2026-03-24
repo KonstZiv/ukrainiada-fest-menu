@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+from django.utils.translation import gettext_lazy as _
 
 from user.models import User
 
@@ -14,19 +15,19 @@ class ProfileEditForm(forms.ModelForm):
             "first_name": forms.TextInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Ім'я",
+                    "placeholder": _("Ім'я"),
                 }
             ),
             "last_name": forms.TextInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Прізвище",
+                    "placeholder": _("Прізвище"),
                 }
             ),
             "email": forms.EmailInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Електронна пошта",
+                    "placeholder": _("Електронна пошта"),
                 }
             ),
             "avatar": forms.FileInput(
@@ -40,7 +41,7 @@ class ProfileEditForm(forms.ModelForm):
             "first_name": "",
             "last_name": "",
             "email": "",
-            "avatar": "Аватар",
+            "avatar": _("Аватар"),
         }
 
 
@@ -67,19 +68,19 @@ class SignUpForm(UserCreationForm):
             "email": forms.EmailInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Електронна пошта (обов'язково)",
+                    "placeholder": _("Електронна пошта (обов'язково)"),
                 }
             ),
             "first_name": forms.TextInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Ім'я (необов'язково)",
+                    "placeholder": _("Ім'я (необов'язково)"),
                 }
             ),
             "last_name": forms.TextInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": "Прізвище (необов'язково)",
+                    "placeholder": _("Прізвище (необов'язково)"),
                 }
             ),
         }
@@ -99,7 +100,7 @@ class SignUpForm(UserCreationForm):
         self.fields["password1"].widget.attrs.update(
             {
                 "class": "form-control",
-                "placeholder": "Пароль (мінімум 8 символів, не лише цифри)",
+                "placeholder": _("Пароль (мінімум 8 символів, не лише цифри)"),
             }
         )
         self.fields["password1"].label = ""
@@ -107,7 +108,7 @@ class SignUpForm(UserCreationForm):
         self.fields["password2"].widget.attrs.update(
             {
                 "class": "form-control",
-                "placeholder": "Підтвердження пароля",
+                "placeholder": _("Підтвердження пароля"),
             }
         )
         self.fields["password2"].label = ""

@@ -1,9 +1,10 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Немає з'єднання</title>
+  <title>{% trans "Немає з'єднання" %}</title>
   <style>
     body {
       background: #F8FAFC;
@@ -36,10 +37,10 @@
 <body>
   <div>
     <div class="icon">📵</div>
-    <h1>Немає з'єднання</h1>
-    <p>Перевірте інтернет і спробуйте знову.</p>
-    <p>Якщо ви переглядали меню раніше — воно доступне в кеші.</p>
-    <button onclick="location.reload()">🔄 Спробувати знову</button>
+    <h1>{% trans "Немає з'єднання" %}</h1>
+    <p>{% trans "Перевірте інтернет і спробуйте знову." %}</p>
+    <p>{% trans "Якщо ви переглядали меню раніше — воно доступне в кеші." %}</p>
+    <button onclick="location.reload()">🔄 {% trans "Спробувати знову" %}</button>
   </div>
 </body>
 </html>

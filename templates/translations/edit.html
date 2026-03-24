@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load i18n menu_extras %}
+
+{% block title %}{% trans "Редагувати переклад" %}{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'translations:review' %}">{% trans "Переклади" %}</a></li>
+      <li class="breadcrumb-item active">{{ model_name }} — {{ object }}</li>
+    </ol>
+  </nav>
+
+  <h5 class="mb-3">
+    {{ language|lang_flag }} {{ language|upper }} — {{ model_name }}: {{ object }}
+  </h5>
+
+  {# Source (UK) #}
+  <div class="mb-3 p-2 bg-light rounded">
+    <small class="text-muted fw-semibold">🇺🇦 {% trans "Оригінал (UK)" %}</small>
+    {% for field, value in source_values.items %}
+    <div class="mt-1">
+      <span class="text-muted">{{ field }}:</span>
+      <span>{{ value }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    {% for field in fields %}
+    <div class="mb-3">
+      <label for="id_{{ field }}" class="form-label fw-semibold">{{ field }}</label>
+      {% with current=current_values|dict_get:field %}
+      {% if field == "description" %}
+      <textarea id="id_{{ field }}" name="{{ field }}" class="form-control" rows="4">{{ current }}</textarea>
+      {% else %}
+      <input type="text" id="id_{{ field }}" name="{{ field }}" class="form-control" value="{{ current }}">
+      {% endif %}
+      {% endwith %}
+    </div>
+    {% endfor %}
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-success">
+        <i class="bi bi-check-lg me-1"></i>{% trans "Зберегти і затвердити" %}
+      </button>
+      <a href="{% url 'translations:review' %}" class="btn btn-outline-secondary">
+        {% trans "Скасувати" %}
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

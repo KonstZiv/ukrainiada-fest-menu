@@ -116,8 +116,8 @@
             alert.className = "alert alert-info";
             alert.id = "cart-empty";
             alert.innerHTML =
-                '<i class="bi bi-info-circle"></i> Ви ще нічого не обрали. ' +
-                '<a href="/menu/dishes/">Перейти до меню</a>';
+                '<i class="bi bi-info-circle"></i> ' + gettext("Ви ще нічого не обрали.") + ' ' +
+                '<a href="/menu/dishes/">' + gettext("Перейти до меню") + '</a>';
             container.appendChild(alert);
         }
     }

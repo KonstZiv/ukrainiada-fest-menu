@@ -5,15 +5,16 @@
 {# --------------------------------------------------------------------------- #}
 
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Jadran Sun — Страви{% endblock %}
+{% block title %}Jadran Sun — {% trans "Страви" %}{% endblock %}
 
 {% block content %}
 <div class="container-fluid mt-3 px-2 px-md-3">
 
   {% include "components/_back_button.html" %}
 
-  <h2 class="mb-4">Усі страви</h2>
+  <h2 class="mb-4">{% trans "Усі страви" %}</h2>
 
   <div class="row g-2 g-md-3">
     {% for dish in dishes %}
@@ -22,7 +23,7 @@
       </div>
     {% empty %}
       <div class="col-12 text-center text-muted py-5">
-        <p>Страв поки немає.</p>
+        <p>{% trans "Страв поки немає." %}</p>
       </div>
     {% endfor %}
   </div>

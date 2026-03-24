@@ -15,6 +15,7 @@ from django.conf import settings as django_settings
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from core_settings.types import AuthenticatedHttpRequest
@@ -321,7 +322,9 @@ def ticket_done(request: AuthenticatedHttpRequest, ticket_id: int) -> HttpRespon
             dish_title = ticket.order_item.dish.title
             messages.warning(
                 request,
-                f"'{dish_title}' — пропущено: {', '.join(skipped)}",
+                _("'{dish_title}' — пропущено: {skipped}").format(
+                    dish_title=dish_title, skipped=", ".join(skipped)
+                ),
             )
     except ValueError as e:
         if is_ajax:
@@ -357,7 +360,7 @@ def generate_handoff_qr(
         except User.DoesNotExist, ValueError:
             messages.error(
                 request,
-                "Обраний офіціант не знайдений або не має відповідної ролі.",
+                _("Обраний офіціант не знайдений або не має відповідної ролі."),
             )
             return redirect(request.path)
 

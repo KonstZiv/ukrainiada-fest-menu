@@ -110,7 +110,7 @@
                 case "order_ready":
                     this.updateProgress("ready");
                     this._applyPartialProgress();
-                    this.showGlobalMessage("\uD83C\uDF89 \u0412\u0441\u0456 \u0441\u0442\u0440\u0430\u0432\u0438 \u0433\u043E\u0442\u043E\u0432\u0456!");
+                    this.showGlobalMessage("\uD83C\uDF89 " + gettext("Всі страви готові!"));
                     break;
                 case "order_delivered":
                     this.updateProgress("delivered");
@@ -119,7 +119,7 @@
                     this.doneCount = this.totalTickets;
                     this.deliveredCount = this.totalTickets;
                     this._applyPartialProgress();
-                    this.showGlobalMessage("\u2705 \u0417\u0430\u043C\u043E\u0432\u043B\u0435\u043D\u043D\u044F \u0434\u043E\u0441\u0442\u0430\u0432\u043B\u0435\u043D\u043E! \u0421\u043C\u0430\u0447\u043D\u043E\u0433\u043E!");
+                    this.showGlobalMessage("\u2705 " + gettext("Замовлення доставлено! Смачного!"));
                     break;
                 case "order_paid":
                     // Force-complete everything before showing paid
@@ -129,24 +129,24 @@
                     this.updateProgress("delivered");
                     this._applyPartialProgress();
                     this._updatePaymentStrip(true);
-                    this.showGlobalMessage("\u2705 \u041E\u043F\u043B\u0430\u0442\u0443 \u043F\u0440\u0438\u0439\u043D\u044F\u0442\u043E. \u0414\u044F\u043A\u0443\u0454\u043C\u043E!");
+                    this.showGlobalMessage("\u2705 " + gettext("Оплату прийнято. Дякуємо!"));
                     this.disconnect();
                     break;
                 case "order_updated":
                     location.reload();
                     break;
                 case "order_cancelled":
-                    this.showGlobalMessage("\u274C \u0417\u0430\u043C\u043E\u0432\u043B\u0435\u043D\u043D\u044F \u0441\u043A\u0430\u0441\u043E\u0432\u0430\u043D\u043E");
+                    this.showGlobalMessage("\u274C " + gettext("Замовлення скасовано"));
                     this.disconnect();
                     break;
                 case "escalation_created":
-                    this.showGlobalMessage("\u26A0\uFE0F \u0412\u0430\u0448\u0435 \u0437\u0432\u0435\u0440\u043D\u0435\u043D\u043D\u044F \u043F\u0440\u0438\u0439\u043D\u044F\u0442\u043E");
+                    this.showGlobalMessage("\u26A0\uFE0F " + gettext("Ваше звернення прийнято"));
                     break;
                 case "escalation_acknowledged":
-                    this.showGlobalMessage("\uD83D\uDC4D " + (data.by || "") + " \u043F\u0440\u0430\u0446\u044E\u0454 \u043D\u0430\u0434 \u0432\u0430\u0448\u0438\u043C \u043F\u0438\u0442\u0430\u043D\u043D\u044F\u043C");
+                    this.showGlobalMessage("\uD83D\uDC4D " + interpolate(gettext("%(by)s працює над вашим питанням"), {by: data.by || ""}, true));
                     break;
                 case "escalation_resolved":
-                    this.showGlobalMessage("\u2705 " + (data.note || "\u0412\u0438\u0440\u0456\u0448\u0435\u043D\u043E"));
+                    this.showGlobalMessage("\u2705 " + (data.note || gettext("Вирішено")));
                     break;
             }
         }
@@ -269,7 +269,7 @@
             strip.classList.remove("paid", "unpaid");
             if (isPaid) {
                 strip.classList.add("paid");
-                strip.textContent = strip.dataset.paidText || "\u0421\u041F\u041B\u0410\u0427\u0415\u041D\u041E";
+                strip.textContent = strip.dataset.paidText || gettext("СПЛАЧЕНО");
             } else {
                 strip.classList.add("unpaid");
             }

@@ -5,29 +5,30 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from menu.models import Dish
 
 
 class Order(models.Model):
     class Status(models.TextChoices):
-        DRAFT = "draft", "Чернетка"
-        SUBMITTED = "submitted", "Створено"
-        ACCEPTED = "accepted", "Прийнято"
-        VERIFIED = "verified", "Верифіковано"
-        IN_PROGRESS = "in_progress", "Готується"
-        READY = "ready", "Готово"
-        DELIVERED = "delivered", "Доставлено"
-        CANCELLED = "cancelled", "Скасовано"
+        DRAFT = "draft", _("Чернетка")
+        SUBMITTED = "submitted", _("Створено")
+        ACCEPTED = "accepted", _("Прийнято")
+        VERIFIED = "verified", _("Верифіковано")
+        IN_PROGRESS = "in_progress", _("Готується")
+        READY = "ready", _("Готово")
+        DELIVERED = "delivered", _("Доставлено")
+        CANCELLED = "cancelled", _("Скасовано")
 
     class PaymentStatus(models.TextChoices):
-        UNPAID = "unpaid", "Не оплачено"
-        PAID = "paid", "Оплачено"
+        UNPAID = "unpaid", _("Не оплачено")
+        PAID = "paid", _("Оплачено")
 
     class PaymentMethod(models.TextChoices):
-        NOT_SET = "not_set", "Не визначено"
-        CASH = "cash", "Готівка"
-        ONLINE = "online", "Онлайн"
+        NOT_SET = "not_set", _("Не визначено")
+        CASH = "cash", _("Готівка")
+        ONLINE = "online", _("Онлайн")
 
     access_token = models.UUIDField(
         default=uuid.uuid4,
@@ -73,7 +74,7 @@ class Order(models.Model):
     location_hint = models.CharField(
         max_length=60,
         blank=True,
-        verbose_name="Де вас знайти (необов'язково)",
+        verbose_name=_("Де вас знайти (необов'язково)"),
     )
     notes = models.TextField(blank=True)
 
@@ -188,20 +189,20 @@ class VisitorEscalation(models.Model):
     """
 
     class Reason(models.TextChoices):
-        SLOW = "slow", "Довго чекаю"
-        WRONG = "wrong", "Щось не те"
-        QUESTION = "question", "Маю питання"
-        OTHER = "other", "Інше"
+        SLOW = "slow", _("Довго чекаю")
+        WRONG = "wrong", _("Щось не те")
+        QUESTION = "question", _("Маю питання")
+        OTHER = "other", _("Інше")
 
     class Level(models.IntegerChoices):
-        WAITER = 1, "Офіціант"
-        SENIOR = 2, "Старший офіціант"
-        MANAGER = 3, "Менеджер"
+        WAITER = 1, _("Офіціант")
+        SENIOR = 2, _("Старший офіціант")
+        MANAGER = 3, _("Менеджер")
 
     class Status(models.TextChoices):
-        OPEN = "open", "Відкрита"
-        ACKNOWLEDGED = "acknowledged", "Побачено"
-        RESOLVED = "resolved", "Вирішено"
+        OPEN = "open", _("Відкрита")
+        ACKNOWLEDGED = "acknowledged", _("Побачено")
+        RESOLVED = "resolved", _("Вирішено")
 
     order = models.ForeignKey(
         Order,
@@ -209,7 +210,7 @@ class VisitorEscalation(models.Model):
         related_name="escalations",
     )
     reason = models.CharField(max_length=20, choices=Reason.choices)
-    message = models.TextField(blank=True, max_length=300, verbose_name="Коментар")
+    message = models.TextField(blank=True, max_length=300, verbose_name=_("Коментар"))
     level = models.IntegerField(
         choices=Level.choices,
         default=Level.WAITER,
@@ -253,16 +254,16 @@ class StepEscalation(models.Model):
     """
 
     class Step(models.TextChoices):
-        SUBMIT_ACCEPT = "submit_accept", "Прийняття замовлення"
-        ACCEPT_VERIFY = "accept_verify", "Верифікація"
-        PENDING_TAKEN = "pending_taken", "Взяття тікета кухарем"
-        TAKEN_DONE = "taken_done", "Приготування"
-        DONE_HANDOFF = "done_handoff", "Передача офіціанту"
-        DELIVER_PAY = "deliver_pay", "Оплата"
+        SUBMIT_ACCEPT = "submit_accept", _("Прийняття замовлення")
+        ACCEPT_VERIFY = "accept_verify", _("Верифікація")
+        PENDING_TAKEN = "pending_taken", _("Взяття тікета кухарем")
+        TAKEN_DONE = "taken_done", _("Приготування")
+        DONE_HANDOFF = "done_handoff", _("Передача офіціанту")
+        DELIVER_PAY = "deliver_pay", _("Оплата")
 
     class Level(models.IntegerChoices):
-        SENIOR = 1, "Старший"
-        MANAGER = 2, "Менеджер"
+        SENIOR = 1, _("Старший")
+        MANAGER = 2, _("Менеджер")
 
     step = models.CharField(max_length=20, choices=Step.choices, db_index=True)
     level = models.IntegerField(choices=Level.choices)

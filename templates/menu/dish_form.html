@@ -21,12 +21,13 @@
 {# --------------------------------------------------------------------------- #}
 
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
   {% if form.instance.pk %}
-    Jadran Sun — Редагувати страву
+    Jadran Sun — {% trans "Редагувати страву" %}
   {% else %}
-    Jadran Sun — Нова страва
+    Jadran Sun — {% trans "Нова страва" %}
   {% endif %}
 {% endblock %}
 
@@ -36,9 +37,9 @@
   {# --- Заголовок сторінки --- #}
   <h2 class="mb-4">
     {% if form.instance.pk %}
-      Редагувати страву
+      {% trans "Редагувати страву" %}
     {% else %}
-      Створити страву
+      {% trans "Створити страву" %}
     {% endif %}
   </h2>
 
@@ -68,8 +69,8 @@
     {% if image_form %}
       <hr class="my-4">
       <h5 class="mb-3">
-        <i class="bi bi-camera"></i> Головне зображення
-        <small class="text-danger">(обов'язково)</small>
+        <i class="bi bi-camera"></i> {% trans "Головне зображення" %}
+        <small class="text-danger">({% trans "обов'язково" %})</small>
       </h5>
 
       {# Помилки форми зображення --- #}
@@ -82,8 +83,7 @@
       {{ image_form.as_div }}
 
       <small class="text-muted d-block mt-1">
-        Завантажте зображення страви (JPEG, PNG або WebP).
-        Рекомендований розмір: 640×480 пікселів.
+        {% trans "Завантажте зображення страви (JPEG, PNG або WebP). Рекомендований розмір: 640×480 пікселів." %}
       </small>
     {% endif %}
 
@@ -98,8 +98,8 @@
     {% if picture_formset %}
       <hr class="my-4">
       <h5 class="mb-3">
-        <i class="bi bi-images"></i> Додаткові зображення
-        <small class="text-muted">(необов'язково)</small>
+        <i class="bi bi-images"></i> {% trans "Додаткові зображення" %}
+        <small class="text-muted">({% trans "необов'язково" %})</small>
       </h5>
 
       {# ManagementForm — приховані поля TOTAL_FORMS, INITIAL_FORMS тощо.    #}
@@ -122,7 +122,7 @@
         {# HTML-імена полів: "pictures-0-title", "pictures-0-image".         #}
         {% for picture_form in picture_formset %}
           <div class="card mb-2 p-3 picture-form">
-            <h6 class="text-muted mb-2">Зображення <span class="picture-number">{{ forloop.counter }}</span></h6>
+            <h6 class="text-muted mb-2">{% trans "Зображення" %} <span class="picture-number">{{ forloop.counter }}</span></h6>
 
             {% if picture_form.non_field_errors %}
               <div class="alert alert-danger">
@@ -140,21 +140,21 @@
       {# та збільшує TOTAL_FORMS у ManagementForm.                           #}
       <button type="button" class="btn btn-outline-secondary btn-sm mt-2"
               id="add-picture-btn">
-        <i class="bi bi-plus-circle"></i> Додати ще зображення
+        <i class="bi bi-plus-circle"></i> {% trans "Додати ще зображення" %}
       </button>
 
       <small class="text-muted d-block mt-2">
-        Завантажте додаткові фото страви. Порожні форми будуть пропущені.
+        {% trans "Завантажте додаткові фото страви. Порожні форми будуть пропущені." %}
       </small>
     {% endif %}
 
     {# --- Кнопки --- #}
     <div class="mt-4 d-flex gap-2">
       <button type="submit" class="btn btn-primary">
-        <i class="bi bi-check-lg"></i> Зберегти
+        <i class="bi bi-check-lg"></i> {% trans "Зберегти" %}
       </button>
       <a href="{% url 'menu:dish_list' %}" class="btn btn-outline-secondary">
-        Скасувати
+        {% trans "Скасувати" %}
       </a>
     </div>
 

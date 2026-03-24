@@ -157,7 +157,7 @@
           var badge = document.createElement("span");
           badge.className = newUrgency === "critical"
             ? "badge bg-danger" : "badge bg-warning text-dark";
-          badge.textContent = newUrgency === "critical" ? "Прострочено" : "Терміново!";
+          badge.textContent = newUrgency === "critical" ? gettext("Прострочено") : gettext("Терміново!");
           infoDiv.querySelector("strong").after(badge);
         }
 

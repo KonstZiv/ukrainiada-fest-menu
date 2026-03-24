@@ -17,6 +17,7 @@ from typing import Any
 from django import forms
 from django.db import models
 from django.forms import BaseInlineFormSet
+from django.utils.translation import gettext_lazy as _
 
 from menu.models import (
     Category,
@@ -99,7 +100,7 @@ class CategoryLogoForm(forms.ModelForm):
         fields = ["title", "image"]
         widgets = {
             "title": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Назва логотипу"}
+                attrs={"class": "form-control", "placeholder": _("Назва логотипу")}
             ),
             # FileInput — стандартний HTML <input type="file">.
             # accept=".svg" — підказка для браузера (фільтрує файли у діалозі),
@@ -258,7 +259,7 @@ class DishForm(forms.ModelForm):
         """
         tags: models.QuerySet[Tag, Tag] | None = self.cleaned_data.get("tags")
         if not tags:
-            raise forms.ValidationError("Оберіть хоча б один тег для страви.")
+            raise forms.ValidationError(_("Оберіть хоча б один тег для страви."))
         return tags
 
 
@@ -301,7 +302,7 @@ class DishMainImageForm(forms.ModelForm):
         fields = ["title", "image"]
         widgets = {
             "title": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Назва зображення"}
+                attrs={"class": "form-control", "placeholder": _("Назва зображення")}
             ),
             # accept="image/*" — підказка для браузера: показувати лише зображення
             # у діалозі вибору файлу. НЕ замінює серверну валідацію!
@@ -331,7 +332,7 @@ class TagLogoForm(forms.ModelForm):
         fields = ["title", "image"]
         widgets = {
             "title": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Назва логотипу"}
+                attrs={"class": "form-control", "placeholder": _("Назва логотипу")}
             ),
             "image": forms.FileInput(attrs={"class": "form-control", "accept": ".svg"}),
         }
@@ -371,7 +372,7 @@ DishPictureFormSet: type[BaseInlineFormSet[Any, Any, Any]] = (
         can_delete=False,
         widgets={
             "title": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Назва зображення"}
+                attrs={"class": "form-control", "placeholder": _("Назва зображення")}
             ),
             "image": forms.FileInput(
                 attrs={"class": "form-control", "accept": "image/*"}

@@ -139,10 +139,10 @@
     if (!indicator) return;
     if (connected) {
       indicator.className = 'badge bg-success';
-      indicator.textContent = 'Live';
+      indicator.textContent = gettext('Live');
     } else {
       indicator.className = 'badge bg-danger';
-      indicator.textContent = 'Offline';
+      indicator.textContent = gettext('Offline');
     }
   }
 
@@ -187,7 +187,7 @@
 
   function onOrderSubmitted(data) {
     console.log('[SSE] onOrderSubmitted order=' + data.order_id);
-    showFlash('Нове замовлення #' + data.order_id + ' від клієнта', 'info');
+    showFlash(interpolate(gettext('Нове замовлення #%(order_id)s від клієнта'), {order_id: data.order_id}, true), 'info');
     sseBeep(660, 0.2);
     updateNavBadge('nav-badge-orders', BADGE_ORDERS_KEY, 1);
     if (_isWaiterDashboard) {
@@ -201,10 +201,10 @@
     );
     console.log('[SSE] onTicketDone ticket=' + data.ticket_id + ' el_found=' + !!el);
     if (el) {
-      el.textContent = 'Готово';
+      el.textContent = gettext('Готово');
       el.className = 'ticket-status badge bg-success';
     }
-    showFlash('Страва готова: ' + (data.dish || '#' + data.ticket_id), 'success');
+    showFlash(gettext('Страва готова:') + ' ' + (data.dish || '#' + data.ticket_id), 'success');
     updateNavBadge('nav-badge-orders', BADGE_ORDERS_KEY, 1);
     if (_isWaiterDashboard && _matchesDetailOrder(data.order_id)) {
       scheduleReload(2000);
@@ -220,7 +220,7 @@
       console.log('[SSE] onOrderReady btn-deliver found=' + !!btn);
       if (btn) btn.style.display = 'block';
     }
-    showFlash('Замовлення #' + data.order_id + ' готове!', 'success');
+    showFlash(interpolate(gettext('Замовлення #%(order_id)s готове!'), {order_id: data.order_id}, true), 'success');
     updateNavBadge('nav-badge-orders', BADGE_ORDERS_KEY, 1);
     if (_isWaiterDashboard && _matchesDetailOrder(data.order_id)) {
       scheduleReload(2000);
@@ -233,7 +233,7 @@
     );
     console.log('[SSE] onTicketTaken ticket=' + data.ticket_id + ' order=' + data.order_id + ' by=' + data.by + ' el_found=' + !!el);
     if (el) {
-      el.textContent = 'Готується (' + data.by + ')';
+      el.textContent = interpolate(gettext('Готується (%(by)s)'), {by: data.by}, true);
       el.className = 'ticket-status badge bg-info';
     }
     if (_isWaiterDashboard && _matchesDetailOrder(data.order_id)) {
@@ -248,7 +248,7 @@
     if (counter) {
       counter.textContent = parseInt(counter.textContent || '0', 10) + 1;
     }
-    showFlash('Замовлення #' + data.order_id + ' на кухні', 'info');
+    showFlash(interpolate(gettext('Замовлення #%(order_id)s на кухні'), {order_id: data.order_id}, true), 'info');
     sseBeep(660, 0.2);
     updateNavBadge('nav-badge-kitchen', BADGE_KITCHEN_KEY, 1);
     if (_isKitchenDashboard) {
@@ -298,8 +298,8 @@
   }
 
   var escalationLabels = {
-    kitchen_escalation: 'Кухня',
-    payment_escalation: 'Оплата',
+    kitchen_escalation: gettext('Кухня'),
+    payment_escalation: gettext('Оплата'),
   };
 
   function onOrderUpdated(data) {
@@ -311,7 +311,7 @@
 
   function onOrderCancelled(data) {
     console.log('[SSE] onOrderCancelled order=' + data.order_id);
-    showFlash('Замовлення #' + data.order_id + ' скасовано', 'warning');
+    showFlash(interpolate(gettext('Замовлення #%(order_id)s скасовано'), {order_id: data.order_id}, true), 'warning');
     if (_isWaiterDashboard) {
       scheduleReload(2000);
     }
@@ -321,7 +321,7 @@
     var id = data.ticket_id || data.order_id;
     var label = escalationLabels[data.type] || data.type;
     console.log('[SSE] onEscalation type=' + data.type + ' id=' + id + ' level=' + data.level);
-    showFlash('Ескалація! ' + label + ' #' + id, 'danger');
+    showFlash(interpolate(gettext('Ескалація! %(label)s #%(id)s'), {label: label, id: id}, true), 'danger');
     var badge = document.getElementById('escalation-badge');
     console.log('[SSE] onEscalation badge_found=' + !!badge);
     if (badge) badge.style.display = 'inline';

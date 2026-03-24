@@ -32,7 +32,7 @@ document.addEventListener("submit", function (e) {
         var badge = document.createElement("span");
         badge.className = "badge bg-secondary";
         badge.style.fontSize = "0.65rem";
-        badge.textContent = "доставлено";
+        badge.textContent = gettext("доставлено");
         parent.insertBefore(badge, parent.firstChild);
         console.log("[AjaxDeliver] badge inserted, form removed");
 

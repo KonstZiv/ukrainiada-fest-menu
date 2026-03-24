@@ -19,9 +19,8 @@
         banner.style.position = "sticky";
         banner.style.top = "0";
         banner.style.zIndex = "1050";
-        // TODO: i18n — replace hardcoded text with translated string (Sprint 6 backlog)
         banner.textContent =
-            "\u{1F4F5} \u041E\u0444\u043B\u0430\u0439\u043D-\u0440\u0435\u0436\u0438\u043C \u2014 \u043C\u0435\u043D\u044E \u043C\u043E\u0436\u0435 \u0431\u0443\u0442\u0438 \u0437\u0430\u0441\u0442\u0430\u0440\u0456\u043B\u0438\u043C. \u0417\u0430\u043C\u043E\u0432\u043B\u0435\u043D\u043D\u044F \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u0456.";
+            "\u{1F4F5} " + gettext("Офлайн-режим \u2014 меню може бути застарілим. Замовлення недоступні.");
         document.body.prepend(banner);
 
         document.querySelectorAll(".form-needs-network").forEach((form) => {

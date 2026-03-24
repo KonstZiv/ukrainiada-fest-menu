@@ -20,8 +20,9 @@
 
 {# --- Наслідуємо базовий шаблон --- #}
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Jadran Sun — Теги{% endblock %}
+{% block title %}Jadran Sun — {% trans "Теги" %}{% endblock %}
 
 {# ======================================================================= #}
 {# Блок nav_pills — перемикач "Категорії" / "Теги"                          #}
@@ -74,11 +75,11 @@
             <span class="d-inline-flex gap-1 flex-shrink-0 me-3"
                   onclick="event.stopPropagation();">
               <a href="{% url 'menu:tag_update' tag.pk %}"
-                 class="btn btn-outline-secondary btn-sm" title="Редагувати">
+                 class="btn btn-outline-secondary btn-sm" title="{% trans "Редагувати" %}">
                 <i class="bi bi-pencil"></i>
               </a>
               <a href="{% url 'menu:tag_delete' tag.pk %}"
-                 class="btn btn-outline-danger btn-sm" title="Видалити">
+                 class="btn btn-outline-danger btn-sm" title="{% trans "Видалити" %}">
                 <i class="bi bi-trash"></i>
               </a>
             </span>
@@ -142,7 +143,7 @@
 
               {# Повідомлення якщо до тега не прив'язано жодної страви #}
               {% if not dishes_by_cat %}
-                <div class="p-3 text-muted small">Страв з цим тегом поки немає.</div>
+                <div class="p-3 text-muted small">{% trans "Страв з цим тегом поки немає." %}</div>
               {% endif %}
 
             </div>

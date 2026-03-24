@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "kitchen",
     "notifications",
     "feedback",
+    "translations",
     # Third-party
     "django_celery_beat",
 ]
@@ -68,6 +69,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "orders.context_processors.cart_context",
                 "orders.context_processors.manager_context",
+                "translations.context_processors.translation_context",
             ],
         },
     },
@@ -308,3 +310,9 @@ VERIFY_TIMEOUT: int = config("VERIFY_TIMEOUT", default=5, cast=int)
 COOKING_TIMEOUT: int = config("COOKING_TIMEOUT", default=15, cast=int)
 HANDOFF_TIMEOUT: int = config("HANDOFF_TIMEOUT", default=10, cast=int)
 SENIOR_RESPONSE_TIMEOUT: int = config("SENIOR_RESPONSE_TIMEOUT", default=10, cast=int)
+
+# ---------------------------------------------------------------------------
+# LLM auto-translation (Google Gemini)
+# ---------------------------------------------------------------------------
+
+GEMINI_API_KEY: str = config("GEMINI_API_KEY", default="")

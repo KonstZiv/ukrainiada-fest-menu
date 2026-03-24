@@ -22,12 +22,13 @@
 {# --------------------------------------------------------------------------- #}
 
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
   {% if form.instance.pk %}
-    Jadran Sun — Редагувати категорію
+    Jadran Sun — {% trans "Редагувати категорію" %}
   {% else %}
-    Jadran Sun — Нова категорія
+    Jadran Sun — {% trans "Нова категорія" %}
   {% endif %}
 {% endblock %}
 
@@ -37,9 +38,9 @@
   {# --- Заголовок сторінки --- #}
   <h2 class="mb-4">
     {% if form.instance.pk %}
-      Редагувати категорію
+      {% trans "Редагувати категорію" %}
     {% else %}
-      Створити категорію
+      {% trans "Створити категорію" %}
     {% endif %}
   </h2>
 
@@ -77,8 +78,8 @@
     {% if logo_form %}
       <hr class="my-4">
       <h5 class="mb-3">
-        <i class="bi bi-image"></i> Логотип категорії
-        <small class="text-muted">(необов'язково)</small>
+        <i class="bi bi-image"></i> {% trans "Логотип категорії" %}
+        <small class="text-muted">({% trans "необов'язково" %})</small>
       </h5>
 
       {# Помилки форми логотипу --- #}
@@ -91,18 +92,17 @@
       {{ logo_form.as_div }}
 
       <small class="text-muted d-block mt-1">
-        Завантажте SVG-файл з логотипом категорії. Формат SVG дозволяє
-        масштабування без втрати якості.
+        {% trans "Завантажте SVG-файл з логотипом категорії. Формат SVG дозволяє масштабування без втрати якості." %}
       </small>
     {% endif %}
 
     {# --- Кнопки --- #}
     <div class="mt-4 d-flex gap-2">
       <button type="submit" class="btn btn-primary">
-        <i class="bi bi-check-lg"></i> Зберегти
+        <i class="bi bi-check-lg"></i> {% trans "Зберегти" %}
       </button>
       <a href="{% url 'menu:category_list' %}" class="btn btn-outline-secondary">
-        Скасувати
+        {% trans "Скасувати" %}
       </a>
     </div>
 

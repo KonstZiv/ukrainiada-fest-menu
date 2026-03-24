@@ -5,6 +5,7 @@ import uuid
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 
 class KitchenAssignment(models.Model):
@@ -18,20 +19,20 @@ class KitchenAssignment(models.Model):
         "menu.Dish",
         on_delete=models.CASCADE,
         related_name="kitchen_assignments",
-        verbose_name="Страва",
+        verbose_name=_("Страва"),
     )
     kitchen_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="kitchen_assignments",
         limit_choices_to={"role__in": ["kitchen", "kitchen_supervisor"]},
-        verbose_name="Кухар",
+        verbose_name=_("Кухар"),
     )
 
     class Meta:
         unique_together = [("dish", "kitchen_user")]
-        verbose_name = "Розподіл кухні"
-        verbose_name_plural = "Розподіл кухні"
+        verbose_name = _("Розподіл кухні")
+        verbose_name_plural = _("Розподіл кухні")
 
     def __str__(self) -> str:
         name = self.kitchen_user.get_full_name() or self.kitchen_user.email
@@ -48,20 +49,20 @@ class KitchenTicket(models.Model):
     """
 
     class Status(models.TextChoices):
-        PENDING = "pending", "Очікує"
-        TAKEN = "taken", "Готується"
-        DONE = "done", "Готово"
+        PENDING = "pending", _("Очікує")
+        TAKEN = "taken", _("Готується")
+        DONE = "done", _("Готово")
 
     class EscalationLevel(models.IntegerChoices):
-        NONE = 0, "Немає"
-        SUPERVISOR = 1, "Старший кухні"
-        MANAGER = 2, "Менеджер"
+        NONE = 0, _("Немає")
+        SUPERVISOR = 1, _("Старший кухні")
+        MANAGER = 2, _("Менеджер")
 
     order_item = models.ForeignKey(
         "orders.OrderItem",
         on_delete=models.CASCADE,
         related_name="kitchen_tickets",
-        verbose_name="Позиція замовлення",
+        verbose_name=_("Позиція замовлення"),
     )
     assigned_to = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -70,7 +71,7 @@ class KitchenTicket(models.Model):
         blank=True,
         related_name="kitchen_tickets",
         limit_choices_to={"role__in": ["kitchen", "kitchen_supervisor"]},
-        verbose_name="Кухар",
+        verbose_name=_("Кухар"),
     )
     status = models.CharField(
         max_length=10,
@@ -100,8 +101,8 @@ class KitchenTicket(models.Model):
 
     class Meta:
         ordering = ["created_at"]
-        verbose_name = "Тікет кухні"
-        verbose_name_plural = "Тікети кухні"
+        verbose_name = _("Тікет кухні")
+        verbose_name_plural = _("Тікети кухні")
 
     def __str__(self) -> str:
         return f"Ticket #{self.pk}: {self.order_item} [{self.status}]"
@@ -138,8 +139,8 @@ class KitchenHandoff(models.Model):
     is_confirmed = models.BooleanField(default=False)
 
     class Meta:
-        verbose_name = "Передача страви"
-        verbose_name_plural = "Передачі страв"
+        verbose_name = _("Передача страви")
+        verbose_name_plural = _("Передачі страв")
 
     def __str__(self) -> str:
         return f"Handoff {self.token} [{self.ticket}]"

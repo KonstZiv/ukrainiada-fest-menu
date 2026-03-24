@@ -9,9 +9,10 @@
 {# --------------------------------------------------------------------------- #}
 
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
-  Jadran Sun — Профіль
+  Jadran Sun — {% trans "Профіль" %}
 {% endblock %}
 
 {% block content %}
@@ -19,7 +20,7 @@
 
     {# --- Заголовок сторінки --- #}
     <h2 class="mb-4">
-      <i class="bi bi-person-circle"></i> Профіль
+      <i class="bi bi-person-circle"></i> {% trans "Профіль" %}
     </h2>
 
     {% if user.is_authenticated %}
@@ -29,7 +30,7 @@
           <div class="d-flex align-items-center gap-3 mb-3">
             {# --- Аватар або іконка-заглушка --- #}
             {% if user.avatar %}
-              <img src="{{ user.avatar.url }}" alt="Аватар"
+              <img src="{{ user.avatar.url }}" alt="{% trans "Аватар" %}"
                    style="width: 48px; height: 48px; object-fit: cover; border-radius: var(--radius-sm);">
             {% else %}
               <div class="brand-logo" style="width: 48px; height: 48px; font-size: 1.3rem;">
@@ -52,17 +53,17 @@
           {# --- Деталі акаунту --- #}
           <div class="small text-muted">
             <div class="d-flex justify-content-between py-1">
-              <span>Дата реєстрації:</span>
+              <span>{% trans "Дата реєстрації:" %}</span>
               <span class="fw-semibold text-body">{{ user.date_joined|date:"d.m.Y" }}</span>
             </div>
             <div class="d-flex justify-content-between py-1">
-              <span>Останній вхід:</span>
+              <span>{% trans "Останній вхід:" %}</span>
               <span class="fw-semibold text-body">{{ user.last_login|date:"d.m.Y H:i" }}</span>
             </div>
             {% if user.is_staff %}
               <div class="d-flex justify-content-between py-1">
-                <span>Статус:</span>
-                <span class="badge text-bg-primary">Адміністратор</span>
+                <span>{% trans "Статус:" %}</span>
+                <span class="badge text-bg-primary">{% trans "Адміністратор" %}</span>
               </div>
             {% endif %}
           </div>
@@ -72,13 +73,13 @@
       {# --- Кнопки дій --- #}
       <div class="mt-4 d-flex gap-2">
         <a href="{% url 'user:profile_edit' %}" class="btn btn-primary">
-          <i class="bi bi-pencil"></i> Редагувати профіль
+          <i class="bi bi-pencil"></i> {% trans "Редагувати профіль" %}
         </a>
         <a href="{% url 'password_change' %}" class="btn btn-outline-secondary">
-          <i class="bi bi-key"></i> Замінити пароль
+          <i class="bi bi-key"></i> {% trans "Замінити пароль" %}
         </a>
         <a href="{% url 'menu:index' %}" class="btn btn-outline-secondary">
-          <i class="bi bi-arrow-left"></i> До меню
+          <i class="bi bi-arrow-left"></i> {% trans "До меню" %}
         </a>
       </div>
 
@@ -86,11 +87,11 @@
       {# --- Для неавтентифікованих --- #}
       <div class="alert alert-warning">
         <i class="bi bi-exclamation-triangle"></i>
-        Ви не увійшли в систему.
+        {% trans "Ви не увійшли в систему." %}
       </div>
       <div class="d-flex gap-2">
         <a href="{% url 'user:sign_up' %}" class="btn btn-primary">
-          <i class="bi bi-person-plus"></i> Зареєструватись
+          <i class="bi bi-person-plus"></i> {% trans "Зареєструватись" %}
         </a>
       </div>
     {% endif %}

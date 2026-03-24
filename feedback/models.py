@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class GuestFeedback(models.Model):
@@ -13,31 +14,31 @@ class GuestFeedback(models.Model):
     """
 
     class Mood(models.TextChoices):
-        LOVE = "love", "❤️ Чудово"
-        GOOD = "good", "😊 Добре"
-        OK = "ok", "😐 Нормально"
-        BAD = "bad", "😕 Не дуже"
+        LOVE = "love", _("❤️ Чудово")
+        GOOD = "good", _("😊 Добре")
+        OK = "ok", _("😐 Нормально")
+        BAD = "bad", _("😕 Не дуже")
 
     order = models.OneToOneField(
         "orders.Order",
         on_delete=models.CASCADE,
         related_name="feedback",
-        verbose_name="Замовлення",
+        verbose_name=_("Замовлення"),
     )
     visitor_name = models.CharField(
         max_length=50,
         blank=True,
-        verbose_name="Ім'я відвідувача",
+        verbose_name=_("Ім'я відвідувача"),
     )
     mood = models.CharField(
         max_length=10,
         choices=Mood.choices,
-        verbose_name="Настрій",
+        verbose_name=_("Настрій"),
     )
     message = models.TextField(
         max_length=500,
         blank=True,
-        verbose_name="Повідомлення",
+        verbose_name=_("Повідомлення"),
     )
 
     is_published = models.BooleanField(default=False, db_index=True)
@@ -48,8 +49,8 @@ class GuestFeedback(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
-        verbose_name = "Відгук"
-        verbose_name_plural = "Відгуки"
+        verbose_name = _("Відгук")
+        verbose_name_plural = _("Відгуки")
 
     def __str__(self) -> str:
         name = self.visitor_name or "Анонім"

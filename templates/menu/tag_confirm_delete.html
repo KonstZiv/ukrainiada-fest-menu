@@ -17,32 +17,32 @@
 {# --------------------------------------------------------------------------- #}
 
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Jadran Sun — Видалити тег{% endblock %}
+{% block title %}Jadran Sun — {% trans "Видалити тег" %}{% endblock %}
 
 {% block content %}
 <div class="container mt-3" style="max-width: 600px;">
 
   <h2 class="mb-4 text-danger">
-    <i class="bi bi-exclamation-triangle"></i> Видалити тег
+    <i class="bi bi-exclamation-triangle"></i> {% trans "Видалити тег" %}
   </h2>
 
   {# --- Попередження --- #}
   <div class="alert alert-danger">
-    <strong>Увага!</strong> Ви збираєтесь видалити тег
-    <strong>«{{ tag.title }}»</strong>.
+    <strong>{% trans "Увага!" %}</strong> {% blocktrans with title=tag.title %}Ви збираєтесь видалити тег <strong>«{{ title }}»</strong>.{% endblocktrans %}
   </div>
 
   {# --- Що буде видалено --- #}
   <div class="card mb-3">
     <div class="card-body">
-      <h6 class="card-title">Разом з тегом буде видалено:</h6>
+      <h6 class="card-title">{% trans "Разом з тегом буде видалено:" %}</h6>
       <ul class="mb-0">
         {% if tag.logo %}
-          <li>Логотип тега: «{{ tag.logo.title }}»</li>
+          <li>{% blocktrans with title=tag.logo.title %}Логотип тега: «{{ title }}»{% endblocktrans %}</li>
         {% endif %}
         <li class="text-muted">
-          Зв'язки зі стравами будуть видалені, але самі страви залишаться.
+          {% trans "Зв'язки зі стравами будуть видалені, але самі страви залишаться." %}
         </li>
       </ul>
     </div>
@@ -55,10 +55,10 @@
     {% csrf_token %}
     <div class="d-flex gap-2">
       <button type="submit" class="btn btn-danger">
-        <i class="bi bi-trash"></i> Так, видалити
+        <i class="bi bi-trash"></i> {% trans "Так, видалити" %}
       </button>
       <a href="{% url 'menu:tag_list' %}" class="btn btn-outline-secondary">
-        Скасувати
+        {% trans "Скасувати" %}
       </a>
     </div>
   </form>

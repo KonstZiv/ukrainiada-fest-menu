@@ -58,6 +58,15 @@
       <button onclick="location.reload()" class="btn btn-sm btn-outline-secondary me-2 p-0 px-1" style="font-size: 0.7rem;" title="{% trans "Оновити" %}">
         <i class="bi bi-arrow-clockwise"></i>
       </button>
+      {% if pending_translations_count %}
+      <a href="{% url 'translations:review' %}"
+         class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none d-flex align-items-center gap-1 me-2"
+         style="font-size: 0.8rem; letter-spacing: 0.05em;">
+        {% trans "ПЕРЕКЛАДИ" %}
+        <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">{{ pending_translations_count }}</span>
+      </a>
+      {% endif %}
+
       {% if user.is_staff and user.role != 'manager' %}
       <div class="dropdown me-2">
         <button class="btn btn-sm text-primary fw-semibold p-0 dropdown-toggle"

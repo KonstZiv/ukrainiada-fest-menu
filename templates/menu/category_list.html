@@ -24,8 +24,9 @@
 
 {# --- Наслідуємо базовий шаблон --- #}
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Jadran Sun — Категорії{% endblock %}
+{% block title %}Jadran Sun — {% trans "Категорії" %}{% endblock %}
 
 {# ======================================================================= #}
 {# Блок nav_pills — перемикач "Категорії" / "Теги"                          #}
@@ -88,11 +89,11 @@
             <span class="d-inline-flex gap-1 flex-shrink-0 me-3"
                   onclick="event.stopPropagation();">
               <a href="{% url 'menu:category_update' category.pk %}"
-                 class="btn btn-outline-secondary btn-sm" title="Редагувати">
+                 class="btn btn-outline-secondary btn-sm" title="{% trans "Редагувати" %}">
                 <i class="bi bi-pencil"></i>
               </a>
               <a href="{% url 'menu:category_delete' category.pk %}"
-                 class="btn btn-outline-danger btn-sm" title="Видалити">
+                 class="btn btn-outline-danger btn-sm" title="{% trans "Видалити" %}">
                 <i class="bi bi-trash"></i>
               </a>
             </span>
@@ -169,7 +170,7 @@
                 </div>
               {% empty %}
                 {# Повідомлення якщо в категорії немає страв #}
-                <div class="p-3 text-muted small">Страв у цій категорії поки немає.</div>
+                <div class="p-3 text-muted small">{% trans "Страв у цій категорії поки немає." %}</div>
               {% endfor %}
 
             </div>

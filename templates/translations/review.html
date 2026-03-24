@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load i18n menu_extras %}
+
+{% block title %}{% trans "Переклади" %}{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <h4 class="mb-3">{% trans "Переклади для перевірки" %}</h4>
+
+  {% if not objects %}
+  <div class="alert alert-success">
+    <i class="bi bi-check-circle me-1"></i> {% trans "Усі переклади затверджено." %}
+  </div>
+  {% endif %}
+
+  {% for item in objects %}
+  <div class="card mb-3 border-warning">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span>
+        <span class="badge bg-secondary me-1">{{ item.model_name }}</span>
+        <strong>{{ item.object }}</strong>
+      </span>
+      <form method="post" action="{% url 'translations:approve_all' %}" class="d-inline">
+        {% csrf_token %}
+        <input type="hidden" name="content_type_id" value="{{ item.content_type.id }}">
+        <input type="hidden" name="object_id" value="{{ item.object_id }}">
+        <button type="submit" class="btn btn-sm btn-success">
+          <i class="bi bi-check-all me-1"></i>{% trans "Затвердити все" %}
+        </button>
+      </form>
+    </div>
+
+    <div class="card-body">
+      {# Source (UK) #}
+      <div class="mb-3 p-2 bg-light rounded">
+        <small class="text-muted fw-semibold">🇺🇦 {% trans "Оригінал (UK)" %}</small>
+        {% for field, value in item.source.items %}
+        <div class="mt-1">
+          <span class="text-muted">{{ field }}:</span>
+          <span>{{ value }}</span>
+        </div>
+        {% endfor %}
+      </div>
+
+      {# Language tabs #}
+      <ul class="nav nav-tabs" role="tablist">
+        {% for lang, data in item.languages.items %}
+        <li class="nav-item" role="presentation">
+          <button class="nav-link {% if forloop.first %}active{% endif %} {% if data.approval.status == 'failed' %}text-danger{% elif data.approval.status == 'pending' %}text-warning{% else %}text-success{% endif %}"
+                  data-bs-toggle="tab"
+                  data-bs-target="#tab-{{ item.object_id }}-{{ lang }}"
+                  type="button" role="tab">
+            {{ lang|lang_flag }} {{ lang|upper }}
+            {% if data.approval.status == "pending" %}
+            <span class="badge bg-warning text-dark" style="font-size: 0.6rem;">!</span>
+            {% elif data.approval.status == "failed" %}
+            <span class="badge bg-danger" style="font-size: 0.6rem;">✗</span>
+            {% else %}
+            <span class="badge bg-success" style="font-size: 0.6rem;">✓</span>
+            {% endif %}
+          </button>
+        </li>
+        {% endfor %}
+      </ul>
+
+      <div class="tab-content border border-top-0 rounded-bottom p-3">
+        {% for lang, data in item.languages.items %}
+        <div class="tab-pane {% if forloop.first %}show active{% endif %}"
+             id="tab-{{ item.object_id }}-{{ lang }}" role="tabpanel">
+
+          {% for field, value in data.translations.items %}
+          <div class="mb-2">
+            <span class="text-muted">{{ field }}:</span>
+            <span {% if data.approval.status == "pending" %}class="bg-warning-subtle px-1 rounded"{% elif data.approval.status == "failed" %}class="bg-danger-subtle px-1 rounded"{% endif %}>
+              {{ value|default:"—" }}
+            </span>
+          </div>
+          {% endfor %}
+
+          <div class="mt-2 d-flex gap-2">
+            {% if data.approval.status == "pending" %}
+            <form method="post" action="{% url 'translations:approve' data.approval.id %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-success">
+                <i class="bi bi-check-lg me-1"></i>{% trans "Затвердити" %}
+              </button>
+            </form>
+            {% endif %}
+
+            {% if data.approval.status != "approved" %}
+            <a href="{% url 'translations:edit' data.approval.id %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-pencil me-1"></i>{% trans "Редагувати" %}
+            </a>
+            {% endif %}
+
+            {% if data.approval.status == "failed" %}
+            <form method="post" action="{% url 'translations:retry' data.approval.id %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-warning">
+                <i class="bi bi-arrow-repeat me-1"></i>{% trans "Повторити" %}
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

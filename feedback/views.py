@@ -5,6 +5,7 @@ from __future__ import annotations
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from feedback.models import GuestFeedback
@@ -31,7 +32,7 @@ def submit_feedback(request: HttpRequest, order_id: int) -> HttpResponse:
     visitor_name = request.POST.get("visitor_name", "")
     try:
         create_feedback(order, mood=mood, message=msg, visitor_name=visitor_name)
-        messages.success(request, "Дякуємо за відгук! 🙏")
+        messages.success(request, _("Дякуємо за відгук! 🙏"))
     except ValueError as e:
         messages.warning(request, str(e))
 
@@ -67,12 +68,12 @@ def moderate_action(request: HttpRequest, feedback_id: int) -> HttpResponse:
 
     if action == "publish":
         publish_feedback(fb)
-        messages.success(request, "Відгук опубліковано.")
+        messages.success(request, _("Відгук опубліковано."))
     elif action == "feature":
         feature_feedback(fb)
-        messages.success(request, "Відгук виділено і опубліковано.")
+        messages.success(request, _("Відгук виділено і опубліковано."))
     elif action == "reject":
         fb.delete()
-        messages.info(request, "Відгук видалено.")
+        messages.info(request, _("Відгук видалено."))
 
     return redirect("feedback:moderate")

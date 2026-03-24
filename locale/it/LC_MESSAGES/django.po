@@ -1,0 +1,1266 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-24 21:42+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+msgid "❤️ Чудово"
+msgstr ""
+
+msgid "😊 Добре"
+msgstr ""
+
+msgid "😐 Нормально"
+msgstr ""
+
+msgid "😕 Не дуже"
+msgstr ""
+
+msgid "Замовлення"
+msgstr ""
+
+msgid "Ім'я відвідувача"
+msgstr ""
+
+msgid "Настрій"
+msgstr ""
+
+msgid "Повідомлення"
+msgstr ""
+
+msgid "Відгук"
+msgstr ""
+
+msgid "Відгуки"
+msgstr ""
+
+msgid "Дякуємо за відгук! 🙏"
+msgstr ""
+
+msgid "Відгук опубліковано."
+msgstr ""
+
+msgid "Відгук виділено і опубліковано."
+msgstr ""
+
+msgid "Відгук видалено."
+msgstr ""
+
+msgid "Страва"
+msgstr ""
+
+msgid "Кухар"
+msgstr ""
+
+msgid "Розподіл кухні"
+msgstr ""
+
+msgid "Очікує"
+msgstr ""
+
+msgid "Готується"
+msgstr ""
+
+msgid "Готово"
+msgstr ""
+
+msgid "Немає"
+msgstr ""
+
+msgid "Старший кухні"
+msgstr ""
+
+msgid "Менеджер"
+msgstr ""
+
+msgid "Позиція замовлення"
+msgstr ""
+
+msgid "Тікет кухні"
+msgstr ""
+
+msgid "Тікети кухні"
+msgstr ""
+
+msgid "Передача страви"
+msgstr ""
+
+msgid "Передачі страв"
+msgstr ""
+
+#, python-brace-format
+msgid "'{dish_title}' — пропущено: {skipped}"
+msgstr ""
+
+msgid "Обраний офіціант не знайдений або не має відповідної ролі."
+msgstr ""
+
+msgid "Назва логотипу"
+msgstr ""
+
+msgid "Оберіть хоча б один тег для страви."
+msgstr ""
+
+msgid "Назва зображення"
+msgstr ""
+
+msgid "Порядок у меню"
+msgstr ""
+
+msgid "Менше число — вище у списку"
+msgstr ""
+
+msgid "В наявності"
+msgstr ""
+
+msgid "Закінчується — уточнюйте у офіціанта"
+msgstr ""
+
+msgid "Алергени"
+msgstr ""
+
+msgid "Наявність"
+msgstr ""
+
+msgid "Файл не є валідним SVG. Завантажте файл у форматі SVG."
+msgstr ""
+
+msgid "Чернетка"
+msgstr ""
+
+msgid "Створено"
+msgstr ""
+
+msgid "Прийнято"
+msgstr ""
+
+msgid "Верифіковано"
+msgstr ""
+
+msgid "Доставлено"
+msgstr ""
+
+msgid "Скасовано"
+msgstr ""
+
+msgid "Не оплачено"
+msgstr ""
+
+msgid "Оплачено"
+msgstr ""
+
+msgid "Не визначено"
+msgstr ""
+
+msgid "Готівка"
+msgstr ""
+
+msgid "Онлайн"
+msgstr ""
+
+msgid "Де вас знайти (необов'язково)"
+msgstr ""
+
+msgid "Довго чекаю"
+msgstr ""
+
+msgid "Щось не те"
+msgstr ""
+
+msgid "Маю питання"
+msgstr ""
+
+msgid "Інше"
+msgstr ""
+
+msgid "Офіціант"
+msgstr ""
+
+msgid "Старший офіціант"
+msgstr ""
+
+msgid "Відкрита"
+msgstr ""
+
+msgid "Побачено"
+msgstr ""
+
+msgid "Вирішено"
+msgstr ""
+
+msgid "Коментар"
+msgstr ""
+
+msgid "Прийняття замовлення"
+msgstr ""
+
+msgid "Верифікація"
+msgstr ""
+
+msgid "Взяття тікета кухарем"
+msgstr ""
+
+msgid "Приготування"
+msgstr ""
+
+msgid "Передача офіціанту"
+msgstr ""
+
+msgid "Оплата"
+msgstr ""
+
+msgid "Старший"
+msgstr ""
+
+msgid "Кошик порожній або страви недоступні."
+msgstr ""
+
+msgid "Оплату підтверджено!"
+msgstr ""
+
+msgid "Ваше звернення надіслано!"
+msgstr ""
+
+#, python-brace-format
+msgid "#{order_id} — пропущені кроки: {skipped}"
+msgstr ""
+
+#, python-brace-format
+msgid "#{order_id} оплата — пропущені кроки: {skipped}"
+msgstr ""
+
+msgid "Цей QR-код призначений іншому офіціанту."
+msgstr ""
+
+msgid "Звернення позначено як побачене."
+msgstr ""
+
+msgid "Звернення вирішено."
+msgstr ""
+
+#, python-brace-format
+msgid "Оплату замовлення #{order_id} підтверджено."
+msgstr ""
+
+msgid "Доступ заборонено"
+msgstr ""
+
+msgid "У вас немає доступу до цього замовлення."
+msgstr ""
+
+msgid ""
+"Якщо це ваше замовлення — скористайтесь посиланням з QR-коду або увійдіть до "
+"свого акаунту."
+msgstr ""
+
+msgid "На головну"
+msgstr ""
+
+msgid "Увійти"
+msgstr ""
+
+msgid "Меню"
+msgstr ""
+
+msgid "Закрити"
+msgstr ""
+
+msgid "Назад"
+msgstr ""
+
+msgid "Категорії"
+msgstr ""
+
+msgid "Теги"
+msgstr ""
+
+msgid "Оновити"
+msgstr ""
+
+msgid "ПЕРЕКЛАДИ"
+msgstr ""
+
+msgid "АДМІНІСТРУВАННЯ"
+msgstr ""
+
+msgid "Створити"
+msgstr ""
+
+msgid "Нова категорія"
+msgstr ""
+
+msgid "Новий тег"
+msgstr ""
+
+msgid "Нова страва"
+msgstr ""
+
+msgid "ЗАМОВЛЕННЯ"
+msgstr ""
+
+msgid "КУХНЯ"
+msgstr ""
+
+msgid "МОНІТОРИНГ"
+msgstr ""
+
+msgid "УВІЙТИ"
+msgstr ""
+
+msgid "ЗАРЕЄСТРУВАТИСЬ"
+msgstr ""
+
+msgid "Пошук страв..."
+msgstr ""
+
+msgid "Сьогодні"
+msgstr ""
+
+msgid "Вчора"
+msgstr ""
+
+msgid "Тиждень"
+msgstr ""
+
+msgid "Місяць"
+msgstr ""
+
+msgid "Від"
+msgstr ""
+
+msgid "До"
+msgstr ""
+
+msgid "Застосувати"
+msgstr ""
+
+msgid "Кухня"
+msgstr ""
+
+msgid "страв"
+msgstr ""
+
+msgid "хв"
+msgstr ""
+
+msgid "сер. час"
+msgstr ""
+
+msgid "помилки"
+msgstr ""
+
+msgid "Офіціанти"
+msgstr ""
+
+msgid "замовлень"
+msgstr ""
+
+msgid "сер. чек"
+msgstr ""
+
+msgid "виторг"
+msgstr ""
+
+msgid "готівка"
+msgstr ""
+
+msgid "онлайн"
+msgstr ""
+
+msgid "готово"
+msgstr ""
+
+msgid "Забери!"
+msgstr ""
+
+msgid "Сплачено"
+msgstr ""
+
+msgid "Не сплачено"
+msgstr ""
+
+msgid "У вас — віднести клієнту"
+msgstr ""
+
+msgid "хв тому — забрати негайно!"
+msgstr ""
+
+msgid "хв — забрати!"
+msgstr ""
+
+msgid "готує"
+msgstr ""
+
+msgid "Готово на кухні — забрати!"
+msgstr ""
+
+msgid "В черзі на кухні"
+msgstr ""
+
+msgid "доставлено"
+msgstr ""
+
+msgid "Верифікувати"
+msgstr ""
+
+msgid "Оплату прийнято"
+msgstr ""
+
+msgid "Відвідувач:"
+msgstr ""
+
+msgid "Позиції"
+msgstr ""
+
+msgid "Скасувати замовлення"
+msgstr ""
+
+msgid "Разом:"
+msgstr ""
+
+msgid "Взяти замовлення"
+msgstr ""
+
+msgid "Верифікувати і передати на кухню"
+msgstr ""
+
+msgid "Доставлено клієнту"
+msgstr ""
+
+msgid "Оплату прийнято (готівка)"
+msgstr ""
+
+msgid "Позачергові дії"
+msgstr ""
+
+msgid "Якщо стандартний flow не був виконаний — зафіксуйте фактичний стан"
+msgstr ""
+
+msgid "Доставлено (без кухні)"
+msgstr ""
+
+msgid "Дошка відгуків"
+msgstr ""
+
+msgid "Що кажуть наші гості"
+msgstr ""
+
+msgid "Поки що відгуків немає. Будьте першим!"
+msgstr ""
+
+msgid "тому"
+msgstr ""
+
+msgid "Модерація відгуків"
+msgstr ""
+
+msgid "Очікують модерації"
+msgstr ""
+
+#, python-format
+msgid "Замовлення #%(order_id)s"
+msgstr ""
+
+msgid "(без повідомлення)"
+msgstr ""
+
+msgid "Опублікувати"
+msgstr ""
+
+msgid "Виділити"
+msgstr ""
+
+msgid "Видалити"
+msgstr ""
+
+msgid "Нових відгуків немає."
+msgstr ""
+
+msgid "стр."
+msgstr ""
+
+msgid "ескал."
+msgstr ""
+
+msgid "черга"
+msgstr ""
+
+msgid "в роб."
+msgstr ""
+
+msgid "В черзі"
+msgstr ""
+
+msgid "Готує"
+msgstr ""
+
+msgid "Немає кухарів у системі"
+msgstr ""
+
+msgid "Прострочено"
+msgstr ""
+
+msgid "Терміново!"
+msgstr ""
+
+msgid "Взяти"
+msgstr ""
+
+msgid "Натисніть для звуку"
+msgstr ""
+
+msgid "Ескалація"
+msgstr ""
+
+msgid "Черга"
+msgstr ""
+
+msgid "В роботі"
+msgstr ""
+
+msgid "Команда"
+msgstr ""
+
+msgid "Оберіть офіціанта"
+msgstr ""
+
+msgid "Згенерувати QR"
+msgstr ""
+
+msgid "Повернутись"
+msgstr ""
+
+msgid "Видалити категорію"
+msgstr ""
+
+msgid "Увага!"
+msgstr ""
+
+#, python-format
+msgid ""
+"Ви збираєтесь видалити категорію <strong>«%(title)s»</strong>. Це видалить "
+"також <strong>усі страви</strong> цієї категорії та їхні зображення!"
+msgstr ""
+
+msgid "Разом з категорією буде видалено:"
+msgstr ""
+
+#, python-format
+msgid "Логотип категорії: «%(title)s»"
+msgstr ""
+
+msgid "страва"
+msgstr ""
+
+msgid "страви"
+msgstr ""
+
+msgid "Страв у цій категорії немає."
+msgstr ""
+
+msgid "Так, видалити"
+msgstr ""
+
+msgid "Скасувати"
+msgstr ""
+
+msgid "Редагувати категорію"
+msgstr ""
+
+msgid "Створити категорію"
+msgstr ""
+
+msgid "Логотип категорії"
+msgstr ""
+
+msgid "необов'язково"
+msgstr ""
+
+msgid ""
+"Завантажте SVG-файл з логотипом категорії. Формат SVG дозволяє масштабування "
+"без втрати якості."
+msgstr ""
+
+msgid "Зберегти"
+msgstr ""
+
+msgid "Редагувати"
+msgstr ""
+
+msgid "Страв у цій категорії поки немає."
+msgstr ""
+
+msgid "Видалити страву"
+msgstr ""
+
+#, python-format
+msgid ""
+"Ви збираєтесь видалити страву <strong>«%(title)s»</strong> (%(price)s EUR)."
+msgstr ""
+
+msgid "Разом зі стравою буде видалено:"
+msgstr ""
+
+#, python-format
+msgid "Головне зображення: «%(title)s»"
+msgstr ""
+
+msgid "додаткове зображення"
+msgstr ""
+
+msgid "додаткових зображення"
+msgstr ""
+
+msgid "додаткових зображень"
+msgstr ""
+
+msgid "Зв'язки з тегами будуть видалені, але самі теги залишаться."
+msgstr ""
+
+msgid "Ціна"
+msgstr ""
+
+msgid "г"
+msgstr ""
+
+msgid "Вага"
+msgstr ""
+
+msgid "ккал"
+msgstr ""
+
+msgid "Додати в замовлення"
+msgstr ""
+
+msgid "Додаткові фото"
+msgstr ""
+
+msgid "Редагувати страву"
+msgstr ""
+
+msgid "Створити страву"
+msgstr ""
+
+msgid "Головне зображення"
+msgstr ""
+
+msgid "обов'язково"
+msgstr ""
+
+msgid ""
+"Завантажте зображення страви (JPEG, PNG або WebP). Рекомендований розмір: "
+"640×480 пікселів."
+msgstr ""
+
+msgid "Додаткові зображення"
+msgstr ""
+
+msgid "Зображення"
+msgstr ""
+
+msgid "Додати ще зображення"
+msgstr ""
+
+msgid "Завантажте додаткові фото страви. Порожні форми будуть пропущені."
+msgstr ""
+
+msgid "Страви"
+msgstr ""
+
+msgid "Усі страви"
+msgstr ""
+
+msgid "Страв поки немає."
+msgstr ""
+
+msgid "Головна"
+msgstr ""
+
+msgid "Попередній"
+msgstr ""
+
+msgid "Наступний"
+msgstr ""
+
+msgid "Наше меню"
+msgstr ""
+
+#, python-format
+msgid ""
+"%(dish_num)s страв у %(cat_num)s категоріях, класифікованих %(tag_num)s "
+"тегами."
+msgstr ""
+
+msgid "Пошук"
+msgstr ""
+
+msgid "Результати пошуку:"
+msgstr ""
+
+msgid "Пошук страв"
+msgstr ""
+
+msgid "Назва страви або опис..."
+msgstr ""
+
+msgid "Знайти"
+msgstr ""
+
+#, python-format
+msgid "За запитом \"%(q)s\" нічого не знайдено."
+msgstr ""
+
+msgid "Спробуйте інший запит або перевірте правопис."
+msgstr ""
+
+msgid "Введіть назву страви або опис для пошуку."
+msgstr ""
+
+msgid "Видалити тег"
+msgstr ""
+
+#, python-format
+msgid "Ви збираєтесь видалити тег <strong>«%(title)s»</strong>."
+msgstr ""
+
+msgid "Разом з тегом буде видалено:"
+msgstr ""
+
+#, python-format
+msgid "Логотип тега: «%(title)s»"
+msgstr ""
+
+msgid "Зв'язки зі стравами будуть видалені, але самі страви залишаться."
+msgstr ""
+
+msgid "Редагувати тег"
+msgstr ""
+
+msgid "Створити тег"
+msgstr ""
+
+msgid "Логотип тега"
+msgstr ""
+
+msgid ""
+"Завантажте SVG-файл з логотипом тега. Валідатор перевірить не лише "
+"розширення, а й вміст файлу."
+msgstr ""
+
+msgid "Страв з цим тегом поки немає."
+msgstr ""
+
+msgid "Немає з'єднання"
+msgstr ""
+
+msgid "Перевірте інтернет і спробуйте знову."
+msgstr ""
+
+msgid "Якщо ви переглядали меню раніше — воно доступне в кеші."
+msgstr ""
+
+msgid "Спробувати знову"
+msgstr ""
+
+msgid "Історія замовлень"
+msgstr ""
+
+msgid "Поточне замовлення"
+msgstr ""
+
+msgid ""
+"Де вас шукати? Столик №, тераса, біля бару... (щоб офіціант міг вас знайти)"
+msgstr ""
+
+msgid "Оформити замовлення"
+msgstr ""
+
+msgid "Ви ще нічого не обрали."
+msgstr ""
+
+msgid "Перейти до меню"
+msgstr ""
+
+msgid "Вже підтверджено"
+msgstr ""
+
+msgid "Цю передачу вже було підтверджено раніше."
+msgstr ""
+
+msgid "Повернутись до dashboard"
+msgstr ""
+
+msgid "Підтвердження прийому страви"
+msgstr ""
+
+msgid "Кількість:"
+msgstr ""
+
+#, python-format
+msgid "Від: <strong>%(name)s</strong>"
+msgstr ""
+
+#, python-format
+msgid "Замовлення: <strong>#%(order_id)s</strong>"
+msgstr ""
+
+msgid "Підтверджую прийом"
+msgstr ""
+
+#, python-format
+msgid "QR дійсний ще ~%(ttl)s секунд"
+msgstr ""
+
+msgid "QR-код прострочений"
+msgstr ""
+
+msgid "Попросіть кухаря згенерувати новий QR-код."
+msgstr ""
+
+msgid "Або скористайтесь ручним підтвердженням."
+msgstr ""
+
+msgid "Панель менеджера"
+msgstr ""
+
+msgid "Активних замовлень"
+msgstr ""
+
+msgid "Очікують оплати"
+msgstr ""
+
+msgid "Відкриті ескалації"
+msgstr ""
+
+msgid "Виторг"
+msgstr ""
+
+msgid "Оплати"
+msgstr ""
+
+msgid "Адміністрування"
+msgstr ""
+
+msgid "Адмін-панель"
+msgstr ""
+
+msgid "Стан обробки замовлення"
+msgstr ""
+
+msgid "СПЛАЧЕНО"
+msgstr ""
+
+msgid "ОЧІКУЄ ОПЛАТИ"
+msgstr ""
+
+msgid "Замовлення створено"
+msgstr ""
+
+msgid "Кількість позицій:"
+msgstr ""
+
+msgid "Прийнято:"
+msgstr ""
+
+msgid "Очікує на офіціанта..."
+msgstr ""
+
+msgid "Верифіковано:"
+msgstr ""
+
+msgid "Замовлення передано на кухню"
+msgstr ""
+
+msgid "Очікує верифікації..."
+msgstr ""
+
+msgid "Очікує передачі на кухню..."
+msgstr ""
+
+msgid "Усі страви готові:"
+msgstr ""
+
+msgid "Страви ще готуються..."
+msgstr ""
+
+msgid "Доставлено:"
+msgstr ""
+
+msgid "Очікує доставки..."
+msgstr ""
+
+msgid "Маєш що сказати? Тисни тут"
+msgstr ""
+
+msgid "Що сталося?"
+msgstr ""
+
+msgid "Опишіть ситуацію..."
+msgstr ""
+
+msgid "Надіслати"
+msgstr ""
+
+msgid "Ваше звернення:"
+msgstr ""
+
+msgid "побачено, працюємо"
+msgstr ""
+
+msgid "надіслано"
+msgstr ""
+
+msgid "Як вам сподобалось?"
+msgstr ""
+
+msgid "Ваше ім'я (необов'язково)"
+msgstr ""
+
+msgid "Напишіть щось приємне... або корисне"
+msgstr ""
+
+msgid "Надіслати відгук"
+msgstr ""
+
+msgid "Дякуємо за відгук!"
+msgstr ""
+
+msgid "Покажіть QR-код або назвіть номер замовлення офіціанту"
+msgstr ""
+
+msgid "Приховати QR-код"
+msgstr ""
+
+msgid "Показати QR-код"
+msgstr ""
+
+msgid "Мої замовлення"
+msgstr ""
+
+msgid ""
+"Зареєструйтесь, щоб зберігати історію замовлень та отримувати бонуси "
+"програми лояльності!"
+msgstr ""
+
+msgid "Зареєструватись"
+msgstr ""
+
+msgid "Активні"
+msgstr ""
+
+msgid "позицій"
+msgstr ""
+
+msgid "Завершені"
+msgstr ""
+
+msgid "Замовлень поки немає."
+msgstr ""
+
+#, python-format
+msgid "Оплата замовлення #%(order_id)s"
+msgstr ""
+
+msgid "Сума:"
+msgstr ""
+
+msgid "Демо-режим:"
+msgstr ""
+
+msgid "Реальна оплата ще не підключена. Кнопка симулює успішну оплату."
+msgstr ""
+
+msgid "Оплатити онлайн (демо)"
+msgstr ""
+
+#, python-format
+msgid "Замовлення оплачено (%(method)s)"
+msgstr ""
+
+msgid "До замовлення"
+msgstr ""
+
+msgid "Ескальовані несплачені замовлення"
+msgstr ""
+
+msgid "Немає проблемних замовлень."
+msgstr ""
+
+#, python-format
+msgid "Доставлено %(minutes)s хв тому"
+msgstr ""
+
+msgid "Офіціант:"
+msgstr ""
+
+msgid "Підтвердити оплату"
+msgstr ""
+
+msgid "Замовлення (офіціант)"
+msgstr ""
+
+msgid "Нові"
+msgstr ""
+
+msgid "Мої"
+msgstr ""
+
+msgid "Готові до доставки"
+msgstr ""
+
+msgid "хв тому"
+msgstr ""
+
+msgid "Немає нових замовлень"
+msgstr ""
+
+msgid "Готівка на руках:"
+msgstr ""
+
+msgid "У вас немає активних замовлень"
+msgstr ""
+
+msgid "прострочено"
+msgstr ""
+
+msgid "не сплачено"
+msgstr ""
+
+msgid "Немає активних замовлень у команди"
+msgstr ""
+
+msgid "ВИЙТИ"
+msgstr ""
+
+msgid "Вхід"
+msgstr ""
+
+msgid "Невірна електронна пошта або пароль. Спробуйте ще раз."
+msgstr ""
+
+msgid "Електронна пошта"
+msgstr ""
+
+msgid "Пароль"
+msgstr ""
+
+msgid "Ще не маєте акаунту?"
+msgstr ""
+
+msgid "Забули пароль?"
+msgstr ""
+
+msgid "Скинути пароль"
+msgstr ""
+
+msgid "Пароль змінено"
+msgstr ""
+
+msgid "Ваш пароль успішно змінено."
+msgstr ""
+
+msgid "Мій профіль"
+msgstr ""
+
+msgid "Зміна пароля"
+msgstr ""
+
+msgid "Будь ласка, виправте помилки нижче."
+msgstr ""
+
+msgid "Поточний пароль"
+msgstr ""
+
+msgid "Новий пароль (мінімум 8 символів, не лише цифри)"
+msgstr ""
+
+msgid "Підтвердження нового пароля"
+msgstr ""
+
+msgid "Змінити пароль"
+msgstr ""
+
+msgid "Ваш пароль успішно змінено. Тепер ви можете увійти з новим паролем."
+msgstr ""
+
+msgid "Новий пароль"
+msgstr ""
+
+msgid "Зберегти пароль"
+msgstr ""
+
+msgid "Посилання недійсне"
+msgstr ""
+
+msgid "Посилання для скидання пароля недійсне або вже було використане."
+msgstr ""
+
+msgid "Запросіть нове посилання."
+msgstr ""
+
+msgid "Надіслати повторно"
+msgstr ""
+
+msgid "Посилання надіслано"
+msgstr ""
+
+msgid ""
+"Якщо акаунт з вказаною адресою існує, ми надіслали посилання для скидання "
+"пароля."
+msgstr ""
+
+msgid "Перевірте вашу пошту."
+msgstr ""
+
+msgid "У dev-режимі лист виводиться у термінал сервера."
+msgstr ""
+
+msgid "Скопіюйте посилання з консолі та вставте у браузер."
+msgstr ""
+
+msgid "Скидання пароля"
+msgstr ""
+
+msgid "Введіть електронну пошту, пов'язану з вашим акаунтом."
+msgstr ""
+
+msgid "Ми надішлемо посилання для скидання пароля."
+msgstr ""
+
+msgid "Надіслати посилання"
+msgstr ""
+
+msgid "Редагувати переклад"
+msgstr ""
+
+msgid "Переклади"
+msgstr ""
+
+msgid "Оригінал (UK)"
+msgstr ""
+
+msgid "Зберегти і затвердити"
+msgstr ""
+
+msgid "Переклади для перевірки"
+msgstr ""
+
+msgid "Усі переклади затверджено."
+msgstr ""
+
+msgid "Затвердити все"
+msgstr ""
+
+msgid "Затвердити"
+msgstr ""
+
+msgid "Повторити"
+msgstr ""
+
+msgid "Профіль"
+msgstr ""
+
+msgid "Аватар"
+msgstr ""
+
+msgid "Дата реєстрації:"
+msgstr ""
+
+msgid "Останній вхід:"
+msgstr ""
+
+msgid "Статус:"
+msgstr ""
+
+msgid "Адміністратор"
+msgstr ""
+
+msgid "Редагувати профіль"
+msgstr ""
+
+msgid "Замінити пароль"
+msgstr ""
+
+msgid "До меню"
+msgstr ""
+
+msgid "Ви не увійшли в систему."
+msgstr ""
+
+msgid "Поточний аватар"
+msgstr ""
+
+msgid "Реєстрація"
+msgstr ""
+
+msgid "Вже маєте акаунт?"
+msgstr ""
+
+msgid "Затверджено"
+msgstr ""
+
+msgid "Помилка перекладу"
+msgstr ""
+
+msgid "Затвердження перекладу"
+msgstr ""
+
+msgid "Затвердження перекладів"
+msgstr ""
+
+msgid "Ім'я"
+msgstr ""
+
+msgid "Прізвище"
+msgstr ""
+
+msgid "Електронна пошта (обов'язково)"
+msgstr ""
+
+msgid "Ім'я (необов'язково)"
+msgstr ""
+
+msgid "Прізвище (необов'язково)"
+msgstr ""
+
+msgid "Пароль (мінімум 8 символів, не лише цифри)"
+msgstr ""
+
+msgid "Підтвердження пароля"
+msgstr ""
+
+msgid "Ім'я користувача"
+msgstr ""
+
+msgid "Виробництво"
+msgstr ""
+
+msgid "Відвідувач"
+msgstr ""
+
+msgid "Роль"
+msgstr ""
+
+msgid "Посада для відвідувачів"
+msgstr ""
+
+msgid "Наприклад: Повариха, Бармен, Майстер десертів"
+msgstr ""
+
+msgid "Публічне ім'я"
+msgstr ""
+
+msgid "Ім'я без прізвища для відвідувачів"
+msgstr ""

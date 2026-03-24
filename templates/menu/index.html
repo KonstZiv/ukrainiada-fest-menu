@@ -24,8 +24,9 @@
 {# Всі блоки (header, content, footer тощо) доступні для перевизначення.       #}
 {# Те, що не перевизначено — береться з base.html за замовчуванням.             #}
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Jadran Sun — Головна{% endblock %}
+{% block title %}Jadran Sun — {% trans "Головна" %}{% endblock %}
 
 {# ======================================================================= #}
 {# Блок content — основний вміст головної сторінки                          #}
@@ -66,12 +67,12 @@
     <button class="carousel-control-prev" type="button"
             data-bs-target="#mainCarousel" data-bs-slide="prev">
       <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Попередній</span>
+      <span class="visually-hidden">{% trans "Попередній" %}</span>
     </button>
     <button class="carousel-control-next" type="button"
             data-bs-target="#mainCarousel" data-bs-slide="next">
       <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Наступний</span>
+      <span class="visually-hidden">{% trans "Наступний" %}</span>
     </button>
 
   </div>
@@ -79,10 +80,9 @@
   {# --- Блок "Наше меню" зі статистикою --- #}
   {# Показує кількість страв, категорій, тегів та кнопки навігації.            #}
   <div class="p-3 mt-3">
-    <h5 class="fw-bold mb-2">Наше меню</h5>
+    <h5 class="fw-bold mb-2">{% trans "Наше меню" %}</h5>
     <p class="text-muted small">
-      {{ dish_num }} страв у {{ cat_num }} категоріях,
-      класифікованих {{ tag_num }} тегами.
+      {% blocktrans with dish_num=dish_num cat_num=cat_num tag_num=tag_num %}{{ dish_num }} страв у {{ cat_num }} категоріях, класифікованих {{ tag_num }} тегами.{% endblocktrans %}
     </p>
 
     {# Підключаємо nav-pills для переходу на категорії/теги.                    #}

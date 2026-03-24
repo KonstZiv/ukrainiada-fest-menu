@@ -7,6 +7,7 @@ from pathlib import Path
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 
 from menu.validators import validate_svg_content
 
@@ -48,8 +49,8 @@ class Category(ModelWithTitle):
     #   https://docs.djangoproject.com/en/stable/ref/models/fields/#positivesmallintegerfield
     number_in_line = models.PositiveSmallIntegerField(
         default=0,
-        verbose_name="Порядок у меню",
-        help_text="Менше число — вище у списку",
+        verbose_name=_("Порядок у меню"),
+        help_text=_("Менше число — вище у списку"),
     )
 
     class Meta:
@@ -66,9 +67,9 @@ class Dish(ModelWithTitle):
     class Availability(models.TextChoices):
         """Dish availability status for the menu."""
 
-        AVAILABLE = "available", "В наявності"
-        LOW = "low", "Закінчується — уточнюйте у офіціанта"
-        OUT = "out", "Немає"
+        AVAILABLE = "available", _("В наявності")
+        LOW = "low", _("Закінчується — уточнюйте у офіціанта")
+        OUT = "out", _("Немає")
 
     description = models.CharField(max_length=1024)
     price = models.DecimalField(max_digits=5, decimal_places=2)
@@ -84,14 +85,14 @@ class Dish(ModelWithTitle):
         "Allergen",
         related_name="dishes",
         blank=True,
-        verbose_name="Алергени",
+        verbose_name=_("Алергени"),
     )
     availability = models.CharField(
         max_length=16,
         choices=Availability.choices,
         default=Availability.AVAILABLE,
         db_index=True,
-        verbose_name="Наявність",
+        verbose_name=_("Наявність"),
     )
 
 

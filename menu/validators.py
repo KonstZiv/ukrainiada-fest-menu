@@ -26,6 +26,7 @@
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
+from django.utils.translation import gettext_lazy as _
 
 
 def validate_svg_content(file: UploadedFile) -> None:
@@ -93,6 +94,6 @@ def validate_svg_content(file: UploadedFile) -> None:
         # Документація:
         #   https://docs.djangoproject.com/en/stable/ref/exceptions/#validationerror
         raise ValidationError(
-            "Файл не є валідним SVG. Завантажте файл у форматі SVG.",
+            _("Файл не є валідним SVG. Завантажте файл у форматі SVG."),
             code="invalid_svg",
         )

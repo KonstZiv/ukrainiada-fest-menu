@@ -1,0 +1,101 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-24 21:42+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != "
+"11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % "
+"100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
+"(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
+msgid "доставлено"
+msgstr "доставлено"
+
+msgid "Ви ще нічого не обрали."
+msgstr "Ви ще нічого не обрали."
+
+msgid "Перейти до меню"
+msgstr "Перейти до меню"
+
+msgid "Прострочено"
+msgstr "Прострочено"
+
+msgid "Терміново!"
+msgstr "Терміново!"
+
+msgid "Офлайн-режим — меню може бути застарілим. Замовлення недоступні."
+msgstr "Офлайн-режим — меню може бути застарілим. Замовлення недоступні."
+
+msgid "Скасувати замовлення?"
+msgstr "Скасувати замовлення?"
+
+msgid "Замовлення скасовано"
+msgstr "Замовлення скасовано"
+
+msgid "Всі страви готові!"
+msgstr "Всі страви готові!"
+
+msgid "Замовлення доставлено! Смачного!"
+msgstr "Замовлення доставлено! Смачного!"
+
+msgid "Оплату прийнято. Дякуємо!"
+msgstr "Оплату прийнято. Дякуємо!"
+
+msgid "Ваше звернення прийнято"
+msgstr "Ваше звернення прийнято"
+
+msgid "%(by)s працює над вашим питанням"
+msgstr "%(by)s працює над вашим питанням"
+
+msgid "Вирішено"
+msgstr "Вирішено"
+
+msgid "СПЛАЧЕНО"
+msgstr "СПЛАЧЕНО"
+
+msgid "Live"
+msgstr "Live"
+
+msgid "Offline"
+msgstr "Offline"
+
+msgid "Нове замовлення #%(order_id)s від клієнта"
+msgstr "Нове замовлення #%(order_id)s від клієнта"
+
+msgid "Готово"
+msgstr "Готово"
+
+msgid "Страва готова:"
+msgstr "Страва готова:"
+
+msgid "Замовлення #%(order_id)s готове!"
+msgstr "Замовлення #%(order_id)s готове!"
+
+msgid "Готується (%(by)s)"
+msgstr "Готується (%(by)s)"
+
+msgid "Замовлення #%(order_id)s на кухні"
+msgstr "Замовлення #%(order_id)s на кухні"
+
+msgid "Кухня"
+msgstr "Кухня"
+
+msgid "Оплата"
+msgstr "Оплата"
+
+msgid "Замовлення #%(order_id)s скасовано"
+msgstr "Замовлення #%(order_id)s скасовано"
+
+msgid "Ескалація! %(label)s #%(id)s"
+msgstr "Ескалація! %(label)s #%(id)s"

@@ -17,6 +17,7 @@
 {# --------------------------------------------------------------------------- #}
 
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}Jadran Sun — {{ dish.title }}{% endblock %}
 
@@ -73,19 +74,19 @@
           <div class="fw-bold" style="font-size: 1.3rem; color: var(--brand-primary);">
             &euro;{{ dish.price }}
           </div>
-          <small class="text-muted">Ціна</small>
+          <small class="text-muted">{% trans "Ціна" %}</small>
         </div>
         <div class="col-4">
           <div class="fw-bold" style="font-size: 1.3rem;">
-            {{ dish.weight }}г
+            {{ dish.weight }}{% trans "г" %}
           </div>
-          <small class="text-muted">Вага</small>
+          <small class="text-muted">{% trans "Вага" %}</small>
         </div>
         <div class="col-4">
           <div class="fw-bold" style="font-size: 1.3rem;">
             {{ dish.calorie }}
           </div>
-          <small class="text-muted">ккал</small>
+          <small class="text-muted">{% trans "ккал" %}</small>
         </div>
       </div>
 
@@ -115,19 +116,19 @@
           <input type="hidden" name="dish_id" value="{{ dish.pk }}">
           <input type="hidden" name="quantity" value="1">
           <button type="submit" class="btn btn-primary btn-action">
-            <i class="bi bi-plus-circle"></i> Додати в замовлення
+            <i class="bi bi-plus-circle"></i> {% trans "Додати в замовлення" %}
           </button>
         </form>
 
         {# --- Кнопки Edit/Delete — тільки для staff/manager --- #}
         {% if user.is_staff or user.role == 'manager' %}
         <a href="{% url 'menu:dish_update' dish.pk %}"
-           class="btn btn-outline-secondary" title="Редагувати">
-          <i class="bi bi-pencil"></i> Редагувати
+           class="btn btn-outline-secondary" title="{% trans "Редагувати" %}">
+          <i class="bi bi-pencil"></i> {% trans "Редагувати" %}
         </a>
         <a href="{% url 'menu:dish_delete' dish.pk %}"
-           class="btn btn-outline-danger" title="Видалити">
-          <i class="bi bi-trash"></i> Видалити
+           class="btn btn-outline-danger" title="{% trans "Видалити" %}">
+          <i class="bi bi-trash"></i> {% trans "Видалити" %}
         </a>
         {% endif %}
       </div>
@@ -142,7 +143,7 @@
   {# ======================================================================= #}
   {% if dish.additional_images.all %}
     <div class="mt-4">
-      <h5>Додаткові фото</h5>
+      <h5>{% trans "Додаткові фото" %}</h5>
       <div id="dishGallery" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-inner">
           {% for img in dish.additional_images.all %}

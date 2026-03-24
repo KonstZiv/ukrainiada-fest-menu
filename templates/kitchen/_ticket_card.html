@@ -1,3 +1,4 @@
+{% load i18n %}
 {# _ticket_card.html — Single dish ticket within an order group #}
 {# Context: t (enriched ticket dict), action_type ("take"|"done"|"handoff") #}
 
@@ -18,9 +19,9 @@
       {% if t.urgency == 'escalated' %}
         <span class="badge bg-danger">{{ t.ticket.get_escalation_level_display }}</span>
       {% elif t.urgency == 'critical' %}
-        <span class="badge bg-danger">Прострочено</span>
+        <span class="badge bg-danger">{% trans "Прострочено" %}</span>
       {% elif t.urgency == 'warn' %}
-        <span class="badge bg-warning text-dark">Терміново!</span>
+        <span class="badge bg-warning text-dark">{% trans "Терміново!" %}</span>
       {% endif %}
 
       <div class="text-muted" style="font-size: 0.78rem;">
@@ -38,7 +39,7 @@
           {% csrf_token %}
           <input type="hidden" name="tab" value="queue">
           <button type="submit" class="btn btn-primary btn-sm" style="min-height: 44px; min-width: 70px;">
-            <i class="bi bi-hand-index"></i> Взяти
+            <i class="bi bi-hand-index"></i> {% trans "Взяти" %}
           </button>
         </form>
       {% elif action_type == "done" %}
@@ -46,7 +47,7 @@
           {% csrf_token %}
           <input type="hidden" name="tab" value="in_progress">
           <button type="submit" class="btn btn-success btn-sm" style="min-height: 44px; min-width: 70px;">
-            <i class="bi bi-check-lg"></i> Готово
+            <i class="bi bi-check-lg"></i> {% trans "Готово" %}
           </button>
         </form>
       {% elif action_type == "handoff" %}

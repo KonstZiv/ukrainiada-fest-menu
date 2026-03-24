@@ -13,6 +13,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from core_settings.types import AuthenticatedHttpRequest
@@ -328,7 +329,9 @@ def order_mark_delivered(
         if skipped:
             messages.warning(
                 request,
-                f"#{order_id} — пропущені кроки: {', '.join(skipped)}",
+                _("#{order_id} — пропущені кроки: {skipped}").format(
+                    order_id=order_id, skipped=", ".join(skipped)
+                ),
             )
     except ValueError as e:
         messages.error(request, str(e))
@@ -381,7 +384,9 @@ def order_confirm_payment(
         if skipped:
             messages.warning(
                 request,
-                f"#{order_id} оплата — пропущені кроки: {', '.join(skipped)}",
+                _("#{order_id} оплата — пропущені кроки: {skipped}").format(
+                    order_id=order_id, skipped=", ".join(skipped)
+                ),
             )
     except ValueError as e:
         messages.error(request, str(e))
@@ -401,7 +406,7 @@ def handoff_confirm_view(
     handoff = get_object_or_404(KitchenHandoff, token=token)
 
     if handoff.target_waiter_id != request.user.id:
-        return HttpResponse("Цей QR-код призначений іншому офіціанту.", status=403)
+        return HttpResponse(_("Цей QR-код призначений іншому офіціанту."), status=403)
 
     if handoff.is_expired:
         return render(
@@ -454,7 +459,7 @@ def escalation_acknowledge(
     escalation = get_object_or_404(VisitorEscalation, pk=escalation_id)
     try:
         acknowledge_escalation(escalation, request.user)
-        messages.success(request, "Звернення позначено як побачене.")
+        messages.success(request, _("Звернення позначено як побачене."))
     except ValueError as e:
         messages.error(request, str(e))
     return redirect("waiter:order_list")
@@ -470,7 +475,7 @@ def escalation_resolve(
     note = request.POST.get("note", "")
     try:
         resolve_escalation(escalation, request.user, note=note)
-        messages.success(request, "Звернення вирішено.")
+        messages.success(request, _("Звернення вирішено."))
     except ValueError as e:
         messages.error(request, str(e))
     return redirect("waiter:order_list")
@@ -525,7 +530,10 @@ def senior_confirm_payment(
     payment_type = request.POST.get("payment_type", "")
     try:
         confirm_payment_by_senior(order, method=payment_type)
-        messages.success(request, f"Оплату замовлення #{order_id} підтверджено.")
+        messages.success(
+            request,
+            _("Оплату замовлення #{order_id} підтверджено.").format(order_id=order_id),
+        )
     except ValueError as e:
         messages.error(request, str(e))
     return redirect("waiter:senior_dashboard")

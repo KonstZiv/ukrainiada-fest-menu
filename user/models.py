@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.files.base import ContentFile
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from PIL import Image
 
 
@@ -35,7 +36,7 @@ class User(AbstractUser):
     # AbstractUser має email без unique=True, тому перевизначаємо.
     email = models.EmailField(
         unique=True,
-        verbose_name="Електронна пошта",
+        verbose_name=_("Електронна пошта"),
     )
 
     # username — необов'язковий. Якщо не заповнений — генерується з email.
@@ -45,7 +46,7 @@ class User(AbstractUser):
         max_length=150,
         unique=True,
         blank=True,
-        verbose_name="Ім'я користувача",
+        verbose_name=_("Ім'я користувача"),
     )
 
     # USERNAME_FIELD — поле, яке Django використовує для автентифікації.
@@ -61,38 +62,38 @@ class User(AbstractUser):
     class Role(models.TextChoices):
         """User roles within the restaurant system."""
 
-        MANAGER = "manager", "Менеджер"
-        KITCHEN_SUPERVISOR = "kitchen_supervisor", "Старший кухні"
-        KITCHEN = "kitchen", "Виробництво"
-        SENIOR_WAITER = "senior_waiter", "Старший офіціант"
-        WAITER = "waiter", "Офіціант"
-        VISITOR = "visitor", "Відвідувач"
+        MANAGER = "manager", _("Менеджер")
+        KITCHEN_SUPERVISOR = "kitchen_supervisor", _("Старший кухні")
+        KITCHEN = "kitchen", _("Виробництво")
+        SENIOR_WAITER = "senior_waiter", _("Старший офіціант")
+        WAITER = "waiter", _("Офіціант")
+        VISITOR = "visitor", _("Відвідувач")
 
     avatar = models.ImageField(
         upload_to="user_avatars/",
         blank=True,
-        verbose_name="Аватар",
+        verbose_name=_("Аватар"),
     )
 
     role = models.CharField(
         max_length=20,
         choices=Role.choices,
         default=Role.VISITOR,
-        verbose_name="Роль",
+        verbose_name=_("Роль"),
     )
 
     display_title = models.CharField(
         max_length=60,
         blank=True,
-        verbose_name="Посада для відвідувачів",
-        help_text="Наприклад: Повариха, Бармен, Майстер десертів",
+        verbose_name=_("Посада для відвідувачів"),
+        help_text=_("Наприклад: Повариха, Бармен, Майстер десертів"),
     )
 
     public_name = models.CharField(
         max_length=50,
         blank=True,
-        verbose_name="Публічне ім'я",
-        help_text="Ім'я без прізвища для відвідувачів",
+        verbose_name=_("Публічне ім'я"),
+        help_text=_("Ім'я без прізвища для відвідувачів"),
     )
 
     @property

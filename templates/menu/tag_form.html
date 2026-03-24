@@ -17,12 +17,13 @@
 {# --------------------------------------------------------------------------- #}
 
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}
   {% if form.instance.pk %}
-    Jadran Sun — Редагувати тег
+    Jadran Sun — {% trans "Редагувати тег" %}
   {% else %}
-    Jadran Sun — Новий тег
+    Jadran Sun — {% trans "Новий тег" %}
   {% endif %}
 {% endblock %}
 
@@ -31,9 +32,9 @@
 
   <h2 class="mb-4">
     {% if form.instance.pk %}
-      Редагувати тег
+      {% trans "Редагувати тег" %}
     {% else %}
-      Створити тег
+      {% trans "Створити тег" %}
     {% endif %}
   </h2>
 
@@ -56,8 +57,8 @@
     {% if logo_form %}
       <hr class="my-4">
       <h5 class="mb-3">
-        <i class="bi bi-image"></i> Логотип тега
-        <small class="text-muted">(необов'язково)</small>
+        <i class="bi bi-image"></i> {% trans "Логотип тега" %}
+        <small class="text-muted">({% trans "необов'язково" %})</small>
       </h5>
 
       {% if logo_form.non_field_errors %}
@@ -69,17 +70,16 @@
       {{ logo_form.as_div }}
 
       <small class="text-muted d-block mt-1">
-        Завантажте SVG-файл з логотипом тега. Валідатор перевірить
-        не лише розширення, а й вміст файлу.
+        {% trans "Завантажте SVG-файл з логотипом тега. Валідатор перевірить не лише розширення, а й вміст файлу." %}
       </small>
     {% endif %}
 
     <div class="mt-4 d-flex gap-2">
       <button type="submit" class="btn btn-primary">
-        <i class="bi bi-check-lg"></i> Зберегти
+        <i class="bi bi-check-lg"></i> {% trans "Зберегти" %}
       </button>
       <a href="{% url 'menu:tag_list' %}" class="btn btn-outline-secondary">
-        Скасувати
+        {% trans "Скасувати" %}
       </a>
     </div>
 

@@ -169,7 +169,7 @@
   window.SSE_HANDLERS["order_submitted"] = function (data) {
     console.log("[WaiterSSE] order_submitted order=" + data.order_id);
     u.showFlash(
-      "Нове замовлення #" + data.order_id + " від клієнта",
+      interpolate(gettext("Нове замовлення #%(order_id)s від клієнта"), {order_id: data.order_id}, true),
       "info"
     );
     u.sseBeep(660, 0.2);
@@ -190,7 +190,7 @@
         data.order_id
     );
     u.showFlash(
-      "Страва готова: " + (data.dish || "#" + data.ticket_id),
+      gettext("Страва готова:") + " " + (data.dish || "#" + data.ticket_id),
       "success"
     );
     u.updateNavBadge("nav-badge-orders", u.BADGE_ORDERS_KEY, 1);
@@ -211,7 +211,7 @@
 
   window.SSE_HANDLERS["order_ready"] = function (data) {
     console.log("[WaiterSSE] order_ready order=" + data.order_id);
-    u.showFlash("Замовлення #" + data.order_id + " готове!", "success");
+    u.showFlash(interpolate(gettext("Замовлення #%(order_id)s готове!"), {order_id: data.order_id}, true), "success");
     u.updateNavBadge("nav-badge-orders", u.BADGE_ORDERS_KEY, 1);
     refreshAccordionItem(data.order_id);
     refreshDetailCard(data.order_id);
@@ -233,7 +233,7 @@
       console.log("[WaiterSSE] self-triggered, skip");
       return;
     }
-    u.showFlash("Замовлення #" + data.order_id + " скасовано", "warning");
+    u.showFlash(interpolate(gettext("Замовлення #%(order_id)s скасовано"), {order_id: data.order_id}, true), "warning");
     removeAccordionItem(data.order_id);
     // Remove from "Нові" tab if present
     var newItem = document.querySelector(

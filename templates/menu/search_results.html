@@ -16,26 +16,27 @@
 {# --------------------------------------------------------------------------- #}
 
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Jadran Sun — Пошук{% endblock %}
+{% block title %}Jadran Sun — {% trans "Пошук" %}{% endblock %}
 
 {% block content %}
 <div class="container mt-3">
 
   {# --- Кнопка "Назад" --- #}
   <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm mb-3">
-    <i class="bi bi-arrow-left"></i> Назад
+    <i class="bi bi-arrow-left"></i> {% trans "Назад" %}
   </a>
 
   {# --- Заголовок сторінки --- #}
   <h4 class="mb-3">
     {% if query %}
-      Результати пошуку: "{{ query }}"
+      {% trans "Результати пошуку:" %} "{{ query }}"
       <small class="text-muted fw-normal" style="font-size: 0.9rem;">
         ({{ dishes|length }} {{ dishes|length|pluralize:"страва,страви,страв" }})
       </small>
     {% else %}
-      Пошук страв
+      {% trans "Пошук страв" %}
     {% endif %}
   </h4>
 
@@ -44,11 +45,11 @@
   <form method="get" action="{% url 'menu:dish_search' %}" class="mb-4">
     <div class="input-group">
       <input type="text" name="q" class="form-control"
-             placeholder="Назва страви або опис..."
+             placeholder="{% trans "Назва страви або опис..." %}"
              value="{{ query }}"
-             aria-label="Пошук">
+             aria-label="{% trans "Пошук" %}">
       <button class="btn btn-primary" type="submit">
-        <i class="bi bi-search"></i> Знайти
+        <i class="bi bi-search"></i> {% trans "Знайти" %}
       </button>
     </div>
   </form>
@@ -63,15 +64,15 @@
     {% empty %}
       <div class="text-center text-muted py-5">
         <i class="bi bi-search" style="font-size: 2rem;"></i>
-        <p class="mt-2">За запитом "{{ query }}" нічого не знайдено.</p>
-        <p class="small">Спробуйте інший запит або перевірте правопис.</p>
+        <p class="mt-2">{% blocktrans with q=query %}За запитом "{{ q }}" нічого не знайдено.{% endblocktrans %}</p>
+        <p class="small">{% trans "Спробуйте інший запит або перевірте правопис." %}</p>
       </div>
     {% endfor %}
     </div>
   {% else %}
     <div class="text-center text-muted py-5">
       <i class="bi bi-search" style="font-size: 2rem;"></i>
-      <p class="mt-2">Введіть назву страви або опис для пошуку.</p>
+      <p class="mt-2">{% trans "Введіть назву страви або опис для пошуку." %}</p>
     </div>
   {% endif %}
 

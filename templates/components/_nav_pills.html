@@ -18,6 +18,7 @@
 {#   https://docs.djangoproject.com/en/stable/ref/templates/builtins/#include  #}
 {# --------------------------------------------------------------------------- #}
 
+{% load i18n %}
 {# --- Перемикач режимів --- #}
 {# nav-pills-custom — кастомний стиль кнопок (brand.css).                      #}
 {# Кожна кнопка — посилання на відповідну сторінку списку.                     #}
@@ -29,14 +30,14 @@
   {# Документація: https://docs.djangoproject.com/en/stable/ref/templates/builtins/#url #}
   <a href="{% url 'menu:category_list' %}"
      class="nav-link text-center {% if active == 'categories' %}active{% endif %}">
-    Категорії
+    {% trans "Категорії" %}
   </a>
 
   {# Кнопка "Теги" — активна, коли active == "tags" #}
   {# URL menu:tag_list — створено в тасці 1.8 (TagListView).                   #}
   <a href="{% url 'menu:tag_list' %}"
      class="nav-link text-center {% if active == 'tags' %}active{% endif %}">
-    Теги
+    {% trans "Теги" %}
   </a>
 
 </nav>

@@ -163,7 +163,7 @@ def order_submit(request: HttpRequest) -> HttpResponse:
     order = submit_order_from_cart(request)
     if order:
         return redirect("orders:order_detail", order_id=order.id)
-    messages.error(request, "Кошик порожній або страви недоступні.")
+    messages.error(request, _("Кошик порожній або страви недоступні."))
     return redirect("orders:cart")
 
 
@@ -406,7 +406,7 @@ def order_pay_online(request: HttpRequest, order_id: int) -> HttpResponse:
     if request.method == "POST":
         try:
             confirm_online_payment_stub(order)
-            messages.success(request, "Оплату підтверджено!")
+            messages.success(request, _("Оплату підтверджено!"))
             return redirect("orders:order_detail", order_id=order_id)
         except ValueError as e:
             messages.error(request, str(e))
@@ -425,7 +425,7 @@ def create_escalation_view(request: HttpRequest, order_id: int) -> HttpResponse:
     message = request.POST.get("message", "")
     try:
         create_escalation(order, reason=reason, message=message)
-        messages.success(request, "Ваше звернення надіслано!")
+        messages.success(request, _("Ваше звернення надіслано!"))
     except ValueError as e:
         messages.warning(request, str(e))
     return redirect("orders:order_detail", order_id=order_id)

@@ -114,7 +114,7 @@
   var cancelBtn = document.getElementById("order-cancel-btn");
   if (cancelBtn) {
     cancelBtn.addEventListener("click", function () {
-      if (!confirm("Скасувати замовлення?")) return;
+      if (!confirm(gettext("Скасувати замовлення?"))) return;
 
       cancelBtn.disabled = true;
       fetch(cancelUrl, {
@@ -153,7 +153,7 @@
     var alert = document.createElement("div");
     alert.className = "alert alert-danger text-center mt-3";
     alert.innerHTML =
-      '<i class="bi bi-x-circle"></i> Замовлення скасовано';
+      '<i class="bi bi-x-circle"></i> ' + gettext("Замовлення скасовано");
     var container = document.querySelector(".container.mt-3");
     if (container) container.prepend(alert);
   }

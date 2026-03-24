@@ -11,30 +11,30 @@
 {# --------------------------------------------------------------------------- #}
 
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Jadran Sun — Видалити страву{% endblock %}
+{% block title %}Jadran Sun — {% trans "Видалити страву" %}{% endblock %}
 
 {% block content %}
 <div class="container mt-3" style="max-width: 600px;">
 
   <h2 class="mb-4 text-danger">
-    <i class="bi bi-exclamation-triangle"></i> Видалити страву
+    <i class="bi bi-exclamation-triangle"></i> {% trans "Видалити страву" %}
   </h2>
 
   {# --- Попередження --- #}
   <div class="alert alert-danger">
-    <strong>Увага!</strong> Ви збираєтесь видалити страву
-    <strong>«{{ dish.title }}»</strong> ({{ dish.price }} EUR).
+    <strong>{% trans "Увага!" %}</strong> {% blocktrans with title=dish.title price=dish.price %}Ви збираєтесь видалити страву <strong>«{{ title }}»</strong> ({{ price }} EUR).{% endblocktrans %}
   </div>
 
   {# --- Що буде видалено --- #}
   <div class="card mb-3">
     <div class="card-body">
-      <h6 class="card-title">Разом зі стравою буде видалено:</h6>
+      <h6 class="card-title">{% trans "Разом зі стравою буде видалено:" %}</h6>
       <ul class="mb-0">
         {# --- Головне зображення --- #}
         {% if dish.main_image %}
-          <li>Головне зображення: «{{ dish.main_image.title }}»</li>
+          <li>{% blocktrans with title=dish.main_image.title %}Головне зображення: «{{ title }}»{% endblocktrans %}</li>
         {% endif %}
 
         {# --- Додаткові зображення --- #}
@@ -42,7 +42,7 @@
           {% if additional %}
             <li>
               {{ additional|length }}
-              {% if additional|length == 1 %}додаткове зображення{% elif additional|length < 5 %}додаткових зображення{% else %}додаткових зображень{% endif %}:
+              {% if additional|length == 1 %}{% trans "додаткове зображення" %}{% elif additional|length < 5 %}{% trans "додаткових зображення" %}{% else %}{% trans "додаткових зображень" %}{% endif %}:
               <ul>
                 {% for pic in additional %}
                   <li>{{ pic.title }}</li>
@@ -53,7 +53,7 @@
         {% endwith %}
 
         <li class="text-muted">
-          Зв'язки з тегами будуть видалені, але самі теги залишаться.
+          {% trans "Зв'язки з тегами будуть видалені, але самі теги залишаться." %}
         </li>
       </ul>
     </div>
@@ -64,10 +64,10 @@
     {% csrf_token %}
     <div class="d-flex gap-2">
       <button type="submit" class="btn btn-danger">
-        <i class="bi bi-trash"></i> Так, видалити
+        <i class="bi bi-trash"></i> {% trans "Так, видалити" %}
       </button>
       <a href="{% url 'menu:dish_list' %}" class="btn btn-outline-secondary">
-        Скасувати
+        {% trans "Скасувати" %}
       </a>
     </div>
   </form>
