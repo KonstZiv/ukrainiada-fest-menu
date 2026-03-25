@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}Dobro Djelo{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  {# --- Hero section --- #}
+  <div class="text-center mb-4">
+    <img src="{% static 'icons/logo-navbar.svg' %}" alt="Dobro Djelo" style="width: 120px; height: 120px;" class="mb-3">
+    <h2 class="fw-bold">Dobro Djelo</h2>
+    <p class="text-muted">
+      {% trans "Український культурний центр у Херцег-Нові, Чорногорія" %}
+    </p>
+  </div>
+
+  {# --- Navigation cards --- #}
+  <div class="row g-3 justify-content-center" style="max-width: 600px; margin: 0 auto;">
+
+    {# Festival menu — active #}
+    <div class="col-6">
+      <a href="{% url 'menu:index' %}" class="card text-decoration-none h-100 border-primary">
+        <div class="card-body text-center">
+          <i class="bi bi-sun-fill text-primary" style="font-size: 2rem;"></i>
+          <h6 class="card-title mt-2 mb-1 fw-semibold">Ukrainiada</h6>
+          <p class="card-text text-muted small mb-0">{% trans "Фестивальне меню" %}</p>
+        </div>
+      </a>
+    </div>
+
+    {# News — coming soon #}
+    <div class="col-6">
+      <div class="card h-100 bg-light text-muted">
+        <div class="card-body text-center">
+          <i class="bi bi-newspaper" style="font-size: 2rem;"></i>
+          <h6 class="card-title mt-2 mb-1 fw-semibold">{% trans "Новини" %}</h6>
+          <p class="card-text small mb-0">{% trans "Скоро" %}</p>
+        </div>
+      </div>
+    </div>
+
+    {# Library — coming soon #}
+    <div class="col-6">
+      <div class="card h-100 bg-light text-muted">
+        <div class="card-body text-center">
+          <i class="bi bi-book" style="font-size: 2rem;"></i>
+          <h6 class="card-title mt-2 mb-1 fw-semibold">{% trans "Бібліотека" %}</h6>
+          <p class="card-text small mb-0">{% trans "Скоро" %}</p>
+        </div>
+      </div>
+    </div>
+
+    {# Schedule — coming soon #}
+    <div class="col-6">
+      <div class="card h-100 bg-light text-muted">
+        <div class="card-body text-center">
+          <i class="bi bi-calendar-event" style="font-size: 2rem;"></i>
+          <h6 class="card-title mt-2 mb-1 fw-semibold">{% trans "Розклад" %}</h6>
+          <p class="card-text small mb-0">{% trans "Скоро" %}</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  {% include "components/_install_pwa.html" %}
+
+</div>
+{% endblock %}

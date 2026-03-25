@@ -2,7 +2,7 @@
     "name": "Український центр в Херцег-Нові, Чорногорія",
     "short_name": "Dobro Djelo",
     "description": "Український культурний центр в Херцег-Нові, Чорногорія",
-    "start_url": "/menu/",
+    "start_url": "/",
     "scope": "/",
     "display": "standalone",
     "background_color": "#F8FAFC",

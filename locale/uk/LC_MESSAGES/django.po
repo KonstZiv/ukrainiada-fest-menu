@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-24 21:42+0000\n"
+"POT-Creation-Date: 2026-03-25 14:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -286,6 +286,15 @@ msgstr "Закрити"
 msgid "Назад"
 msgstr "Назад"
 
+msgid "Встановити додаток"
+msgstr "Підтвердити оплату"
+
+msgid "Натисніть"
+msgstr "Натисніть для звуку"
+
+msgid "та оберіть «На Початковий екран»"
+msgstr "та оберіть «На Початковий екран»"
+
 msgid "Категорії"
 msgstr "Категорії"
 
@@ -547,6 +556,24 @@ msgstr "Згенерувати QR"
 
 msgid "Повернутись"
 msgstr "Повернутись"
+
+msgid "Український культурний центр у Херцег-Нові, Чорногорія"
+msgstr "Український культурний центр у Херцег-Нові, Чорногорія"
+
+msgid "Фестивальне меню"
+msgstr "Перейти до меню"
+
+msgid "Новини"
+msgstr "Новий тег"
+
+msgid "Скоро"
+msgstr "Скоро"
+
+msgid "Бібліотека"
+msgstr "Бібліотека"
+
+msgid "Розклад"
+msgstr "Переклади"
 
 msgid "Видалити категорію"
 msgstr "Видалити категорію"

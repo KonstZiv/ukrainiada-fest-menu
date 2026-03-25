@@ -11,6 +11,11 @@ from django.shortcuts import render
 logger = logging.getLogger(__name__)
 
 
+def landing_page(request: HttpRequest) -> HttpResponse:
+    """Central landing page for the Ukrainian Cultural Center platform."""
+    return render(request, "landing.html", {"show_search": False})
+
+
 def offline_page(request: HttpRequest) -> HttpResponse:
     """Offline fallback page served from Service Worker cache."""
     return render(request, "offline.html")

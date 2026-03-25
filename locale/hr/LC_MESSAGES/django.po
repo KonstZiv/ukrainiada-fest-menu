@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-24 21:42+0000\n"
+"POT-Creation-Date: 2026-03-25 14:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,8 +15,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+
 msgid "❤️ Чудово"
 msgstr "❤️ Sjajno"
 
@@ -281,6 +282,15 @@ msgstr "Zatvori"
 msgid "Назад"
 msgstr "Natrag"
 
+msgid "Встановити додаток"
+msgstr "Potvrdite plaćanje"
+
+msgid "Натисніть"
+msgstr "Kliknite za zvuk"
+
+msgid "та оберіть «На Початковий екран»"
+msgstr ""
+
 msgid "Категорії"
 msgstr "Kategorije"
 
@@ -542,6 +552,24 @@ msgstr "Generiraj QR"
 
 msgid "Повернутись"
 msgstr "Natrag"
+
+msgid "Український культурний центр у Херцег-Нові, Чорногорія"
+msgstr ""
+
+msgid "Фестивальне меню"
+msgstr "Idite na jelovnik"
+
+msgid "Новини"
+msgstr "Nova oznaka"
+
+msgid "Скоро"
+msgstr ""
+
+msgid "Бібліотека"
+msgstr ""
+
+msgid "Розклад"
+msgstr "Prijevodi"
 
 msgid "Видалити категорію"
 msgstr "Izbriši kategoriju"
@@ -1094,7 +1122,9 @@ msgid "Змінити пароль"
 msgstr "Promijeni lozinku"
 
 msgid "Ваш пароль успішно змінено. Тепер ви можете увійти з новим паролем."
-msgstr "Vaša lozinka je uspješno promijenjena. Sada se možete prijaviti s novom lozinkom."
+msgstr ""
+"Vaša lozinka je uspješno promijenjena. Sada se možete prijaviti s novom "
+"lozinkom."
 
 msgid "Новий пароль"
 msgstr "Nova lozinka"

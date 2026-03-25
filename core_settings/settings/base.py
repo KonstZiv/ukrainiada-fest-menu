@@ -67,6 +67,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "core_settings.context_processors.brand_context",
                 "orders.context_processors.cart_context",
                 "orders.context_processors.manager_context",
                 "translations.context_processors.translation_context",

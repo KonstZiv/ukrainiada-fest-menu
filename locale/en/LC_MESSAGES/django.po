@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-24 21:42+0000\n"
+"POT-Creation-Date: 2026-03-25 14:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,18 +29,15 @@ msgstr "😐 Okay"
 msgid "😕 Не дуже"
 msgstr "😕 Not so good"
 
-#| msgid "Мої замовлення"
 msgid "Замовлення"
 msgstr "My orders"
 
-#| msgid "Передав відвідувачу"
 msgid "Ім'я відвідувача"
 msgstr "Delivered to visitor"
 
 msgid "Настрій"
 msgstr "Mood"
 
-#| msgid "До замовлення"
 msgid "Повідомлення"
 msgstr "Back to order"
 
@@ -62,7 +59,6 @@ msgstr "Feedback highlighted and published."
 msgid "Відгук видалено."
 msgstr "Feedback deleted."
 
-#| msgid "Страви"
 msgid "Страва"
 msgstr "Dishes"
 
@@ -84,14 +80,12 @@ msgstr "Ready"
 msgid "Немає"
 msgstr "None"
 
-#| msgid "Старший офіціант"
 msgid "Старший кухні"
 msgstr "Senior waiter"
 
 msgid "Менеджер"
 msgstr "Manager"
 
-#| msgid "Мої замовлення"
 msgid "Позиція замовлення"
 msgstr "My orders"
 
@@ -104,7 +98,6 @@ msgstr "Kitchen Tickets"
 msgid "Передача страви"
 msgstr "Dish handoff"
 
-#| msgid "Передача страви"
 msgid "Передачі страв"
 msgstr "Dish handoff"
 
@@ -121,11 +114,9 @@ msgstr "Logo Name"
 msgid "Оберіть хоча б один тег для страви."
 msgstr "Select at least one tag for the dish."
 
-#| msgid "До замовлення"
 msgid "Назва зображення"
 msgstr "Back to order"
 
-#| msgid "Перейти до меню"
 msgid "Порядок у меню"
 msgstr "Menu order"
 
@@ -141,7 +132,6 @@ msgstr "Running out — check with the waiter"
 msgid "Алергени"
 msgstr "Allergens"
 
-#| msgid "Кількість:"
 msgid "Наявність"
 msgstr "Quantity:"
 
@@ -151,18 +141,15 @@ msgstr "The file is not a valid SVG. Please upload an SVG file."
 msgid "Чернетка"
 msgstr "Draft"
 
-#| msgid "Створено:"
 msgid "Створено"
 msgstr "Created:"
 
-#| msgid "Прийняв готівку"
 msgid "Прийнято"
 msgstr "Received cash"
 
 msgid "Верифіковано"
 msgstr "Verified"
 
-#| msgid "Доступ заборонено"
 msgid "Доставлено"
 msgstr "Access denied"
 
@@ -172,11 +159,9 @@ msgstr "Cancelled"
 msgid "Не оплачено"
 msgstr "Not paid"
 
-#| msgid "Не оплачено"
 msgid "Оплачено"
 msgstr "Not paid"
 
-#| msgid "Не оплачено"
 msgid "Не визначено"
 msgstr "Not paid"
 
@@ -186,7 +171,6 @@ msgstr "Cash"
 msgid "Онлайн"
 msgstr "Online"
 
-#| msgid "Де вас знайти? (необов'язково)"
 msgid "Де вас знайти (необов'язково)"
 msgstr "Where to find you? (optional)"
 
@@ -211,7 +195,6 @@ msgstr "Senior waiter"
 msgid "Відкрита"
 msgstr "Open"
 
-#| msgid "Не оплачено"
 msgid "Побачено"
 msgstr "Not paid"
 
@@ -221,7 +204,6 @@ msgstr "Resolved"
 msgid "Коментар"
 msgstr "Comment"
 
-#| msgid "Оформити замовлення"
 msgid "Прийняття замовлення"
 msgstr "Order acceptance"
 
@@ -234,21 +216,18 @@ msgstr "Chef claims ticket"
 msgid "Приготування"
 msgstr "Preparation"
 
-#| msgid "Передача страви"
 msgid "Передача офіціанту"
 msgstr "Dish handoff"
 
 msgid "Оплата"
 msgstr "Payment"
 
-#| msgid "Старший офіціант"
 msgid "Старший"
 msgstr "Senior waiter"
 
 msgid "Кошик порожній або страви недоступні."
 msgstr "The cart is empty or dishes are unavailable."
 
-#| msgid "Вже підтверджено"
 msgid "Оплату підтверджено!"
 msgstr "Already confirmed"
 
@@ -266,7 +245,6 @@ msgstr "#{order_id} payment — skipped steps: {skipped}"
 msgid "Цей QR-код призначений іншому офіціанту."
 msgstr "This QR code is assigned to another waiter."
 
-#| msgid "Передано, але не оплачено"
 msgid "Звернення позначено як побачене."
 msgstr "Delivered but not paid"
 
@@ -274,7 +252,6 @@ msgid "Звернення вирішено."
 msgstr "Request resolved."
 
 #, fuzzy, python-brace-format
-#| msgid "Оплата замовлення #%(order_id)s"
 msgid "Оплату замовлення #{order_id} підтверджено."
 msgstr "Payment for order #%(order_id)s"
 
@@ -300,14 +277,21 @@ msgstr "Sign in"
 msgid "Меню"
 msgstr "Menu"
 
-#| msgid "Створити"
 msgid "Закрити"
 msgstr "Create"
 
 msgid "Назад"
 msgstr "Back"
 
-#| msgid "Нова категорія"
+msgid "Встановити додаток"
+msgstr "Confirm payment"
+
+msgid "Натисніть"
+msgstr "Click for sound"
+
+msgid "та оберіть «На Початковий екран»"
+msgstr ""
+
 msgid "Категорії"
 msgstr "Categories"
 
@@ -371,14 +355,12 @@ msgstr "From"
 msgid "До"
 msgstr "To"
 
-#| msgid "Згенерувати QR"
 msgid "Застосувати"
 msgstr "Generate QR"
 
 msgid "Кухня"
 msgstr "Kitchen"
 
-#| msgid "Страви"
 msgid "страв"
 msgstr "Dishes"
 
@@ -391,11 +373,9 @@ msgstr "avg. time"
 msgid "помилки"
 msgstr "errors"
 
-#| msgid "Офіціант"
 msgid "Офіціанти"
 msgstr "Waiter"
 
-#| msgid "До замовлення"
 msgid "замовлень"
 msgstr "Back to order"
 
@@ -405,26 +385,21 @@ msgstr "avg. check"
 msgid "виторг"
 msgstr "revenue"
 
-#| msgid "Готівка"
 msgid "готівка"
 msgstr "Cash"
 
-#| msgid "Онлайн"
 msgid "онлайн"
 msgstr "Online"
 
-#| msgid "Готово"
 msgid "готово"
 msgstr "Ready"
 
 msgid "Забери!"
 msgstr "Pick up!"
 
-#| msgid "Не оплачено"
 msgid "Сплачено"
 msgstr "Not paid"
 
-#| msgid "Не оплачено"
 msgid "Не сплачено"
 msgstr "Not paid"
 
@@ -446,43 +421,36 @@ msgstr "Ready in the kitchen — pick up!"
 msgid "В черзі на кухні"
 msgstr "In the kitchen queue"
 
-#| msgid "Мої замовлення"
 msgid "доставлено"
 msgstr "My orders"
 
-#| msgid "Згенерувати QR"
 msgid "Верифікувати"
 msgstr "Generate QR"
 
 msgid "Оплату прийнято"
 msgstr "Payment accepted"
 
-#| msgid "Передав відвідувачу"
 msgid "Відвідувач:"
 msgstr "Delivered to visitor"
 
 msgid "Позиції"
 msgstr "Items"
 
-#| msgid "Оформити замовлення"
 msgid "Скасувати замовлення"
 msgstr "Cancel order"
 
 msgid "Разом:"
 msgstr "Total:"
 
-#| msgid "Мої замовлення"
 msgid "Взяти замовлення"
 msgstr "My orders"
 
 msgid "Верифікувати і передати на кухню"
 msgstr "Verify and send to the kitchen"
 
-#| msgid "Доставлено %(minutes)s хв тому"
 msgid "Доставлено клієнту"
 msgstr "Delivered %(minutes)s min ago"
 
-#| msgid "Прийняв готівку"
 msgid "Оплату прийнято (готівка)"
 msgstr "Received cash"
 
@@ -492,7 +460,6 @@ msgstr "Manual actions"
 msgid "Якщо стандартний flow не був виконаний — зафіксуйте фактичний стан"
 msgstr "If the standard flow was not followed — record the actual status"
 
-#| msgid "Доставлено %(minutes)s хв тому"
 msgid "Доставлено (без кухні)"
 msgstr "Delivered %(minutes)s min ago"
 
@@ -505,7 +472,6 @@ msgstr "What our guests are saying"
 msgid "Поки що відгуків немає. Будьте першим!"
 msgstr "No reviews yet. Be the first!"
 
-#| msgid "%(time)s тому"
 msgid "тому"
 msgstr "%(time)s ago"
 
@@ -519,11 +485,9 @@ msgstr "Awaiting moderation"
 msgid "Замовлення #%(order_id)s"
 msgstr "Order #%(order_id)s"
 
-#| msgid "До замовлення"
 msgid "(без повідомлення)"
 msgstr "Back to order"
 
-#| msgid "Згенерувати QR"
 msgid "Опублікувати"
 msgstr "Generate QR"
 
@@ -542,7 +506,6 @@ msgstr "p."
 msgid "ескал."
 msgstr "esc."
 
-#| msgid "Черга"
 msgid "черга"
 msgstr "Queue"
 
@@ -558,7 +521,6 @@ msgstr "Preparing"
 msgid "Немає кухарів у системі"
 msgstr "No chefs in the system"
 
-#| msgid "QR-код прострочений"
 msgid "Прострочено"
 msgstr "QR code expired"
 
@@ -577,7 +539,6 @@ msgstr "Escalation"
 msgid "Черга"
 msgstr "Queue"
 
-#| msgid "В роботі (%(count)s)"
 msgid "В роботі"
 msgstr "In progress (%(count)s)"
 
@@ -593,9 +554,26 @@ msgstr "Generate QR"
 msgid "Повернутись"
 msgstr "Go back"
 
-#| msgid "Нова категорія"
+msgid "Український культурний центр у Херцег-Нові, Чорногорія"
+msgstr "Ukrainian Cultural Center in Herceg Novi, Montenegro"
+
+msgid "Фестивальне меню"
+msgstr "Festival menu"
+
+msgid "Новини"
+msgstr "News"
+
+msgid "Скоро"
+msgstr "Coming soon"
+
+msgid "Бібліотека"
+msgstr "Library"
+
+msgid "Розклад"
+msgstr "Schedule"
+
 msgid "Видалити категорію"
-msgstr "New category"
+msgstr "Delete category"
 
 msgid "Увага!"
 msgstr "Attention!"
@@ -610,15 +588,12 @@ msgid "Разом з категорією буде видалено:"
 msgstr "Along with the category, the following will be deleted:"
 
 #, fuzzy, python-format
-#| msgid "Нова категорія"
 msgid "Логотип категорії: «%(title)s»"
 msgstr "New category"
 
-#| msgid "Страви"
 msgid "страва"
 msgstr "Dishes"
 
-#| msgid "Страви"
 msgid "страви"
 msgstr "Dishes"
 
@@ -628,23 +603,18 @@ msgstr "There are no dishes in this category."
 msgid "Так, видалити"
 msgstr "Yes, delete"
 
-#| msgid "Згенерувати QR"
 msgid "Скасувати"
 msgstr "Generate QR"
 
-#| msgid "Нова категорія"
 msgid "Редагувати категорію"
 msgstr "New category"
 
-#| msgid "Нова категорія"
 msgid "Створити категорію"
 msgstr "New category"
 
-#| msgid "Нова категорія"
 msgid "Логотип категорії"
 msgstr "New category"
 
-#| msgid "Де вас знайти? (необов'язково)"
 msgid "необов'язково"
 msgstr "Where to find you? (optional)"
 
@@ -656,14 +626,12 @@ msgstr ""
 msgid "Зберегти"
 msgstr "Save"
 
-#| msgid "Згенерувати QR"
 msgid "Редагувати"
 msgstr "Generate QR"
 
 msgid "Страв у цій категорії поки немає."
 msgstr "There are no dishes in this category yet."
 
-#| msgid "Передача страви"
 msgid "Видалити страву"
 msgstr "Dish handoff"
 
@@ -679,15 +647,12 @@ msgstr "Along with the dish, the following will be deleted:"
 msgid "Головне зображення: «%(title)s»"
 msgstr "Main image: “%(title)s”"
 
-#| msgid "До замовлення"
 msgid "додаткове зображення"
 msgstr "Back to order"
 
-#| msgid "Немає активних замовлень"
 msgid "додаткових зображення"
 msgstr "No active orders"
 
-#| msgid "Немає активних замовлень"
 msgid "додаткових зображень"
 msgstr "No active orders"
 
@@ -706,22 +671,18 @@ msgstr "Weight"
 msgid "ккал"
 msgstr "kcal"
 
-#| msgid "Оформити замовлення"
 msgid "Додати в замовлення"
 msgstr "Add to order"
 
 msgid "Додаткові фото"
 msgstr "Additional photos"
 
-#| msgid "Передача страви"
 msgid "Редагувати страву"
 msgstr "Dish handoff"
 
-#| msgid "Створити"
 msgid "Створити страву"
 msgstr "Create"
 
-#| msgid "До замовлення"
 msgid "Головне зображення"
 msgstr "Back to order"
 
@@ -733,15 +694,12 @@ msgid ""
 "640×480 пікселів."
 msgstr ""
 
-#| msgid "До замовлення"
 msgid "Додаткові зображення"
 msgstr "Back to order"
 
-#| msgid "До замовлення"
 msgid "Зображення"
 msgstr "Back to order"
 
-#| msgid "Оформити замовлення"
 msgid "Додати ще зображення"
 msgstr "Add more images"
 
@@ -751,7 +709,6 @@ msgstr "Upload additional photos of the dish. Empty fields will be skipped."
 msgid "Страви"
 msgstr "Dishes"
 
-#| msgid "Страви"
 msgid "Усі страви"
 msgstr "Dishes"
 
@@ -782,11 +739,9 @@ msgstr "Search"
 msgid "Результати пошуку:"
 msgstr "Search results:"
 
-#| msgid "Пошук страв..."
 msgid "Пошук страв"
 msgstr "Search dishes..."
 
-#| msgid "Нова страва"
 msgid "Назва страви або опис..."
 msgstr "New dish"
 
@@ -803,7 +758,6 @@ msgstr "Try a different search or check your spelling."
 msgid "Введіть назву страви або опис для пошуку."
 msgstr "Enter a dish name or description to search."
 
-#| msgid "Новий тег"
 msgid "Видалити тег"
 msgstr "New tag"
 
@@ -819,17 +773,16 @@ msgid "Логотип тега: «%(title)s»"
 msgstr "Tag logo: \"%(title)s\""
 
 msgid "Зв'язки зі стравами будуть видалені, але самі страви залишаться."
-msgstr "Associations with dishes will be deleted, but the dishes themselves will remain."
+msgstr ""
+"Associations with dishes will be deleted, but the dishes themselves will "
+"remain."
 
-#| msgid "Згенерувати QR"
 msgid "Редагувати тег"
 msgstr "Generate QR"
 
-#| msgid "Створити"
 msgid "Створити тег"
 msgstr "Create"
 
-#| msgid "Новий тег"
 msgid "Логотип тега"
 msgstr "New tag"
 
@@ -853,11 +806,9 @@ msgstr "If you have viewed the menu before, it is available in the cache."
 msgid "Спробувати знову"
 msgstr "Try again"
 
-#| msgid "Мої замовлення"
 msgid "Історія замовлень"
 msgstr "My orders"
 
-#| msgid "Мої замовлення"
 msgid "Поточне замовлення"
 msgstr "My orders"
 
@@ -868,7 +819,6 @@ msgstr ""
 msgid "Оформити замовлення"
 msgstr "Place order"
 
-#| msgid "Ще нічого не приготовлено"
 msgid "Ви ще нічого не обрали."
 msgstr "Nothing cooked yet"
 
@@ -914,11 +864,9 @@ msgstr "Ask the cook to generate a new QR code."
 msgid "Або скористайтесь ручним підтвердженням."
 msgstr "Or use manual confirmation."
 
-#| msgid "Менеджер"
 msgid "Панель менеджера"
 msgstr "Manager"
 
-#| msgid "Немає активних замовлень"
 msgid "Активних замовлень"
 msgstr "No active orders"
 
@@ -931,7 +879,6 @@ msgstr "Open Escalations"
 msgid "Виторг"
 msgstr "Revenue"
 
-#| msgid "Оплата"
 msgid "Оплати"
 msgstr "Payment"
 
@@ -941,7 +888,6 @@ msgstr "Administration"
 msgid "Адмін-панель"
 msgstr "Admin Panel"
 
-#| msgid "Оформити замовлення"
 msgid "Стан обробки замовлення"
 msgstr "Order processing status"
 
@@ -951,26 +897,21 @@ msgstr "PAID"
 msgid "ОЧІКУЄ ОПЛАТИ"
 msgstr "AWAITING PAYMENT"
 
-#| msgid "Замовлення оплачено (%(method)s)"
 msgid "Замовлення створено"
 msgstr "Order paid (%(method)s)"
 
-#| msgid "Кількість:"
 msgid "Кількість позицій:"
 msgstr "Quantity:"
 
-#| msgid "Прийняв готівку"
 msgid "Прийнято:"
 msgstr "Received cash"
 
-#| msgid "Оберіть офіціанта"
 msgid "Очікує на офіціанта..."
 msgstr "Select a waiter"
 
 msgid "Верифіковано:"
 msgstr "Verified:"
 
-#| msgid "Замовлення оплачено (%(method)s)"
 msgid "Замовлення передано на кухню"
 msgstr "Order paid (%(method)s)"
 
@@ -986,7 +927,6 @@ msgstr "All dishes are ready:"
 msgid "Страви ще готуються..."
 msgstr "Dishes are still being prepared..."
 
-#| msgid "Створено:"
 msgid "Доставлено:"
 msgstr "Created:"
 
@@ -1005,7 +945,6 @@ msgstr "Describe the situation..."
 msgid "Надіслати"
 msgstr "Send"
 
-#| msgid "Мої замовлення"
 msgid "Ваше звернення:"
 msgstr "My orders"
 
@@ -1018,7 +957,6 @@ msgstr "sent"
 msgid "Як вам сподобалось?"
 msgstr "How did you like it?"
 
-#| msgid "Де вас знайти? (необов'язково)"
 msgid "Ваше ім'я (необов'язково)"
 msgstr "Where to find you? (optional)"
 
@@ -1048,21 +986,18 @@ msgid ""
 "програми лояльності!"
 msgstr ""
 
-#| msgid "Згенерувати QR"
 msgid "Зареєструватись"
 msgstr "Generate QR"
 
 msgid "Активні"
 msgstr "Active"
 
-#| msgid "Позиції"
 msgid "позицій"
 msgstr "Items"
 
 msgid "Завершені"
 msgstr "Completed"
 
-#| msgid "Замовлення оплачено (%(method)s)"
 msgid "Замовлень поки немає."
 msgstr "Order paid (%(method)s)"
 
@@ -1077,8 +1012,10 @@ msgid "Демо-режим:"
 msgstr "Demo mode:"
 
 msgid "Реальна оплата ще не підключена. Кнопка симулює успішну оплату."
-msgstr "Real payment is not yet connected. The button simulates a successful payment."
-"Real payment is not connected yet. The button simulates a successful payment."
+msgstr ""
+"Real payment is not yet connected. The button simulates a successful "
+"payment.Real payment is not connected yet. The button simulates a successful "
+"payment."
 
 msgid "Оплатити онлайн (демо)"
 msgstr "Pay online (demo)"
@@ -1106,7 +1043,6 @@ msgstr "Waiter:"
 msgid "Підтвердити оплату"
 msgstr "Confirm payment"
 
-#| msgid "Замовлення #%(order_id)s"
 msgid "Замовлення (офіціант)"
 msgstr "Order #%(order_id)s"
 
@@ -1119,31 +1055,24 @@ msgstr "My"
 msgid "Готові до доставки"
 msgstr "Ready for delivery"
 
-#| msgid "%(time)s тому"
 msgid "хв тому"
 msgstr "%(time)s ago"
 
-#| msgid "Немає активних замовлень"
 msgid "Немає нових замовлень"
 msgstr "No active orders"
 
-#| msgid "Готівка"
 msgid "Готівка на руках:"
 msgstr "Cash"
 
-#| msgid "Немає активних замовлень"
 msgid "У вас немає активних замовлень"
 msgstr "No active orders"
 
-#| msgid "QR-код прострочений"
 msgid "прострочено"
 msgstr "QR code expired"
 
-#| msgid "Не оплачено"
 msgid "не сплачено"
 msgstr "Not paid"
 
-#| msgid "Немає активних замовлень"
 msgid "Немає активних замовлень у команди"
 msgstr "No active orders"
 
@@ -1192,7 +1121,6 @@ msgstr "Current password"
 msgid "Новий пароль (мінімум 8 символів, не лише цифри)"
 msgstr "New password (minimum 8 characters, not just numbers)"
 
-#| msgid "Підтвердження прийому страви"
 msgid "Підтвердження нового пароля"
 msgstr "Confirm dish receipt"
 
@@ -1200,9 +1128,10 @@ msgid "Змінити пароль"
 msgstr "Change password"
 
 msgid "Ваш пароль успішно змінено. Тепер ви можете увійти з новим паролем."
-msgstr "Your password has been changed successfully. You can now log in with your new password."
+msgstr ""
+"Your password has been changed successfully. You can now log in with your "
+"new password."
 
-#| msgid "Новий тег"
 msgid "Новий пароль"
 msgstr "New tag"
 
@@ -1229,7 +1158,6 @@ msgid ""
 "пароля."
 msgstr ""
 
-#| msgid "Передав відвідувачу"
 msgid "Перевірте вашу пошту."
 msgstr "Delivered to visitor"
 
@@ -1254,7 +1182,6 @@ msgstr "Send link"
 msgid "Редагувати переклад"
 msgstr "Edit translation"
 
-#| msgid "Передав"
 msgid "Переклади"
 msgstr "Delivered"
 
@@ -1267,19 +1194,15 @@ msgstr "Save and approve"
 msgid "Переклади для перевірки"
 msgstr "Translations for review"
 
-#| msgid "Вже підтверджено"
 msgid "Усі переклади затверджено."
 msgstr "Already confirmed"
 
-#| msgid "Підтвердити оплату"
 msgid "Затвердити все"
 msgstr "Confirm payment"
 
-#| msgid "Підтвердити оплату"
 msgid "Затвердити"
 msgstr "Confirm payment"
 
-#| msgid "Створити"
 msgid "Повторити"
 msgstr "Create"
 
@@ -1322,18 +1245,15 @@ msgstr "Registration"
 msgid "Вже маєте акаунт?"
 msgstr "Already have an account?"
 
-#| msgid "Вже підтверджено"
 msgid "Затверджено"
 msgstr "Already confirmed"
 
 msgid "Помилка перекладу"
 msgstr "Translation error"
 
-#| msgid "Підтвердження прийому страви"
 msgid "Затвердження перекладу"
 msgstr "Confirm dish receipt"
 
-#| msgid "Підтвердження прийому страви"
 msgid "Затвердження перекладів"
 msgstr "Confirm dish receipt"
 
@@ -1343,22 +1263,18 @@ msgstr "First name"
 msgid "Прізвище"
 msgstr "Last name"
 
-#| msgid "Де вас знайти? (необов'язково)"
 msgid "Електронна пошта (обов'язково)"
 msgstr "Where to find you? (optional)"
 
-#| msgid "Де вас знайти? (необов'язково)"
 msgid "Ім'я (необов'язково)"
 msgstr "Where to find you? (optional)"
 
-#| msgid "Де вас знайти? (необов'язково)"
 msgid "Прізвище (необов'язково)"
 msgstr "Where to find you? (optional)"
 
 msgid "Пароль (мінімум 8 символів, не лише цифри)"
 msgstr "Password (minimum 8 characters, not only digits)"
 
-#| msgid "Підтвердження прийому страви"
 msgid "Підтвердження пароля"
 msgstr "Confirm dish receipt"
 
@@ -1368,14 +1284,12 @@ msgstr "Username"
 msgid "Виробництво"
 msgstr "Department"
 
-#| msgid "Передав відвідувачу"
 msgid "Відвідувач"
 msgstr "Delivered to visitor"
 
 msgid "Роль"
 msgstr "Role"
 
-#| msgid "Передав відвідувачу"
 msgid "Посада для відвідувачів"
 msgstr "Delivered to visitor"
 
@@ -1385,7 +1299,6 @@ msgstr "For example: Cook, Bartender, Pastry Chef"
 msgid "Публічне ім'я"
 msgstr "Display name"
 
-#| msgid "Передав відвідувачу"
 msgid "Ім'я без прізвища для відвідувачів"
 msgstr "Delivered to visitor"
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-24 21:42+0000\n"
+"POT-Creation-Date: 2026-03-25 14:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
 msgid "❤️ Чудово"
 msgstr "❤️ Ottimo"
 
@@ -105,7 +106,8 @@ msgid "'{dish_title}' — пропущено: {skipped}"
 msgstr "'{dish_title}' — saltato: {skipped}"
 
 msgid "Обраний офіціант не знайдений або не має відповідної ролі."
-msgstr "Il cameriere selezionato non è stato trovato o non ha il ruolo appropriato."
+msgstr ""
+"Il cameriere selezionato non è stato trovato o non ha il ruolo appropriato."
 
 msgid "Назва логотипу"
 msgstr "Nome del logo"
@@ -135,7 +137,8 @@ msgid "Наявність"
 msgstr "Disponibilità"
 
 msgid "Файл не є валідним SVG. Завантажте файл у форматі SVG."
-msgstr "Il file non è un SVG valido. Si prega di caricare un file in formato SVG."
+msgstr ""
+"Il file non è un SVG valido. Si prega di caricare un file in formato SVG."
 
 msgid "Чернетка"
 msgstr "Bozza"
@@ -279,6 +282,15 @@ msgstr "Chiudi"
 
 msgid "Назад"
 msgstr "Indietro"
+
+msgid "Встановити додаток"
+msgstr "Conferma pagamento"
+
+msgid "Натисніть"
+msgstr "Clicca per l'audio"
+
+msgid "та оберіть «На Початковий екран»"
+msgstr ""
 
 msgid "Категорії"
 msgstr "Categorie"
@@ -446,7 +458,8 @@ msgid "Позачергові дії"
 msgstr "Azioni straordinarie"
 
 msgid "Якщо стандартний flow не був виконаний — зафіксуйте фактичний стан"
-msgstr "Se il flusso standard non è stato seguito, registra lo stato effettivo."
+msgstr ""
+"Se il flusso standard non è stato seguito, registra lo stato effettivo."
 
 msgid "Доставлено (без кухні)"
 msgstr "Consegnato (senza cucina)"
@@ -541,6 +554,24 @@ msgstr "Genera QR"
 
 msgid "Повернутись"
 msgstr "Indietro"
+
+msgid "Український культурний центр у Херцег-Нові, Чорногорія"
+msgstr ""
+
+msgid "Фестивальне меню"
+msgstr "Vai al menù"
+
+msgid "Новини"
+msgstr "Nuovo tag"
+
+msgid "Скоро"
+msgstr ""
+
+msgid "Бібліотека"
+msgstr ""
+
+msgid "Розклад"
+msgstr "Traduzioni"
 
 msgid "Видалити категорію"
 msgstr "Elimina categoria"
@@ -743,7 +774,8 @@ msgid "Логотип тега: «%(title)s»"
 msgstr "Logo del tag: \"%(title)s\""
 
 msgid "Зв'язки зі стравами будуть видалені, але самі страви залишаться."
-msgstr "Le associazioni con i piatti verranno rimosse, ma i piatti stessi rimarranno."
+msgstr ""
+"Le associazioni con i piatti verranno rimosse, ma i piatti stessi rimarranno."
 
 msgid "Редагувати тег"
 msgstr "Modifica tag"
@@ -769,7 +801,8 @@ msgid "Перевірте інтернет і спробуйте знову."
 msgstr "Controlla la connessione internet e riprova."
 
 msgid "Якщо ви переглядали меню раніше — воно доступне в кеші."
-msgstr "Se hai già visualizzato il menù in precedenza, è disponibile nella cache."
+msgstr ""
+"Se hai già visualizzato il menù in precedenza, è disponibile nella cache."
 
 msgid "Спробувати знову"
 msgstr "Riprova"
@@ -980,7 +1013,9 @@ msgid "Демо-режим:"
 msgstr "Modalità demo:"
 
 msgid "Реальна оплата ще не підключена. Кнопка симулює успішну оплату."
-msgstr "Il pagamento reale non è ancora abilitato. Il pulsante simula un pagamento andato a buon fine."
+msgstr ""
+"Il pagamento reale non è ancora abilitato. Il pulsante simula un pagamento "
+"andato a buon fine."
 
 msgid "Оплатити онлайн (демо)"
 msgstr "Paga online (demo)"
@@ -1093,7 +1128,9 @@ msgid "Змінити пароль"
 msgstr "Modifica password"
 
 msgid "Ваш пароль успішно змінено. Тепер ви можете увійти з новим паролем."
-msgstr "La tua password è stata modificata con successo. Ora puoi accedere con la nuova password."
+msgstr ""
+"La tua password è stata modificata con successo. Ora puoi accedere con la "
+"nuova password."
 
 msgid "Новий пароль"
 msgstr "Nuova password"
@@ -1105,7 +1142,9 @@ msgid "Посилання недійсне"
 msgstr "Link non valido"
 
 msgid "Посилання для скидання пароля недійсне або вже було використане."
-msgstr "Il link per il ripristino della password non è valido o è già stato utilizzato."
+msgstr ""
+"Il link per il ripristino della password non è valido o è già stato "
+"utilizzato."
 
 msgid "Запросіть нове посилання."
 msgstr "Richiedi un nuovo link."
@@ -1125,7 +1164,9 @@ msgid "Перевірте вашу пошту."
 msgstr "Controlla la tua email."
 
 msgid "У dev-режимі лист виводиться у термінал сервера."
-msgstr "In modalità sviluppatore, l'email viene visualizzata nel terminale del server."
+msgstr ""
+"In modalità sviluppatore, l'email viene visualizzata nel terminale del "
+"server."
 
 msgid "Скопіюйте посилання з консолі та вставте у браузер."
 msgstr "Copia il link dalla console e incollalo nel browser."

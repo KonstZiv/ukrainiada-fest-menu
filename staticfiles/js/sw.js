@@ -7,6 +7,7 @@
 const CACHE_NAME = "festival-menu-v1";
 
 const PRECACHE_URLS = [
+    "/",
     "/menu/",
     "/static/css/brand.css",
     "/static/js/sse_client.js",

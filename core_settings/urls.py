@@ -12,13 +12,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from django.views.generic import RedirectView
+
 from django.views.i18n import JavaScriptCatalog
 
-from core_settings.views import health_check, offline_page, service_worker
+from core_settings.views import health_check, landing_page, offline_page, service_worker
 
 urlpatterns = [
-    path("", RedirectView.as_view(url="/menu/", permanent=False)),
+    path("", landing_page, name="landing"),
     path("health/", health_check, name="health_check"),
     path("sw.js", service_worker, name="service_worker"),
     path("i18n/", include("django.conf.urls.i18n")),
