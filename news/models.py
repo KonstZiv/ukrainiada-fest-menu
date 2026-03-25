@@ -146,3 +146,31 @@ class ArticleImage(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+
+class TranslationFeedback(models.Model):
+    """User-submitted feedback about translation inaccuracies."""
+
+    article = models.ForeignKey(
+        Article,
+        on_delete=models.CASCADE,
+        related_name="translation_feedbacks",
+    )
+    language = models.CharField(max_length=10, verbose_name=_("Мова"))
+    message = models.TextField(verbose_name=_("Повідомлення"))
+    page_url = models.URLField(verbose_name=_("Сторінка"))
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = _("Зауваження до перекладу")
+        verbose_name_plural = _("Зауваження до перекладів")
+
+    def __str__(self) -> str:
+        return f"Feedback #{self.pk} [{self.language}] {self.article}"

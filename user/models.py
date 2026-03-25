@@ -114,6 +114,13 @@ class User(AbstractUser):
         verbose_name=_("Джерело реєстрації"),
     )
 
+    corrector_languages: models.JSONField[list[str], list[str]] = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name=_("Мови коректора"),
+        help_text=_("Коди мов для коректури: en, cnr, hr, bs, it, de"),
+    )
+
     @property
     def staff_label(self) -> str:
         """Human-friendly label for visitor-facing displays.

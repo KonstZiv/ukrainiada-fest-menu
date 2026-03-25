@@ -144,6 +144,13 @@
             {% trans "НОВИНИ" %}
           </a>
           <div class="vr-custom"></div>
+        {% elif user.role == 'corrector' %}
+          <a href="{% url 'translations:review' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none d-flex align-items-center gap-1"
+             style="font-size: 0.8rem; letter-spacing: 0.05em;">
+            {% trans "ПЕРЕКЛАДИ" %}
+            {% if pending_translations_count %}<span class="badge bg-warning text-dark" style="font-size: 0.65rem;">{{ pending_translations_count }}</span>{% endif %}
+          </a>
+          <div class="vr-custom"></div>
         {% elif user.role == 'manager' %}
           <a href="{% url 'manager:dashboard' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none d-flex align-items-center gap-1"
              style="font-size: 0.8rem; letter-spacing: 0.05em;">

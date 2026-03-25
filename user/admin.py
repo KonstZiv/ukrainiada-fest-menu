@@ -32,7 +32,7 @@ class UserAdmin(BaseUserAdmin):
         ),
         (
             "Роль та аватар",
-            {"fields": ("role", "avatar")},
+            {"fields": ("role", "avatar", "corrector_languages")},
         ),
     )
     inlines = [CommunicationChannelInline]

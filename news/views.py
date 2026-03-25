@@ -4,15 +4,20 @@ from __future__ import annotations
 
 from typing import Any, cast
 
+from django.contrib import messages
+from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from django.db.models import Prefetch, QuerySet
+from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils.translation import get_language
+from django.utils.translation import gettext as _
 from django.views import generic
 
 from news.forms import ArticleForm, ArticleImageFormSet, ArticleMainImageForm
-from news.models import Article, ArticleMainImage
+from news.models import Article, ArticleMainImage, TranslationFeedback
+from translations.models import TranslationApproval
 from user.decorators import role_required
 from user.models import User
 
@@ -51,10 +56,26 @@ def article_detail(request: HttpRequest, pk: int) -> HttpResponse:
     else:
         article = get_object_or_404(qs, pk=pk, status=Article.Status.PUBLISHED)
 
+    # Check if translation is approved for current language.
+    current_lang = get_language() or "uk"
+    translation_approved = current_lang == "uk"
+    if not translation_approved:
+        ct = ContentType.objects.get_for_model(Article)
+        translation_approved = TranslationApproval.objects.filter(
+            content_type=ct,
+            object_id=article.pk,
+            language=current_lang,
+            status=TranslationApproval.Status.APPROVED,
+        ).exists()
+
     return render(
         request,
         "news/article_detail.html",
-        {"article": article, "show_search": False},
+        {
+            "article": article,
+            "show_search": False,
+            "translation_approved": translation_approved,
+        },
     )
 
 
@@ -189,3 +210,30 @@ class ArticleDeleteView(generic.DeleteView):  # type: ignore[type-arg]
         ctx = super().get_context_data(**kwargs)
         ctx["show_search"] = False
         return ctx
+
+
+# ---------------------------------------------------------------------------
+# Translation feedback
+# ---------------------------------------------------------------------------
+
+
+def submit_translation_feedback(request: HttpRequest, pk: int) -> HttpResponse:
+    """Submit feedback about a translation inaccuracy."""
+    article = get_object_or_404(Article, pk=pk)
+
+    if request.method == "POST":
+        message = request.POST.get("message", "").strip()
+        if message:
+            TranslationFeedback.objects.create(
+                article=article,
+                language=get_language() or "uk",
+                message=message,
+                page_url=request.build_absolute_uri(article.get_absolute_url())
+                if hasattr(article, "get_absolute_url")
+                else request.META.get("HTTP_REFERER", ""),
+                user=request.user if request.user.is_authenticated else None,
+            )
+            messages.success(request, _("Дякуємо за зауваження!"))
+        return redirect("news:article_detail", pk=pk)
+
+    return redirect("news:article_detail", pk=pk)

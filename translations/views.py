@@ -20,13 +20,32 @@ from translations.services import (
 from user.decorators import role_required
 from user.models import User
 
-_REVIEW_ROLES = ("manager", "kitchen_supervisor", "senior_waiter")
+_REVIEW_ROLES = (
+    "manager",
+    "kitchen_supervisor",
+    "senior_waiter",
+    "corrector",
+    "editor",
+)
 
 
 @role_required(*_REVIEW_ROLES)
 def review_list(request: HttpRequest) -> HttpResponse:
     """Show all objects with pending / failed translations."""
     objects = get_pending_objects()
+
+    # Correctors see only their assigned languages.
+    user = cast(User, request.user)
+    if user.role == "corrector" and user.corrector_languages:
+        allowed = set(user.corrector_languages)
+        for obj in objects:
+            obj["languages"] = {
+                lang: data
+                for lang, data in obj["languages"].items()  # type: ignore[union-attr,attr-defined]
+                if lang in allowed
+            }
+        objects = [o for o in objects if o["languages"]]
+
     return render(
         request,
         "translations/review.html",

@@ -12,4 +12,9 @@ urlpatterns = [
     path("create/", views.ArticleCreateView.as_view(), name="article_create"),
     path("<int:pk>/edit/", views.ArticleUpdateView.as_view(), name="article_update"),
     path("<int:pk>/delete/", views.ArticleDeleteView.as_view(), name="article_delete"),
+    path(
+        "<int:pk>/translation-feedback/",
+        views.submit_translation_feedback,
+        name="translation_feedback",
+    ),
 ]

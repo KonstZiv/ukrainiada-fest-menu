@@ -27,6 +27,19 @@
     {% endif %}
   </div>
 
+  {# --- Translation disclaimer --- #}
+  {% if not translation_approved %}
+  <div class="alert alert-warning small py-2 mb-3 d-flex justify-content-between align-items-center">
+    <span>
+      <i class="bi bi-translate me-1"></i>
+      {% trans "Це автоматичний переклад. Можливі неточності." %}
+    </span>
+    <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#translationFeedbackModal">
+      {% trans "Повідомити про помилку" %}
+    </button>
+  </div>
+  {% endif %}
+
   {# --- Content (rich text HTML) --- #}
   <div class="article-content mb-4">
     {{ article.content|safe }}
@@ -57,5 +70,29 @@
   </div>
   {% endif %}
 
+</div>
+
+{# --- Translation feedback modal --- #}
+<div class="modal fade" id="translationFeedbackModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="{% url 'news:translation_feedback' article.pk %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">{% trans "Зауваження до перекладу" %}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted small">{% trans "Опишіть що саме перекладено неточно або некоректно." %}</p>
+          <textarea name="message" class="form-control" rows="4"
+                    placeholder="{% trans 'Ваше зауваження...' %}" required></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Скасувати" %}</button>
+          <button type="submit" class="btn btn-warning">{% trans "Надіслати" %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 {% endblock %}
