@@ -48,7 +48,7 @@ def save_edited_translation(
         return
 
     obj = model.objects.get(pk=approval.object_id)  # type: ignore[attr-defined]
-    fields = FIELDS_MAP.get(model, [])
+    fields = FIELDS_MAP.get(model, {})
     update_fields: list[str] = []
 
     for field, value in field_values.items():
@@ -98,7 +98,7 @@ def get_pending_objects() -> list[dict[str, object]]:
         except model.DoesNotExist:  # type: ignore[attr-defined]
             continue
 
-        fields = FIELDS_MAP.get(model, [])
+        fields = FIELDS_MAP.get(model, {})
         source = {f: getattr(obj, f"{f}_uk", "") for f in fields}
 
         lang_data: dict[str, dict[str, object]] = {}

@@ -1,4 +1,4 @@
-"""Google Gemini API client for menu content translation."""
+"""Google Gemini API client for menu/news content translation."""
 
 from __future__ import annotations
 
@@ -7,8 +7,11 @@ import logging
 import re
 from dataclasses import dataclass, field
 
+from bs4 import BeautifulSoup, NavigableString
 from django.conf import settings
 from google import genai
+
+from translations.constants import ContentKind
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +25,7 @@ _LANG_NAMES: dict[str, str] = {
     "de": "German (Deutsch)",
 }
 
-# Pricing per 1M tokens (USD) — gemini-2.5-flash as of 2026-03.
+# Pricing per 1M tokens (USD).
 MODEL_PRICING: dict[str, dict[str, float]] = {
     "gemini-2.5-flash": {"input": 0.15, "output": 0.60},
     "gemini-2.5-pro": {"input": 1.25, "output": 10.00},
@@ -30,6 +33,63 @@ MODEL_PRICING: dict[str, dict[str, float]] = {
 }
 
 DEFAULT_MODEL = "gemini-2.5-flash"
+
+
+# ---------------------------------------------------------------------------
+# HTML text extraction / reassembly
+# ---------------------------------------------------------------------------
+
+
+def _extract_texts_from_html(html: str) -> tuple[list[str], BeautifulSoup]:
+    """Extract translatable text nodes from HTML.
+
+    Returns a list of text strings and the parsed soup (with placeholders).
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    texts: list[str] = []
+
+    for node in soup.descendants:
+        if (
+            isinstance(node, NavigableString)
+            and node.parent is not None
+            and node.parent.name not in ("script", "style", "code", "pre")
+        ):
+            stripped = node.strip()
+            if len(stripped) >= 2:  # skip whitespace-only and single chars
+                texts.append(stripped)
+
+    return texts, soup
+
+
+def _reassemble_html(
+    soup: BeautifulSoup,
+    original_texts: list[str],
+    translated_texts: list[str],
+) -> str:
+    """Replace original text nodes in soup with translated versions."""
+    text_map = dict(zip(original_texts, translated_texts, strict=False))
+
+    for node in list(soup.descendants):
+        if (
+            isinstance(node, NavigableString)
+            and node.parent is not None
+            and node.parent.name not in ("script", "style", "code", "pre")
+        ):
+            stripped = node.strip()
+            if stripped in text_map:
+                # Preserve surrounding whitespace.
+                leading = node[: len(node) - len(node.lstrip())]
+                trailing = node[len(node.rstrip()) :]
+                node.replace_with(
+                    NavigableString(leading + text_map[stripped] + trailing)
+                )
+
+    return str(soup)
+
+
+# ---------------------------------------------------------------------------
+# Usage stats
+# ---------------------------------------------------------------------------
 
 
 @dataclass
@@ -89,6 +149,11 @@ def reset_stats() -> None:
     usage_stats._per_call.clear()
 
 
+# ---------------------------------------------------------------------------
+# Prompt building
+# ---------------------------------------------------------------------------
+
+
 def _build_prompt(source: dict[str, str], target_languages: list[str]) -> str:
     """Build translation prompt for Gemini."""
     lang_list = ", ".join(
@@ -109,12 +174,12 @@ def _build_prompt(source: dict[str, str], target_languages: list[str]) -> str:
         )
 
     return (
-        "You are a professional translator for a restaurant menu.\n"
+        "You are a professional translator for a cultural center website.\n"
         f"Translate the following content from Ukrainian to: {lang_list}.\n\n"
         f"Source (Ukrainian):\n{source_json}\n\n"
         "Rules:\n"
         "- Keep translations natural, appetizing, and culturally appropriate.\n"
-        "- Preserve the original meaning and culinary terminology.\n"
+        "- Preserve the original meaning.\n"
         f"{cnr_rules}"
         "- Return ONLY valid JSON — no markdown fences, no explanation.\n\n"
         "Expected JSON format:\n"
@@ -126,50 +191,78 @@ def _build_prompt(source: dict[str, str], target_languages: list[str]) -> str:
 
 def _extract_json(text: str) -> dict[str, dict[str, str]]:
     """Extract JSON from Gemini response, handling markdown fences."""
-    # Strip markdown code fences if present.
     cleaned = re.sub(r"```(?:json)?\s*", "", text).strip()
     cleaned = re.sub(r"```\s*$", "", cleaned).strip()
     return json.loads(cleaned)  # type: ignore[no-any-return]
+
+
+# ---------------------------------------------------------------------------
+# Main translation function
+# ---------------------------------------------------------------------------
 
 
 def translate_with_gemini(
     source: dict[str, str],
     target_languages: list[str],
     model: str = DEFAULT_MODEL,
+    field_kinds: dict[str, ContentKind] | None = None,
 ) -> dict[str, dict[str, str]]:
     """Translate source fields to all target languages in one API call.
 
+    For fields with kind="html", text is extracted from HTML, translated
+    as plain text, then reassembled back into the original HTML structure.
+
     Args:
-        source: Field names to Ukrainian text, e.g. {"title": "Борщ", "description": "..."}.
-        target_languages: Language codes, e.g. ["en", "cnr", "hr", "bs", "it", "de"].
+        source: Field names to Ukrainian text.
+        target_languages: Language codes.
         model: Gemini model to use.
+        field_kinds: Mapping of field_name -> "plain" | "html".
+            If None, all fields are treated as plain text.
 
     Returns:
         Nested dict: {lang_code: {field_name: translated_text}}.
-
-    Raises:
-        ValueError: If API key is missing or response cannot be parsed.
-        google.genai.errors.APIError: On Gemini API failures.
 
     """
     api_key: str = settings.GEMINI_API_KEY
     if not api_key:
         raise ValueError("GEMINI_API_KEY is not configured")
 
+    kinds = field_kinds or {}
+
+    # Separate HTML fields: extract text, translate as plain, reassemble.
+    html_meta: dict[str, tuple[list[str], BeautifulSoup]] = {}
+    plain_source: dict[str, str] = {}
+
+    for field_name, value in source.items():
+        kind = kinds.get(field_name, "plain")
+        if kind == "html" and "<" in value:
+            texts, soup = _extract_texts_from_html(value)
+            if texts:
+                html_meta[field_name] = (texts, soup)
+                # Send extracted texts as numbered dict for translation.
+                for i, txt in enumerate(texts):
+                    plain_source[f"_html_{field_name}_{i}"] = txt
+            else:
+                # No translatable text in HTML — skip field.
+                plain_source[field_name] = value
+        else:
+            plain_source[field_name] = value
+
+    if not plain_source:
+        return {}
+
     client = genai.Client(api_key=api_key)
+    prompt = _build_prompt(plain_source, target_languages)
 
-    prompt = _build_prompt(source, target_languages)
     logger.info(
-        "Calling Gemini (%s) for %d fields -> %d languages",
+        "Calling Gemini (%s) for %d fields -> %d languages (HTML fields: %s)",
         model,
-        len(source),
+        len(plain_source),
         len(target_languages),
+        list(html_meta.keys()) or "none",
     )
 
-    response = client.models.generate_content(
-        model=model,
-        contents=prompt,
-    )
+    response = client.models.generate_content(model=model, contents=prompt)
 
     # Track usage.
     meta = response.usage_metadata
@@ -190,12 +283,39 @@ def translate_with_gemini(
     logger.debug("Gemini raw response: %s", raw_text[:500])
 
     try:
-        result = _extract_json(raw_text)
+        raw_result = _extract_json(raw_text)
     except (json.JSONDecodeError, ValueError) as exc:
         logger.error("Failed to parse Gemini response: %s", raw_text[:500])
         raise ValueError(f"Gemini returned invalid JSON: {exc}") from exc
 
-    # Validate structure: ensure all requested languages are present.
+    # Reassemble HTML fields from translated text fragments.
+    result: dict[str, dict[str, str]] = {}
+    for lang, field_data in raw_result.items():
+        if lang not in target_languages:
+            continue
+        lang_fields: dict[str, str] = {}
+        for field_name, value in field_data.items():
+            if field_name.startswith("_html_"):
+                continue  # skip raw fragments — handled below
+            lang_fields[field_name] = value
+        result[lang] = lang_fields
+
+    # Reassemble HTML for each language.
+    for field_name, (original_texts, soup) in html_meta.items():
+        for lang in target_languages:
+            lang_data = raw_result.get(lang, {})
+            translated_texts: list[str] = []
+            for i in range(len(original_texts)):
+                key = f"_html_{field_name}_{i}"
+                translated = lang_data.get(key, original_texts[i])
+                translated_texts.append(translated)
+
+            # Reassemble: clone soup for each language.
+            lang_soup = BeautifulSoup(str(soup), "html.parser")
+            html_result = _reassemble_html(lang_soup, original_texts, translated_texts)
+            result.setdefault(lang, {})[field_name] = html_result
+
+    # Validate: ensure all requested languages present.
     missing = set(target_languages) - set(result.keys())
     if missing:
         logger.warning("Gemini response missing languages: %s", missing)

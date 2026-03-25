@@ -135,7 +135,9 @@ class Command(BaseCommand):
 
                 self.stdout.write(f"  {obj} — translating...", ending="")
                 try:
-                    translations = translate_with_gemini(source, languages)
+                    translations = translate_with_gemini(
+                        source, languages, field_kinds=fields
+                    )
                 except Exception as exc:
                     self.stdout.write(self.style.ERROR(f" FAILED: {exc}"))
                     for lang in languages:

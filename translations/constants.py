@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from django.db import models
@@ -10,9 +10,19 @@ if TYPE_CHECKING:
 # Languages to auto-translate into (all except the source language 'uk').
 TARGET_LANGUAGES: list[str] = ["en", "cnr", "hr", "bs", "it", "de"]
 
-# Mapping: model class -> list of translatable field base names.
+# Content type for each translatable field.
+ContentKind = Literal["plain", "html"]
+
+# Mapping: model class -> {field_name: content_kind}.
 # Populated at app ready() from modeltranslation registry.
-FIELDS_MAP: dict[type[models.Model], list[str]] = {}
+# Default kind is "plain"; override in FIELD_CONTENT_KINDS for HTML fields.
+FIELDS_MAP: dict[type[models.Model], dict[str, ContentKind]] = {}
+
+# Explicit overrides: (app_label.ModelName, field_name) -> content kind.
+# Add entries here for fields that contain HTML (e.g. CKEditor content).
+_FIELD_KIND_OVERRIDES: dict[tuple[str, str], ContentKind] = {
+    ("news.Article", "content"): "html",
+}
 
 
 def populate_fields_map() -> None:
@@ -21,4 +31,9 @@ def populate_fields_map() -> None:
 
     for model in translator.get_registered_models(abstract=False):
         opts = translator.get_options_for_model(model)
-        FIELDS_MAP[model] = list(opts.fields)  # type: ignore[attr-defined]
+        model_label = f"{model._meta.app_label}.{model.__name__}"
+        fields: dict[str, ContentKind] = {}
+        for field_name in opts.fields:  # type: ignore[attr-defined]
+            kind = _FIELD_KIND_OVERRIDES.get((model_label, field_name), "plain")
+            fields[field_name] = kind
+        FIELDS_MAP[model] = fields

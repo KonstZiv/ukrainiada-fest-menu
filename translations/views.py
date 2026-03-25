@@ -81,7 +81,7 @@ def edit_translation(request: HttpRequest, pk: int) -> HttpResponse:
         return redirect("translations:review")
 
     obj = get_object_or_404(model, pk=approval.object_id)
-    fields = FIELDS_MAP.get(model, [])
+    fields: list[str] = list(FIELDS_MAP.get(model, {}))
 
     if request.method == "POST":
         field_values = {f: request.POST.get(f, "") for f in fields}

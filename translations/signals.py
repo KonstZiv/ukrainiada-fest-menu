@@ -20,7 +20,7 @@ _TRANSLATABLE_MODELS = (Category, Dish, Tag, Allergen, Article, Topic, NewsTag)
 def _uk_field_snapshot(instance: Any) -> dict[str, str | None]:
     """Return a dict of {field_uk: value} for the instance's translatable fields."""
     model = type(instance)
-    fields = FIELDS_MAP.get(model, [])
+    fields = FIELDS_MAP.get(model, {})
     return {f"{f}_uk": getattr(instance, f"{f}_uk", None) for f in fields}
 
 

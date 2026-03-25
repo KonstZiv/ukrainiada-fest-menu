@@ -35,7 +35,7 @@ def translate_object(self: object, content_type_id: int, object_id: int) -> None
         )
         return
 
-    fields = FIELDS_MAP.get(model, [])
+    fields = FIELDS_MAP.get(model, {})
     if not fields:
         logger.warning("No translatable fields for %s", ct.model)
         return
@@ -66,7 +66,9 @@ def translate_object(self: object, content_type_id: int, object_id: int) -> None
     from translations.gemini import translate_with_gemini
 
     try:
-        translations = translate_with_gemini(source, TARGET_LANGUAGES)
+        translations = translate_with_gemini(
+            source, TARGET_LANGUAGES, field_kinds=fields
+        )
     except Exception as exc:
         logger.error(
             "Gemini translation failed for %s#%s: %s", ct.model, object_id, exc
