@@ -92,6 +92,18 @@ def _build_prompt(source: dict[str, str], target_languages: list[str]) -> str:
     )
     source_json = json.dumps(source, ensure_ascii=False, indent=2)
 
+    cnr_rules = ""
+    if "cnr" in target_languages:
+        cnr_rules = (
+            "- MONTENEGRIN (cnr) specific rules:\n"
+            "  * Use Latin script with Montenegrin-specific letters ś and ź.\n"
+            "  * ś replaces sj in ijekavian forms: pjeśma, śever, śutra, śesti.\n"
+            "  * ź replaces zj: iźelica, poiźdalica.\n"
+            "  * Use ijekavian: mlijeko, lijepo, bijelo (not mleko, lepo, belo).\n"
+            "  * Montenegrin vocabulary: hljeb (bread), kahva (coffee), śutra (tomorrow).\n"
+            "  * NOT every s→ś or z→ź — only in specific Montenegrin words.\n"
+        )
+
     return (
         "You are a professional translator for a restaurant menu.\n"
         f"Translate the following content from Ukrainian to: {lang_list}.\n\n"
@@ -99,7 +111,7 @@ def _build_prompt(source: dict[str, str], target_languages: list[str]) -> str:
         "Rules:\n"
         "- Keep translations natural, appetizing, and culturally appropriate.\n"
         "- Preserve the original meaning and culinary terminology.\n"
-        "- For Montenegrin (cnr): use Latin script with specific letters (ś, ź).\n"
+        f"{cnr_rules}"
         "- Return ONLY valid JSON — no markdown fences, no explanation.\n\n"
         "Expected JSON format:\n"
         '{"en": {"title": "...", "description": "..."}, '

@@ -1,8 +1,10 @@
-"""One-time command to translate all existing menu objects via Gemini.
+"""Translate existing menu objects via Gemini.
 
 Usage:
-    python manage.py translate_existing          # all models
-    python manage.py translate_existing --model category
+    python manage.py translate_existing                    # all models, all languages
+    python manage.py translate_existing --model category   # one model type
+    python manage.py translate_existing --lang cnr         # one language only
+    python manage.py translate_existing --force            # re-translate filled fields
     python manage.py translate_existing --dry-run
 """
 
@@ -33,6 +35,11 @@ class Command(BaseCommand):
             help="Only translate this model (category, dish, tag, allergen).",
         )
         parser.add_argument(
+            "--lang",
+            type=str,
+            help="Only translate to this language (en, cnr, hr, bs, it, de).",
+        )
+        parser.add_argument(
             "--dry-run",
             action="store_true",
             help="Show what would be translated without calling the API.",
@@ -51,6 +58,20 @@ class Command(BaseCommand):
         dry_run: bool = options["dry_run"]
         force: bool = options["force"]
         model_filter: str | None = options.get("model")
+        lang_filter: str | None = options.get("lang")
+
+        # Determine target languages.
+        if lang_filter:
+            if lang_filter not in TARGET_LANGUAGES:
+                self.stderr.write(
+                    self.style.ERROR(
+                        f"Language '{lang_filter}' not in TARGET_LANGUAGES: {TARGET_LANGUAGES}"
+                    )
+                )
+                return
+            languages = [lang_filter]
+        else:
+            languages = TARGET_LANGUAGES
 
         reset_stats()
 
@@ -66,6 +87,8 @@ class Command(BaseCommand):
                     self.style.ERROR(f"Model '{model_filter}' not found in FIELDS_MAP.")
                 )
                 return
+
+        self.stdout.write(f"Languages: {', '.join(languages)}")
 
         total_translated = 0
         total_skipped = 0
@@ -89,7 +112,7 @@ class Command(BaseCommand):
                         source[f] = uk_val
                     # Check if any target language is empty.
                     if not force:
-                        for lang in TARGET_LANGUAGES:
+                        for lang in languages:
                             if not (getattr(obj, f"{f}_{lang}", "") or ""):
                                 needs_translation = True
                                 break
@@ -112,11 +135,10 @@ class Command(BaseCommand):
 
                 self.stdout.write(f"  {obj} — translating...", ending="")
                 try:
-                    translations = translate_with_gemini(source, TARGET_LANGUAGES)
+                    translations = translate_with_gemini(source, languages)
                 except Exception as exc:
                     self.stdout.write(self.style.ERROR(f" FAILED: {exc}"))
-                    # Mark as failed.
-                    for lang in TARGET_LANGUAGES:
+                    for lang in languages:
                         TranslationApproval.objects.update_or_create(
                             content_type=ct,
                             object_id=obj.pk,
@@ -128,7 +150,7 @@ class Command(BaseCommand):
                 # Save translations.
                 update_fields: list[str] = []
                 for lang, field_data in translations.items():
-                    if lang not in TARGET_LANGUAGES:
+                    if lang not in languages:
                         continue
                     for field, value in field_data.items():
                         if field not in fields:
@@ -142,7 +164,7 @@ class Command(BaseCommand):
                     obj.save(update_fields=update_fields)
 
                 # Create approvals.
-                for lang in TARGET_LANGUAGES:
+                for lang in languages:
                     TranslationApproval.objects.update_or_create(
                         content_type=ct,
                         object_id=obj.pk,
