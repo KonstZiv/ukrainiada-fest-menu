@@ -61,7 +61,10 @@ def trigger_auto_translate(
 
     from translations.tasks import translate_object
 
-    translate_object.delay(ct.id, instance.pk)
+    try:
+        translate_object.delay(ct.id, instance.pk)
+    except Exception:
+        logger.warning("Could not dispatch translate_object (Celery/Redis unavailable)")
 
 
 # Connect signals for each translatable model.
