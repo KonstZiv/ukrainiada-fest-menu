@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Dobro Djelo — {{ article.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-3" style="max-width: 800px;">
+
+  {# --- Header --- #}
+  {% if article.main_image %}
+  <img src="{{ article.main_image.image.url }}" alt="{{ article.title }}"
+       class="img-fluid rounded mb-3" style="width: 100%; max-height: 400px; object-fit: cover;">
+  {% endif %}
+
+  <h2 class="fw-bold">{{ article.title }}</h2>
+
+  <div class="d-flex flex-wrap gap-2 align-items-center text-muted small mb-3">
+    {% if article.topic %}
+    <span class="badge text-bg-secondary">{{ article.topic.title }}</span>
+    {% endif %}
+    {% for tag in article.tags.all %}
+    <span class="badge text-bg-light text-muted">{{ tag.title }}</span>
+    {% endfor %}
+    <span>{{ article.created_at|date:"d.m.Y H:i" }}</span>
+    {% if article.author %}
+    <span>— {{ article.author.get_full_name|default:article.author.username }}</span>
+    {% endif %}
+  </div>
+
+  {# --- Content (rich text HTML) --- #}
+  <div class="article-content mb-4">
+    {{ article.content|safe }}
+  </div>
+
+  {# --- Gallery --- #}
+  {% if article.images.exists %}
+  <h5 class="mt-4 mb-2">{% trans "Додаткові фото" %}</h5>
+  <div class="row g-2">
+    {% for img in article.images.all %}
+    <div class="col-6 col-md-4">
+      <img src="{{ img.image.url }}" alt="{{ img.title }}"
+           class="img-fluid rounded" style="height: 180px; object-fit: cover; width: 100%;">
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# --- Editor actions --- #}
+  {% if user.is_authenticated and user.role == 'editor' or user.role == 'manager' %}
+  <div class="mt-4 d-flex gap-2">
+    <a href="{% url 'news:article_update' article.pk %}" class="btn btn-sm btn-outline-primary">
+      <i class="bi bi-pencil me-1"></i> {% trans "Редагувати" %}
+    </a>
+    <a href="{% url 'news:article_delete' article.pk %}" class="btn btn-sm btn-outline-danger">
+      <i class="bi bi-trash me-1"></i> {% trans "Видалити" %}
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

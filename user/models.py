@@ -69,13 +69,15 @@ class User(AbstractUser):
         TELEGRAM = "telegram", "Telegram"
 
     class Role(models.TextChoices):
-        """User roles within the restaurant system."""
+        """User roles within the platform."""
 
         MANAGER = "manager", _("Менеджер")
         KITCHEN_SUPERVISOR = "kitchen_supervisor", _("Старший кухні")
         KITCHEN = "kitchen", _("Виробництво")
         SENIOR_WAITER = "senior_waiter", _("Старший офіціант")
         WAITER = "waiter", _("Офіціант")
+        EDITOR = "editor", _("Редактор")
+        CORRECTOR = "corrector", _("Коректор")
         VISITOR = "visitor", _("Відвідувач")
 
     avatar = models.ImageField(

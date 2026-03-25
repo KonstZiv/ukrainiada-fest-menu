@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Dobro Djelo — {% trans "Видалити статтю" %}{% endblock %}
+
+{% block content %}
+<div class="container py-3" style="max-width: 600px;">
+
+  <h4 class="mb-3">{% trans "Видалити статтю" %}</h4>
+
+  <div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle me-1"></i>
+    {% blocktrans with title=object.title %}Ви збираєтесь видалити статтю «{{ title }}»{% endblocktrans %}
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-danger">
+        <i class="bi bi-trash me-1"></i> {% trans "Так, видалити" %}
+      </button>
+      <a href="{% url 'news:article_list' %}" class="btn btn-outline-secondary">
+        {% trans "Скасувати" %}
+      </a>
+    </div>
+  </form>
+
+</div>
+{% endblock %}

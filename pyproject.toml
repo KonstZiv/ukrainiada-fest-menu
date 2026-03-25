@@ -16,6 +16,7 @@ dependencies = [
     "django-modeltranslation>=0.20.2",
     "google-genai>=1.0",
     "django-allauth[socialaccount]>=65.0",
+    "django-ckeditor-5>=0.2",
 ]
 
 [dependency-groups]
@@ -112,8 +113,25 @@ exclude = ["migrations", "doc"]
 
 # django-modeltranslation patches managers at runtime — django-stubs cannot resolve them
 [[tool.mypy.overrides]]
-module = "menu.models"
+module = ["menu.models", "user.models"]
 disable_error_code = ["django-manager-missing"]
+
+[[tool.mypy.overrides]]
+module = "news.models"
+disable_error_code = ["django-manager-missing"]
+
+# CBV generic views + formsets have complex types that mypy can't fully resolve
+[[tool.mypy.overrides]]
+module = "news.views"
+disable_error_code = ["attr-defined", "type-var", "valid-type"]
+
+[[tool.mypy.overrides]]
+module = "news.forms"
+disable_error_code = ["var-annotated"]
+
+[[tool.mypy.overrides]]
+module = "news.admin"
+disable_error_code = ["type-arg"]
 
 # Налаштування плагіну django-stubs
 [tool.django-stubs]

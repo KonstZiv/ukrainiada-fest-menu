@@ -35,6 +35,8 @@ urlpatterns = [
     path("feedback/", include("feedback.urls")),
     path("events/", include("notifications.urls")),
     path("translations/", include("translations.urls")),
+    path("news/", include("news.urls")),
+    path("ckeditor5/", include("django_ckeditor_5.urls")),
 ]
 
 if settings.DEBUG:

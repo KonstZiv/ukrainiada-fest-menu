@@ -21,3 +21,13 @@ def is_waiter_staff(user: User) -> bool:
 def is_management(user: User) -> bool:
     """Return True if user is a manager."""
     return user.role == user.Role.MANAGER
+
+
+def is_editor(user: User) -> bool:
+    """Return True if user is a news editor."""
+    return user.role == user.Role.EDITOR
+
+
+def is_corrector(user: User) -> bool:
+    """Return True if user is a translation corrector."""
+    return user.role == user.Role.CORRECTOR

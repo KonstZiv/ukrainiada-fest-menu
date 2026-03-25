@@ -138,6 +138,12 @@
             <span id="nav-badge-kitchen" class="badge bg-danger" style="font-size: 0.65rem; display: none;"></span>
           </a>
           <div class="vr-custom"></div>
+        {% elif user.role == 'editor' %}
+          <a href="{% url 'news:article_list' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none d-flex align-items-center gap-1"
+             style="font-size: 0.8rem; letter-spacing: 0.05em;">
+            {% trans "НОВИНИ" %}
+          </a>
+          <div class="vr-custom"></div>
         {% elif user.role == 'manager' %}
           <a href="{% url 'manager:dashboard' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none d-flex align-items-center gap-1"
              style="font-size: 0.8rem; letter-spacing: 0.05em;">

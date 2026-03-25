@@ -29,15 +29,15 @@
       </a>
     </div>
 
-    {# News — coming soon #}
+    {# News — active #}
     <div class="col-6">
-      <div class="card h-100 bg-light text-muted">
+      <a href="{% url 'news:article_list' %}" class="card text-decoration-none h-100 border-primary">
         <div class="card-body text-center">
-          <i class="bi bi-newspaper" style="font-size: 2rem;"></i>
+          <i class="bi bi-newspaper text-primary" style="font-size: 2rem;"></i>
           <h6 class="card-title mt-2 mb-1 fw-semibold">{% trans "Новини" %}</h6>
-          <p class="card-text small mb-0">{% trans "Скоро" %}</p>
+          <p class="card-text text-muted small mb-0">{% trans "Стрічка новин" %}</p>
         </div>
-      </div>
+      </a>
     </div>
 
     {# Library — coming soon #}

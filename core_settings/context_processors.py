@@ -13,7 +13,7 @@ _SUBTITLE_MAP: list[tuple[str, str]] = [
     ("/waiter/", "Ukrainiada"),
     ("/kitchen/", "Ukrainiada"),
     ("/manager/", "Ukrainiada"),
-    # Future: ("/news/", "Новини"), ("/library/", "Бібліотека"), etc.
+    ("/news/", "Новини"),
 ]
 
 

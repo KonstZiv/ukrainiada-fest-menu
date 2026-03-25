@@ -37,8 +37,10 @@ INSTALLED_APPS = [
     "notifications",
     "feedback",
     "translations",
+    "news",
     # Third-party
     "django_celery_beat",
+    "django_ckeditor_5",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
@@ -176,6 +178,37 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_ADAPTER = "user.adapters.CustomSocialAccountAdapter"
+
+# ---------------------------------------------------------------------------
+# CKEditor 5 — rich text editor for news articles
+# ---------------------------------------------------------------------------
+
+CKEDITOR_5_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+CKEDITOR_5_UPLOADS_FOLDER = "ckeditor_uploads/"
+
+CKEDITOR_5_CONFIGS = {
+    "default": {
+        "toolbar": [
+            "heading",
+            "|",
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "|",
+            "link",
+            "bulletedList",
+            "numberedList",
+            "blockQuote",
+            "|",
+            "imageUpload",
+            "mediaEmbed",
+            "|",
+            "undo",
+            "redo",
+        ],
+    },
+}
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
