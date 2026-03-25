@@ -17,82 +17,82 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 msgid "доставлено"
-msgstr ""
+msgstr "zugestellt"
 
 msgid "Ви ще нічого не обрали."
-msgstr ""
+msgstr "Sie haben noch nichts ausgewählt."
 
 msgid "Перейти до меню"
-msgstr ""
+msgstr "Zum Menü"
 
 msgid "Прострочено"
-msgstr ""
+msgstr "Überfällig"
 
 msgid "Терміново!"
-msgstr ""
+msgstr "Dringend!"
 
 msgid "Офлайн-режим — меню може бути застарілим. Замовлення недоступні."
-msgstr ""
+msgstr "Offline-Modus — das Menü ist möglicherweise veraltet. Bestellungen sind nicht verfügbar."
 
 msgid "Скасувати замовлення?"
-msgstr ""
+msgstr "Bestellung stornieren?"
 
 msgid "Замовлення скасовано"
-msgstr ""
+msgstr "Bestellung storniert"
 
 msgid "Всі страви готові!"
-msgstr ""
+msgstr "Alle Gerichte sind fertig!"
 
 msgid "Замовлення доставлено! Смачного!"
-msgstr ""
+msgstr "Bestellung zugestellt! Guten Appetit!"
 
 msgid "Оплату прийнято. Дякуємо!"
-msgstr ""
+msgstr "Zahlung akzeptiert. Vielen Dank!"
 
 msgid "Ваше звернення прийнято"
-msgstr ""
+msgstr "Ihre Anfrage wurde entgegengenommen"
 
 msgid "%(by)s працює над вашим питанням"
-msgstr ""
+msgstr "%(by)s bearbeitet Ihre Anfrage"
 
 msgid "Вирішено"
-msgstr ""
+msgstr "Gelöst"
 
 msgid "СПЛАЧЕНО"
-msgstr ""
+msgstr "BEZAHLT"
 
 msgid "Live"
-msgstr ""
+msgstr "Live"
 
 msgid "Offline"
-msgstr ""
+msgstr "Offline"
 
 msgid "Нове замовлення #%(order_id)s від клієнта"
-msgstr ""
+msgstr "Neue Bestellung #%(order_id)s von einem Kunden"
 
 msgid "Готово"
-msgstr ""
+msgstr "Fertig"
 
 msgid "Страва готова:"
-msgstr ""
+msgstr "Gericht fertig:"
 
 msgid "Замовлення #%(order_id)s готове!"
-msgstr ""
+msgstr "Bestellung #%(order_id)s ist fertig!"
 
 msgid "Готується (%(by)s)"
-msgstr ""
+msgstr "In Zubereitung (%(by)s)"
 
 msgid "Замовлення #%(order_id)s на кухні"
-msgstr ""
+msgstr "Bestellung #%(order_id)s in der Küche"
 
 msgid "Кухня"
-msgstr ""
+msgstr "Küche"
 
 msgid "Оплата"
-msgstr ""
+msgstr "Bezahlung"
 
 msgid "Замовлення #%(order_id)s скасовано"
-msgstr ""
+msgstr "Bestellung #%(order_id)s storniert"
 
 msgid "Ескалація! %(label)s #%(id)s"
-msgstr ""
+msgstr "Eskalation! %(label)s #%(id)s"

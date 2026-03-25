@@ -17,248 +17,248 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 msgid "❤️ Чудово"
-msgstr ""
+msgstr "❤️ Ausgezeichnet"
 
 msgid "😊 Добре"
-msgstr ""
+msgstr "😊 Gut"
 
 msgid "😐 Нормально"
-msgstr ""
+msgstr "😐 Okay"
 
 msgid "😕 Не дуже"
-msgstr ""
+msgstr "😕 Nicht so gut"
 
 msgid "Замовлення"
-msgstr ""
+msgstr "Bestellung"
 
 msgid "Ім'я відвідувача"
-msgstr ""
+msgstr "Name des Gastes"
 
 msgid "Настрій"
-msgstr ""
+msgstr "Stimmung"
 
 msgid "Повідомлення"
-msgstr ""
+msgstr "Nachricht"
 
 msgid "Відгук"
-msgstr ""
+msgstr "Bewertung"
 
 msgid "Відгуки"
-msgstr ""
+msgstr "Bewertungen"
 
 msgid "Дякуємо за відгук! 🙏"
-msgstr ""
+msgstr "Vielen Dank für Ihre Bewertung! 🙏"
 
 msgid "Відгук опубліковано."
-msgstr ""
+msgstr "Bewertung veröffentlicht."
 
 msgid "Відгук виділено і опубліковано."
-msgstr ""
+msgstr "Bewertung hervorgehoben und veröffentlicht."
 
 msgid "Відгук видалено."
-msgstr ""
+msgstr "Bewertung gelöscht."
 
 msgid "Страва"
-msgstr ""
+msgstr "Gericht"
 
 msgid "Кухар"
-msgstr ""
+msgstr "Koch"
 
 msgid "Розподіл кухні"
-msgstr ""
+msgstr "Küchenverteilung"
 
 msgid "Очікує"
-msgstr ""
+msgstr "Wartet"
 
 msgid "Готується"
-msgstr ""
+msgstr "In Zubereitung"
 
 msgid "Готово"
-msgstr ""
+msgstr "Fertig"
 
 msgid "Немає"
-msgstr ""
+msgstr "Keine"
 
 msgid "Старший кухні"
-msgstr ""
+msgstr "Küchenchef"
 
 msgid "Менеджер"
-msgstr ""
+msgstr "Manager"
 
 msgid "Позиція замовлення"
-msgstr ""
+msgstr "Bestellposition"
 
 msgid "Тікет кухні"
-msgstr ""
+msgstr "Küchenbon"
 
 msgid "Тікети кухні"
-msgstr ""
+msgstr "Küchenbons"
 
 msgid "Передача страви"
-msgstr ""
+msgstr "Gerichtübergabe"
 
 msgid "Передачі страв"
-msgstr ""
+msgstr "Gerichtübergaben"
 
 #, python-brace-format
 msgid "'{dish_title}' — пропущено: {skipped}"
-msgstr ""
+msgstr "'{dish_title}' — übersprungen: {skipped}"
 
 msgid "Обраний офіціант не знайдений або не має відповідної ролі."
-msgstr ""
+msgstr "Der ausgewählte Kellner wurde nicht gefunden oder hat nicht die entsprechende Rolle."
 
 msgid "Назва логотипу"
-msgstr ""
+msgstr "Logo-Name"
 
 msgid "Оберіть хоча б один тег для страви."
-msgstr ""
+msgstr "Wählen Sie mindestens ein Tag für das Gericht aus."
 
 msgid "Назва зображення"
-msgstr ""
+msgstr "Bildname"
 
 msgid "Порядок у меню"
-msgstr ""
+msgstr "Reihenfolge im Menü"
 
 msgid "Менше число — вище у списку"
-msgstr ""
+msgstr "Kleinere Zahl — weiter oben in der Liste"
 
 msgid "В наявності"
-msgstr ""
+msgstr "Verfügbar"
 
 msgid "Закінчується — уточнюйте у офіціанта"
-msgstr ""
+msgstr "Wird knapp – bitte beim Kellner nachfragen"
 
 msgid "Алергени"
-msgstr ""
+msgstr "Allergene"
 
 msgid "Наявність"
-msgstr ""
+msgstr "Verfügbarkeit"
 
 msgid "Файл не є валідним SVG. Завантажте файл у форматі SVG."
-msgstr ""
+msgstr "Die Datei ist keine gültige SVG-Datei. Bitte laden Sie eine Datei im SVG-Format hoch."
 
 msgid "Чернетка"
-msgstr ""
+msgstr "Entwurf"
 
 msgid "Створено"
-msgstr ""
+msgstr "Erstellt"
 
 msgid "Прийнято"
-msgstr ""
+msgstr "Angenommen"
 
 msgid "Верифіковано"
-msgstr ""
+msgstr "Verifiziert"
 
 msgid "Доставлено"
-msgstr ""
+msgstr "Serviert"
 
 msgid "Скасовано"
-msgstr ""
+msgstr "Storniert"
 
 msgid "Не оплачено"
-msgstr ""
+msgstr "Unbezahlt"
 
 msgid "Оплачено"
-msgstr ""
+msgstr "Bezahlt"
 
 msgid "Не визначено"
-msgstr ""
+msgstr "Unbestimmt"
 
 msgid "Готівка"
-msgstr ""
+msgstr "Barzahlung"
 
 msgid "Онлайн"
-msgstr ""
+msgstr "Online"
 
 msgid "Де вас знайти (необов'язково)"
-msgstr ""
+msgstr "Wo wir Sie finden können (optional)"
 
 msgid "Довго чекаю"
-msgstr ""
+msgstr "Ich warte schon lange"
 
 msgid "Щось не те"
-msgstr ""
+msgstr "Etwas stimmt nicht"
 
 msgid "Маю питання"
-msgstr ""
+msgstr "Ich habe eine Frage"
 
 msgid "Інше"
-msgstr ""
+msgstr "Sonstiges"
 
 msgid "Офіціант"
-msgstr ""
+msgstr "Kellner"
 
 msgid "Старший офіціант"
-msgstr ""
+msgstr "Oberkellner"
 
 msgid "Відкрита"
-msgstr ""
+msgstr "Offen"
 
 msgid "Побачено"
-msgstr ""
+msgstr "Gesehen"
 
 msgid "Вирішено"
-msgstr ""
+msgstr "Erledigt"
 
 msgid "Коментар"
-msgstr ""
+msgstr "Kommentar"
 
 msgid "Прийняття замовлення"
-msgstr ""
+msgstr "Bestellannahme"
 
 msgid "Верифікація"
-msgstr ""
+msgstr "Verifizierung"
 
 msgid "Взяття тікета кухарем"
-msgstr ""
+msgstr "Ticket vom Koch übernommen"
 
 msgid "Приготування"
-msgstr ""
+msgstr "Zubereitung"
 
 msgid "Передача офіціанту"
-msgstr ""
+msgstr "Übergabe an den Kellner"
 
 msgid "Оплата"
-msgstr ""
+msgstr "Bezahlung"
 
 msgid "Старший"
-msgstr ""
+msgstr "Senior"
 
 msgid "Кошик порожній або страви недоступні."
-msgstr ""
+msgstr "Der Warenkorb ist leer oder Gerichte sind nicht verfügbar."
 
 msgid "Оплату підтверджено!"
-msgstr ""
+msgstr "Zahlung bestätigt!"
 
 msgid "Ваше звернення надіслано!"
-msgstr ""
+msgstr "Ihre Anfrage wurde gesendet!"
 
 #, python-brace-format
 msgid "#{order_id} — пропущені кроки: {skipped}"
-msgstr ""
+msgstr "#{order_id} — übersprungene Schritte: {skipped}"
 
 #, python-brace-format
 msgid "#{order_id} оплата — пропущені кроки: {skipped}"
-msgstr ""
+msgstr "#{order_id} Bezahlung — übersprungene Schritte: {skipped}"
 
 msgid "Цей QR-код призначений іншому офіціанту."
-msgstr ""
+msgstr "Dieser QR-Code ist für einen anderen Kellner bestimmt."
 
 msgid "Звернення позначено як побачене."
-msgstr ""
+msgstr "Anfrage als gesehen markiert."
 
 msgid "Звернення вирішено."
-msgstr ""
+msgstr "Anfrage erledigt."
 
 #, python-brace-format
 msgid "Оплату замовлення #{order_id} підтверджено."
-msgstr ""
+msgstr "Zahlung für Bestellung #{order_id} bestätigt."
 
 msgid "Доступ заборонено"
-msgstr ""
+msgstr "Zugriff verweigert"
 
 msgid "У вас немає доступу до цього замовлення."
-msgstr ""
+msgstr "Sie haben keinen Zugriff auf diese Bestellung."
 
 msgid ""
 "Якщо це ваше замовлення — скористайтесь посиланням з QR-коду або увійдіть до "
@@ -266,287 +266,287 @@ msgid ""
 msgstr ""
 
 msgid "На головну"
-msgstr ""
+msgstr "Zur Startseite"
 
 msgid "Увійти"
-msgstr ""
+msgstr "Anmelden"
 
 msgid "Меню"
-msgstr ""
+msgstr "Menü"
 
 msgid "Закрити"
-msgstr ""
+msgstr "Schließen"
 
 msgid "Назад"
-msgstr ""
+msgstr "Zurück"
 
 msgid "Категорії"
-msgstr ""
+msgstr "Kategorien"
 
 msgid "Теги"
-msgstr ""
+msgstr "Tags"
 
 msgid "Оновити"
-msgstr ""
+msgstr "Aktualisieren"
 
 msgid "ПЕРЕКЛАДИ"
-msgstr ""
+msgstr "ÜBERSETZUNGEN"
 
 msgid "АДМІНІСТРУВАННЯ"
-msgstr ""
+msgstr "VERWALTUNG"
 
 msgid "Створити"
-msgstr ""
+msgstr "Erstellen"
 
 msgid "Нова категорія"
-msgstr ""
+msgstr "Neue Kategorie"
 
 msgid "Новий тег"
-msgstr ""
+msgstr "Neuer Tag"
 
 msgid "Нова страва"
-msgstr ""
+msgstr "Neues Gericht"
 
 msgid "ЗАМОВЛЕННЯ"
-msgstr ""
+msgstr "BESTELLUNGEN"
 
 msgid "КУХНЯ"
-msgstr ""
+msgstr "KÜCHE"
 
 msgid "МОНІТОРИНГ"
-msgstr ""
+msgstr "MONITORING"
 
 msgid "УВІЙТИ"
-msgstr ""
+msgstr "ANMELDEN"
 
 msgid "ЗАРЕЄСТРУВАТИСЬ"
-msgstr ""
+msgstr "REGISTRIEREN"
 
 msgid "Пошук страв..."
-msgstr ""
+msgstr "Gerichte suchen..."
 
 msgid "Сьогодні"
-msgstr ""
+msgstr "Heute"
 
 msgid "Вчора"
-msgstr ""
+msgstr "Gestern"
 
 msgid "Тиждень"
-msgstr ""
+msgstr "Woche"
 
 msgid "Місяць"
-msgstr ""
+msgstr "Monat"
 
 msgid "Від"
-msgstr ""
+msgstr "Von"
 
 msgid "До"
-msgstr ""
+msgstr "Bis"
 
 msgid "Застосувати"
-msgstr ""
+msgstr "Anwenden"
 
 msgid "Кухня"
-msgstr ""
+msgstr "Küche"
 
 msgid "страв"
-msgstr ""
+msgstr "Gerichte"
 
 msgid "хв"
-msgstr ""
+msgstr "Min"
 
 msgid "сер. час"
-msgstr ""
+msgstr "Ø Zeit"
 
 msgid "помилки"
-msgstr ""
+msgstr "Fehler"
 
 msgid "Офіціанти"
-msgstr ""
+msgstr "Kellner"
 
 msgid "замовлень"
-msgstr ""
+msgstr "Bestellungen"
 
 msgid "сер. чек"
-msgstr ""
+msgstr "Ø Rechnung"
 
 msgid "виторг"
-msgstr ""
+msgstr "Umsatz"
 
 msgid "готівка"
-msgstr ""
+msgstr "Bargeld"
 
 msgid "онлайн"
-msgstr ""
+msgstr "Online"
 
 msgid "готово"
-msgstr ""
+msgstr "Fertig"
 
 msgid "Забери!"
-msgstr ""
+msgstr "Abholen!"
 
 msgid "Сплачено"
-msgstr ""
+msgstr "Bezahlt"
 
 msgid "Не сплачено"
-msgstr ""
+msgstr "Nicht bezahlt"
 
 msgid "У вас — віднести клієнту"
-msgstr ""
+msgstr "Bei Ihnen – zum Gast bringen"
 
 msgid "хв тому — забрати негайно!"
-msgstr ""
+msgstr "vor Min. – sofort abholen!"
 
 msgid "хв — забрати!"
-msgstr ""
+msgstr "Min. – abholen!"
 
 msgid "готує"
-msgstr ""
+msgstr "In Zubereitung"
 
 msgid "Готово на кухні — забрати!"
-msgstr ""
+msgstr "Fertig in der Küche – abholen!"
 
 msgid "В черзі на кухні"
-msgstr ""
+msgstr "Warteschlange Küche"
 
 msgid "доставлено"
-msgstr ""
+msgstr "Geliefert"
 
 msgid "Верифікувати"
-msgstr ""
+msgstr "Verifizieren"
 
 msgid "Оплату прийнято"
-msgstr ""
+msgstr "Zahlung erhalten"
 
 msgid "Відвідувач:"
-msgstr ""
+msgstr "Gast:"
 
 msgid "Позиції"
-msgstr ""
+msgstr "Positionen"
 
 msgid "Скасувати замовлення"
-msgstr ""
+msgstr "Bestellung stornieren"
 
 msgid "Разом:"
-msgstr ""
+msgstr "Gesamt:"
 
 msgid "Взяти замовлення"
-msgstr ""
+msgstr "Bestellung annehmen"
 
 msgid "Верифікувати і передати на кухню"
-msgstr ""
+msgstr "Verifizieren und an die Küche weiterleiten"
 
 msgid "Доставлено клієнту"
-msgstr ""
+msgstr "An den Gast geliefert"
 
 msgid "Оплату прийнято (готівка)"
-msgstr ""
+msgstr "Zahlung erhalten (Barzahlung)"
 
 msgid "Позачергові дії"
-msgstr ""
+msgstr "Manuelle Aktionen"
 
 msgid "Якщо стандартний flow не був виконаний — зафіксуйте фактичний стан"
-msgstr ""
+msgstr "Wenn der Standardablauf nicht eingehalten wurde, den tatsächlichen Zustand festhalten."
 
 msgid "Доставлено (без кухні)"
-msgstr ""
+msgstr "Geliefert (ohne Küche)"
 
 msgid "Дошка відгуків"
-msgstr ""
+msgstr "Feedback-Wand"
 
 msgid "Що кажуть наші гості"
-msgstr ""
+msgstr "Was unsere Gäste sagen"
 
 msgid "Поки що відгуків немає. Будьте першим!"
-msgstr ""
+msgstr "Noch keine Bewertungen. Seien Sie der/die Erste!"
 
 msgid "тому"
-msgstr ""
+msgstr "her"
 
 msgid "Модерація відгуків"
-msgstr ""
+msgstr "Bewertungsmoderation"
 
 msgid "Очікують модерації"
-msgstr ""
+msgstr "Warten auf Moderation"
 
 #, python-format
 msgid "Замовлення #%(order_id)s"
-msgstr ""
+msgstr "Bestellung #%(order_id)s"
 
 msgid "(без повідомлення)"
-msgstr ""
+msgstr "(ohne Benachrichtigung)"
 
 msgid "Опублікувати"
-msgstr ""
+msgstr "Veröffentlichen"
 
 msgid "Виділити"
-msgstr ""
+msgstr "Hervorheben"
 
 msgid "Видалити"
-msgstr ""
+msgstr "Löschen"
 
 msgid "Нових відгуків немає."
-msgstr ""
+msgstr "Keine neuen Bewertungen."
 
 msgid "стр."
-msgstr ""
+msgstr "S."
 
 msgid "ескал."
-msgstr ""
+msgstr "Eskal."
 
 msgid "черга"
-msgstr ""
+msgstr "Warteschlange"
 
 msgid "в роб."
-msgstr ""
+msgstr "In Arbeit"
 
 msgid "В черзі"
-msgstr ""
+msgstr "In Warteschlange"
 
 msgid "Готує"
-msgstr ""
+msgstr "In Zubereitung"
 
 msgid "Немає кухарів у системі"
-msgstr ""
+msgstr "Keine Köche im System"
 
 msgid "Прострочено"
-msgstr ""
+msgstr "Überfällig"
 
 msgid "Терміново!"
-msgstr ""
+msgstr "Dringend!"
 
 msgid "Взяти"
-msgstr ""
+msgstr "Übernehmen"
 
 msgid "Натисніть для звуку"
-msgstr ""
+msgstr "Für Ton klicken"
 
 msgid "Ескалація"
-msgstr ""
+msgstr "Eskalation"
 
 msgid "Черга"
-msgstr ""
+msgstr "Warteschlange"
 
 msgid "В роботі"
-msgstr ""
+msgstr "In Arbeit"
 
 msgid "Команда"
-msgstr ""
+msgstr "Team"
 
 msgid "Оберіть офіціанта"
-msgstr ""
+msgstr "Kellner auswählen"
 
 msgid "Згенерувати QR"
-msgstr ""
+msgstr "QR generieren"
 
 msgid "Повернутись"
-msgstr ""
+msgstr "Zurück"
 
 msgid "Видалити категорію"
-msgstr ""
+msgstr "Kategorie löschen"
 
 msgid "Увага!"
-msgstr ""
+msgstr "Achtung!"
 
 #, python-format
 msgid ""
@@ -555,38 +555,38 @@ msgid ""
 msgstr ""
 
 msgid "Разом з категорією буде видалено:"
-msgstr ""
+msgstr "Zusammen mit der Kategorie wird gelöscht:"
 
 #, python-format
 msgid "Логотип категорії: «%(title)s»"
-msgstr ""
+msgstr "Kategorie-Logo: „%(title)s“"
 
 msgid "страва"
-msgstr ""
+msgstr "Gericht"
 
 msgid "страви"
-msgstr ""
+msgstr "Gerichte"
 
 msgid "Страв у цій категорії немає."
-msgstr ""
+msgstr "Es gibt keine Gerichte in dieser Kategorie."
 
 msgid "Так, видалити"
-msgstr ""
+msgstr "Ja, löschen"
 
 msgid "Скасувати"
-msgstr ""
+msgstr "Abbrechen"
 
 msgid "Редагувати категорію"
-msgstr ""
+msgstr "Kategorie bearbeiten"
 
 msgid "Створити категорію"
-msgstr ""
+msgstr "Kategorie erstellen"
 
 msgid "Логотип категорії"
-msgstr ""
+msgstr "Kategorie-Logo"
 
 msgid "необов'язково"
-msgstr ""
+msgstr "optional"
 
 msgid ""
 "Завантажте SVG-файл з логотипом категорії. Формат SVG дозволяє масштабування "
@@ -594,16 +594,16 @@ msgid ""
 msgstr ""
 
 msgid "Зберегти"
-msgstr ""
+msgstr "Speichern"
 
 msgid "Редагувати"
-msgstr ""
+msgstr "Bearbeiten"
 
 msgid "Страв у цій категорії поки немає."
-msgstr ""
+msgstr "Es gibt noch keine Gerichte in dieser Kategorie."
 
 msgid "Видалити страву"
-msgstr ""
+msgstr "Gericht löschen"
 
 #, python-format
 msgid ""
@@ -611,53 +611,53 @@ msgid ""
 msgstr ""
 
 msgid "Разом зі стравою буде видалено:"
-msgstr ""
+msgstr "Zusammen mit dem Gericht wird gelöscht:"
 
 #, python-format
 msgid "Головне зображення: «%(title)s»"
-msgstr ""
+msgstr "Hauptbild: „%(title)s“"
 
 msgid "додаткове зображення"
-msgstr ""
+msgstr "zusätzliches Bild"
 
 msgid "додаткових зображення"
-msgstr ""
+msgstr "zusätzliche Bilder"
 
 msgid "додаткових зображень"
-msgstr ""
+msgstr "zusätzliche Bilder"
 
 msgid "Зв'язки з тегами будуть видалені, але самі теги залишаться."
-msgstr ""
+msgstr "Die Verknüpfungen mit den Tags werden gelöscht, aber die Tags selbst bleiben erhalten."
 
 msgid "Ціна"
-msgstr ""
+msgstr "Preis"
 
 msgid "г"
-msgstr ""
+msgstr "g"
 
 msgid "Вага"
-msgstr ""
+msgstr "Gewicht"
 
 msgid "ккал"
-msgstr ""
+msgstr "kcal"
 
 msgid "Додати в замовлення"
-msgstr ""
+msgstr "Zur Bestellung hinzufügen"
 
 msgid "Додаткові фото"
-msgstr ""
+msgstr "Zusätzliche Fotos"
 
 msgid "Редагувати страву"
-msgstr ""
+msgstr "Gericht bearbeiten"
 
 msgid "Створити страву"
-msgstr ""
+msgstr "Gericht erstellen"
 
 msgid "Головне зображення"
-msgstr ""
+msgstr "Hauptbild"
 
 msgid "обов'язково"
-msgstr ""
+msgstr "erforderlich"
 
 msgid ""
 "Завантажте зображення страви (JPEG, PNG або WebP). Рекомендований розмір: "
@@ -665,37 +665,37 @@ msgid ""
 msgstr ""
 
 msgid "Додаткові зображення"
-msgstr ""
+msgstr "Zusätzliche Bilder"
 
 msgid "Зображення"
-msgstr ""
+msgstr "Bild"
 
 msgid "Додати ще зображення"
-msgstr ""
+msgstr "Weiteres Bild hinzufügen"
 
 msgid "Завантажте додаткові фото страви. Порожні форми будуть пропущені."
-msgstr ""
+msgstr "Laden Sie zusätzliche Fotos des Gerichts hoch. Leere Felder werden ignoriert."
 
 msgid "Страви"
-msgstr ""
+msgstr "Gerichte"
 
 msgid "Усі страви"
-msgstr ""
+msgstr "Alle Gerichte"
 
 msgid "Страв поки немає."
-msgstr ""
+msgstr "Noch keine Gerichte vorhanden."
 
 msgid "Головна"
-msgstr ""
+msgstr "Startseite"
 
 msgid "Попередній"
-msgstr ""
+msgstr "Zurück"
 
 msgid "Наступний"
-msgstr ""
+msgstr "Weiter"
 
 msgid "Наше меню"
-msgstr ""
+msgstr "Unsere Speisekarte"
 
 #, python-format
 msgid ""
@@ -704,55 +704,55 @@ msgid ""
 msgstr ""
 
 msgid "Пошук"
-msgstr ""
+msgstr "Suche"
 
 msgid "Результати пошуку:"
-msgstr ""
+msgstr "Suchergebnisse:"
 
 msgid "Пошук страв"
-msgstr ""
+msgstr "Gerichte suchen"
 
 msgid "Назва страви або опис..."
-msgstr ""
+msgstr "Gerichtename oder Beschreibung..."
 
 msgid "Знайти"
-msgstr ""
+msgstr "Suchen"
 
 #, python-format
 msgid "За запитом \"%(q)s\" нічого не знайдено."
-msgstr ""
+msgstr "Für Ihre Suche nach \"%(q)s\" wurden keine Ergebnisse gefunden."
 
 msgid "Спробуйте інший запит або перевірте правопис."
-msgstr ""
+msgstr "Versuchen Sie eine andere Suchanfrage oder überprüfen Sie die Rechtschreibung."
 
 msgid "Введіть назву страви або опис для пошуку."
-msgstr ""
+msgstr "Geben Sie den Namen oder die Beschreibung eines Gerichts ein, um zu suchen."
 
 msgid "Видалити тег"
-msgstr ""
+msgstr "Tag löschen"
 
 #, python-format
 msgid "Ви збираєтесь видалити тег <strong>«%(title)s»</strong>."
-msgstr ""
+msgstr "Sie sind dabei, den Tag <strong>„%(title)s“</strong> zu löschen."
 
 msgid "Разом з тегом буде видалено:"
-msgstr ""
+msgstr "Zusammen mit dem Tag wird gelöscht:"
 
 #, python-format
 msgid "Логотип тега: «%(title)s»"
-msgstr ""
+msgstr "Tag-Logo: „%(title)s“"
 
 msgid "Зв'язки зі стравами будуть видалені, але самі страви залишаться."
-msgstr ""
+msgstr "Die Verknüpfungen mit den Gerichten werden entfernt, aber die Gerichte selbst bleiben erhalten."
 
 msgid "Редагувати тег"
-msgstr ""
+msgstr "Tag bearbeiten"
 
 msgid "Створити тег"
-msgstr ""
+msgstr "Tag erstellen"
 
 msgid "Логотип тега"
-msgstr ""
+msgstr "Tag-Logo"
 
 msgid ""
 "Завантажте SVG-файл з логотипом тега. Валідатор перевірить не лише "
@@ -760,194 +760,194 @@ msgid ""
 msgstr ""
 
 msgid "Страв з цим тегом поки немає."
-msgstr ""
+msgstr "Es gibt noch keine Gerichte mit diesem Tag."
 
 msgid "Немає з'єднання"
-msgstr ""
+msgstr "Keine Verbindung"
 
 msgid "Перевірте інтернет і спробуйте знову."
-msgstr ""
+msgstr "Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut."
 
 msgid "Якщо ви переглядали меню раніше — воно доступне в кеші."
-msgstr ""
+msgstr "Wenn Sie die Speisekarte bereits angesehen haben, ist sie im Cache verfügbar."
 
 msgid "Спробувати знову"
-msgstr ""
+msgstr "Erneut versuchen"
 
 msgid "Історія замовлень"
-msgstr ""
+msgstr "Bestellverlauf"
 
 msgid "Поточне замовлення"
-msgstr ""
+msgstr "Aktuelle Bestellung"
 
 msgid ""
 "Де вас шукати? Столик №, тераса, біля бару... (щоб офіціант міг вас знайти)"
 msgstr ""
 
 msgid "Оформити замовлення"
-msgstr ""
+msgstr "Bestellung aufgeben"
 
 msgid "Ви ще нічого не обрали."
-msgstr ""
+msgstr "Sie haben noch nichts ausgewählt."
 
 msgid "Перейти до меню"
-msgstr ""
+msgstr "Zur Speisekarte"
 
 msgid "Вже підтверджено"
-msgstr ""
+msgstr "Bereits bestätigt"
 
 msgid "Цю передачу вже було підтверджено раніше."
-msgstr ""
+msgstr "Diese Übergabe wurde bereits bestätigt."
 
 msgid "Повернутись до dashboard"
-msgstr ""
+msgstr "Zurück zum Dashboard"
 
 msgid "Підтвердження прийому страви"
-msgstr ""
+msgstr "Bestätigung des Gerichterhalts"
 
 msgid "Кількість:"
-msgstr ""
+msgstr "Menge:"
 
 #, python-format
 msgid "Від: <strong>%(name)s</strong>"
-msgstr ""
+msgstr "Von: <strong>%(name)s</strong>"
 
 #, python-format
 msgid "Замовлення: <strong>#%(order_id)s</strong>"
-msgstr ""
+msgstr "Bestellung: <strong>#%(order_id)s</strong>"
 
 msgid "Підтверджую прийом"
-msgstr ""
+msgstr "Empfang bestätigen"
 
 #, python-format
 msgid "QR дійсний ще ~%(ttl)s секунд"
-msgstr ""
+msgstr "QR-Code ist noch ~%(ttl)s Sekunden gültig"
 
 msgid "QR-код прострочений"
-msgstr ""
+msgstr "QR-Code ist abgelaufen"
 
 msgid "Попросіть кухаря згенерувати новий QR-код."
-msgstr ""
+msgstr "Bitten Sie den Koch, einen neuen QR-Code zu generieren."
 
 msgid "Або скористайтесь ручним підтвердженням."
-msgstr ""
+msgstr "Oder verwenden Sie die manuelle Bestätigung."
 
 msgid "Панель менеджера"
-msgstr ""
+msgstr "Manager-Dashboard"
 
 msgid "Активних замовлень"
-msgstr ""
+msgstr "Aktive Bestellungen"
 
 msgid "Очікують оплати"
-msgstr ""
+msgstr "Warten auf Zahlung"
 
 msgid "Відкриті ескалації"
-msgstr ""
+msgstr "Offene Eskalationen"
 
 msgid "Виторг"
-msgstr ""
+msgstr "Umsatz"
 
 msgid "Оплати"
-msgstr ""
+msgstr "Zahlungen"
 
 msgid "Адміністрування"
-msgstr ""
+msgstr "Verwaltung"
 
 msgid "Адмін-панель"
-msgstr ""
+msgstr "Admin-Panel"
 
 msgid "Стан обробки замовлення"
-msgstr ""
+msgstr "Bestellstatus"
 
 msgid "СПЛАЧЕНО"
-msgstr ""
+msgstr "BEZAHLT"
 
 msgid "ОЧІКУЄ ОПЛАТИ"
-msgstr ""
+msgstr "ZAHLUNG AUSSTEHEND"
 
 msgid "Замовлення створено"
-msgstr ""
+msgstr "Bestellung erstellt"
 
 msgid "Кількість позицій:"
-msgstr ""
+msgstr "Anzahl der Positionen:"
 
 msgid "Прийнято:"
-msgstr ""
+msgstr "Angenommen:"
 
 msgid "Очікує на офіціанта..."
-msgstr ""
+msgstr "Wartet auf Kellner..."
 
 msgid "Верифіковано:"
-msgstr ""
+msgstr "Verifiziert:"
 
 msgid "Замовлення передано на кухню"
-msgstr ""
+msgstr "Bestellung an die Küche übermittelt"
 
 msgid "Очікує верифікації..."
-msgstr ""
+msgstr "Wartet auf Verifizierung..."
 
 msgid "Очікує передачі на кухню..."
-msgstr ""
+msgstr "Wartet auf Übermittlung an die Küche..."
 
 msgid "Усі страви готові:"
-msgstr ""
+msgstr "Alle Gerichte sind fertig:"
 
 msgid "Страви ще готуються..."
-msgstr ""
+msgstr "Gerichte werden noch zubereitet..."
 
 msgid "Доставлено:"
-msgstr ""
+msgstr "Serviert:"
 
 msgid "Очікує доставки..."
-msgstr ""
+msgstr "Wird gleich serviert..."
 
 msgid "Маєш що сказати? Тисни тут"
-msgstr ""
+msgstr "Haben Sie etwas zu sagen? Klicken Sie hier"
 
 msgid "Що сталося?"
-msgstr ""
+msgstr "Was ist passiert?"
 
 msgid "Опишіть ситуацію..."
-msgstr ""
+msgstr "Beschreiben Sie die Situation..."
 
 msgid "Надіслати"
-msgstr ""
+msgstr "Senden"
 
 msgid "Ваше звернення:"
-msgstr ""
+msgstr "Ihre Nachricht:"
 
 msgid "побачено, працюємо"
-msgstr ""
+msgstr "Gesehen, wir arbeiten daran"
 
 msgid "надіслано"
-msgstr ""
+msgstr "Gesendet"
 
 msgid "Як вам сподобалось?"
-msgstr ""
+msgstr "Wie hat es Ihnen geschmeckt?"
 
 msgid "Ваше ім'я (необов'язково)"
-msgstr ""
+msgstr "Ihr Name (optional)"
 
 msgid "Напишіть щось приємне... або корисне"
-msgstr ""
+msgstr "Schreiben Sie etwas Nettes... oder Nützliches"
 
 msgid "Надіслати відгук"
-msgstr ""
+msgstr "Feedback senden"
 
 msgid "Дякуємо за відгук!"
-msgstr ""
+msgstr "Vielen Dank für Ihr Feedback!"
 
 msgid "Покажіть QR-код або назвіть номер замовлення офіціанту"
-msgstr ""
+msgstr "Zeigen Sie dem Kellner den QR-Code oder nennen Sie die Bestellnummer"
 
 msgid "Приховати QR-код"
-msgstr ""
+msgstr "QR-Code ausblenden"
 
 msgid "Показати QR-код"
-msgstr ""
+msgstr "QR-Code anzeigen"
 
 msgid "Мої замовлення"
-msgstr ""
+msgstr "Meine Bestellungen"
 
 msgid ""
 "Зареєструйтесь, щоб зберігати історію замовлень та отримувати бонуси "
@@ -955,166 +955,166 @@ msgid ""
 msgstr ""
 
 msgid "Зареєструватись"
-msgstr ""
+msgstr "Registrieren"
 
 msgid "Активні"
-msgstr ""
+msgstr "Aktiv"
 
 msgid "позицій"
-msgstr ""
+msgstr "Positionen"
 
 msgid "Завершені"
-msgstr ""
+msgstr "Abgeschlossen"
 
 msgid "Замовлень поки немає."
-msgstr ""
+msgstr "Noch keine Bestellungen."
 
 #, python-format
 msgid "Оплата замовлення #%(order_id)s"
-msgstr ""
+msgstr "Bezahlung für Bestellung #%(order_id)s"
 
 msgid "Сума:"
-msgstr ""
+msgstr "Betrag:"
 
 msgid "Демо-режим:"
-msgstr ""
+msgstr "Demo-Modus:"
 
 msgid "Реальна оплата ще не підключена. Кнопка симулює успішну оплату."
-msgstr ""
+msgstr "Echte Zahlung ist noch nicht aktiviert. Die Schaltfläche simuliert eine erfolgreiche Zahlung."
 
 msgid "Оплатити онлайн (демо)"
-msgstr ""
+msgstr "Online bezahlen (Demo)"
 
 #, python-format
 msgid "Замовлення оплачено (%(method)s)"
-msgstr ""
+msgstr "Bestellung bezahlt (%(method)s)"
 
 msgid "До замовлення"
-msgstr ""
+msgstr "Zur Bestellung"
 
 msgid "Ескальовані несплачені замовлення"
-msgstr ""
+msgstr "Eskalierte unbezahlte Bestellungen"
 
 msgid "Немає проблемних замовлень."
-msgstr ""
+msgstr "Keine problematischen Bestellungen."
 
 #, python-format
 msgid "Доставлено %(minutes)s хв тому"
-msgstr ""
+msgstr "Serviert vor %(minutes)s Min."
 
 msgid "Офіціант:"
-msgstr ""
+msgstr "Kellner:"
 
 msgid "Підтвердити оплату"
-msgstr ""
+msgstr "Zahlung bestätigen"
 
 msgid "Замовлення (офіціант)"
-msgstr ""
+msgstr "Bestellungen (Kellner)"
 
 msgid "Нові"
-msgstr ""
+msgstr "Neu"
 
 msgid "Мої"
-msgstr ""
+msgstr "Meine"
 
 msgid "Готові до доставки"
-msgstr ""
+msgstr "Lieferbereit"
 
 msgid "хв тому"
-msgstr ""
+msgstr "Min. zuvor"
 
 msgid "Немає нових замовлень"
-msgstr ""
+msgstr "Keine neuen Bestellungen"
 
 msgid "Готівка на руках:"
-msgstr ""
+msgstr "Bargeld:"
 
 msgid "У вас немає активних замовлень"
-msgstr ""
+msgstr "Sie haben keine aktiven Bestellungen"
 
 msgid "прострочено"
-msgstr ""
+msgstr "überfällig"
 
 msgid "не сплачено"
-msgstr ""
+msgstr "nicht bezahlt"
 
 msgid "Немає активних замовлень у команди"
-msgstr ""
+msgstr "Keine aktiven Bestellungen im Team"
 
 msgid "ВИЙТИ"
-msgstr ""
+msgstr "AUSLOGGEN"
 
 msgid "Вхід"
-msgstr ""
+msgstr "Anmelden"
 
 msgid "Невірна електронна пошта або пароль. Спробуйте ще раз."
-msgstr ""
+msgstr "Falsche E-Mail-Adresse oder falsches Passwort. Bitte versuchen Sie es erneut."
 
 msgid "Електронна пошта"
-msgstr ""
+msgstr "E-Mail"
 
 msgid "Пароль"
-msgstr ""
+msgstr "Passwort"
 
 msgid "Ще не маєте акаунту?"
-msgstr ""
+msgstr "Noch kein Konto?"
 
 msgid "Забули пароль?"
-msgstr ""
+msgstr "Passwort vergessen?"
 
 msgid "Скинути пароль"
-msgstr ""
+msgstr "Passwort zurücksetzen"
 
 msgid "Пароль змінено"
-msgstr ""
+msgstr "Passwort geändert"
 
 msgid "Ваш пароль успішно змінено."
-msgstr ""
+msgstr "Ihr Passwort wurde erfolgreich geändert."
 
 msgid "Мій профіль"
-msgstr ""
+msgstr "Mein Profil"
 
 msgid "Зміна пароля"
-msgstr ""
+msgstr "Passwort ändern"
 
 msgid "Будь ласка, виправте помилки нижче."
-msgstr ""
+msgstr "Bitte korrigieren Sie die folgenden Fehler."
 
 msgid "Поточний пароль"
-msgstr ""
+msgstr "Aktuelles Passwort"
 
 msgid "Новий пароль (мінімум 8 символів, не лише цифри)"
-msgstr ""
+msgstr "Neues Passwort (mindestens 8 Zeichen, nicht nur Ziffern)"
 
 msgid "Підтвердження нового пароля"
-msgstr ""
+msgstr "Neues Passwort bestätigen"
 
 msgid "Змінити пароль"
-msgstr ""
+msgstr "Passwort ändern"
 
 msgid "Ваш пароль успішно змінено. Тепер ви можете увійти з новим паролем."
-msgstr ""
+msgstr "Ihr Passwort wurde erfolgreich geändert. Sie können sich jetzt mit dem neuen Passwort anmelden."
 
 msgid "Новий пароль"
-msgstr ""
+msgstr "Neues Passwort"
 
 msgid "Зберегти пароль"
-msgstr ""
+msgstr "Passwort speichern"
 
 msgid "Посилання недійсне"
-msgstr ""
+msgstr "Link ist ungültig"
 
 msgid "Посилання для скидання пароля недійсне або вже було використане."
-msgstr ""
+msgstr "Der Link zum Zurücksetzen des Passworts ist ungültig oder wurde bereits verwendet."
 
 msgid "Запросіть нове посилання."
-msgstr ""
+msgstr "Fordern Sie einen neuen Link an."
 
 msgid "Надіслати повторно"
-msgstr ""
+msgstr "Erneut senden"
 
 msgid "Посилання надіслано"
-msgstr ""
+msgstr "Link gesendet"
 
 msgid ""
 "Якщо акаунт з вказаною адресою існує, ми надіслали посилання для скидання "
@@ -1122,145 +1122,145 @@ msgid ""
 msgstr ""
 
 msgid "Перевірте вашу пошту."
-msgstr ""
+msgstr "Überprüfen Sie Ihren Posteingang."
 
 msgid "У dev-режимі лист виводиться у термінал сервера."
-msgstr ""
+msgstr "Im Entwicklermodus wird die E-Mail im Server-Terminal ausgegeben."
 
 msgid "Скопіюйте посилання з консолі та вставте у браузер."
-msgstr ""
+msgstr "Kopieren Sie den Link aus der Konsole und fügen Sie ihn in den Browser ein."
 
 msgid "Скидання пароля"
-msgstr ""
+msgstr "Passwort zurücksetzen"
 
 msgid "Введіть електронну пошту, пов'язану з вашим акаунтом."
-msgstr ""
+msgstr "Geben Sie die E-Mail-Adresse ein, die mit Ihrem Konto verknüpft ist."
 
 msgid "Ми надішлемо посилання для скидання пароля."
-msgstr ""
+msgstr "Wir senden Ihnen einen Link zum Zurücksetzen des Passworts."
 
 msgid "Надіслати посилання"
-msgstr ""
+msgstr "Link senden"
 
 msgid "Редагувати переклад"
-msgstr ""
+msgstr "Übersetzung bearbeiten"
 
 msgid "Переклади"
-msgstr ""
+msgstr "Übersetzungen"
 
 msgid "Оригінал (UK)"
-msgstr ""
+msgstr "Original (UK)"
 
 msgid "Зберегти і затвердити"
-msgstr ""
+msgstr "Speichern und genehmigen"
 
 msgid "Переклади для перевірки"
-msgstr ""
+msgstr "Übersetzungen zur Überprüfung"
 
 msgid "Усі переклади затверджено."
-msgstr ""
+msgstr "Alle Übersetzungen sind genehmigt."
 
 msgid "Затвердити все"
-msgstr ""
+msgstr "Alle genehmigen"
 
 msgid "Затвердити"
-msgstr ""
+msgstr "Genehmigen"
 
 msgid "Повторити"
-msgstr ""
+msgstr "Wiederholen"
 
 msgid "Профіль"
-msgstr ""
+msgstr "Profil"
 
 msgid "Аватар"
-msgstr ""
+msgstr "Avatar"
 
 msgid "Дата реєстрації:"
-msgstr ""
+msgstr "Registrierungsdatum:"
 
 msgid "Останній вхід:"
-msgstr ""
+msgstr "Letzter Login:"
 
 msgid "Статус:"
-msgstr ""
+msgstr "Status:"
 
 msgid "Адміністратор"
-msgstr ""
+msgstr "Administrator"
 
 msgid "Редагувати профіль"
-msgstr ""
+msgstr "Profil bearbeiten"
 
 msgid "Замінити пароль"
-msgstr ""
+msgstr "Passwort ändern"
 
 msgid "До меню"
-msgstr ""
+msgstr "Zum Menü"
 
 msgid "Ви не увійшли в систему."
-msgstr ""
+msgstr "Sie sind nicht angemeldet."
 
 msgid "Поточний аватар"
-msgstr ""
+msgstr "Aktueller Avatar"
 
 msgid "Реєстрація"
-msgstr ""
+msgstr "Registrierung"
 
 msgid "Вже маєте акаунт?"
-msgstr ""
+msgstr "Haben Sie bereits ein Konto?"
 
 msgid "Затверджено"
-msgstr ""
+msgstr "Genehmigt"
 
 msgid "Помилка перекладу"
-msgstr ""
+msgstr "Übersetzungsfehler"
 
 msgid "Затвердження перекладу"
-msgstr ""
+msgstr "Übersetzung genehmigen"
 
 msgid "Затвердження перекладів"
-msgstr ""
+msgstr "Übersetzungen genehmigen"
 
 msgid "Ім'я"
-msgstr ""
+msgstr "Vorname"
 
 msgid "Прізвище"
-msgstr ""
+msgstr "Nachname"
 
 msgid "Електронна пошта (обов'язково)"
-msgstr ""
+msgstr "E-Mail-Adresse (erforderlich)"
 
 msgid "Ім'я (необов'язково)"
-msgstr ""
+msgstr "Vorname (optional)"
 
 msgid "Прізвище (необов'язково)"
-msgstr ""
+msgstr "Nachname (optional)"
 
 msgid "Пароль (мінімум 8 символів, не лише цифри)"
-msgstr ""
+msgstr "Passwort (mindestens 8 Zeichen, nicht nur Ziffern)"
 
 msgid "Підтвердження пароля"
-msgstr ""
+msgstr "Passwort bestätigen"
 
 msgid "Ім'я користувача"
-msgstr ""
+msgstr "Benutzername"
 
 msgid "Виробництво"
-msgstr ""
+msgstr "Produktion"
 
 msgid "Відвідувач"
-msgstr ""
+msgstr "Besucher"
 
 msgid "Роль"
-msgstr ""
+msgstr "Rolle"
 
 msgid "Посада для відвідувачів"
-msgstr ""
+msgstr "Position für Gäste"
 
 msgid "Наприклад: Повариха, Бармен, Майстер десертів"
-msgstr ""
+msgstr "Zum Beispiel: Köchin, Barkeeper, Pâtissier"
 
 msgid "Публічне ім'я"
-msgstr ""
+msgstr "Öffentlicher Name"
 
 msgid "Ім'я без прізвища для відвідувачів"
-msgstr ""
+msgstr "Vorname ohne Nachname für Gäste"

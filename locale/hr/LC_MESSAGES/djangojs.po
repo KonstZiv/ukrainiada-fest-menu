@@ -18,82 +18,82 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 msgid "доставлено"
-msgstr ""
+msgstr "dostavljeno"
 
 msgid "Ви ще нічого не обрали."
-msgstr ""
+msgstr "Još niste ništa odabrali."
 
 msgid "Перейти до меню"
-msgstr ""
+msgstr "Idi na jelovnik"
 
 msgid "Прострочено"
-msgstr ""
+msgstr "Kasni"
 
 msgid "Терміново!"
-msgstr ""
+msgstr "Hitno!"
 
 msgid "Офлайн-режим — меню може бути застарілим. Замовлення недоступні."
-msgstr ""
+msgstr "Izvanmrežni način rada — jelovnik je možda zastario. Narudžbe nisu dostupne."
 
 msgid "Скасувати замовлення?"
-msgstr ""
+msgstr "Otkaži narudžbu?"
 
 msgid "Замовлення скасовано"
-msgstr ""
+msgstr "Narudžba otkazana"
 
 msgid "Всі страви готові!"
-msgstr ""
+msgstr "Sva jela su spremna!"
 
 msgid "Замовлення доставлено! Смачного!"
-msgstr ""
+msgstr "Narudžba je dostavljena! Dobar tek!"
 
 msgid "Оплату прийнято. Дякуємо!"
-msgstr ""
+msgstr "Plaćanje prihvaćeno. Hvala!"
 
 msgid "Ваше звернення прийнято"
-msgstr ""
+msgstr "Vaš zahtjev je zaprimljen"
 
 msgid "%(by)s працює над вашим питанням"
-msgstr ""
+msgstr "%(by)s radi na vašem pitanju"
 
 msgid "Вирішено"
-msgstr ""
+msgstr "Riješeno"
 
 msgid "СПЛАЧЕНО"
-msgstr ""
+msgstr "PLAĆENO"
 
 msgid "Live"
-msgstr ""
+msgstr "Uživo"
 
 msgid "Offline"
-msgstr ""
+msgstr "Izvan mreže"
 
 msgid "Нове замовлення #%(order_id)s від клієнта"
-msgstr ""
+msgstr "Nova narudžba #%(order_id)s od klijenta"
 
 msgid "Готово"
-msgstr ""
+msgstr "Gotovo"
 
 msgid "Страва готова:"
-msgstr ""
+msgstr "Jelo je spremno:"
 
 msgid "Замовлення #%(order_id)s готове!"
-msgstr ""
+msgstr "Narudžba #%(order_id)s je spremna!"
 
 msgid "Готується (%(by)s)"
-msgstr ""
+msgstr "U pripremi (%(by)s)"
 
 msgid "Замовлення #%(order_id)s на кухні"
-msgstr ""
+msgstr "Narudžba #%(order_id)s je u kuhinji"
 
 msgid "Кухня"
-msgstr ""
+msgstr "Kuhinja"
 
 msgid "Оплата"
-msgstr ""
+msgstr "Plaćanje"
 
 msgid "Замовлення #%(order_id)s скасовано"
-msgstr ""
+msgstr "Narudžba #%(order_id)s je otkazana"
 
 msgid "Ескалація! %(label)s #%(id)s"
-msgstr ""
+msgstr "Eskalacija! %(label)s #%(id)s"

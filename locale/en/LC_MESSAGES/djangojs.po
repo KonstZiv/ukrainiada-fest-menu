@@ -17,82 +17,82 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 msgid "доставлено"
-msgstr ""
+msgstr "Delivered"
 
 msgid "Ви ще нічого не обрали."
-msgstr ""
+msgstr "You haven't selected anything yet."
 
 msgid "Перейти до меню"
-msgstr ""
+msgstr "Go to menu"
 
 msgid "Прострочено"
-msgstr ""
+msgstr "Overdue"
 
 msgid "Терміново!"
-msgstr ""
+msgstr "Urgent!"
 
 msgid "Офлайн-режим — меню може бути застарілим. Замовлення недоступні."
-msgstr ""
+msgstr "Offline mode — the menu may be outdated. Ordering is unavailable."
 
 msgid "Скасувати замовлення?"
-msgstr ""
+msgstr "Cancel order?"
 
 msgid "Замовлення скасовано"
-msgstr ""
+msgstr "Order cancelled"
 
 msgid "Всі страви готові!"
-msgstr ""
+msgstr "All dishes are ready!"
 
 msgid "Замовлення доставлено! Смачного!"
-msgstr ""
+msgstr "Order delivered! Enjoy your meal!"
 
 msgid "Оплату прийнято. Дякуємо!"
-msgstr ""
+msgstr "Payment accepted. Thank you!"
 
 msgid "Ваше звернення прийнято"
-msgstr ""
+msgstr "Your request has been received"
 
 msgid "%(by)s працює над вашим питанням"
-msgstr ""
+msgstr "%(by)s is working on your issue"
 
 msgid "Вирішено"
-msgstr ""
+msgstr "Resolved"
 
 msgid "СПЛАЧЕНО"
-msgstr ""
+msgstr "PAID"
 
 msgid "Live"
-msgstr ""
+msgstr "Live"
 
 msgid "Offline"
-msgstr ""
+msgstr "Offline"
 
 msgid "Нове замовлення #%(order_id)s від клієнта"
-msgstr ""
+msgstr "New order #%(order_id)s from a customer"
 
 msgid "Готово"
-msgstr ""
+msgstr "Ready"
 
 msgid "Страва готова:"
-msgstr ""
+msgstr "Dish ready:"
 
 msgid "Замовлення #%(order_id)s готове!"
-msgstr ""
+msgstr "Order #%(order_id)s is ready!"
 
 msgid "Готується (%(by)s)"
-msgstr ""
+msgstr "Preparing (%(by)s)"
 
 msgid "Замовлення #%(order_id)s на кухні"
-msgstr ""
+msgstr "Order #%(order_id)s is in the kitchen"
 
 msgid "Кухня"
-msgstr ""
+msgstr "Kitchen"
 
 msgid "Оплата"
-msgstr ""
+msgstr "Payment"
 
 msgid "Замовлення #%(order_id)s скасовано"
-msgstr ""
+msgstr "Order #%(order_id)s cancelled"
 
 msgid "Ескалація! %(label)s #%(id)s"
-msgstr ""
+msgstr "Escalation! %(label)s #%(id)s"
