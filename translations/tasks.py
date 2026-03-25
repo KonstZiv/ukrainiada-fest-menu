@@ -51,6 +51,17 @@ def translate_object(self: object, content_type_id: int, object_id: int) -> None
         logger.info("All UK fields empty for %s#%s — skipping", ct.model, object_id)
         return
 
+    # Check API key before calling Gemini.
+    from django.conf import settings as django_settings
+
+    if not getattr(django_settings, "GEMINI_API_KEY", ""):
+        logger.info(
+            "GEMINI_API_KEY not configured — skipping translation for %s#%s",
+            ct.model,
+            object_id,
+        )
+        return
+
     # Call Gemini.
     from translations.gemini import translate_with_gemini
 
