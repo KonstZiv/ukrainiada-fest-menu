@@ -1,0 +1,52 @@
+{% load i18n %}
+{# PWA install prompt — visible only on mobile/tablet, hidden on desktop #}
+<div id="pwa-install-block" class="mt-4" style="display: none;">
+  <hr>
+  {# Android: native install prompt #}
+  <button id="pwa-install-btn" class="btn btn-outline-primary w-100" style="display: none;">
+    <i class="bi bi-download me-1"></i> {% trans "Встановити додаток" %}
+  </button>
+  {# iOS: manual instruction #}
+  <div id="pwa-ios-hint" class="text-center text-muted small" style="display: none;">
+    <i class="bi bi-phone me-1"></i>
+    {% trans "Натисніть" %}
+    <i class="bi bi-box-arrow-up"></i>
+    {% trans "та оберіть «На Початковий екран»" %}
+  </div>
+</div>
+
+<script>
+(function() {
+  // Skip if already installed (standalone mode)
+  if (window.matchMedia("(display-mode: standalone)").matches) return;
+
+  var block = document.getElementById("pwa-install-block");
+  var btn = document.getElementById("pwa-install-btn");
+  var iosHint = document.getElementById("pwa-ios-hint");
+  var deferredPrompt = null;
+
+  // Android: intercept beforeinstallprompt
+  window.addEventListener("beforeinstallprompt", function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    block.style.display = "";
+    btn.style.display = "";
+  });
+
+  btn.addEventListener("click", function() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function() {
+      deferredPrompt = null;
+      block.style.display = "none";
+    });
+  });
+
+  // iOS: show instruction
+  var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) && !window.MSStream;
+  if (isIOS) {
+    block.style.display = "";
+    iosHint.style.display = "";
+  }
+})();
+</script>
