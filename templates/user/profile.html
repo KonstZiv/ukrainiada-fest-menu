@@ -70,6 +70,35 @@
         </div>
       </div>
 
+      {# --- Канали комунікації --- #}
+      <div class="mt-4">
+        <h6 class="fw-semibold mb-2">
+          <i class="bi bi-broadcast me-1"></i> {% trans "Канали комунікації" %}
+        </h6>
+        <div class="list-group list-group-flush">
+          {% for ch in channels %}
+          <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+            <span>
+              {% if ch.channel_type == "email" %}<i class="bi bi-envelope me-1"></i>
+              {% elif ch.channel_type == "telegram" %}<i class="bi bi-telegram me-1"></i>
+              {% endif %}
+              {{ ch.address }}
+            </span>
+            {% if ch.is_verified %}
+            <span class="badge text-bg-success">{% trans "Верифіковано" %}</span>
+            {% else %}
+            <span class="badge text-bg-warning text-dark">{% trans "Не верифіковано" %}</span>
+            {% endif %}
+          </div>
+          {% empty %}
+          <p class="text-muted small">{% trans "Канали не налаштовані" %}</p>
+          {% endfor %}
+        </div>
+        <a href="{% url 'user:channels' %}" class="btn btn-sm btn-outline-primary mt-2">
+          <i class="bi bi-gear me-1"></i> {% trans "Налаштувати канали" %}
+        </a>
+      </div>
+
       {# --- Кнопки дій --- #}
       <div class="mt-4 d-flex gap-2">
         <a href="{% url 'user:profile_edit' %}" class="btn btn-primary">

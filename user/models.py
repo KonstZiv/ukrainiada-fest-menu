@@ -180,3 +180,52 @@ class User(AbstractUser):
             )
             # save=False вище, тому зберігаємо лише поле avatar
             super().save(update_fields=["avatar"])
+
+
+class CommunicationChannel(models.Model):
+    """User communication channel for notifications and digests."""
+
+    class ChannelType(models.TextChoices):
+        EMAIL = "email", _("Email")
+        TELEGRAM = "telegram", _("Telegram")
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="channels",
+    )
+    channel_type = models.CharField(
+        max_length=20,
+        choices=ChannelType.choices,
+        verbose_name=_("Тип каналу"),
+    )
+    address = models.CharField(
+        max_length=255,
+        verbose_name=_("Адреса"),
+        help_text=_("Email, Telegram chat ID, або номер телефону"),
+    )
+    is_verified = models.BooleanField(
+        default=False,
+        verbose_name=_("Верифіковано"),
+    )
+    priority = models.PositiveSmallIntegerField(
+        default=0,
+        verbose_name=_("Пріоритет"),
+        help_text=_("Менше число — вищий пріоритет"),
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "channel_type"],
+                name="unique_channel_per_type",
+            ),
+        ]
+        ordering = ["priority"]
+        verbose_name = _("Канал комунікації")
+        verbose_name_plural = _("Канали комунікації")
+
+    def __str__(self) -> str:
+        status = "\u2713" if self.is_verified else "\u2717"
+        return f"{self.get_channel_type_display()} [{status}] {self.address}"

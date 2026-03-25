@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Dobro Djelo — {% trans "Канали комунікації" %}{% endblock %}
+
+{% block content %}
+<div class="container py-3" style="max-width: 600px;">
+
+  <h4 class="mb-3">
+    <i class="bi bi-broadcast me-1"></i> {% trans "Канали комунікації" %}
+  </h4>
+
+  <p class="text-muted small">
+    {% trans "Канали використовуються для надсилання повідомлень, дайджестів та сповіщень. Верхній канал має найвищий пріоритет." %}
+  </p>
+
+  {% if channels %}
+  <div class="list-group mb-3">
+    {% for ch in channels %}
+    <div class="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+        {% if ch.channel_type == "email" %}<i class="bi bi-envelope me-1 text-primary"></i>
+        {% elif ch.channel_type == "telegram" %}<i class="bi bi-telegram me-1 text-info"></i>
+        {% endif %}
+        <strong>{{ ch.get_channel_type_display }}</strong>
+        <span class="text-muted ms-1">{{ ch.address }}</span>
+        {% if ch.is_verified %}
+        <span class="badge text-bg-success ms-1">{% trans "Верифіковано" %}</span>
+        {% else %}
+        <span class="badge text-bg-warning text-dark ms-1">{% trans "Не верифіковано" %}</span>
+        {% endif %}
+      </div>
+      <div class="d-flex gap-1">
+        {# Priority buttons #}
+        {% if not forloop.first %}
+        <form method="post" class="d-inline">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="priority_up">
+          <input type="hidden" name="channel_id" value="{{ ch.id }}">
+          <button type="submit" class="btn btn-sm btn-outline-secondary p-0 px-1" title="{% trans 'Вище' %}">
+            <i class="bi bi-arrow-up"></i>
+          </button>
+        </form>
+        {% endif %}
+        {% if not forloop.last %}
+        <form method="post" class="d-inline">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="priority_down">
+          <input type="hidden" name="channel_id" value="{{ ch.id }}">
+          <button type="submit" class="btn btn-sm btn-outline-secondary p-0 px-1" title="{% trans 'Нижче' %}">
+            <i class="bi bi-arrow-down"></i>
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-info">{% trans "Канали не налаштовані" %}</div>
+  {% endif %}
+
+  {# Telegram connect placeholder #}
+  <div class="card border-info mb-3">
+    <div class="card-body text-center">
+      <i class="bi bi-telegram text-info" style="font-size: 2rem;"></i>
+      <h6 class="mt-2">{% trans "Підключити Telegram" %}</h6>
+      <p class="text-muted small mb-2">{% trans "Отримуйте сповіщення та дайджести в Telegram" %}</p>
+      <button class="btn btn-info btn-sm" disabled>
+        <i class="bi bi-link-45deg me-1"></i> {% trans "Скоро" %}
+      </button>
+    </div>
+  </div>
+
+  <a href="{% url 'user:profile' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i> {% trans "До профілю" %}
+  </a>
+
+</div>
+{% endblock %}

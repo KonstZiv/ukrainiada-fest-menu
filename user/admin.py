@@ -1,7 +1,12 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import User
+from .models import CommunicationChannel, User
+
+
+class CommunicationChannelInline(admin.TabularInline[CommunicationChannel, User]):
+    model = CommunicationChannel
+    extra = 0
 
 
 @admin.register(User)
@@ -30,3 +35,4 @@ class UserAdmin(BaseUserAdmin):
             {"fields": ("role", "avatar")},
         ),
     )
+    inlines = [CommunicationChannelInline]
