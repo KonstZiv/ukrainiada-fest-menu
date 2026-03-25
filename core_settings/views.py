@@ -1,6 +1,7 @@
-"""Core views — offline page, health check, DB connection monitoring."""
+"""Core views — offline page, health check, DB connection monitoring, SW."""
 
 import logging
+from pathlib import Path
 
 from django.conf import settings
 from django.db import connection
@@ -13,6 +14,16 @@ logger = logging.getLogger(__name__)
 def offline_page(request: HttpRequest) -> HttpResponse:
     """Offline fallback page served from Service Worker cache."""
     return render(request, "offline.html")
+
+
+def service_worker(request: HttpRequest) -> HttpResponse:
+    """Serve SW from root so its scope covers the entire site."""
+    sw_path = Path(settings.BASE_DIR) / "staticfiles" / "js" / "sw.js"
+    return HttpResponse(
+        sw_path.read_text(),
+        content_type="application/javascript",
+        headers={"Service-Worker-Allowed": "/"},
+    )
 
 
 def _get_db_connection_count() -> int | None:

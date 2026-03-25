@@ -15,11 +15,12 @@ from django.urls import include, path
 from django.views.generic import RedirectView
 from django.views.i18n import JavaScriptCatalog
 
-from core_settings.views import health_check, offline_page
+from core_settings.views import health_check, offline_page, service_worker
 
 urlpatterns = [
     path("", RedirectView.as_view(url="/menu/", permanent=False)),
     path("health/", health_check, name="health_check"),
+    path("sw.js", service_worker, name="service_worker"),
     path("i18n/", include("django.conf.urls.i18n")),
     path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),
     path("offline/", offline_page, name="offline"),
