@@ -46,6 +46,12 @@ def trigger_auto_translate(
     if update_fields is not None and not any(f.endswith("_uk") for f in update_fields):
         return
 
+    # No API key → skip entirely (avoids Redis connection attempt in CI/tests).
+    from django.conf import settings
+
+    if not getattr(settings, "GEMINI_API_KEY", ""):
+        return
+
     old: dict[str, str | None] = getattr(instance, "_old_uk", {})
     if not created:
         current = _uk_field_snapshot(instance)
