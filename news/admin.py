@@ -3,7 +3,14 @@
 from django.contrib import admin
 from modeltranslation.admin import TabbedTranslationAdmin
 
-from news.models import Article, ArticleImage, ArticleMainImage, NewsTag, Topic
+from news.models import (
+    Article,
+    ArticleComment,
+    ArticleImage,
+    ArticleMainImage,
+    NewsTag,
+    Topic,
+)
 
 
 class ArticleMainImageInline(admin.StackedInline[ArticleMainImage, Article]):
@@ -45,3 +52,12 @@ class TopicAdmin(TabbedTranslationAdmin):
 class NewsTagAdmin(TabbedTranslationAdmin):
     list_display = ["title"]
     search_fields = ["title_uk", "title_en"]
+
+
+@admin.register(ArticleComment)
+class ArticleCommentAdmin(admin.ModelAdmin[ArticleComment]):
+    list_display = ["article", "author", "status", "created_at"]
+    list_filter = ["status", "created_at"]
+    list_editable = ["status"]
+    search_fields = ["message", "author__email"]
+    readonly_fields = ["article", "author", "message", "created_at"]

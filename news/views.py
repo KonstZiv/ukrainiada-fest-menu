@@ -15,10 +15,15 @@ from django.utils.translation import get_language
 from django.utils.translation import gettext as _
 from django.views import generic
 
-from news.forms import ArticleForm, ArticleImageFormSet, ArticleMainImageForm
-from news.models import Article, ArticleMainImage, TranslationFeedback
+from news.forms import (
+    ArticleForm,
+    ArticleImageFormSet,
+    ArticleMainImageForm,
+    CommentForm,
+)
+from news.models import Article, ArticleComment, ArticleMainImage, TranslationFeedback
 from translations.models import TranslationApproval
-from user.decorators import role_required
+from user.decorators import role_required, verified_channel_required
 from user.models import User
 
 _EDITOR_ROLES = ("editor", "manager")
@@ -68,6 +73,21 @@ def article_detail(request: HttpRequest, pk: int) -> HttpResponse:
             status=TranslationApproval.Status.APPROVED,
         ).exists()
 
+    # Comments: approved for everyone, pending also visible to editor/manager.
+    comments = article.comments.select_related("author")
+    user = request.user
+    if not (user.is_authenticated and cast(User, user).role in _EDITOR_ROLES):
+        comments = comments.filter(status=ArticleComment.Status.APPROVED)
+
+    # Comment form for authenticated users with verified channel.
+    comment_form = None
+    can_comment = False
+    if user.is_authenticated:
+        u = cast(User, user)
+        can_comment = u.channels.filter(is_verified=True).exists()
+        if can_comment:
+            comment_form = CommentForm()
+
     return render(
         request,
         "news/article_detail.html",
@@ -75,6 +95,9 @@ def article_detail(request: HttpRequest, pk: int) -> HttpResponse:
             "article": article,
             "show_search": False,
             "translation_approved": translation_approved,
+            "comments": comments,
+            "comment_form": comment_form,
+            "can_comment": can_comment,
         },
     )
 
@@ -237,3 +260,62 @@ def submit_translation_feedback(request: HttpRequest, pk: int) -> HttpResponse:
         return redirect("news:article_detail", pk=pk)
 
     return redirect("news:article_detail", pk=pk)
+
+
+# ---------------------------------------------------------------------------
+# Comments
+# ---------------------------------------------------------------------------
+
+
+@verified_channel_required
+def submit_comment(request: HttpRequest, pk: int) -> HttpResponse:
+    """Submit a comment on an article (pre-moderated)."""
+    article = get_object_or_404(Article, pk=pk, status=Article.Status.PUBLISHED)
+
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.article = article
+            comment.author = cast(User, request.user)
+            comment.save()
+            messages.success(request, _("Коментар надіслано на модерацію."))
+
+    return redirect("news:article_detail", pk=pk)
+
+
+@role_required(*_EDITOR_ROLES)
+def moderate_comments(request: HttpRequest) -> HttpResponse:
+    """List all pending comments for moderation."""
+    pending = (
+        ArticleComment.objects.filter(status=ArticleComment.Status.PENDING)
+        .select_related("article", "author")
+        .order_by("-created_at")
+    )
+    return render(
+        request,
+        "news/moderate_comments.html",
+        {"comments": pending, "show_search": False},
+    )
+
+
+@role_required(*_EDITOR_ROLES)
+def approve_comment(request: HttpRequest, pk: int) -> HttpResponse:
+    """Approve a pending comment."""
+    comment = get_object_or_404(ArticleComment, pk=pk)
+    comment.status = ArticleComment.Status.APPROVED
+    comment.moderated_by = cast(User, request.user)
+    comment.save(update_fields=["status", "moderated_by"])
+    messages.success(request, _("Коментар схвалено."))
+    return redirect("news:moderate_comments")
+
+
+@role_required(*_EDITOR_ROLES)
+def reject_comment(request: HttpRequest, pk: int) -> HttpResponse:
+    """Reject a pending comment."""
+    comment = get_object_or_404(ArticleComment, pk=pk)
+    comment.status = ArticleComment.Status.REJECTED
+    comment.moderated_by = cast(User, request.user)
+    comment.save(update_fields=["status", "moderated_by"])
+    messages.info(request, _("Коментар відхилено."))
+    return redirect("news:moderate_comments")

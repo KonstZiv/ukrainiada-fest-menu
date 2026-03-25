@@ -17,4 +17,8 @@ urlpatterns = [
         views.submit_translation_feedback,
         name="translation_feedback",
     ),
+    path("<int:pk>/comment/", views.submit_comment, name="submit_comment"),
+    path("comments/moderate/", views.moderate_comments, name="moderate_comments"),
+    path("comments/<int:pk>/approve/", views.approve_comment, name="approve_comment"),
+    path("comments/<int:pk>/reject/", views.reject_comment, name="reject_comment"),
 ]

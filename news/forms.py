@@ -5,7 +5,7 @@ from django.forms import inlineformset_factory
 from django.utils.translation import gettext_lazy as _
 from django_ckeditor_5.widgets import CKEditor5Widget
 
-from news.models import Article, ArticleImage, ArticleMainImage
+from news.models import Article, ArticleComment, ArticleImage, ArticleMainImage
 
 
 class ArticleForm(forms.ModelForm):
@@ -49,6 +49,21 @@ class ArticleMainImageForm(forms.ModelForm):
             ),
             "image": forms.ClearableFileInput(
                 attrs={"class": "form-control", "accept": "image/*"}
+            ),
+        }
+
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = ArticleComment
+        fields = ["message"]
+        widgets = {
+            "message": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 3,
+                    "placeholder": _("Ваш коментар..."),
+                }
             ),
         }
 

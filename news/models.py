@@ -174,3 +174,49 @@ class TranslationFeedback(models.Model):
 
     def __str__(self) -> str:
         return f"Feedback #{self.pk} [{self.language}] {self.article}"
+
+
+class ArticleComment(models.Model):
+    """User comment on an article (pre-moderated)."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", _("На розгляді")
+        APPROVED = "approved", _("Схвалений")
+        REJECTED = "rejected", _("Відхилений")
+
+    article = models.ForeignKey(
+        Article,
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="article_comments",
+    )
+    message = models.TextField(
+        max_length=2000,
+        verbose_name=_("Коментар"),
+    )
+    status = models.CharField(
+        max_length=10,
+        choices=Status.choices,
+        default=Status.PENDING,
+        db_index=True,
+    )
+    moderated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = _("Коментар до статті")
+        verbose_name_plural = _("Коментарі до статей")
+
+    def __str__(self) -> str:
+        return f"Comment #{self.pk} by {self.author} on {self.article}"

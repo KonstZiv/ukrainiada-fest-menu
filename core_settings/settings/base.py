@@ -90,6 +90,7 @@ TEMPLATES = [
                 "orders.context_processors.cart_context",
                 "orders.context_processors.manager_context",
                 "translations.context_processors.translation_context",
+                "news.context_processors.news_context",
             ],
         },
     },

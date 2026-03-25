@@ -142,6 +142,7 @@
           <a href="{% url 'news:article_list' %}" class="btn btn-sm text-primary fw-semibold p-0 text-decoration-none d-flex align-items-center gap-1"
              style="font-size: 0.8rem; letter-spacing: 0.05em;">
             {% trans "НОВИНИ" %}
+            {% if pending_comments_count %}<span class="badge bg-warning text-dark" style="font-size: 0.65rem;">{{ pending_comments_count }}</span>{% endif %}
           </a>
           <div class="vr-custom"></div>
         {% elif user.role == 'corrector' %}

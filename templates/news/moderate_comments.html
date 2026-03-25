@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Dobro Djelo — {% trans "Модерація коментарів" %}{% endblock %}
+
+{% block content %}
+<div class="container py-3" style="max-width: 800px;">
+
+  <h4 class="mb-3">
+    <i class="bi bi-chat-dots me-1"></i> {% trans "Модерація коментарів" %}
+  </h4>
+
+  {% if comments %}
+  {% for comment in comments %}
+  <div class="card mb-2 border-warning">
+    <div class="card-body py-2 px-3">
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <div>
+          <strong class="small">{{ comment.author.get_full_name|default:comment.author.username }}</strong>
+          <span class="text-muted small ms-2">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
+        </div>
+        <a href="{% url 'news:article_detail' comment.article.pk %}" class="text-muted small">
+          {{ comment.article.title|truncatechars:40 }}
+        </a>
+      </div>
+      <p class="mb-2">{{ comment.message }}</p>
+      <div class="d-flex gap-2">
+        <form method="post" action="{% url 'news:approve_comment' comment.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-success">
+            <i class="bi bi-check-lg me-1"></i> {% trans "Схвалити" %}
+          </button>
+        </form>
+        <form method="post" action="{% url 'news:reject_comment' comment.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-outline-danger">
+            <i class="bi bi-x-lg me-1"></i> {% trans "Відхилити" %}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="alert alert-success">
+    <i class="bi bi-check-circle me-1"></i> {% trans "Немає коментарів для модерації." %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
