@@ -381,6 +381,17 @@ SENIOR_RESPONSE_TIMEOUT: int = config("SENIOR_RESPONSE_TIMEOUT", default=10, cas
 GEMINI_API_KEY: str = config("GEMINI_API_KEY", default="")
 
 # ---------------------------------------------------------------------------
+# Cache — Redis (shared across uvicorn workers)
+# ---------------------------------------------------------------------------
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": config("REDIS_URL", default="redis://localhost:6379/1"),
+    },
+}
+
+# ---------------------------------------------------------------------------
 # Telegram Bot (aiogram3 webhook)
 # ---------------------------------------------------------------------------
 
