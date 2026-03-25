@@ -60,17 +60,39 @@
   <div class="alert alert-info">{% trans "Канали не налаштовані" %}</div>
   {% endif %}
 
-  {# Telegram connect placeholder #}
+  {# Telegram connect #}
+  {% if not has_telegram and bot_configured %}
   <div class="card border-info mb-3">
     <div class="card-body text-center">
       <i class="bi bi-telegram text-info" style="font-size: 2rem;"></i>
       <h6 class="mt-2">{% trans "Підключити Telegram" %}</h6>
       <p class="text-muted small mb-2">{% trans "Отримуйте сповіщення та дайджести в Telegram" %}</p>
-      <button class="btn btn-info btn-sm" disabled>
-        <i class="bi bi-link-45deg me-1"></i> {% trans "Скоро" %}
-      </button>
+
+      {% if telegram_link %}
+      <a href="{{ telegram_link }}" target="_blank" class="btn btn-info btn-sm">
+        <i class="bi bi-telegram me-1"></i> {% trans "Відкрити в Telegram" %}
+      </a>
+      <p class="text-muted small mt-2">{% trans "Натисніть Start у боті для підтвердження" %}</p>
+      {% else %}
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="connect_telegram">
+        <button type="submit" class="btn btn-info btn-sm">
+          <i class="bi bi-link-45deg me-1"></i> {% trans "Підключити" %}
+        </button>
+      </form>
+      {% endif %}
     </div>
   </div>
+  {% elif not bot_configured %}
+  <div class="card border-info mb-3 bg-light">
+    <div class="card-body text-center text-muted">
+      <i class="bi bi-telegram" style="font-size: 2rem;"></i>
+      <h6 class="mt-2">{% trans "Підключити Telegram" %}</h6>
+      <p class="small mb-0">{% trans "Скоро" %}</p>
+    </div>
+  </div>
+  {% endif %}
 
   <a href="{% url 'user:profile' %}" class="btn btn-outline-secondary">
     <i class="bi bi-arrow-left me-1"></i> {% trans "До профілю" %}

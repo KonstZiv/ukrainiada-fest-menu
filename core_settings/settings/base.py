@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "feedback",
     "translations",
     "news",
+    "telegram_bot",
     # Third-party
     "django_celery_beat",
     "django_ckeditor_5",
@@ -378,3 +379,12 @@ SENIOR_RESPONSE_TIMEOUT: int = config("SENIOR_RESPONSE_TIMEOUT", default=10, cas
 # ---------------------------------------------------------------------------
 
 GEMINI_API_KEY: str = config("GEMINI_API_KEY", default="")
+
+# ---------------------------------------------------------------------------
+# Telegram Bot (aiogram3 webhook)
+# ---------------------------------------------------------------------------
+
+TG_TOKEN: str = config("TG_TOKEN", default="")
+TG_WEBHOOK_SECRET: str = config("TG_WEBHOOK_SECRET", default="")
+TG_WEBHOOK_BASE_URL: str = config("TG_WEBHOOK_BASE_URL", default="")
+TG_BOT_URL: str = config("TG_BOT_URL", default="")  # https://t.me/BotName

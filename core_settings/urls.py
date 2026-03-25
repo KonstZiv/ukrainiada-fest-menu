@@ -37,6 +37,7 @@ urlpatterns = [
     path("translations/", include("translations.urls")),
     path("news/", include("news.urls")),
     path("ckeditor5/", include("django_ckeditor_5.urls")),
+    path("bot/webhook/", include("telegram_bot.urls")),
 ]
 
 if settings.DEBUG:

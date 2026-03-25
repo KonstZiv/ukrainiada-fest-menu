@@ -1,5 +1,6 @@
 from typing import cast
 
+from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
@@ -54,26 +55,47 @@ def manage_channels(request: HttpRequest) -> HttpResponse:
     user = cast(User, request.user)
     channels = user.channels.all()
 
+    telegram_link = ""
+
     if request.method == "POST":
         action = request.POST.get("action")
         channel_id = request.POST.get("channel_id")
 
-        if action == "priority_up" and channel_id:
+        if action == "connect_telegram":
+            from django.conf import settings as django_settings
+
+            from telegram_bot.verification import generate_verification_code
+
+            if django_settings.TG_TOKEN and django_settings.TG_BOT_URL:
+                code = generate_verification_code(user.pk)
+                telegram_link = f"{django_settings.TG_BOT_URL}?start={code}"
+            # Don't redirect — show the link on the same page.
+        elif action == "priority_up" and channel_id:
             _swap_priority(user, int(channel_id), direction=-1)
+            return redirect(reverse("user:channels"))
         elif action == "priority_down" and channel_id:
             _swap_priority(user, int(channel_id), direction=1)
+            return redirect(reverse("user:channels"))
         elif action == "delete" and channel_id:
             ch = channels.filter(id=channel_id).first()
-            # Don't delete last verified channel.
             if ch and channels.filter(is_verified=True).count() > 1:
                 ch.delete()
+            return redirect(reverse("user:channels"))
 
-        return redirect(reverse("user:channels"))
+    has_telegram = channels.filter(
+        channel_type=CommunicationChannel.ChannelType.TELEGRAM,
+    ).exists()
 
     return render(
         request,
         "user/channels.html",
-        {"channels": channels, "show_search": False},
+        {
+            "channels": channels,
+            "show_search": False,
+            "telegram_link": telegram_link,
+            "has_telegram": has_telegram,
+            "bot_configured": bool(getattr(settings, "TG_TOKEN", "")),
+        },
     )
 
 
