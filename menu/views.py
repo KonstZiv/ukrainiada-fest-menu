@@ -59,29 +59,23 @@ def index(request: HttpRequest) -> HttpResponse:
     Документація Bootstrap Carousel:
       https://getbootstrap.com/docs/5.3/components/carousel/
     """
-    # --- Слайди для каруселі --- #
-    # Кожен слайд — словник з image, title, text.
-    # Фото з Unsplash CDN — стабільні URL, безкоштовна ліцензія.
-    # Параметри URL:
-    #   w=800&h=500  — пропорція ~16:10 (більше висоти, щоб обличчя не обрізались)
-    #   fit=crop     — обрізка під заданий розмір без спотворення
-    #   crop=entropy — «розумний» кроп: Unsplash фокусується на найцікавішій частині
+    # --- Слайди для каруселі (новини "в ротацію") --- #
+    from news.models import Article
+
+    rotation_articles = (
+        Article.objects.filter(in_rotation=True, status=Article.Status.PUBLISHED)
+        .select_related("main_image")
+        .order_by("-created_at")[:8]
+    )
     slides = [
         {
-            "image": "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=800&h=500&fit=crop&crop=entropy",
-            "title": "Ласкаво просимо",
-            "text": "Середземноморська та балканська кухня на березі Адріатики.",
-        },
-        {
-            "image": "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?w=800&h=500&fit=crop&crop=entropy",
-            "title": "Наша команда шеф-кухарів",
-            "text": "Майстри з 20-річним досвідом готують для вас найкраще.",
-        },
-        {
-            "image": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&h=500&fit=crop&crop=entropy",
-            "title": "Атмосфера Jadran Sun",
-            "text": "Ваш комфорт — наш пріоритет.",
-        },
+            "image": a.main_image.image.url,
+            "title": a.title,
+            "text": a.description,
+            "url": reverse_lazy("news:article_detail", args=[a.pk]),
+        }
+        for a in rotation_articles
+        if getattr(a, "main_image", None)
     ]
 
     # --- Статистика меню --- #

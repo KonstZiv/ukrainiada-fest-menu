@@ -36,34 +36,25 @@
 
   <div class="px-3">{% include "components/_back_button.html" %}</div>
 
-  {# --- Bootstrap Carousel --- #}
-  {# id="mainCarousel" — унікальний ідентифікатор для JS-управління.           #}
-  {# data-bs-ride="carousel" — автоматичне гортання слайдів.                   #}
-  {# Документація: https://getbootstrap.com/docs/5.3/components/carousel/      #}
-  {# data-bs-interval="15000" — інтервал зміни слайдів 15 секунд (за замовчуванням 5000 мс). #}
+  {# --- Bootstrap Carousel (news in rotation) --- #}
+  {% if slides %}
   <div id="mainCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="15000">
-
-    {# --- Слайди каруселі --- #}
-    {# {% for slide in slides %} — перебираємо список слайдів з контексту view. #}
-    {# Кожен слайд містить зображення (70% висоти) та текст (30%).             #}
     <div class="carousel-inner" style="border-radius: var(--radius-precise);">
       {% for slide in slides %}
-        {# carousel-item — один слайд. Перший має клас "active" для показу.      #}
         <div class="carousel-item {% if forloop.first %}active{% endif %}">
-          <img src="{{ slide.image }}"
-               class="d-block w-100 carousel-img"
-               alt="{{ slide.title }}"
-               style="object-fit: cover;">
-          {# Текстовий блок під зображенням #}
-          <div class="p-3 bg-white">
-            <h5 class="fw-bold mb-1">{{ slide.title }}</h5>
-            <p class="text-muted small mb-0">{{ slide.text }}</p>
-          </div>
+          <a href="{{ slide.url }}" class="text-decoration-none">
+            <img src="{{ slide.image }}"
+                 class="d-block w-100 carousel-img"
+                 alt="{{ slide.title }}"
+                 style="object-fit: cover;">
+            <div class="p-3 bg-white">
+              <h5 class="fw-bold mb-1 text-body">{{ slide.title }}</h5>
+              <p class="text-muted small mb-0">{{ slide.text }}</p>
+            </div>
+          </a>
         </div>
       {% endfor %}
     </div>
-
-    {# --- Стрілки навігації (вліво/вправо) --- #}
     <button class="carousel-control-prev" type="button"
             data-bs-target="#mainCarousel" data-bs-slide="prev">
       <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -74,8 +65,8 @@
       <span class="carousel-control-next-icon" aria-hidden="true"></span>
       <span class="visually-hidden">{% trans "Наступний" %}</span>
     </button>
-
   </div>
+  {% endif %}
 
   {# --- Блок "Наше меню" зі статистикою --- #}
   {# Показує кількість страв, категорій, тегів та кнопки навігації.            #}

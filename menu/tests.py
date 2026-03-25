@@ -60,18 +60,11 @@ class IndexViewTest(TestCase):
         response = self.client.get("/menu/")
         slides = response.context["slides"]
         self.assertIsInstance(slides, list)
-        self.assertGreater(len(slides), 0)
 
-    def test_index_contains_carousel_markup(self) -> None:
-        """HTML відповіді повинен містити розмітку Bootstrap Carousel.
-
-        assertContains — перевіряє, що рядок присутній у тілі відповіді.
-        Документація:
-          https://docs.djangoproject.com/en/stable/topics/testing/tools/#django.test.SimpleTestCase.assertContains
-        """
+    def test_index_no_carousel_without_rotation_articles(self) -> None:
+        """Carousel is hidden when no articles are in rotation."""
         response = self.client.get("/menu/")
-        self.assertContains(response, 'id="mainCarousel"')
-        self.assertContains(response, "carousel-item")
+        self.assertNotContains(response, 'id="mainCarousel"')
 
 
 class CategoryListViewTest(TestCase):
