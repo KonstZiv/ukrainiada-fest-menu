@@ -127,7 +127,7 @@ msgstr "Back to order"
 
 #| msgid "Перейти до меню"
 msgid "Порядок у меню"
-msgstr "Go to menu"
+msgstr "Menu order"
 
 msgid "Менше число — вище у списку"
 msgstr "Lower number — higher in the list"
@@ -223,7 +223,7 @@ msgstr "Comment"
 
 #| msgid "Оформити замовлення"
 msgid "Прийняття замовлення"
-msgstr "Place order"
+msgstr "Order acceptance"
 
 msgid "Верифікація"
 msgstr "Verification"
@@ -292,7 +292,7 @@ msgstr ""
 "account."
 
 msgid "На головну"
-msgstr "Go to home"
+msgstr "Go to home page"
 
 msgid "Увійти"
 msgstr "Sign in"
@@ -466,7 +466,7 @@ msgstr "Items"
 
 #| msgid "Оформити замовлення"
 msgid "Скасувати замовлення"
-msgstr "Place order"
+msgstr "Cancel order"
 
 msgid "Разом:"
 msgstr "Total:"
@@ -708,7 +708,7 @@ msgstr "kcal"
 
 #| msgid "Оформити замовлення"
 msgid "Додати в замовлення"
-msgstr "Place order"
+msgstr "Add to order"
 
 msgid "Додаткові фото"
 msgstr "Additional photos"
@@ -743,7 +743,7 @@ msgstr "Back to order"
 
 #| msgid "Оформити замовлення"
 msgid "Додати ще зображення"
-msgstr "Place order"
+msgstr "Add more images"
 
 msgid "Завантажте додаткові фото страви. Порожні форми будуть пропущені."
 msgstr "Upload additional photos of the dish. Empty fields will be skipped."
@@ -943,7 +943,7 @@ msgstr "Admin Panel"
 
 #| msgid "Оформити замовлення"
 msgid "Стан обробки замовлення"
-msgstr "Place order"
+msgstr "Order processing status"
 
 msgid "СПЛАЧЕНО"
 msgstr "PAID"

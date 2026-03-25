@@ -20,13 +20,13 @@ msgid "доставлено"
 msgstr "Dostavljeno"
 
 msgid "Ви ще нічого не обрали."
-msgstr "Još uvijek nijeste ništa izabrali."
+msgstr "Još ništa nijeste odabrali."
 
 msgid "Перейти до меню"
 msgstr "Idite na meni"
 
 msgid "Прострочено"
-msgstr "Kasni"
+msgstr "Zakasnjelo"
 
 msgid "Терміново!"
 msgstr "Hitno!"
@@ -38,19 +38,19 @@ msgid "Скасувати замовлення?"
 msgstr "Otkažite porudžbinu?"
 
 msgid "Замовлення скасовано"
-msgstr "Porudžbina otkazana"
+msgstr "Porudžbina je otkazana"
 
 msgid "Всі страви готові!"
-msgstr "Sva jela su spremna!"
+msgstr "Sva jela su gotova!"
 
 msgid "Замовлення доставлено! Смачного!"
-msgstr "Porudžbina dostavljena! Prijatno!"
+msgstr "Porudžbina je dostavljena! Prijatno!"
 
 msgid "Оплату прийнято. Дякуємо!"
-msgstr "Plaćanje prihvaćeno. Hvala!"
+msgstr "Plaćanje je prihvaćeno. Hvala!"
 
 msgid "Ваше звернення прийнято"
-msgstr "Vaš zahtjev je primljen"
+msgstr "Vaš zahtjev je prihvaćen"
 
 msgid "%(by)s працює над вашим питанням"
 msgstr "%(by)s radi na vašem pitanju"
@@ -62,22 +62,22 @@ msgid "СПЛАЧЕНО"
 msgstr "PLAĆENO"
 
 msgid "Live"
-msgstr "Live"
+msgstr "Uživo"
 
 msgid "Offline"
-msgstr "Offline"
+msgstr "Oflajn"
 
 msgid "Нове замовлення #%(order_id)s від клієнта"
 msgstr "Nova porudžbina #%(order_id)s od klijenta"
 
 msgid "Готово"
-msgstr "Spremno"
+msgstr "Gotovo"
 
 msgid "Страва готова:"
-msgstr "Jelo je spremno:"
+msgstr "Jelo je gotovo:"
 
 msgid "Замовлення #%(order_id)s готове!"
-msgstr "Porudžbina #%(order_id)s je spremna!"
+msgstr "Porudžbina #%(order_id)s je gotova!"
 
 msgid "Готується (%(by)s)"
 msgstr "Priprema se (%(by)s)"
