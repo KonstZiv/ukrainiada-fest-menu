@@ -7,9 +7,6 @@ import logging
 from aiogram import Bot, Dispatcher, Router
 from aiogram.filters import CommandStart
 from aiogram.types import Message
-from django.conf import settings
-
-from telegram_bot.verification import verify_telegram
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +24,8 @@ async def cmd_start(message: Message) -> None:
 
     if len(args) > 1:
         # /start CODE — verification flow.
+        from telegram_bot.verification import verify_telegram
+
         code = args[1].strip()
         ok = verify_telegram(chat_id=message.chat.id, code=code)
         if ok:
@@ -47,6 +46,8 @@ async def cmd_start(message: Message) -> None:
 
 def get_bot() -> Bot:
     """Create a Bot instance with the configured token."""
+    from django.conf import settings
+
     return Bot(token=settings.TG_TOKEN)
 
 
