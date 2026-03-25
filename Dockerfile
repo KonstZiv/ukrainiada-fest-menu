@@ -5,6 +5,9 @@ FROM python:3.14-slim AS builder
 
 COPY --from=ghcr.io/astral-sh/uv:0.10.10 /uv /uvx /bin/
 
+# gettext provides msgfmt for compilemessages (locale .po → .mo)
+RUN apt-get update && apt-get install -y --no-install-recommends gettext && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # Install dependencies first (cached layer, no source code needed).
@@ -18,8 +21,13 @@ COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-editable --no-dev
 
-# Collect static files at build time (no DB needed).
+# Compile locale .mo files and collect static at build time (no DB needed).
 RUN DJANGO_SETTINGS_MODULE=core_settings.settings.prod \
+    SECRET_KEY=build-placeholder \
+    ALLOWED_HOSTS=localhost \
+    DB_NAME=x DB_USER=x DB_PASSWORD=x DB_HOST=localhost \
+    .venv/bin/python manage.py compilemessages && \
+    DJANGO_SETTINGS_MODULE=core_settings.settings.prod \
     SECRET_KEY=build-placeholder \
     ALLOWED_HOSTS=localhost \
     DB_NAME=x DB_USER=x DB_PASSWORD=x DB_HOST=localhost \
