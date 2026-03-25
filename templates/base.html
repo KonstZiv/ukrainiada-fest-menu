@@ -189,6 +189,12 @@
       navigator.serviceWorker.register("{% url 'service_worker' %}", {scope: "/"}).catch(function (err) {
         console.warn("[PWA] SW registration failed:", err);
       });
+      // Clean up legacy SW registered from /static/js/
+      navigator.serviceWorker.getRegistrations().then(function (regs) {
+        regs.forEach(function (r) {
+          if (r.scope.includes("/static/")) r.unregister();
+        });
+      });
     });
   }
   </script>
