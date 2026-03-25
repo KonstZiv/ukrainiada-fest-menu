@@ -40,18 +40,27 @@
       </div>
     {% endif %}
 
-    {% for field in form %}
     <div class="mb-3">
-      {% if field.errors %}<div class="text-danger small mb-1">{{ field.errors }}</div>{% endif %}
-      <input type="{{ field.field.widget.input_type|default:'text' }}"
-             name="{{ field.html_name }}"
-             id="{{ field.id_for_label }}"
-             class="form-control {% if field.errors %}is-invalid{% endif %}"
-             placeholder="{{ field.label }}"
-             value="{{ field.value|default:'' }}"
-             {% if field.field.required %}required{% endif %}>
+      {% if form.email.errors %}<div class="text-danger small mb-1">{{ form.email.errors }}</div>{% endif %}
+      <input type="email" name="email" class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+             placeholder="{% trans "Електронна пошта" %}"
+             value="{{ form.email.value|default:'' }}"
+             autofocus required>
     </div>
-    {% endfor %}
+
+    <div class="mb-3">
+      {% if form.password1.errors %}<div class="text-danger small mb-1">{{ form.password1.errors }}</div>{% endif %}
+      <input type="password" name="password1" class="form-control {% if form.password1.errors %}is-invalid{% endif %}"
+             placeholder="{% trans "Пароль (мінімум 8 символів, не лише цифри)" %}"
+             required>
+    </div>
+
+    <div class="mb-3">
+      {% if form.password2.errors %}<div class="text-danger small mb-1">{{ form.password2.errors }}</div>{% endif %}
+      <input type="password" name="password2" class="form-control {% if form.password2.errors %}is-invalid{% endif %}"
+             placeholder="{% trans "Підтвердження пароля" %}"
+             required>
+    </div>
 
     <div class="mt-4 d-flex gap-2">
       <button type="submit" class="btn btn-primary">
