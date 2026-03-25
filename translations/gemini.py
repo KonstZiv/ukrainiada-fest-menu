@@ -80,9 +80,13 @@ usage_stats = UsageStats()
 
 
 def reset_stats() -> None:
-    """Reset accumulated stats."""
-    global usage_stats
-    usage_stats = UsageStats()
+    """Reset accumulated stats (mutates in place so importers keep the reference)."""
+    usage_stats.input_tokens = 0
+    usage_stats.output_tokens = 0
+    usage_stats.total_tokens = 0
+    usage_stats.calls = 0
+    usage_stats.cost_usd = 0.0
+    usage_stats._per_call.clear()
 
 
 def _build_prompt(source: dict[str, str], target_languages: list[str]) -> str:
