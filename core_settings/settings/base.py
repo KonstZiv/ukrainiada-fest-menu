@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",  # required by django-allauth
     # Project apps
     "user",
     "menu",
@@ -38,7 +39,16 @@ INSTALLED_APPS = [
     "translations",
     # Third-party
     "django_celery_beat",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.facebook",
+    "allauth.socialaccount.providers.instagram",
+    "allauth.socialaccount.providers.telegram",
 ]
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     "core_settings.middleware.SSEAwareGZipMiddleware",
@@ -50,9 +60,15 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "core_settings.urls"
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
 
 AUTH_USER_MODEL = "user.User"
 
@@ -148,6 +164,18 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_REDIRECT_URL = "user:profile"
+
+# ---------------------------------------------------------------------------
+# django-allauth — social authentication
+# ---------------------------------------------------------------------------
+
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
+ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+SOCIALACCOUNT_ADAPTER = "user.adapters.CustomSocialAccountAdapter"
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 

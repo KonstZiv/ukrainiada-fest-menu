@@ -6,8 +6,11 @@ from collections.abc import Callable
 from functools import wraps
 from typing import Concatenate, ParamSpec, TypeVar, cast
 
+from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpRequest, HttpResponse, HttpResponseForbidden
+from django.shortcuts import redirect
+from django.utils.translation import gettext as _
 
 from user.models import User
 
@@ -43,3 +46,24 @@ def role_required(
         return wrapper
 
     return decorator
+
+
+def verified_channel_required[**P, Req: HttpRequest](
+    view_func: Callable[Concatenate[Req, P], HttpResponse],
+) -> Callable[Concatenate[Req, P], HttpResponse]:
+    """Require at least one verified communication channel."""
+
+    @wraps(view_func)
+    def wrapper(request: Req, *args: P.args, **kwargs: P.kwargs) -> HttpResponse:
+        if not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path())
+        user = cast(User, request.user)
+        if not user.channels.filter(is_verified=True).exists():
+            messages.warning(
+                request,
+                _("Для цієї дії потрібен верифікований канал комунікації."),
+            )
+            return redirect("user:channels")
+        return view_func(request, *args, **kwargs)
+
+    return wrapper

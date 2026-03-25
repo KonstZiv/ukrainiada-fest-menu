@@ -59,6 +59,15 @@ class User(AbstractUser):
     # username тут обов'язковий для createsuperuser, але не для звичайної реєстрації.
     REQUIRED_FIELDS = ["username"]
 
+    class RegistrationSource(models.TextChoices):
+        """How the user originally registered."""
+
+        EMAIL = "email", "Email"
+        GOOGLE = "google", "Google"
+        FACEBOOK = "facebook", "Facebook"
+        INSTAGRAM = "instagram", "Instagram"
+        TELEGRAM = "telegram", "Telegram"
+
     class Role(models.TextChoices):
         """User roles within the restaurant system."""
 
@@ -94,6 +103,13 @@ class User(AbstractUser):
         blank=True,
         verbose_name=_("Публічне ім'я"),
         help_text=_("Ім'я без прізвища для відвідувачів"),
+    )
+
+    registration_source = models.CharField(
+        max_length=20,
+        choices=RegistrationSource.choices,
+        default=RegistrationSource.EMAIL,
+        verbose_name=_("Джерело реєстрації"),
     )
 
     @property

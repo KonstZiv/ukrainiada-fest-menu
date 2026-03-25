@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load i18n socialaccount %}
+
+{% block title %}
+  Dobro Djelo — {% trans "Вхід" %}
+{% endblock %}
+
+{% block content %}
+  <div class="container mt-3" style="max-width: 600px;">
+
+    <h2 class="mb-4">
+      <i class="bi bi-box-arrow-in-right"></i> {% trans "Вхід" %}
+    </h2>
+
+    {% if form.errors %}
+      <div class="alert alert-danger">
+        {% trans "Невірна електронна пошта або пароль. Спробуйте ще раз." %}
+      </div>
+    {% endif %}
+
+    {# --- Social login buttons --- #}
+    {% get_providers as socialaccount_providers %}
+    {% if socialaccount_providers %}
+    <div class="d-grid gap-2 mb-3">
+      {% for provider in socialaccount_providers %}
+        <a href="{% provider_login_url provider.id %}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2">
+          {% if provider.id == "google" %}<i class="bi bi-google"></i>
+          {% elif provider.id == "facebook" %}<i class="bi bi-facebook"></i>
+          {% elif provider.id == "instagram" %}<i class="bi bi-instagram"></i>
+          {% elif provider.id == "telegram" %}<i class="bi bi-telegram"></i>
+          {% endif %}
+          {% blocktrans with name=provider.name %}Увійти через {{ name }}{% endblocktrans %}
+        </a>
+      {% endfor %}
+    </div>
+    <div class="text-center text-muted small mb-3">{% trans "або" %}</div>
+    {% endif %}
+
+    {# --- Email/password form --- #}
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <input type="email" name="login" class="form-control"
+               placeholder="{% trans "Електронна пошта" %}"
+               value="{{ form.login.value|default:'' }}"
+               autofocus required>
+      </div>
+
+      <div class="mb-3">
+        <input type="password" name="password" class="form-control"
+               placeholder="{% trans "Пароль" %}" required>
+      </div>
+
+      <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-box-arrow-in-right"></i> {% trans "Увійти" %}
+        </button>
+        <a href="{% url 'landing' %}" class="btn btn-outline-secondary">
+          {% trans "Скасувати" %}
+        </a>
+      </div>
+    </form>
+
+    <p class="mt-3 text-muted">
+      {% trans "Ще не маєте акаунту?" %}
+      <a href="{% url 'account_signup' %}">{% trans "Зареєструватись" %}</a>
+    </p>
+    <p class="mt-1 text-muted">
+      {% trans "Забули пароль?" %}
+      <a href="{% url 'account_reset_password' %}">{% trans "Скинути пароль" %}</a>
+    </p>
+
+    {% include "components/_install_pwa.html" %}
+
+  </div>
+{% endblock %}
