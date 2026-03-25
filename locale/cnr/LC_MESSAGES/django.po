@@ -287,7 +287,7 @@ msgid "Натисніть"
 msgstr "Pritisnite za zvuk"
 
 msgid "та оберіть «На Початковий екран»"
-msgstr ""
+msgstr "i izaberite „Na Početni ekran”"
 
 msgid "Категорії"
 msgstr "Kategorije"
@@ -552,7 +552,7 @@ msgid "Повернутись"
 msgstr "Nazad"
 
 msgid "Український культурний центр у Херцег-Нові, Чорногорія"
-msgstr ""
+msgstr "Ukrajinski kulturni centar u Herceg Novom, Crna Gora"
 
 msgid "Фестивальне меню"
 msgstr "Idite na meni"
@@ -561,10 +561,10 @@ msgid "Новини"
 msgstr "Novi tag"
 
 msgid "Скоро"
-msgstr ""
+msgstr "Uskoro"
 
 msgid "Бібліотека"
-msgstr ""
+msgstr "Biblioteka"
 
 msgid "Розклад"
 msgstr "Prevodi"
@@ -1120,7 +1120,7 @@ msgid "Змінити пароль"
 msgstr "Promijenite lozinku"
 
 msgid "Ваш пароль успішно змінено. Тепер ви можете увійти з новим паролем."
-msgstr ""
+msgstr "Vaša lozinka je uspješno promijenjena. Sada se možete prijaviti sa novom lozinkom."
 "Vaša lozinka je uspješno promijenjena. Sada se možete prijaviti sa novom "
 "lozinkom."
 

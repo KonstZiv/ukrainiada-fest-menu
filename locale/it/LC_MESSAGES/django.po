@@ -106,7 +106,7 @@ msgid "'{dish_title}' — пропущено: {skipped}"
 msgstr "'{dish_title}' — saltato: {skipped}"
 
 msgid "Обраний офіціант не знайдений або не має відповідної ролі."
-msgstr ""
+msgstr "Il cameriere selezionato non è stato trovato o non ha il ruolo appropriato."
 "Il cameriere selezionato non è stato trovato o non ha il ruolo appropriato."
 
 msgid "Назва логотипу"
@@ -137,7 +137,7 @@ msgid "Наявність"
 msgstr "Disponibilità"
 
 msgid "Файл не є валідним SVG. Завантажте файл у форматі SVG."
-msgstr ""
+msgstr "Il file non è un SVG valido. Si prega di caricare un file in formato SVG."
 "Il file non è un SVG valido. Si prega di caricare un file in formato SVG."
 
 msgid "Чернетка"
@@ -290,7 +290,7 @@ msgid "Натисніть"
 msgstr "Clicca per l'audio"
 
 msgid "та оберіть «На Початковий екран»"
-msgstr ""
+msgstr "e seleziona «Aggiungi alla schermata Home»"
 
 msgid "Категорії"
 msgstr "Categorie"
@@ -458,7 +458,7 @@ msgid "Позачергові дії"
 msgstr "Azioni straordinarie"
 
 msgid "Якщо стандартний flow не був виконаний — зафіксуйте фактичний стан"
-msgstr ""
+msgstr "Se il flusso standard non è stato seguito, registra lo stato effettivo."
 "Se il flusso standard non è stato seguito, registra lo stato effettivo."
 
 msgid "Доставлено (без кухні)"
@@ -556,7 +556,7 @@ msgid "Повернутись"
 msgstr "Indietro"
 
 msgid "Український культурний центр у Херцег-Нові, Чорногорія"
-msgstr ""
+msgstr "Centro culturale ucraino a Herceg Novi, Montenegro"
 
 msgid "Фестивальне меню"
 msgstr "Vai al menù"
@@ -565,10 +565,10 @@ msgid "Новини"
 msgstr "Nuovo tag"
 
 msgid "Скоро"
-msgstr ""
+msgstr "Prossimamente"
 
 msgid "Бібліотека"
-msgstr ""
+msgstr "Biblioteca"
 
 msgid "Розклад"
 msgstr "Traduzioni"
@@ -774,7 +774,7 @@ msgid "Логотип тега: «%(title)s»"
 msgstr "Logo del tag: \"%(title)s\""
 
 msgid "Зв'язки зі стравами будуть видалені, але самі страви залишаться."
-msgstr ""
+msgstr "I collegamenti ai piatti verranno eliminati, ma i piatti stessi rimarranno."
 "Le associazioni con i piatti verranno rimosse, ma i piatti stessi rimarranno."
 
 msgid "Редагувати тег"
@@ -801,7 +801,7 @@ msgid "Перевірте інтернет і спробуйте знову."
 msgstr "Controlla la connessione internet e riprova."
 
 msgid "Якщо ви переглядали меню раніше — воно доступне в кеші."
-msgstr ""
+msgstr "Se hai già visualizzato il menu in precedenza, è disponibile nella cache."
 "Se hai già visualizzato il menù in precedenza, è disponibile nella cache."
 
 msgid "Спробувати знову"
@@ -1013,7 +1013,7 @@ msgid "Демо-режим:"
 msgstr "Modalità demo:"
 
 msgid "Реальна оплата ще не підключена. Кнопка симулює успішну оплату."
-msgstr ""
+msgstr "Il pagamento reale non è ancora attivo. Il pulsante simula un pagamento andato a buon fine."
 "Il pagamento reale non è ancora abilitato. Il pulsante simula un pagamento "
 "andato a buon fine."
 
@@ -1128,7 +1128,7 @@ msgid "Змінити пароль"
 msgstr "Modifica password"
 
 msgid "Ваш пароль успішно змінено. Тепер ви можете увійти з новим паролем."
-msgstr ""
+msgstr "La tua password è stata cambiata con successo. Ora puoi accedere con la nuova password."
 "La tua password è stata modificata con successo. Ora puoi accedere con la "
 "nuova password."
 
@@ -1142,7 +1142,7 @@ msgid "Посилання недійсне"
 msgstr "Link non valido"
 
 msgid "Посилання для скидання пароля недійсне або вже було використане."
-msgstr ""
+msgstr "Il link per il ripristino della password non è valido o è già stato utilizzato."
 "Il link per il ripristino della password non è valido o è già stato "
 "utilizzato."
 
@@ -1164,7 +1164,7 @@ msgid "Перевірте вашу пошту."
 msgstr "Controlla la tua email."
 
 msgid "У dev-режимі лист виводиться у термінал сервера."
-msgstr ""
+msgstr "In modalità dev, l'email viene visualizzata nel terminale del server."
 "In modalità sviluppatore, l'email viene visualizzata nel terminale del "
 "server."
 

@@ -290,7 +290,7 @@ msgid "Натисніть"
 msgstr "Click for sound"
 
 msgid "та оберіть «На Початковий екран»"
-msgstr ""
+msgstr "and select 'Add to Home Screen'"
 
 msgid "Категорії"
 msgstr "Categories"
@@ -773,7 +773,7 @@ msgid "Логотип тега: «%(title)s»"
 msgstr "Tag logo: \"%(title)s\""
 
 msgid "Зв'язки зі стравами будуть видалені, але самі страви залишаться."
-msgstr ""
+msgstr "Associations with the dishes will be removed, but the dishes themselves will remain."
 "Associations with dishes will be deleted, but the dishes themselves will "
 "remain."
 
@@ -1012,7 +1012,7 @@ msgid "Демо-режим:"
 msgstr "Demo mode:"
 
 msgid "Реальна оплата ще не підключена. Кнопка симулює успішну оплату."
-msgstr ""
+msgstr "Live payments are not yet enabled. This button simulates a successful payment."
 "Real payment is not yet connected. The button simulates a successful "
 "payment.Real payment is not connected yet. The button simulates a successful "
 "payment."
@@ -1128,7 +1128,7 @@ msgid "Змінити пароль"
 msgstr "Change password"
 
 msgid "Ваш пароль успішно змінено. Тепер ви можете увійти з новим паролем."
-msgstr ""
+msgstr "Your password has been changed successfully. You can now log in with your new password."
 "Your password has been changed successfully. You can now log in with your "
 "new password."
 
