@@ -1,7 +1,7 @@
 {
-    "name": "Festival Menu — Ukrainiada",
-    "short_name": "Festival",
-    "description": "Menu and orders at the Ukrainian Culture Festival in Herceg Novi",
+    "name": "Український центр в Херцег-Нові, Чорногорія",
+    "short_name": "Dobro Djelo",
+    "description": "Український культурний центр в Херцег-Нові, Чорногорія",
     "start_url": "/menu/",
     "scope": "/",
     "display": "standalone",
