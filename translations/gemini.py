@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+from dataclasses import dataclass, field
 
 from django.conf import settings
 from google import genai
@@ -20,6 +21,68 @@ _LANG_NAMES: dict[str, str] = {
     "it": "Italian (Italiano)",
     "de": "German (Deutsch)",
 }
+
+# Pricing per 1M tokens (USD) — gemini-2.5-flash as of 2026-03.
+MODEL_PRICING: dict[str, dict[str, float]] = {
+    "gemini-2.5-flash": {"input": 0.15, "output": 0.60},
+    "gemini-2.5-pro": {"input": 1.25, "output": 10.00},
+    "gemini-2.0-flash": {"input": 0.10, "output": 0.40},
+}
+
+DEFAULT_MODEL = "gemini-2.5-flash"
+
+
+@dataclass
+class UsageStats:
+    """Accumulated token usage and cost from Gemini API calls."""
+
+    input_tokens: int = 0
+    output_tokens: int = 0
+    total_tokens: int = 0
+    calls: int = 0
+    cost_usd: float = 0.0
+    _per_call: list[dict[str, object]] = field(default_factory=list)
+
+    def record(self, prompt_tokens: int, completion_tokens: int, model: str) -> float:
+        """Record a single API call. Returns cost for this call."""
+        self.input_tokens += prompt_tokens
+        self.output_tokens += completion_tokens
+        self.total_tokens += prompt_tokens + completion_tokens
+        self.calls += 1
+
+        pricing = MODEL_PRICING.get(model, MODEL_PRICING[DEFAULT_MODEL])
+        call_cost = (
+            prompt_tokens * pricing["input"] + completion_tokens * pricing["output"]
+        ) / 1_000_000
+        self.cost_usd += call_cost
+
+        self._per_call.append(
+            {
+                "input": prompt_tokens,
+                "output": completion_tokens,
+                "cost": call_cost,
+                "model": model,
+            }
+        )
+        return call_cost
+
+    def summary(self) -> str:
+        """Human-readable summary."""
+        return (
+            f"{self.calls} calls, "
+            f"{self.input_tokens:,} input + {self.output_tokens:,} output tokens, "
+            f"${self.cost_usd:.4f}"
+        )
+
+
+# Global stats accumulator (reset per management command run).
+usage_stats = UsageStats()
+
+
+def reset_stats() -> None:
+    """Reset accumulated stats."""
+    global usage_stats
+    usage_stats = UsageStats()
 
 
 def _build_prompt(source: dict[str, str], target_languages: list[str]) -> str:
@@ -56,12 +119,14 @@ def _extract_json(text: str) -> dict[str, dict[str, str]]:
 def translate_with_gemini(
     source: dict[str, str],
     target_languages: list[str],
+    model: str = DEFAULT_MODEL,
 ) -> dict[str, dict[str, str]]:
     """Translate source fields to all target languages in one API call.
 
     Args:
         source: Field names to Ukrainian text, e.g. {"title": "Борщ", "description": "..."}.
         target_languages: Language codes, e.g. ["en", "cnr", "hr", "bs", "it", "de"].
+        model: Gemini model to use.
 
     Returns:
         Nested dict: {lang_code: {field_name: translated_text}}.
@@ -79,15 +144,31 @@ def translate_with_gemini(
 
     prompt = _build_prompt(source, target_languages)
     logger.info(
-        "Calling Gemini for %d fields -> %d languages",
+        "Calling Gemini (%s) for %d fields -> %d languages",
+        model,
         len(source),
         len(target_languages),
     )
 
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model=model,
         contents=prompt,
     )
+
+    # Track usage.
+    meta = response.usage_metadata
+    if meta:
+        cost = usage_stats.record(
+            prompt_tokens=meta.prompt_token_count or 0,
+            completion_tokens=meta.candidates_token_count or 0,
+            model=model,
+        )
+        logger.info(
+            "Gemini usage: %d in + %d out tokens, $%.6f this call",
+            meta.prompt_token_count or 0,
+            meta.candidates_token_count or 0,
+            cost,
+        )
 
     raw_text = response.text or ""
     logger.debug("Gemini raw response: %s", raw_text[:500])
