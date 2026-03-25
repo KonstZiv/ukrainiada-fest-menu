@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from celery.schedules import crontab
 from decouple import Csv
 
 from core_settings.settings.env import config
@@ -327,6 +328,14 @@ CELERY_BEAT_SCHEDULE = {
     "monitor-db-connections": {
         "task": "core_settings.monitor_db_connections",
         "schedule": 120.0,
+    },
+    "send-daily-digest": {
+        "task": "news.send_daily_digest",
+        "schedule": crontab(hour=9, minute=0),
+    },
+    "send-weekly-digest": {
+        "task": "news.send_weekly_digest",
+        "schedule": crontab(hour=9, minute=0, day_of_week=1),
     },
 }
 

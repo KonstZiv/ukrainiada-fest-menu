@@ -220,3 +220,34 @@ class ArticleComment(models.Model):
 
     def __str__(self) -> str:
         return f"Comment #{self.pk} by {self.author} on {self.article}"
+
+
+class DigestSubscription(models.Model):
+    """User subscription to news digests."""
+
+    class Frequency(models.TextChoices):
+        DAILY = "daily", _("Щоденно")
+        WEEKLY = "weekly", _("Щотижня")
+        URGENT = "urgent", _("Тільки термінові")
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="digest_subscription",
+    )
+    frequency = models.CharField(
+        max_length=10,
+        choices=Frequency.choices,
+        default=Frequency.WEEKLY,
+        verbose_name=_("Частота"),
+    )
+    is_active = models.BooleanField(default=True, verbose_name=_("Активна"))
+    last_sent_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("Підписка на дайджест")
+        verbose_name_plural = _("Підписки на дайджести")
+
+    def __str__(self) -> str:
+        return f"{self.user} [{self.frequency}]"

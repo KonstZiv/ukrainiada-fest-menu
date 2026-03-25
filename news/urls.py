@@ -21,4 +21,5 @@ urlpatterns = [
     path("comments/moderate/", views.moderate_comments, name="moderate_comments"),
     path("comments/<int:pk>/approve/", views.approve_comment, name="approve_comment"),
     path("comments/<int:pk>/reject/", views.reject_comment, name="reject_comment"),
+    path("subscription/", views.manage_subscription, name="subscription"),
 ]

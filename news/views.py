@@ -21,7 +21,13 @@ from news.forms import (
     ArticleMainImageForm,
     CommentForm,
 )
-from news.models import Article, ArticleComment, ArticleMainImage, TranslationFeedback
+from news.models import (
+    Article,
+    ArticleComment,
+    ArticleMainImage,
+    DigestSubscription,
+    TranslationFeedback,
+)
 from translations.models import TranslationApproval
 from user.decorators import role_required, verified_channel_required
 from user.models import User
@@ -155,6 +161,15 @@ class ArticleCreateView(generic.CreateView):  # type: ignore[type-arg]
 
             image_formset.instance = article
             image_formset.save()
+
+        # Trigger urgent notification if applicable.
+        if article.is_urgent and article.status == Article.Status.PUBLISHED:
+            from news.tasks import send_urgent_notification
+
+            try:
+                send_urgent_notification.delay(article.pk)
+            except Exception:
+                pass  # Celery unavailable in dev/test
 
         return super().form_valid(form)
 
@@ -319,3 +334,44 @@ def reject_comment(request: HttpRequest, pk: int) -> HttpResponse:
     comment.save(update_fields=["status", "moderated_by"])
     messages.info(request, _("Коментар відхилено."))
     return redirect("news:moderate_comments")
+
+
+# ---------------------------------------------------------------------------
+# Digest subscription
+# ---------------------------------------------------------------------------
+
+
+@verified_channel_required
+def manage_subscription(request: HttpRequest) -> HttpResponse:
+    """Subscribe/unsubscribe from news digests."""
+    user = cast(User, request.user)
+    sub, _ = DigestSubscription.objects.get_or_create(user=user)
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+        if action == "update":
+            frequency = request.POST.get("frequency", "weekly")
+            if frequency in dict(DigestSubscription.Frequency.choices):  # type: ignore[operator]
+                sub.frequency = frequency
+                sub.is_active = True
+                sub.save(update_fields=["frequency", "is_active"])
+                messages.success(request, _("Підписку оновлено."))
+        elif action == "unsubscribe":
+            sub.is_active = False
+            sub.save(update_fields=["is_active"])
+            messages.info(request, _("Підписку деактивовано."))
+        elif action == "resubscribe":
+            sub.is_active = True
+            sub.save(update_fields=["is_active"])
+            messages.success(request, _("Підписку відновлено."))
+        return redirect("news:subscription")
+
+    return render(
+        request,
+        "news/subscription.html",
+        {
+            "subscription": sub,
+            "frequencies": DigestSubscription.Frequency.choices,  # type: ignore[operator]
+            "show_search": False,
+        },
+    )

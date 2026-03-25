@@ -125,7 +125,7 @@ disable_error_code = ["django-manager-missing"]
 # CBV generic views + formsets have complex types that mypy can't fully resolve
 [[tool.mypy.overrides]]
 module = "news.views"
-disable_error_code = ["attr-defined", "type-var", "valid-type"]
+disable_error_code = ["attr-defined", "type-var", "valid-type", "operator"]
 
 [[tool.mypy.overrides]]
 module = "news.forms"

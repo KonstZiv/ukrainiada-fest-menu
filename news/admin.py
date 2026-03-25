@@ -8,6 +8,7 @@ from news.models import (
     ArticleComment,
     ArticleImage,
     ArticleMainImage,
+    DigestSubscription,
     NewsTag,
     Topic,
 )
@@ -61,3 +62,9 @@ class ArticleCommentAdmin(admin.ModelAdmin[ArticleComment]):
     list_editable = ["status"]
     search_fields = ["message", "author__email"]
     readonly_fields = ["article", "author", "message", "created_at"]
+
+
+@admin.register(DigestSubscription)
+class DigestSubscriptionAdmin(admin.ModelAdmin[DigestSubscription]):
+    list_display = ["user", "frequency", "is_active", "last_sent_at"]
+    list_filter = ["frequency", "is_active"]
