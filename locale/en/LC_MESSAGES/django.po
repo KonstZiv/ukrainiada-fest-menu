@@ -309,7 +309,7 @@ msgstr "Back"
 
 #| msgid "Нова категорія"
 msgid "Категорії"
-msgstr "New category"
+msgstr "Categories"
 
 msgid "Теги"
 msgstr "Tags"
@@ -758,20 +758,17 @@ msgstr "Dishes"
 msgid "Страв поки немає."
 msgstr "No dishes yet."
 
-#| msgid "На головну"
 msgid "Головна"
-msgstr "Go to home"
+msgstr "Home"
 
-#| msgid "Передав"
 msgid "Попередній"
-msgstr "Delivered"
+msgstr "Previous"
 
 msgid "Наступний"
 msgstr "Next"
 
-#| msgid "Перейти до меню"
 msgid "Наше меню"
-msgstr "Go to menu"
+msgstr "Our menu"
 
 #, python-format
 msgid ""
