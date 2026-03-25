@@ -72,7 +72,7 @@ coverage.xml
 cover/
 
 # Translations
-# *.mo — committed because Docker build needs pre-compiled locale files
+*.mo
 
 # Django stuff:
 
