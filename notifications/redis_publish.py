@@ -30,7 +30,9 @@ def _get_redis() -> Redis:
         logger.info(
             "[SSE:redis] initializing client host=%s port=%d db=%d", host, port, db
         )
-        _redis_client = Redis(host=host, port=port, db=db)
+        _redis_client = Redis(
+            host=host, port=port, db=db, socket_connect_timeout=1, socket_timeout=1
+        )
     return _redis_client
 
 
