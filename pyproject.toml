@@ -89,7 +89,7 @@ ignore = [
 # Вказуємо Django settings-модуль, щоб pytest міг ініціалізувати Django
 DJANGO_SETTINGS_MODULE = "core_settings.settings.dev"
 # Які файли pytest розглядає як тестові
-python_files = ["tests.py", "test_*.py"]
+python_files = ["tests.py", "tests_*.py", "test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 # --tb=short — скорочений traceback; -q — менше виводу
@@ -134,6 +134,19 @@ disable_error_code = ["var-annotated"]
 [[tool.mypy.overrides]]
 module = "news.admin"
 disable_error_code = ["type-arg"]
+
+# Test files use create_user which returns Any per django-stubs
+[[tool.mypy.overrides]]
+module = [
+    "news.tests",
+    "translations.tests",
+    "telegram_bot.tests",
+    "user.tests_channels",
+    "user.tests_social",
+    "core_settings.tests_landing",
+    "core_settings.tests_pwa",
+]
+disable_error_code = ["no-any-return"]
 
 # Налаштування плагіну django-stubs
 [tool.django-stubs]

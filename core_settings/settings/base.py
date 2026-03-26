@@ -182,6 +182,19 @@ SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_ADAPTER = "user.adapters.CustomSocialAccountAdapter"
 
+SITE_DOMAIN: str = config("SITE_DOMAIN", default="localhost:8000")
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": ["email", "profile"],
+        "AUTH_PARAMS": {"access_type": "online"},
+    },
+    "facebook": {
+        "SCOPE": ["email"],
+        "METHOD": "oauth2",
+    },
+}
+
 # ---------------------------------------------------------------------------
 # CKEditor 5 — rich text editor for news articles
 # ---------------------------------------------------------------------------
