@@ -455,7 +455,7 @@ def review_translation(
     raw_text = response.text or ""
     try:
         data = _extract_flat_json(raw_text)
-    except (json.JSONDecodeError, ValueError):
+    except json.JSONDecodeError, ValueError:
         logger.error("Failed to parse review response: %s", raw_text[:300])
         # Return passing scores on parse failure — don't block translation.
         return ReviewScores(
@@ -570,7 +570,7 @@ def correct_translation(
     try:
         result = _extract_flat_json(raw_text)
         return {k: str(v) for k, v in result.items()}
-    except (json.JSONDecodeError, ValueError):
+    except json.JSONDecodeError, ValueError:
         logger.error("Failed to parse correction response: %s", raw_text[:300])
         # Fall back to previous translation on parse failure.
         return previous_translation
