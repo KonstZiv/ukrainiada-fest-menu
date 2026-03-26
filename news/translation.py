@@ -12,9 +12,9 @@ class ArticleTranslationOptions(TranslationOptions):
 
 @register(Topic)
 class TopicTranslationOptions(TranslationOptions):
-    fields = ("title",)
+    fields = ("title", "description")
 
 
 @register(NewsTag)
 class NewsTagTranslationOptions(TranslationOptions):
-    fields = ("title",)
+    fields = ("title", "description")

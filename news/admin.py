@@ -10,7 +10,9 @@ from news.models import (
     ArticleMainImage,
     DigestSubscription,
     NewsTag,
+    NewsTagLogo,
     Topic,
+    TopicLogo,
 )
 
 
@@ -43,16 +45,30 @@ class ArticleAdmin(TabbedTranslationAdmin):
     inlines = [ArticleMainImageInline, ArticleImageInline]
 
 
+class TopicLogoInline(admin.StackedInline[TopicLogo, Topic]):
+    model = TopicLogo
+    min_num = 0
+    max_num = 1
+
+
 @admin.register(Topic)
 class TopicAdmin(TabbedTranslationAdmin):
     list_display = ["title"]
     search_fields = ["title_uk", "title_en"]
+    inlines = [TopicLogoInline]
+
+
+class NewsTagLogoInline(admin.StackedInline[NewsTagLogo, NewsTag]):
+    model = NewsTagLogo
+    min_num = 0
+    max_num = 1
 
 
 @admin.register(NewsTag)
 class NewsTagAdmin(TabbedTranslationAdmin):
     list_display = ["title"]
     search_fields = ["title_uk", "title_en"]
+    inlines = [NewsTagLogoInline]
 
 
 @admin.register(ArticleComment)

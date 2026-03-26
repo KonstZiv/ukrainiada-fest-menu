@@ -1,11 +1,11 @@
-# Development infrastructure — PostgreSQL + Redis only.
-# Django, Celery worker/beat run locally via uv run.
-#
-# Requires .env-dev with DB_NAME, DB_USER, DB_PASSWORD.
+# Development — all services in containers, code mounted from host.
 #
 # Usage:
 #   docker compose -f compose.dev.yml --env-file .env-dev up -d
-#   uv run python manage.py runserver
+#   docker compose -f compose.dev.yml --env-file .env-dev logs -f web
+#
+# Django dev server at http://localhost:8001
+# Code changes auto-reload (runserver watches mounted volume).
 
 services:
   db:
@@ -34,5 +34,74 @@ services:
       timeout: 3s
       retries: 5
 
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: >
+      uv run python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+      - dev_venv:/app/.venv
+    env_file:
+      - .env-dev
+    environment:
+      - DJANGO_SETTINGS_MODULE=core_settings.settings.dev
+      - DB_HOST=db
+      - REDIS_URL=redis://redis:6379/0
+    ports:
+      - "8001:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: >
+      uv run celery -A core_settings worker
+      --loglevel=info
+      --concurrency=2
+    volumes:
+      - .:/app
+      - dev_venv:/app/.venv
+    env_file:
+      - .env-dev
+    environment:
+      - DJANGO_SETTINGS_MODULE=core_settings.settings.dev
+      - DB_HOST=db
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: >
+      uv run celery -A core_settings beat
+      --loglevel=info
+    volumes:
+      - .:/app
+      - dev_venv:/app/.venv
+    env_file:
+      - .env-dev
+    environment:
+      - DJANGO_SETTINGS_MODULE=core_settings.settings.dev
+      - DB_HOST=db
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
 volumes:
   postgres_data:
+  dev_venv:

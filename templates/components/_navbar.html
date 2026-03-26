@@ -48,7 +48,9 @@
       {# Bootstrap Dropdown — меню з посиланнями на створення об'єктів.          #}
       {# Документація:                                                           #}
       {#   https://getbootstrap.com/docs/5.3/components/dropdowns/               #}
+      {% if user.is_authenticated %}
       <span id="connection-indicator" class="badge bg-secondary me-2" style="font-size: 0.65rem;"></span>
+      {% endif %}
       <button onclick="location.reload()" class="btn btn-sm btn-outline-secondary me-2 p-0 px-1" style="font-size: 0.7rem;" title="{% trans "Оновити" %}">
         <i class="bi bi-arrow-clockwise"></i>
       </button>

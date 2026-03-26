@@ -33,11 +33,13 @@ STORAGES = {  # noqa: F405
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
 
-# Use in-memory cache in dev/test — no Redis dependency for tests.
-# Production uses Redis cache (set in base.py) for cross-worker sharing.
+# Use Redis cache in dev — shared between Django and Celery workers.
+# CI tests override this to LocMemCache via ci.py settings.
+_redis_base = config("REDIS_URL", default="redis://localhost:6379/0")  # noqa: F405
 CACHES = {  # noqa: F405
     "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": _redis_base.rsplit("/", 1)[0] + "/1",  # DB1 for cache
     },
 }
 

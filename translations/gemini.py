@@ -189,11 +189,20 @@ def _build_prompt(source: dict[str, str], target_languages: list[str]) -> str:
     )
 
 
-def _extract_json(text: str) -> dict[str, dict[str, str]]:
-    """Extract JSON from Gemini response, handling markdown fences."""
+def _strip_markdown_fences(text: str) -> str:
+    """Strip markdown code fences from Gemini response."""
     cleaned = re.sub(r"```(?:json)?\s*", "", text).strip()
-    cleaned = re.sub(r"```\s*$", "", cleaned).strip()
-    return json.loads(cleaned)  # type: ignore[no-any-return]
+    return re.sub(r"```\s*$", "", cleaned).strip()
+
+
+def _extract_json(text: str) -> dict[str, dict[str, str]]:
+    """Extract nested JSON from Gemini translation response."""
+    return json.loads(_strip_markdown_fences(text))  # type: ignore[no-any-return]
+
+
+def _extract_flat_json(text: str) -> dict[str, object]:
+    """Extract flat JSON from Gemini review/correction response."""
+    return json.loads(_strip_markdown_fences(text))  # type: ignore[no-any-return]
 
 
 # ---------------------------------------------------------------------------
@@ -321,3 +330,348 @@ def translate_with_gemini(
         logger.warning("Gemini response missing languages: %s", missing)
 
     return result
+
+
+# ---------------------------------------------------------------------------
+# Review scores dataclass
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class ReviewScores:
+    """LLM reviewer evaluation of a single-language translation."""
+
+    accuracy: float = 0.0
+    emotion: float = 0.0
+    quality: float = 0.0
+    style: float = 0.0
+    grammar: float = 0.0
+    ethics: float = 0.0
+    comment: str = ""
+
+    @property
+    def average(self) -> float:
+        scores = [
+            self.accuracy,
+            self.emotion,
+            self.quality,
+            self.style,
+            self.grammar,
+            self.ethics,
+        ]
+        return sum(scores) / len(scores)
+
+    @property
+    def passed(self) -> bool:
+        return self.average >= REVIEW_THRESHOLD
+
+
+# Review threshold — translations below this average go back for correction.
+REVIEW_THRESHOLD: float = 8.5
+
+# Max correction iterations to avoid infinite loops.
+MAX_CORRECTION_ITERATIONS: int = 2
+
+# Roles: translator = fast/cheap, reviewer = smart/accurate.
+TRANSLATOR_MODEL = "gemini-2.5-flash"
+REVIEWER_MODEL = "gemini-2.5-pro"
+
+
+# ---------------------------------------------------------------------------
+# Reviewer — evaluates a translation and returns scores
+# ---------------------------------------------------------------------------
+
+
+def _build_review_prompt(
+    source: dict[str, str],
+    translation: dict[str, str],
+    lang_code: str,
+) -> str:
+    """Build a prompt for the LLM reviewer role."""
+    lang_name = _LANG_NAMES.get(lang_code, lang_code)
+    source_json = json.dumps(source, ensure_ascii=False, indent=2)
+    translation_json = json.dumps(translation, ensure_ascii=False, indent=2)
+
+    return (
+        "You are an expert linguistic reviewer who deeply understands Ukrainian "
+        "culture, language nuances, and their expression in other languages.\n\n"
+        f"Evaluate this Ukrainian → {lang_name} translation.\n\n"
+        f"Original (Ukrainian):\n{source_json}\n\n"
+        f"Translation ({lang_name}):\n{translation_json}\n\n"
+        "Rate each criterion from 0.0 to 10.0:\n"
+        "- accuracy: faithfulness to the original meaning\n"
+        "- emotion: preservation of emotional tone and connotation\n"
+        "- quality: overall translation quality\n"
+        "- style: stylistic naturalness in the target language\n"
+        "- grammar: grammatical correctness in the target language\n"
+        "- ethics: cultural and ethical appropriateness\n\n"
+        "If any score is below 9, provide a brief 'comment' explaining what "
+        "should be improved — this will be sent back to the translator.\n\n"
+        "Return ONLY valid JSON, no markdown fences:\n"
+        '{"accuracy": 9.0, "emotion": 8.5, "quality": 9.0, '
+        '"style": 8.0, "grammar": 9.5, "ethics": 10.0, '
+        '"comment": "..."}'
+    )
+
+
+def review_translation(
+    source: dict[str, str],
+    translation: dict[str, str],
+    lang_code: str,
+    model: str = REVIEWER_MODEL,
+) -> ReviewScores:
+    """Have the LLM reviewer evaluate a translation for one language.
+
+    Args:
+        source: Original Ukrainian field values.
+        translation: Translated field values for one language.
+        lang_code: Target language code.
+        model: Gemini model for review (default: pro).
+
+    Returns:
+        ReviewScores with individual scores and comment.
+
+    """
+    api_key: str = settings.GEMINI_API_KEY
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY is not configured")
+
+    client = genai.Client(api_key=api_key)
+    prompt = _build_review_prompt(source, translation, lang_code)
+
+    lang_name = _LANG_NAMES.get(lang_code, lang_code)
+    logger.info("Reviewing %s translation with %s", lang_name, model)
+
+    response = client.models.generate_content(model=model, contents=prompt)
+
+    meta = response.usage_metadata
+    if meta:
+        usage_stats.record(
+            prompt_tokens=meta.prompt_token_count or 0,
+            completion_tokens=meta.candidates_token_count or 0,
+            model=model,
+        )
+
+    raw_text = response.text or ""
+    try:
+        data = _extract_flat_json(raw_text)
+    except (json.JSONDecodeError, ValueError):
+        logger.error("Failed to parse review response: %s", raw_text[:300])
+        # Return passing scores on parse failure — don't block translation.
+        return ReviewScores(
+            accuracy=10,
+            emotion=10,
+            quality=10,
+            style=10,
+            grammar=10,
+            ethics=10,
+            comment="[review parse error — auto-passed]",
+        )
+
+    return ReviewScores(
+        accuracy=float(data.get("accuracy", 0)),  # type: ignore[arg-type]
+        emotion=float(data.get("emotion", 0)),  # type: ignore[arg-type]
+        quality=float(data.get("quality", 0)),  # type: ignore[arg-type]
+        style=float(data.get("style", 0)),  # type: ignore[arg-type]
+        grammar=float(data.get("grammar", 0)),  # type: ignore[arg-type]
+        ethics=float(data.get("ethics", 0)),  # type: ignore[arg-type]
+        comment=str(data.get("comment", "")),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Correction — re-translate with reviewer feedback
+# ---------------------------------------------------------------------------
+
+
+def _build_correction_prompt(
+    source: dict[str, str],
+    previous_translation: dict[str, str],
+    lang_code: str,
+    reviewer_comment: str,
+) -> str:
+    """Build a prompt for the translator to fix based on reviewer feedback."""
+    lang_name = _LANG_NAMES.get(lang_code, lang_code)
+    source_json = json.dumps(source, ensure_ascii=False, indent=2)
+    prev_json = json.dumps(previous_translation, ensure_ascii=False, indent=2)
+
+    cnr_rules = ""
+    if lang_code == "cnr":
+        cnr_rules = (
+            "- MONTENEGRIN specific: use Latin script with ś/ź.\n"
+            "  ś replaces sj in ijekavian: pjeśma, śever, śutra.\n"
+            "  ź replaces zj: iźelica, poiźdalica.\n"
+            "  Use ijekavian: mlijeko, lijepo, bijelo.\n"
+        )
+
+    return (
+        "You are a professional polyglot translator who knows Ukrainian deeply "
+        "and translates with cultural sensitivity.\n\n"
+        f"Your previous Ukrainian → {lang_name} translation was reviewed. "
+        "Please provide an improved translation based on the feedback.\n\n"
+        f"Original (Ukrainian):\n{source_json}\n\n"
+        f"Your previous translation:\n{prev_json}\n\n"
+        f"Reviewer feedback:\n{reviewer_comment}\n\n"
+        "Rules:\n"
+        "- Fix ONLY the issues mentioned in the feedback.\n"
+        "- Keep everything else unchanged.\n"
+        f"{cnr_rules}"
+        "- Return ONLY valid JSON with the corrected translation.\n"
+        "- Same keys as the original, no markdown fences.\n"
+    )
+
+
+def correct_translation(
+    source: dict[str, str],
+    previous_translation: dict[str, str],
+    lang_code: str,
+    reviewer_comment: str,
+    model: str = TRANSLATOR_MODEL,
+) -> dict[str, str]:
+    """Re-translate with reviewer feedback for one language.
+
+    Args:
+        source: Original Ukrainian field values.
+        previous_translation: Previous translation that was below threshold.
+        lang_code: Target language code.
+        reviewer_comment: Feedback from the reviewer.
+        model: Gemini model for correction (default: flash).
+
+    Returns:
+        Corrected field values for the language.
+
+    """
+    api_key: str = settings.GEMINI_API_KEY
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY is not configured")
+
+    client = genai.Client(api_key=api_key)
+    prompt = _build_correction_prompt(
+        source,
+        previous_translation,
+        lang_code,
+        reviewer_comment,
+    )
+
+    lang_name = _LANG_NAMES.get(lang_code, lang_code)
+    logger.info("Correcting %s translation with %s", lang_name, model)
+
+    response = client.models.generate_content(model=model, contents=prompt)
+
+    meta = response.usage_metadata
+    if meta:
+        usage_stats.record(
+            prompt_tokens=meta.prompt_token_count or 0,
+            completion_tokens=meta.candidates_token_count or 0,
+            model=model,
+        )
+
+    raw_text = response.text or ""
+    try:
+        result = _extract_flat_json(raw_text)
+        return {k: str(v) for k, v in result.items()}
+    except (json.JSONDecodeError, ValueError):
+        logger.error("Failed to parse correction response: %s", raw_text[:300])
+        # Fall back to previous translation on parse failure.
+        return previous_translation
+
+
+# ---------------------------------------------------------------------------
+# Two-role pipeline: translate → review → correct (per language)
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class TranslationResult:
+    """Result of the two-role translation pipeline for one language."""
+
+    lang_code: str
+    fields: dict[str, str]
+    scores: ReviewScores
+    iterations: int
+
+
+def translate_and_review(
+    source: dict[str, str],
+    target_languages: list[str],
+    field_kinds: dict[str, ContentKind] | None = None,
+) -> dict[str, TranslationResult]:
+    """Full two-role pipeline: translate all languages, then review each.
+
+    1. Translate all languages in one API call (gemini-flash, cheap).
+    2. Review each language individually (gemini-pro, accurate).
+    3. If score < threshold, correct and re-review (max 2 iterations).
+
+    Args:
+        source: Ukrainian field values.
+        target_languages: Language codes to translate into.
+        field_kinds: Field content kinds (plain/html).
+
+    Returns:
+        Dict of lang_code -> TranslationResult with final fields and scores.
+
+    """
+    # Step 1: Initial translation (all languages, flash model).
+    raw_translations = translate_with_gemini(
+        source,
+        target_languages,
+        model=TRANSLATOR_MODEL,
+        field_kinds=field_kinds,
+    )
+
+    results: dict[str, TranslationResult] = {}
+
+    for lang in target_languages:
+        lang_fields = raw_translations.get(lang, {})
+        if not lang_fields:
+            logger.warning("No translation for %s — skipping review", lang)
+            results[lang] = TranslationResult(
+                lang_code=lang,
+                fields={},
+                scores=ReviewScores(),
+                iterations=0,
+            )
+            continue
+
+        current_fields = lang_fields
+        iteration = 0
+
+        for iteration in range(1, MAX_CORRECTION_ITERATIONS + 2):
+            # Step 2: Review.
+            scores = review_translation(source, current_fields, lang)
+
+            lang_name = _LANG_NAMES.get(lang, lang)
+            logger.info(
+                "Review %s (iter %d): avg=%.1f [acc=%.1f emo=%.1f "
+                "qual=%.1f sty=%.1f gram=%.1f eth=%.1f]%s",
+                lang_name,
+                iteration,
+                scores.average,
+                scores.accuracy,
+                scores.emotion,
+                scores.quality,
+                scores.style,
+                scores.grammar,
+                scores.ethics,
+                "" if scores.passed else f" — NEEDS CORRECTION: {scores.comment}",
+            )
+
+            if scores.passed or iteration > MAX_CORRECTION_ITERATIONS:
+                break
+
+            # Step 3: Correct based on feedback.
+            current_fields = correct_translation(
+                source,
+                current_fields,
+                lang,
+                scores.comment,
+            )
+
+        results[lang] = TranslationResult(
+            lang_code=lang,
+            fields=current_fields,
+            scores=scores,
+            iterations=iteration,
+        )
+
+    return results

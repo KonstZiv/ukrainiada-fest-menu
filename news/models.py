@@ -7,9 +7,12 @@ from functools import partial
 from pathlib import Path
 
 from django.conf import settings
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+
+from menu.validators import validate_svg_content
 
 
 def _upload_image(instance: object, filename: str, folder: str = "images") -> Path:
@@ -17,6 +20,8 @@ def _upload_image(instance: object, filename: str, folder: str = "images") -> Pa
     return Path(folder) / stem
 
 
+upload_to_topic_logo = partial(_upload_image, folder="topic_logos")
+upload_to_newstag_logo = partial(_upload_image, folder="newstag_logos")
 upload_to_article_main = partial(_upload_image, folder="article_main_images")
 upload_to_article_gallery = partial(_upload_image, folder="article_gallery_images")
 
@@ -24,25 +29,81 @@ upload_to_article_gallery = partial(_upload_image, folder="article_gallery_image
 class Topic(models.Model):
     """News rubric (e.g. Culture, Sport, Events)."""
 
-    title = models.CharField(max_length=128)
+    title = models.CharField(max_length=128, verbose_name=_("Назва"))
+    description = models.TextField(blank=True, default="", verbose_name=_("Опис"))
 
     class Meta:
         ordering = ["title"]
+        verbose_name = _("Рубрика")
+        verbose_name_plural = _("Рубрики")
 
     def __str__(self) -> str:
         return self.title
+
+
+class TopicLogo(models.Model):
+    """SVG logo for a news topic."""
+
+    topic = models.OneToOneField(
+        Topic,
+        on_delete=models.CASCADE,
+        related_name="logo",
+    )
+    image = models.FileField(
+        upload_to=upload_to_topic_logo,
+        validators=[
+            FileExtensionValidator(allowed_extensions=["svg"]),
+            validate_svg_content,
+        ],
+        verbose_name=_("Логотип (SVG)"),
+    )
+
+    class Meta:
+        verbose_name = _("Логотип рубрики")
+        verbose_name_plural = _("Логотипи рубрик")
+
+    def __str__(self) -> str:
+        return f"Logo: {self.topic.title}"
 
 
 class NewsTag(models.Model):
     """Fine-tuning tag for articles (e.g. ballet, children, cuisine)."""
 
-    title = models.CharField(max_length=128)
+    title = models.CharField(max_length=128, verbose_name=_("Назва"))
+    description = models.TextField(blank=True, default="", verbose_name=_("Опис"))
 
     class Meta:
         ordering = ["title"]
+        verbose_name = _("Тег новин")
+        verbose_name_plural = _("Теги новин")
 
     def __str__(self) -> str:
         return self.title
+
+
+class NewsTagLogo(models.Model):
+    """SVG logo for a news tag."""
+
+    tag = models.OneToOneField(
+        NewsTag,
+        on_delete=models.CASCADE,
+        related_name="logo",
+    )
+    image = models.FileField(
+        upload_to=upload_to_newstag_logo,
+        validators=[
+            FileExtensionValidator(allowed_extensions=["svg"]),
+            validate_svg_content,
+        ],
+        verbose_name=_("Логотип (SVG)"),
+    )
+
+    class Meta:
+        verbose_name = _("Логотип тега")
+        verbose_name_plural = _("Логотипи тегів")
+
+    def __str__(self) -> str:
+        return f"Logo: {self.tag.title}"
 
 
 class Article(models.Model):

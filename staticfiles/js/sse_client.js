@@ -139,10 +139,10 @@
     if (!indicator) return;
     if (connected) {
       indicator.className = 'badge bg-success';
-      indicator.textContent = gettext('Live');
+      indicator.textContent = gettext('live');
     } else {
       indicator.className = 'badge bg-danger';
-      indicator.textContent = gettext('Offline');
+      indicator.textContent = gettext('offline');
     }
   }
 

@@ -19,7 +19,7 @@ on:
     branches: [dev, main]
 
 env:
-  DJANGO_SETTINGS_MODULE: core_settings.settings.dev
+  DJANGO_SETTINGS_MODULE: core_settings.settings.ci
   SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
 jobs:

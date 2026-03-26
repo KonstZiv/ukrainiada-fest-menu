@@ -5,6 +5,8 @@
   Dobro Djelo — {% if object %}{% trans "Редагувати статтю" %}{% else %}{% trans "Нова стаття" %}{% endif %}
 {% endblock %}
 
+{% block extra_css %}{{ form.media }}{% endblock %}
+
 {% block content %}
 <div class="container py-3" style="max-width: 800px;">
 

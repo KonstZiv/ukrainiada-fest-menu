@@ -41,6 +41,35 @@ class TranslationApproval(models.Model):
     approved_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # --- LLM reviewer scores (0.0 – 10.0) ---
+    llm_accuracy = models.FloatField(
+        null=True, blank=True, help_text="Meaning accuracy (0-10)"
+    )
+    llm_emotion = models.FloatField(
+        null=True, blank=True, help_text="Emotion accuracy (0-10)"
+    )
+    llm_quality = models.FloatField(
+        null=True, blank=True, help_text="Translation quality (0-10)"
+    )
+    llm_style = models.FloatField(
+        null=True, blank=True, help_text="Stylistic quality (0-10)"
+    )
+    llm_grammar = models.FloatField(
+        null=True, blank=True, help_text="Grammar correctness (0-10)"
+    )
+    llm_ethics = models.FloatField(
+        null=True, blank=True, help_text="Ethical appropriateness (0-10)"
+    )
+    llm_average = models.FloatField(
+        null=True, blank=True, help_text="Average of all scores"
+    )
+    llm_review_comment = models.TextField(
+        blank=True, default="", help_text="Reviewer feedback / correction notes"
+    )
+    llm_review_iterations = models.PositiveSmallIntegerField(
+        default=0, help_text="Number of translate-review cycles"
+    )
+
     class Meta:
         constraints = [
             models.UniqueConstraint(

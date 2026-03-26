@@ -1,4 +1,4 @@
-"""Celery tasks for LLM auto-translation."""
+"""Celery tasks for LLM auto-translation with two-role pipeline."""
 
 from __future__ import annotations
 
@@ -20,7 +20,13 @@ logger = logging.getLogger(__name__)
     default_retry_delay=30,
 )
 def translate_object(self: object, content_type_id: int, object_id: int) -> None:
-    """Auto-translate an object's UK fields to all target languages via Gemini."""
+    """Auto-translate an object's UK fields using two-role pipeline.
+
+    Pipeline per language:
+      1. Translator (gemini-flash) — initial translation
+      2. Reviewer (gemini-pro) — scores on 6 criteria
+      3. If average < 8.5 → Translator corrects with feedback (max 2 loops)
+    """
     ct = ContentType.objects.get(id=content_type_id)
     model = ct.model_class()
     if model is None:
@@ -51,7 +57,6 @@ def translate_object(self: object, content_type_id: int, object_id: int) -> None
         logger.info("All UK fields empty for %s#%s — skipping", ct.model, object_id)
         return
 
-    # Check API key before calling Gemini.
     from django.conf import settings as django_settings
 
     if not getattr(django_settings, "GEMINI_API_KEY", ""):
@@ -62,18 +67,19 @@ def translate_object(self: object, content_type_id: int, object_id: int) -> None
         )
         return
 
-    # Call Gemini.
-    from translations.gemini import translate_with_gemini
+    # --- Two-role pipeline ---
+    from translations.gemini import translate_and_review
 
     try:
-        translations = translate_with_gemini(
-            source, TARGET_LANGUAGES, field_kinds=fields
+        results = translate_and_review(
+            source,
+            TARGET_LANGUAGES,
+            field_kinds=fields,
         )
     except Exception as exc:
         logger.error(
-            "Gemini translation failed for %s#%s: %s", ct.model, object_id, exc
+            "Translation pipeline failed for %s#%s: %s", ct.model, object_id, exc
         )
-        # Mark all languages as FAILED.
         for lang in TARGET_LANGUAGES:
             TranslationApproval.objects.update_or_create(
                 content_type=ct,
@@ -83,18 +89,42 @@ def translate_object(self: object, content_type_id: int, object_id: int) -> None
             )
         raise self.retry(exc=exc) from exc  # type: ignore[attr-defined]
 
-    # Save translations to model fields.
+    # Save translations and review scores.
     update_fields: list[str] = []
-    for lang, field_data in translations.items():
+    for lang, result in results.items():
         if lang not in TARGET_LANGUAGES:
             continue
-        for field, value in field_data.items():
-            if field not in fields:
+
+        # Save translated field values to model.
+        for field_name, value in result.fields.items():
+            if field_name not in fields:
                 continue
-            attr = f"{field}_{lang}"
+            attr = f"{field_name}_{lang}"
             if hasattr(obj, attr):
                 setattr(obj, attr, value)
                 update_fields.append(attr)
+
+        # Save review scores to TranslationApproval.
+        scores = result.scores
+        TranslationApproval.objects.update_or_create(
+            content_type=ct,
+            object_id=object_id,
+            language=lang,
+            defaults={
+                "status": TranslationApproval.Status.PENDING,
+                "approved_by": None,
+                "approved_at": None,
+                "llm_accuracy": scores.accuracy,
+                "llm_emotion": scores.emotion,
+                "llm_quality": scores.quality,
+                "llm_style": scores.style,
+                "llm_grammar": scores.grammar,
+                "llm_ethics": scores.ethics,
+                "llm_average": scores.average,
+                "llm_review_comment": scores.comment,
+                "llm_review_iterations": result.iterations,
+            },
+        )
 
     if update_fields:
         obj.save(update_fields=update_fields)
@@ -105,15 +135,16 @@ def translate_object(self: object, content_type_id: int, object_id: int) -> None
             len(update_fields),
         )
 
-    # Create / reset approvals to PENDING.
-    for lang in TARGET_LANGUAGES:
-        TranslationApproval.objects.update_or_create(
-            content_type=ct,
-            object_id=object_id,
-            language=lang,
-            defaults={
-                "status": TranslationApproval.Status.PENDING,
-                "approved_by": None,
-                "approved_at": None,
-            },
+    # Log summary.
+    for lang, result in results.items():
+        avg = result.scores.average
+        status = "PASS" if result.scores.passed else "BELOW THRESHOLD"
+        logger.info(
+            "%s#%s [%s] avg=%.1f (%s, %d iterations)",
+            ct.model,
+            object_id,
+            lang,
+            avg,
+            status,
+            result.iterations,
         )
