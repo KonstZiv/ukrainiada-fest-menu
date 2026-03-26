@@ -16,6 +16,16 @@ def landing_page(request: HttpRequest) -> HttpResponse:
     return render(request, "landing.html", {"show_search": False})
 
 
+def privacy_policy(request: HttpRequest) -> HttpResponse:
+    """Public privacy policy page."""
+    return render(request, "legal/privacy.html", {"show_search": False})
+
+
+def terms_of_service(request: HttpRequest) -> HttpResponse:
+    """Public terms of service page."""
+    return render(request, "legal/terms.html", {"show_search": False})
+
+
 def offline_page(request: HttpRequest) -> HttpResponse:
     """Offline fallback page served from Service Worker cache."""
     return render(request, "offline.html")

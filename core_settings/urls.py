@@ -15,7 +15,14 @@ from django.urls import include, path
 
 from django.views.i18n import JavaScriptCatalog
 
-from core_settings.views import health_check, landing_page, offline_page, service_worker
+from core_settings.views import (
+    health_check,
+    landing_page,
+    offline_page,
+    privacy_policy,
+    service_worker,
+    terms_of_service,
+)
 
 urlpatterns = [
     path("", landing_page, name="landing"),
@@ -24,6 +31,8 @@ urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
     path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),
     path("offline/", offline_page, name="offline"),
+    path("privacy/", privacy_policy, name="privacy"),
+    path("terms/", terms_of_service, name="terms"),
     path("admin/", admin.site.urls),
     path("menu/", include("menu.urls")),
     path("user/", include("user.urls")),
