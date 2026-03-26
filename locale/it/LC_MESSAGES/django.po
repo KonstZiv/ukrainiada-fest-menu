@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-25 14:51+0000\n"
+"POT-Creation-Date: 2026-03-26 10:13+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -106,8 +106,10 @@ msgid "'{dish_title}' — пропущено: {skipped}"
 msgstr "'{dish_title}' — saltato: {skipped}"
 
 msgid "Обраний офіціант не знайдений або не має відповідної ролі."
-msgstr "Il cameriere selezionato non è stato trovato o non ha il ruolo appropriato."
-"Il cameriere selezionato non è stato trovato o non ha il ruolo appropriato."
+msgstr "Cameriere selezionato non trovato o privo del ruolo appropriato."
+"Il cameriere selezionato non è stato trovato o non ha il ruolo "
+"appropriato.Il cameriere selezionato non è stato trovato o non ha il ruolo "
+"appropriato."
 
 msgid "Назва логотипу"
 msgstr "Nome del logo"
@@ -138,10 +140,146 @@ msgstr "Disponibilità"
 
 msgid "Файл не є валідним SVG. Завантажте файл у форматі SVG."
 msgstr "Il file non è un SVG valido. Si prega di caricare un file in formato SVG."
-"Il file non è un SVG valido. Si prega di caricare un file in formato SVG."
+"Il file non è un SVG valido. Si prega di caricare un file in formato SVG.Il "
+"file non è un SVG valido. Si prega di caricare un file in formato SVG."
+
+msgid "Заголовок статті"
+msgstr "Principale"
+
+msgid "Короткий опис для анонсу"
+msgstr "Breve descrizione per l'annuncio"
+
+msgid "Ваш коментар..."
+msgstr "Commento"
 
 msgid "Чернетка"
 msgstr "Bozza"
+
+msgid "Опублікована"
+msgstr "Pubblica"
+
+msgid "Архівована"
+msgstr "Verificato"
+
+msgid "Заголовок"
+msgstr "Principale"
+
+msgid "Короткий опис"
+msgstr "Breve descrizione"
+
+msgid "Анонс для списку новин"
+msgstr "Annuncio per l'elenco delle notizie"
+
+msgid "Текст статті"
+msgstr "Testo dell'articolo"
+
+msgid "Рубрика"
+msgstr "Categoria"
+
+msgid "Теги"
+msgstr "Tag"
+
+msgid "Автор"
+msgstr "Riprova"
+
+msgid "Статус"
+msgstr "Stato:"
+
+msgid "Термінова"
+msgstr "Urgente!"
+
+msgid "Термінові новини надсилаються підписникам негайно"
+msgstr "Le notizie urgenti vengono inviate immediatamente agli iscritti"
+
+msgid "В ротації"
+msgstr "In lavorazione"
+
+msgid "Показувати в каруселі на головній"
+msgstr "Mostra nel carosello sulla pagina principale"
+
+msgid "Стаття"
+msgstr "Stato:"
+
+msgid "Статті"
+msgstr "Stato:"
+
+msgid "Головне зображення"
+msgstr "Immagine principale"
+
+msgid "Додаткове зображення"
+msgstr "immagine aggiuntiva"
+
+msgid "Мова"
+msgstr "Lingua"
+
+msgid "Сторінка"
+msgstr "Pagina"
+
+msgid "Зауваження до перекладу"
+msgstr "Approvazione della traduzione"
+
+msgid "Зауваження до перекладів"
+msgstr "Approvazione delle traduzioni"
+
+msgid "На розгляді"
+msgstr "In revisione"
+
+msgid "Схвалений"
+msgstr "Approvato"
+
+msgid "Відхилений"
+msgstr "Rifiutato"
+
+msgid "Коментар"
+msgstr "Commento"
+
+msgid "Коментар до статті"
+msgstr "Commento"
+
+msgid "Коментарі до статей"
+msgstr "Pronti per la consegna"
+
+msgid "Щоденно"
+msgstr "Giornaliero"
+
+msgid "Щотижня"
+msgstr "Settimanale"
+
+msgid "Тільки термінові"
+msgstr "Urgente!"
+
+msgid "Частота"
+msgstr "Applica"
+
+msgid "Активна"
+msgstr "Attivi"
+
+msgid "Підписка на дайджест"
+msgstr "Iscrizione al digest"
+
+msgid "Підписки на дайджести"
+msgstr "Iscrizioni ai digest"
+
+msgid "Дякуємо за зауваження!"
+msgstr "Grazie per la tua recensione!"
+
+msgid "Коментар надіслано на модерацію."
+msgstr "Commento inviato per la moderazione."
+
+msgid "Коментар схвалено."
+msgstr "Commento"
+
+msgid "Коментар відхилено."
+msgstr "Commento"
+
+msgid "Підписку оновлено."
+msgstr "Recensione eliminata."
+
+msgid "Підписку деактивовано."
+msgstr "Recensione pubblicata."
+
+msgid "Підписку відновлено."
+msgstr "Recensione eliminata."
 
 msgid "Створено"
 msgstr "Creato"
@@ -202,9 +340,6 @@ msgstr "Visto"
 
 msgid "Вирішено"
 msgstr "Risolto"
-
-msgid "Коментар"
-msgstr "Commento"
 
 msgid "Прийняття замовлення"
 msgstr "Accettazione dell'ordine"
@@ -274,8 +409,69 @@ msgstr "Principale"
 msgid "Увійти"
 msgstr "Accedi"
 
+msgid "Вхід"
+msgstr "Accedi"
+
+msgid "Невірна електронна пошта або пароль. Спробуйте ще раз."
+msgstr "Email o password non corretti. Riprova."
+
+#, python-format
+msgid "Увійти через %(name)s"
+msgstr "Accedi con %(name)s"
+
+msgid "або"
+msgstr "Al"
+
+msgid "Електронна пошта"
+msgstr "Email"
+
+msgid "Пароль"
+msgstr "Password"
+
+msgid "Скасувати"
+msgstr "Annulla"
+
+msgid "Ще не маєте акаунту?"
+msgstr "Non hai ancora un account?"
+
+msgid "Зареєструватись"
+msgstr "Registrati"
+
+msgid "Забули пароль?"
+msgstr "Password dimenticata?"
+
+msgid "Скинути пароль"
+msgstr "Reimposta password"
+
+msgid "Реєстрація"
+msgstr "Registrazione"
+
+#, fuzzy, python-format
+msgid "Зареєструватись через %(name)s"
+msgstr "Registrati"
+
+msgid "Пароль (мінімум 8 символів, не лише цифри)"
+msgstr "Password (minimo 8 caratteri, non solo numerici)"
+
+msgid "Підтвердження пароля"
+msgstr "Conferma password"
+
+msgid "Вже маєте акаунт?"
+msgstr "Hai già un account?"
+
 msgid "Меню"
 msgstr "Menu"
+
+msgid ""
+"Цей сервіс є некомерційним проєктом Українського центру в Херцег-Нові для "
+"підтримки спільноти."
+msgstr ""
+
+msgid "Політика конфіденційності"
+msgstr "Informativa sulla privacy"
+
+msgid "Умови використання"
+msgstr "Termini di utilizzo"
 
 msgid "Закрити"
 msgstr "Chiudi"
@@ -294,9 +490,6 @@ msgstr "e seleziona «Aggiungi alla schermata Home»"
 
 msgid "Категорії"
 msgstr "Categorie"
-
-msgid "Теги"
-msgstr "Tag"
 
 msgid "Оновити"
 msgstr "Aggiorna"
@@ -324,6 +517,9 @@ msgstr "ORDINI"
 
 msgid "КУХНЯ"
 msgstr "CUCINA"
+
+msgid "НОВИНИ"
+msgstr "NOTIZIE"
 
 msgid "МОНІТОРИНГ"
 msgstr "MONITORAGGIO"
@@ -458,8 +654,9 @@ msgid "Позачергові дії"
 msgstr "Azioni straordinarie"
 
 msgid "Якщо стандартний flow не був виконаний — зафіксуйте фактичний стан"
-msgstr "Se il flusso standard non è stato seguito, registra lo stato effettivo."
-"Se il flusso standard non è stato seguito, registra lo stato effettivo."
+msgstr "Se il flusso standard non è stato seguito, registra lo stato effettivo"
+"Se il flusso standard non è stato seguito, registra lo stato effettivo.Se il "
+"flusso standard non è stato seguito, registra lo stato effettivo."
 
 msgid "Доставлено (без кухні)"
 msgstr "Consegnato (senza cucina)"
@@ -564,14 +761,148 @@ msgstr "Vai al menù"
 msgid "Новини"
 msgstr "Nuovo tag"
 
-msgid "Скоро"
-msgstr "Prossimamente"
+msgid "Стрічка новин"
+msgstr "Feed delle notizie"
 
 msgid "Бібліотека"
 msgstr "Biblioteca"
 
+msgid "Скоро"
+msgstr "Prossimamente"
+
 msgid "Розклад"
 msgstr "Traduzioni"
+
+msgid "Політика конфіденційності та правила захисту даних"
+msgstr "Il carrello è vuoto o i piatti non sono disponibili."
+
+msgid ""
+"Громадська організація «Український центр у Херцег-Нові» з повагою ставиться "
+"до вашої конфіденційності. Цей документ пояснює, як ми обробляємо ваші "
+"персональні дані."
+msgstr ""
+
+msgid "1. Які дані ми збираємо"
+msgstr "1. Quali dati raccogliamo"
+
+msgid ""
+"При використанні сайту ми можемо збирати мінімально необхідні дані: ім'я, "
+"прізвище, контактний номер телефону або email (якщо ви заповнюєте форми "
+"зворотного зв'язку або реєстрації на заходи)."
+msgstr ""
+
+msgid ""
+"Технічні дані (cookies, IP-адреса) для забезпечення коректної роботи веб-"
+"сервісу."
+msgstr ""
+
+msgid "2. Мета збору даних"
+msgstr "2. Scopo della raccolta dei dati"
+
+msgid ""
+"Ваші дані використовуються виключно для комунікації щодо діяльності Центру, "
+"координації благодійних проєктів та реєстрації на культурні заходи."
+msgstr ""
+
+msgid ""
+"Ми не продаємо і не передаємо ваші дані третім особам у комерційних цілях."
+msgstr ""
+
+msgid "3. Безпека платежів та внесків"
+msgstr "3. Sicurezza dei pagamenti e delle donazioni"
+
+msgid ""
+"Усі благодійні перерахування обробляються через захищені платіжні шлюзи "
+"банків-партнерів. Організація не зберігає дані вашої банківської картки."
+msgstr ""
+
+msgid ""
+"Відповідно до законодавства Чорногорії та статуту Організації, усі внески є "
+"безповоротними та спрямовуються на статутну діяльність."
+msgstr ""
+
+msgid "4. Термін зберігання даних"
+msgstr "4. Periodo di conservazione dei dati"
+
+msgid ""
+"Ми зберігаємо дані лише стільки, скільки це необхідно для реалізації "
+"проєктів або відповідно до вимог чинного законодавства щодо звітності "
+"громадських організацій."
+msgstr ""
+
+msgid "5. Ваші права"
+msgstr "Nuovo piatto"
+
+msgid ""
+"Ви маєте право запитати доступ до своїх даних, вимагати їх виправлення або "
+"повного видалення з нашої бази, надіславши запит на офіційну електронну "
+"адресу Організації."
+msgstr ""
+
+msgid "6. Контакти"
+msgstr "6. Contatti"
+
+msgid ""
+"Якщо у вас є питання щодо конфіденційності, будь ласка, зв'яжіться з нами "
+"через форму на сайті або за адресою:"
+msgstr ""
+
+msgid "Умови використання сервісу «Український центр у Херцег-Нові»"
+msgstr "Centro culturale ucraino a Herceg Novi, Montenegro"
+
+msgid ""
+"Ці Умови регулюють використання веб-ресурсу громадської організації "
+"«Український центр у Херцег-Нові» (далі — Організація). Користуючись цим "
+"сайтом, ви погоджуєтеся з наведеними нижче правилами."
+msgstr ""
+
+msgid "1. Загальні положення"
+msgstr "Immagini aggiuntive"
+
+msgid ""
+"Сайт є некомерційним ресурсом, створеним для підтримки української громади в "
+"Чорногорії, збереження та популяризації української культури."
+msgstr ""
+
+msgid ""
+"Використання матеріалів сайту дозволяється лише з метою ознайомлення та "
+"некомерційного поширення із обов'язковим посиланням на джерело."
+msgstr ""
+
+msgid "2. Статус Організації та внесків"
+msgstr "2. Status dell'Organizzazione e dei contributi"
+
+msgid "Організація не веде комерційної діяльності."
+msgstr "L'Organizzazione non svolge attività commerciali."
+
+msgid ""
+"Усі платежі, здійснені через сайт (якщо передбачено), є добровільними "
+"благодійними внесками (Donations)."
+msgstr ""
+
+msgid ""
+"Благодійні внески використовуються виключно для досягнення статутних цілей "
+"Організації: гуманітарної допомоги, культурних заходів та підтримки "
+"українців у Чорногорії."
+msgstr ""
+
+msgid "3. Відмова від відповідальності"
+msgstr "3. Esclusione di responsabilità"
+
+msgid ""
+"Ми прагнемо надавати актуальну інформацію про заходи та сервіси, проте не "
+"несемо відповідальності за тимчасові технічні збої або наслідки використання "
+"інформації з третіх ресурсів, на які є посилання на нашому сайті."
+msgstr ""
+
+msgid "4. Зміни в умовах"
+msgstr "Modifica password"
+
+msgid ""
+"Організація залишає за собою право змінювати ці умови в будь-який час. "
+"Продовження використання сайту після змін означає вашу згоду з новими "
+"умовами."
+msgstr ""
 
 msgid "Видалити категорію"
 msgstr "Elimina categoria"
@@ -603,9 +934,6 @@ msgstr "Non ci sono piatti in questa categoria."
 
 msgid "Так, видалити"
 msgstr "Sì, elimina"
-
-msgid "Скасувати"
-msgstr "Annulla"
 
 msgid "Редагувати категорію"
 msgstr "Modifica categoria"
@@ -683,9 +1011,6 @@ msgstr "Modifica piatto"
 
 msgid "Створити страву"
 msgstr "Crea piatto"
-
-msgid "Головне зображення"
-msgstr "Immagine principale"
 
 msgid "обов'язково"
 msgstr "obbligatorio"
@@ -774,8 +1099,10 @@ msgid "Логотип тега: «%(title)s»"
 msgstr "Logo del tag: \"%(title)s\""
 
 msgid "Зв'язки зі стравами будуть видалені, але самі страви залишаться."
-msgstr "I collegamenti ai piatti verranno eliminati, ma i piatti stessi rimarranno."
-"Le associazioni con i piatti verranno rimosse, ma i piatti stessi rimarranno."
+msgstr "I collegamenti ai piatti verranno rimossi, ma i piatti stessi rimarranno."
+"I collegamenti ai piatti verranno eliminati, ma i piatti stessi "
+"rimarranno.Le associazioni con i piatti verranno rimosse, ma i piatti stessi "
+"rimarranno."
 
 msgid "Редагувати тег"
 msgstr "Modifica tag"
@@ -794,6 +1121,88 @@ msgstr ""
 msgid "Страв з цим тегом поки немає."
 msgstr "Non ci sono ancora piatti con questo tag."
 
+msgid "Видалити статтю"
+msgstr "Elimina piatto"
+
+#, fuzzy, python-format
+msgid "Ви збираєтесь видалити статтю «%(title)s»"
+msgstr "Stai per eliminare il tag <strong>\"%(title)s\"</strong>."
+
+msgid "Це автоматичний переклад. Можливі неточності."
+msgstr "Questa è una traduzione automatica. Potrebbero esserci delle imprecisioni."
+
+msgid "Повідомити про помилку"
+msgstr "Conferma pagamento"
+
+msgid "Коментарі"
+msgstr "Commento"
+
+msgid "Коментарів поки немає."
+msgstr "Nessun piatto ancora."
+
+msgid "Надіслати"
+msgstr "Invia"
+
+msgid "Для коментування потрібен верифікований канал комунікації."
+msgstr "Per commentare è necessario un canale di comunicazione verificato."
+
+msgid "Налаштувати"
+msgstr "Annulla"
+
+msgid "Увійдіть"
+msgstr "Accedi"
+
+msgid "щоб залишити коментар."
+msgstr "Elimina categoria"
+
+msgid "Опишіть що саме перекладено неточно або некоректно."
+msgstr "Scrivi qualcosa di carino... o di utile"
+
+msgid "Ваше зауваження..."
+msgstr "La tua richiesta:"
+
+msgid "Редагувати статтю"
+msgstr "Modifica piatto"
+
+msgid "Нова стаття"
+msgstr "Nuovo piatto"
+
+msgid "Новин поки немає."
+msgstr "Nessun ordine ancora."
+
+msgid "Модерація коментарів"
+msgstr "Moderazione recensioni"
+
+msgid "Схвалити"
+msgstr "Elimina"
+
+msgid "Відхилити"
+msgstr "Evidenzia"
+
+msgid "Немає коментарів для модерації."
+msgstr "Nessun ordine problematico."
+
+msgid "Дайджест новин"
+msgstr "Riepilogo notizie"
+
+msgid "Отримуйте підбірку новин на ваш верифікований канал комунікації."
+msgstr "Ricevi una selezione di notizie sul tuo canale di comunicazione verificato."
+
+msgid "Підписка активна"
+msgstr "Iscrizione attiva"
+
+msgid "Відписатись"
+msgstr "Indietro"
+
+msgid "Підписка неактивна"
+msgstr "Iscrizione non attiva"
+
+msgid "Підписатись"
+msgstr "Indietro"
+
+msgid "До новин"
+msgstr "Aggiorna"
+
 msgid "Немає з'єднання"
 msgstr "Nessuna connessione"
 
@@ -802,7 +1211,8 @@ msgstr "Controlla la connessione internet e riprova."
 
 msgid "Якщо ви переглядали меню раніше — воно доступне в кеші."
 msgstr "Se hai già visualizzato il menu in precedenza, è disponibile nella cache."
-"Se hai già visualizzato il menù in precedenza, è disponibile nella cache."
+"Se hai già visualizzato il menu in precedenza, è disponibile nella cache.Se "
+"hai già visualizzato il menù in precedenza, è disponibile nella cache."
 
 msgid "Спробувати знову"
 msgstr "Riprova"
@@ -943,9 +1353,6 @@ msgstr "Cosa è successo?"
 msgid "Опишіть ситуацію..."
 msgstr "Descrivi la situazione..."
 
-msgid "Надіслати"
-msgstr "Invia"
-
 msgid "Ваше звернення:"
 msgstr "La tua richiesta:"
 
@@ -987,9 +1394,6 @@ msgid ""
 "програми лояльності!"
 msgstr ""
 
-msgid "Зареєструватись"
-msgstr "Registrati"
-
 msgid "Активні"
 msgstr "Attivi"
 
@@ -1013,9 +1417,10 @@ msgid "Демо-режим:"
 msgstr "Modalità demo:"
 
 msgid "Реальна оплата ще не підключена. Кнопка симулює успішну оплату."
-msgstr "Il pagamento reale non è ancora attivo. Il pulsante simula un pagamento andato a buon fine."
-"Il pagamento reale non è ancora abilitato. Il pulsante simula un pagamento "
-"andato a buon fine."
+msgstr "Il pagamento reale non è ancora abilitato. Il pulsante simula un pagamento andato a buon fine."
+"Il pagamento reale non è ancora attivo. Il pulsante simula un pagamento "
+"andato a buon fine.Il pagamento reale non è ancora abilitato. Il pulsante "
+"simula un pagamento andato a buon fine."
 
 msgid "Оплатити онлайн (демо)"
 msgstr "Paga online (demo)"
@@ -1079,27 +1484,6 @@ msgstr "Nessun ordine attivo per il team"
 msgid "ВИЙТИ"
 msgstr "ESCI"
 
-msgid "Вхід"
-msgstr "Accedi"
-
-msgid "Невірна електронна пошта або пароль. Спробуйте ще раз."
-msgstr "Email o password non corretti. Riprova."
-
-msgid "Електронна пошта"
-msgstr "Email"
-
-msgid "Пароль"
-msgstr "Password"
-
-msgid "Ще не маєте акаунту?"
-msgstr "Non hai ancora un account?"
-
-msgid "Забули пароль?"
-msgstr "Password dimenticata?"
-
-msgid "Скинути пароль"
-msgstr "Reimposta password"
-
 msgid "Пароль змінено"
 msgstr "Password modificata"
 
@@ -1129,8 +1513,9 @@ msgstr "Modifica password"
 
 msgid "Ваш пароль успішно змінено. Тепер ви можете увійти з новим паролем."
 msgstr "La tua password è stata cambiata con successo. Ora puoi accedere con la nuova password."
-"La tua password è stata modificata con successo. Ora puoi accedere con la "
-"nuova password."
+"La tua password è stata cambiata con successo. Ora puoi accedere con la "
+"nuova password.La tua password è stata modificata con successo. Ora puoi "
+"accedere con la nuova password."
 
 msgid "Новий пароль"
 msgstr "Nuova password"
@@ -1144,7 +1529,8 @@ msgstr "Link non valido"
 msgid "Посилання для скидання пароля недійсне або вже було використане."
 msgstr "Il link per il ripristino della password non è valido o è già stato utilizzato."
 "Il link per il ripristino della password non è valido o è già stato "
-"utilizzato."
+"utilizzato.Il link per il ripristino della password non è valido o è già "
+"stato utilizzato."
 
 msgid "Запросіть нове посилання."
 msgstr "Richiedi un nuovo link."
@@ -1165,8 +1551,8 @@ msgstr "Controlla la tua email."
 
 msgid "У dev-режимі лист виводиться у термінал сервера."
 msgstr "In modalità dev, l'email viene visualizzata nel terminale del server."
-"In modalità sviluppatore, l'email viene visualizzata nel terminale del "
-"server."
+"In modalità dev, l'email viene visualizzata nel terminale del server.In "
+"modalità sviluppatore, l'email viene visualizzata nel terminale del server."
 
 msgid "Скопіюйте посилання з консолі та вставте у браузер."
 msgstr "Copia il link dalla console e incollalo nel browser."
@@ -1182,6 +1568,22 @@ msgstr "Ti invieremo un link per reimpostare la password."
 
 msgid "Надіслати посилання"
 msgstr "Invia link"
+
+msgid "Вхід через"
+msgstr "In coda"
+
+#, python-format
+msgid "Ви збираєтеся увійти, використовуючи обліковий запис %(name)s."
+msgstr "Stai per accedere utilizzando l'account %(name)s."
+
+msgid "Продовжити"
+msgstr "Continua"
+
+msgid "Завершення реєстрації"
+msgstr "Data di registrazione:"
+
+msgid "Ви майже зареєстровані. Будь ласка, перевірте дані нижче."
+msgstr "Sei quasi registrato. Per favore, controlla i dati qui sotto."
 
 msgid "Редагувати переклад"
 msgstr "Modifica traduzione"
@@ -1210,6 +1612,44 @@ msgstr "Approva"
 msgid "Повторити"
 msgstr "Riprova"
 
+msgid "Канали комунікації"
+msgstr "Canali di comunicazione"
+
+msgid ""
+"Канали використовуються для надсилання повідомлень, дайджестів та сповіщень. "
+"Верхній канал має найвищий пріоритет."
+msgstr ""
+
+msgid "Не верифіковано"
+msgstr "Verificato"
+
+msgid "Вище"
+msgstr "Su"
+
+msgid "Нижче"
+msgstr "Giù"
+
+msgid "Канали не налаштовані"
+msgstr "Canali non configurati"
+
+msgid "Підключити Telegram"
+msgstr "Connetti Telegram"
+
+msgid "Отримуйте сповіщення та дайджести в Telegram"
+msgstr "Ricevi notifiche e riepiloghi su Telegram"
+
+msgid "Відкрити в Telegram"
+msgstr "Aperto"
+
+msgid "Натисніть Start у боті для підтвердження"
+msgstr "Oppure usa la conferma manuale."
+
+msgid "Підключити"
+msgstr "Connetti"
+
+msgid "До профілю"
+msgstr "Il mio profilo"
+
 msgid "Профіль"
 msgstr "Profilo"
 
@@ -1228,6 +1668,9 @@ msgstr "Stato:"
 msgid "Адміністратор"
 msgstr "Amministratore"
 
+msgid "Налаштувати канали"
+msgstr "Annulla ordine"
+
 msgid "Редагувати профіль"
 msgstr "Modifica profilo"
 
@@ -1243,12 +1686,6 @@ msgstr "Non hai effettuato l'accesso."
 msgid "Поточний аватар"
 msgstr "Avatar attuale"
 
-msgid "Реєстрація"
-msgstr "Registrazione"
-
-msgid "Вже маєте акаунт?"
-msgstr "Hai già un account?"
-
 msgid "Затверджено"
 msgstr "Approvato"
 
@@ -1260,6 +1697,9 @@ msgstr "Approvazione della traduzione"
 
 msgid "Затвердження перекладів"
 msgstr "Approvazione delle traduzioni"
+
+msgid "Для цієї дії потрібен верифікований канал комунікації."
+msgstr "Questa azione richiede un canale di comunicazione verificato."
 
 msgid "Ім'я"
 msgstr "Nome"
@@ -1276,17 +1716,17 @@ msgstr "Nome (opzionale)"
 msgid "Прізвище (необов'язково)"
 msgstr "Cognome (opzionale)"
 
-msgid "Пароль (мінімум 8 символів, не лише цифри)"
-msgstr "Password (minimo 8 caratteri, non solo numerici)"
-
-msgid "Підтвердження пароля"
-msgstr "Conferma password"
-
 msgid "Ім'я користувача"
 msgstr "Nome utente"
 
 msgid "Виробництво"
 msgstr "Produzione"
+
+msgid "Редактор"
+msgstr "Modifica"
+
+msgid "Коректор"
+msgstr "Correttore"
 
 msgid "Відвідувач"
 msgstr "Visitatore"
@@ -1305,3 +1745,36 @@ msgstr "Nome pubblico"
 
 msgid "Ім'я без прізвища для відвідувачів"
 msgstr "Nome senza cognome per i visitatori"
+
+msgid "Джерело реєстрації"
+msgstr "Data di registrazione:"
+
+msgid "Мови коректора"
+msgstr "Lingue del correttore"
+
+msgid "Коди мов для коректури: en, cnr, hr, bs, it, de"
+msgstr "Codici lingua per la correzione: en, cnr, hr, bs, it, de"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Telegram"
+msgstr "Telegram"
+
+msgid "Тип каналу"
+msgstr "Tipo di canale"
+
+msgid "Адреса"
+msgstr "Indirizzo"
+
+msgid "Email, Telegram chat ID, або номер телефону"
+msgstr "Email, ID chat di Telegram o numero di telefono"
+
+msgid "Пріоритет"
+msgstr "Riprova"
+
+msgid "Менше число — вищий пріоритет"
+msgstr "Numero più basso — più in alto nella lista"
+
+msgid "Канал комунікації"
+msgstr "Canale di comunicazione"
