@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import secrets
 from typing import Any
 
 from django.core.management.base import BaseCommand
 
+from core_settings.settings.env import config
 from user.models import CommunicationChannel, User
 
 TEST_USERS = [
@@ -15,13 +17,18 @@ TEST_USERS = [
     {"email": "valentyna@fest.ua", "role": "kitchen", "first_name": "Valentyna"},
 ]
 
-DEFAULT_PASSWORD = "fest2026"
-
 
 class Command(BaseCommand):
-    help = "Create test users with known credentials (for staging/dev)."
+    help = (
+        "Create test users. Password from TEST_USER_PASSWORD env var or auto-generated."
+    )
 
     def handle(self, **options: Any) -> None:
+        password = config("TEST_USER_PASSWORD", default="")
+        if not password:
+            password = secrets.token_urlsafe(12)
+            self.stdout.write(self.style.WARNING(f"Generated password: {password}"))
+
         for data in TEST_USERS:
             user, created = User.objects.get_or_create(
                 email=data["email"],
@@ -32,7 +39,7 @@ class Command(BaseCommand):
                 },
             )
             if created:
-                user.set_password(DEFAULT_PASSWORD)
+                user.set_password(password)
                 user.save()
                 self.stdout.write(f"  {data['email']} ({data['role']}) — created")
             else:
@@ -44,6 +51,4 @@ class Command(BaseCommand):
                 defaults={"address": user.email, "is_verified": True, "priority": 0},
             )
 
-        self.stdout.write(
-            self.style.SUCCESS(f"Done. Password for all: {DEFAULT_PASSWORD}")
-        )
+        self.stdout.write(self.style.SUCCESS("Done."))

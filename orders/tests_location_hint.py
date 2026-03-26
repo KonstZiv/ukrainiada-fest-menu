@@ -24,9 +24,6 @@ def test_location_hint_saved() -> None:
 
 
 @pytest.mark.django_db
-@pytest.mark.xfail(
-    reason="Waiter dashboard renders empty body in CI — needs investigation"
-)
 def test_location_hint_shown_on_waiter_dashboard(
     client: Client, django_user_model: Any
 ) -> None:

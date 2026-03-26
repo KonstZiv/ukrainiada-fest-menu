@@ -5,6 +5,9 @@ from .env import config
 
 DEBUG = True
 
+# Allow testserver hostname used by Django TestClient.
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]  # noqa: F405
+
 # ---------------------------------------------------------------------------
 # Database — PostgreSQL via Docker Compose
 # ---------------------------------------------------------------------------
