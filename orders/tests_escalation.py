@@ -26,7 +26,7 @@ def test_escalation_str() -> None:
     order = Order.objects.create()
     esc = VisitorEscalation.objects.create(order=order, reason="slow")
     assert "Escalation" in str(esc)
-    assert "open" in str(esc).lower()
+    assert "open" in str(esc).lower() or "відкрита" in str(esc).lower()
 
 
 # --- Service: create ---

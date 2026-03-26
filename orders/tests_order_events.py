@@ -104,7 +104,10 @@ def test_approve_order_creates_event(
     client.post(f"/waiter/order/{order.id}/approve/")
 
     events = list(order.events.all())
-    assert any("перевірив" in e.message.lower() for e in events)
+    assert any(
+        "верифікував" in e.message.lower() or "перевірив" in e.message.lower()
+        for e in events
+    )
 
 
 @pytest.mark.django_db

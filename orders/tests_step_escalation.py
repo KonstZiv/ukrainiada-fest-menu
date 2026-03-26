@@ -117,6 +117,7 @@ def test_promote_stale_seniors_no_duplicate() -> None:
         StepEscalation.Step.SUBMIT_ACCEPT,
         StepEscalation.Level.SENIOR,
         order=order,
+        owner_role="senior_waiter",
     )
     StepEscalation.objects.filter(pk=esc.pk).update(
         created_at=timezone.now() - timedelta(minutes=15)

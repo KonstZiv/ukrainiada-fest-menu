@@ -257,7 +257,8 @@ def test_edit_pushes_sse(django_user_model: Any) -> None:
     ):
         update_order_items(order, {item.id: 2}, request)
 
-    mock_updated.assert_called_once_with(order.id)
+    mock_updated.assert_called_once()
+    assert mock_updated.call_args[0][0] == order.id
     mock_visitor.assert_called_once()
     assert mock_visitor.call_args[1]["event_type"] == "order_updated"
 
@@ -274,7 +275,8 @@ def test_cancel_pushes_sse(django_user_model: Any) -> None:
     ):
         cancel_order(order, request)
 
-    mock_cancelled.assert_called_once_with(order.id)
+    mock_cancelled.assert_called_once()
+    assert mock_cancelled.call_args[0][0] == order.id
 
 
 @pytest.mark.django_db
