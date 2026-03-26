@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Dobro Djelo — {% trans "Вхід через" %} {{ provider.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-3" style="max-width: 600px;">
+
+  <h2 class="mb-4">
+    <i class="bi bi-box-arrow-in-right"></i> {% blocktrans with name=provider.name %}Увійти через {{ name }}{% endblocktrans %}
+  </h2>
+
+  <p class="text-muted">
+    {% blocktrans with name=provider.name %}Ви збираєтеся увійти, використовуючи обліковий запис {{ name }}.{% endblocktrans %}
+  </p>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">
+      <i class="bi bi-check-lg me-1"></i> {% trans "Продовжити" %}
+    </button>
+    <a href="{% url 'account_login' %}" class="btn btn-outline-secondary ms-2">
+      {% trans "Скасувати" %}
+    </a>
+  </form>
+
+</div>
+{% endblock %}
