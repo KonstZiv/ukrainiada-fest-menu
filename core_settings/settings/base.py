@@ -128,6 +128,17 @@ LANGUAGES = [
 
 LANGUAGE_CODE = "uk"
 
+# Montenegrin (cnr) is not in Django's LANG_INFO — register it to avoid
+# KeyError in modeltranslation admin and get_language_info().
+import django.conf.locale  # noqa: E402
+
+django.conf.locale.LANG_INFO["cnr"] = {
+    "bidi": False,
+    "code": "cnr",
+    "name": "Montenegrin",
+    "name_local": "Crnogorski",
+}
+
 TIME_ZONE = "UTC"
 
 USE_I18N = True

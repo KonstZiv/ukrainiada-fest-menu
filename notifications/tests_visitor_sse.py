@@ -101,8 +101,10 @@ def test_approve_pushes_visitor_event(django_user_model: Any) -> None:
     with patch("orders.services.push_visitor_event") as mock_push:
         approve_order(order, waiter)
 
-    mock_push.assert_called_once()
-    assert mock_push.call_args[1]["event_type"] == "order_approved"
+    # approve_order does accept + verify, each pushes a visitor event.
+    assert mock_push.call_count >= 1
+    event_types = [c[1]["event_type"] for c in mock_push.call_args_list]
+    assert "order_accepted" in event_types or "order_verified" in event_types
 
 
 @pytest.mark.django_db

@@ -13,9 +13,9 @@ def test_manifest_json_is_valid() -> None:
     manifest_path = os.path.join("staticfiles", "manifest.json")
     with open(manifest_path) as f:
         manifest = json.load(f)
-    assert manifest["name"] == "Festival Menu — Ukrainiada"
+    assert manifest["name"] == "Український центр в Херцег-Нові, Чорногорія"
     assert manifest["display"] == "standalone"
-    assert manifest["start_url"] == "/menu/"
+    assert manifest["start_url"] == "/"
     assert len(manifest["icons"]) == 2
 
 
