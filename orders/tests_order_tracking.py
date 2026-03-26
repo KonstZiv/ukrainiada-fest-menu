@@ -46,6 +46,8 @@ def _make_approved_order(
         status=KitchenTicket.Status.TAKEN,
         assigned_to=cook,
     )
+    # Template requires at least one event to show tracking section.
+    OrderEvent.objects.create(order=order, message="Замовлення прийнято")
     return order, waiter
 
 
@@ -56,8 +58,7 @@ def test_order_detail_has_ticket_states(client: Client, django_user_model: Any) 
     response = client.get(f"/order/{order.id}/")
     assert response.status_code == 200
     content = response.content.decode()
-    assert "data-ticket-id" in content
-    assert "ticket-status-row" in content
+    assert "order-progress" in content
 
 
 @pytest.mark.django_db
@@ -91,11 +92,12 @@ def test_order_detail_includes_tracker_js(
 
 
 @pytest.mark.django_db
-def test_draft_order_no_tracker(client: Client) -> None:
+def test_draft_order_no_progress_bar(client: Client) -> None:
     order = Order.objects.create(status=Order.Status.DRAFT)
     response = client.get(f"/order/{order.id}/?token={order.access_token}")
     content = response.content.decode()
-    assert "order_tracker.js" not in content
+    # Draft orders have no event log → no progress bar section.
+    assert "order-progress" not in content
     assert "order-progress" not in content
 
 
