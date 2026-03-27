@@ -22,6 +22,7 @@ def test_channel_names() -> None:
 def test_channels_for_visitor_returns_empty() -> None:
     user = MagicMock(spec=User)
     user.role = User.Role.VISITOR
+    user.is_superuser = False
     assert channels_for_user(user) == []
 
 

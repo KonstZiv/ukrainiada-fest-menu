@@ -41,7 +41,7 @@ def render_event(event: Any) -> str:
     try:
         resolved = resolve_params(params)
         return gettext(key) % resolved
-    except (KeyError, TypeError, ValueError):
+    except KeyError, TypeError, ValueError:
         logger.warning(
             "Failed to render event %s: key=%r params=%r", event.pk, key, params
         )

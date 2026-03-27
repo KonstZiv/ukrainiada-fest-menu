@@ -100,7 +100,7 @@ def log_event(
         resolved = resolve_params(raw_params)
         try:
             fallback_message = gettext(message_key) % resolved
-        except (KeyError, TypeError, ValueError):
+        except KeyError, TypeError, ValueError:
             logger.warning(
                 "Failed to format message_key=%r params=%r", message_key, resolved
             )
