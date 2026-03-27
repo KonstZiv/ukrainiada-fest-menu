@@ -9,6 +9,7 @@ repos:
       - id: check-added-large-files
         args: ["--maxkb=500"]
       - id: debug-statements
+        language_version: python3.14
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.14
