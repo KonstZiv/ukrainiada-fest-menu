@@ -57,6 +57,8 @@ services:
       - idle_session_timeout=300000
       - -c
       - idle_in_transaction_session_timeout=120000
+    ports:
+      - "127.0.0.1:${DB_PORT_LOCALHOST:-15432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
