@@ -15,7 +15,7 @@ class ArticleForm(forms.ModelForm):
             "title",
             "description",
             "content",
-            "topic",
+            "primary_tag",
             "tags",
             "status",
             "is_urgent",
@@ -33,10 +33,22 @@ class ArticleForm(forms.ModelForm):
                 }
             ),
             "content": CKEditor5Widget(config_name="default"),
-            "topic": forms.Select(attrs={"class": "form-select"}),
+            "primary_tag": forms.Select(attrs={"class": "form-select"}),
             "tags": forms.CheckboxSelectMultiple(),
             "status": forms.Select(attrs={"class": "form-select"}),
         }
+
+    def clean(self) -> dict[str, object]:
+        cleaned: dict[str, object] = super().clean() or {}
+        primary_tag = cleaned.get("primary_tag")
+        additional_tags = cleaned.get("tags")
+        if (
+            primary_tag and additional_tags and primary_tag in additional_tags  # type: ignore[operator]
+        ):
+            raise forms.ValidationError(
+                _("Головний тег не може бути серед додаткових тегів.")
+            )
+        return cleaned
 
 
 class ArticleMainImageForm(forms.ModelForm):

@@ -25,9 +25,10 @@
              class="card-img-top" style="height: 200px; object-fit: cover;">
         {% endif %}
         <div class="card-body">
-          {% if article.topic %}
-          <span class="badge text-bg-secondary mb-1">{{ article.topic.title }}</span>
-          {% endif %}
+          <span class="badge text-bg-primary mb-1">{{ article.primary_tag.title }}</span>
+          {% for tag in article.tags.all %}
+          <span class="badge text-bg-secondary mb-1">{{ tag.title }}</span>
+          {% endfor %}
           <h6 class="card-title fw-semibold text-body">{{ article.title }}</h6>
           <p class="card-text text-muted small mb-2">{{ article.description }}</p>
           <small class="text-muted">{{ article.created_at|date:"d.m.Y" }}</small>

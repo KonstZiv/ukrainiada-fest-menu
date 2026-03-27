@@ -26,3 +26,9 @@ repos:
         types: [python]
         require_serial: true
         pass_filenames: false
+      - id: validate-po
+        name: validate .po files
+        entry: bash -c 'for f in locale/*/LC_MESSAGES/*.po; do msgfmt --check "$f" -o /dev/null || exit 1; done'
+        language: system
+        files: '\.po$'
+        pass_filenames: false

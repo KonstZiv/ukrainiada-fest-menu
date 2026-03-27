@@ -15,11 +15,9 @@
   <h2 class="fw-bold">{{ article.title }}</h2>
 
   <div class="d-flex flex-wrap gap-2 align-items-center text-muted small mb-3">
-    {% if article.topic %}
-    <span class="badge text-bg-secondary">{{ article.topic.title }}</span>
-    {% endif %}
+    <span class="badge text-bg-primary">{{ article.primary_tag.title }}</span>
     {% for tag in article.tags.all %}
-    <span class="badge text-bg-light text-muted">{{ tag.title }}</span>
+    <span class="badge text-bg-secondary">{{ tag.title }}</span>
     {% endfor %}
     <span>{{ article.created_at|date:"d.m.Y H:i" }}</span>
     {% if article.author %}

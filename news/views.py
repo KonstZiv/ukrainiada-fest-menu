@@ -44,7 +44,7 @@ def article_list(request: HttpRequest) -> HttpResponse:
     """Public list of published articles."""
     articles = (
         Article.objects.filter(status=Article.Status.PUBLISHED)
-        .select_related("main_image", "topic", "author")
+        .select_related("main_image", "primary_tag", "author")
         .prefetch_related("tags")
     )
     return render(
@@ -57,7 +57,7 @@ def article_list(request: HttpRequest) -> HttpResponse:
 def article_detail(request: HttpRequest, pk: int) -> HttpResponse:
     """Public article detail with full content."""
     qs: QuerySet[Article] = Article.objects.select_related(
-        "main_image", "topic", "author"
+        "main_image", "primary_tag", "author"
     ).prefetch_related("tags", "images")
 
     # Editors/managers see all statuses; visitors only published.

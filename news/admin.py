@@ -1,6 +1,7 @@
 """Admin registration for news models."""
 
 from django.contrib import admin
+from django.core.exceptions import ValidationError
 from modeltranslation.admin import TabbedTranslationAdmin
 
 from news.models import (
@@ -11,8 +12,6 @@ from news.models import (
     DigestSubscription,
     NewsTag,
     NewsTagLogo,
-    Topic,
-    TopicLogo,
 )
 
 
@@ -31,31 +30,29 @@ class ArticleImageInline(admin.TabularInline[ArticleImage, Article]):
 class ArticleAdmin(TabbedTranslationAdmin):
     list_display = [
         "title",
-        "topic",
+        "primary_tag",
         "author",
         "status",
         "is_urgent",
         "in_rotation",
         "created_at",
     ]
-    list_filter = ["status", "topic", "is_urgent", "in_rotation", "created_at"]
+    list_filter = ["status", "primary_tag", "is_urgent", "in_rotation", "created_at"]
     list_editable = ["status", "is_urgent", "in_rotation"]
     search_fields = ["title_uk", "title_en"]
     ordering = ["-created_at"]
     inlines = [ArticleMainImageInline, ArticleImageInline]
 
-
-class TopicLogoInline(admin.StackedInline[TopicLogo, Topic]):
-    model = TopicLogo
-    min_num = 0
-    max_num = 1
-
-
-@admin.register(Topic)
-class TopicAdmin(TabbedTranslationAdmin):
-    list_display = ["title"]
-    search_fields = ["title_uk", "title_en"]
-    inlines = [TopicLogoInline]
+    def save_related(
+        self, request: object, form: object, formsets: object, change: bool
+    ) -> None:  # type: ignore[override]
+        super().save_related(request, form, formsets, change)  # type: ignore[arg-type]
+        article = form.instance  # type: ignore[attr-defined]
+        if (
+            article.primary_tag
+            and article.tags.filter(pk=article.primary_tag_id).exists()
+        ):
+            article.tags.remove(article.primary_tag)
 
 
 class NewsTagLogoInline(admin.StackedInline[NewsTagLogo, NewsTag]):

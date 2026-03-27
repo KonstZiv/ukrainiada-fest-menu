@@ -20,50 +20,9 @@ def _upload_image(instance: object, filename: str, folder: str = "images") -> Pa
     return Path(folder) / stem
 
 
-upload_to_topic_logo = partial(_upload_image, folder="topic_logos")
 upload_to_newstag_logo = partial(_upload_image, folder="newstag_logos")
 upload_to_article_main = partial(_upload_image, folder="article_main_images")
 upload_to_article_gallery = partial(_upload_image, folder="article_gallery_images")
-
-
-class Topic(models.Model):
-    """News rubric (e.g. Culture, Sport, Events)."""
-
-    title = models.CharField(max_length=128, verbose_name=_("Назва"))
-    description = models.TextField(blank=True, default="", verbose_name=_("Опис"))
-
-    class Meta:
-        ordering = ["title"]
-        verbose_name = _("Рубрика")
-        verbose_name_plural = _("Рубрики")
-
-    def __str__(self) -> str:
-        return self.title
-
-
-class TopicLogo(models.Model):
-    """SVG logo for a news topic."""
-
-    topic = models.OneToOneField(
-        Topic,
-        on_delete=models.CASCADE,
-        related_name="logo",
-    )
-    image = models.FileField(
-        upload_to=upload_to_topic_logo,
-        validators=[
-            FileExtensionValidator(allowed_extensions=["svg"]),
-            validate_svg_content,
-        ],
-        verbose_name=_("Логотип (SVG)"),
-    )
-
-    class Meta:
-        verbose_name = _("Логотип рубрики")
-        verbose_name_plural = _("Логотипи рубрик")
-
-    def __str__(self) -> str:
-        return f"Logo: {self.topic.title}"
 
 
 class NewsTag(models.Model):
@@ -123,19 +82,19 @@ class Article(models.Model):
     content = models.TextField(
         verbose_name=_("Текст статті"),
     )
-    topic = models.ForeignKey(
-        Topic,
-        on_delete=models.SET_NULL,
+    primary_tag = models.ForeignKey(
+        NewsTag,
+        on_delete=models.PROTECT,
         null=True,
-        blank=True,
-        related_name="articles",
-        verbose_name=_("Рубрика"),
+        blank=False,
+        related_name="primary_articles",
+        verbose_name=_("Головний тег"),
     )
     tags = models.ManyToManyField(
         NewsTag,
         blank=True,
-        related_name="articles",
-        verbose_name=_("Теги"),
+        related_name="tagged_articles",
+        verbose_name=_("Додаткові теги"),
     )
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,

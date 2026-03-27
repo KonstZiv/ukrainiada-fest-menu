@@ -36,6 +36,18 @@ jobs:
       - run: uv run ruff check .
       - run: uv run ruff format --check .
 
+  validate-po:
+    name: Validate .po files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: sudo apt-get install -y gettext
+      - run: |
+          for f in locale/*/LC_MESSAGES/*.po; do
+            echo "Checking $f"
+            msgfmt --check "$f" -o /dev/null
+          done
+
   mypy:
     name: Mypy
     runs-on: ubuntu-latest

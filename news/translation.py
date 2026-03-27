@@ -2,17 +2,12 @@
 
 from modeltranslation.translator import TranslationOptions, register
 
-from news.models import Article, NewsTag, Topic
+from news.models import Article, NewsTag
 
 
 @register(Article)
 class ArticleTranslationOptions(TranslationOptions):
     fields = ("title", "description", "content")
-
-
-@register(Topic)
-class TopicTranslationOptions(TranslationOptions):
-    fields = ("title", "description")
 
 
 @register(NewsTag)

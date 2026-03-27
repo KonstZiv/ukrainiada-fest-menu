@@ -9,12 +9,12 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_save, pre_save
 
 from menu.models import Allergen, Category, Dish, Tag
-from news.models import Article, NewsTag, Topic
+from news.models import Article, NewsTag
 from translations.constants import FIELDS_MAP
 
 logger = logging.getLogger(__name__)
 
-_TRANSLATABLE_MODELS = (Category, Dish, Tag, Allergen, Article, Topic, NewsTag)
+_TRANSLATABLE_MODELS = (Category, Dish, Tag, Allergen, Article, NewsTag)
 
 
 def _uk_field_snapshot(instance: Any) -> dict[str, str | None]:
