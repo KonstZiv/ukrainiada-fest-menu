@@ -1,13 +1,12 @@
 /**
  * TerminalLog — typewriter-style event log for order tracking.
  *
- * Usage:
- *   var term = new TerminalLog(document.getElementById("terminal"), {
- *       charDelay: 25,   // ms per character (typewriter speed)
- *       lineDelay: 400,  // ms pause between lines
- *   });
- *   term.addLine("2026-03-16 17:34:22 — замовлення сформовано", true);  // instant
- *   term.addLine("2026-03-16 17:36:01 — офіціант прийняв");             // typewriter
+ * Supports two input formats:
+ *   - String: "2026-03-16 17:34:22 — message" (legacy)
+ *   - Object: {ts: "...", text: "...", msg_class: "msg-created"} (i18n)
+ *
+ * For SSE real-time events, uses _eventCatalog + _roleCatalog
+ * (injected from Django template) to translate message_key + params.
  */
 (function () {
     "use strict";
@@ -22,48 +21,76 @@
         this.cursor = null;
     }
 
-    TerminalLog.prototype.addLine = function (text, instant) {
-        console.log("[Terminal] addLine instant=" + !!instant + " text=" + text.substring(0, 80));
+    /**
+     * Add a line to the terminal log.
+     * @param {string|object} data - Either "ts — msg" string or {ts, text, msg_class}
+     * @param {boolean} instant - If true, skip typewriter animation
+     */
+    TerminalLog.prototype.addLine = function (data, instant) {
+        var parsed = this._parseInput(data);
+        var displayText = parsed.ts ? parsed.ts + " — " + parsed.text : parsed.text;
+
+        console.log("[Terminal] addLine instant=" + !!instant + " text=" + displayText.substring(0, 80));
         if (instant) {
-            this._appendLine(text);
+            this._appendLine(displayText, parsed.msg_class);
         } else {
-            this.queue.push(text);
+            this.queue.push({text: displayText, msg_class: parsed.msg_class});
             if (!this.typing) {
                 this._processQueue();
             }
         }
     };
 
-    TerminalLog.prototype._appendLine = function (text) {
+    /**
+     * Parse input into {ts, text, msg_class}.
+     */
+    TerminalLog.prototype._parseInput = function (data) {
+        if (typeof data === "object" && data !== null) {
+            return {
+                ts: data.ts || "",
+                text: data.text || "",
+                msg_class: data.msg_class || "",
+            };
+        }
+        // Legacy string: "YYYY-MM-DD HH:MM:SS — message"
+        var match = String(data).match(/^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\s—\s(.*)$/);
+        if (match) {
+            return {ts: match[1], text: match[2], msg_class: ""};
+        }
+        return {ts: "", text: String(data), msg_class: ""};
+    };
+
+    TerminalLog.prototype._appendLine = function (text, msgClass) {
         var line = document.createElement("div");
         line.className = "terminal-line";
-        line.innerHTML = this._formatLine(text);
+        line.innerHTML = this._formatLine(text, msgClass);
         this.container.appendChild(line);
         this._scrollToBottom();
     };
 
-    TerminalLog.prototype._formatLine = function (text) {
-        // Split "YYYY-MM-DD HH:MM:SS — message" into timestamp + message
+    TerminalLog.prototype._formatLine = function (text, msgClass) {
         var match = text.match(/^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\s—\s(.*)$/);
         if (match) {
-            var msgClass = this._detectMsgClass(match[2]);
+            var cls = msgClass || this._detectMsgClass(match[2]);
             return (
                 '<span class="ts">' + this._escapeHtml(match[1]) + "</span> — " +
-                '<span class="msg ' + msgClass + '">' + this._escapeHtml(match[2]) + "</span>"
+                '<span class="msg ' + cls + '">' + this._escapeHtml(match[2]) + "</span>"
             );
         }
         return '<span class="msg">' + this._escapeHtml(text) + "</span>";
     };
 
     TerminalLog.prototype._detectMsgClass = function (msg) {
+        // Fallback keyword detection for legacy events without msg_class.
         var lower = msg.toLowerCase();
-        if (lower.indexOf("сформовано") !== -1) return "msg-created";
-        if (lower.indexOf("перевірив") !== -1 || lower.indexOf("передав") !== -1) return "msg-approved";
-        if (lower.indexOf("кухня:") !== -1 && lower.indexOf("прийняв") !== -1) return "msg-kitchen";
-        if (lower.indexOf("приготував") !== -1 || lower.indexOf("✅") !== -1) return "msg-done";
-        if (lower.indexOf("усі страви готові") !== -1) return "msg-ready";
-        if (lower.indexOf("доставив") !== -1) return "msg-delivered";
-        if (lower.indexOf("оплат") !== -1) return "msg-paid";
+        if (lower.indexOf("submitted") !== -1 || lower.indexOf("сформовано") !== -1) return "msg-created";
+        if (lower.indexOf("verified") !== -1 || lower.indexOf("перевірив") !== -1) return "msg-approved";
+        if (lower.indexOf("kitchen") !== -1 && lower.indexOf("started") !== -1) return "msg-kitchen";
+        if (lower.indexOf("prepared") !== -1 || lower.indexOf("приготував") !== -1 || lower.indexOf("✅") !== -1) return "msg-done";
+        if (lower.indexOf("all dishes ready") !== -1 || lower.indexOf("усі страви готові") !== -1) return "msg-ready";
+        if (lower.indexOf("delivered") !== -1 || lower.indexOf("доставив") !== -1) return "msg-delivered";
+        if (lower.indexOf("payment") !== -1 || lower.indexOf("оплат") !== -1) return "msg-paid";
+        if (lower.indexOf("cancelled") !== -1 || lower.indexOf("скасовано") !== -1) return "msg-cancelled";
         return "";
     };
 
@@ -83,8 +110,8 @@
                 self._removeCursor();
                 return;
             }
-            var text = self.queue.shift();
-            self._typeLine(text, function () {
+            var item = self.queue.shift();
+            self._typeLine(item.text, item.msg_class, function () {
                 setTimeout(next, self.lineDelay);
             });
         }
@@ -92,13 +119,12 @@
         next();
     };
 
-    TerminalLog.prototype._typeLine = function (text, callback) {
+    TerminalLog.prototype._typeLine = function (text, msgClass, callback) {
         var self = this;
         var line = document.createElement("div");
         line.className = "terminal-line";
         this.container.appendChild(line);
 
-        // Parse into ts + msg parts for coloring
         var match = text.match(/^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\s—\s(.*)$/);
         var tsText = match ? match[1] : "";
         var separator = match ? " — " : "";
@@ -107,16 +133,15 @@
 
         var tsSpan = document.createElement("span");
         tsSpan.className = "ts";
-        var msgClass = match ? self._detectMsgClass(match[2]) : "";
+        var cls = msgClass || (match ? self._detectMsgClass(match[2]) : "");
         var msgSpan = document.createElement("span");
-        msgSpan.className = "msg" + (msgClass ? " " + msgClass : "");
+        msgSpan.className = "msg" + (cls ? " " + cls : "");
         line.appendChild(tsSpan);
 
         var charIndex = 0;
         var tsLen = tsText.length;
         var sepLen = separator.length;
 
-        // Add blinking cursor
         self._addCursor(line);
 
         function typeChar() {
@@ -125,7 +150,6 @@
                 if (charIndex < tsLen) {
                     tsSpan.textContent += ch;
                 } else if (charIndex < tsLen + sepLen) {
-                    // Separator " — " — append directly to line as text
                     if (charIndex === tsLen) {
                         var sepNode = document.createTextNode(separator);
                         line.insertBefore(sepNode, self.cursor);
@@ -138,8 +162,6 @@
 
                 charIndex++;
                 self._scrollToBottom();
-
-                // Vary speed slightly for natural feel
                 var delay = self.charDelay + Math.random() * 15 - 7;
                 setTimeout(typeChar, delay);
             } else {
@@ -169,6 +191,47 @@
         this.container.scrollTop = this.container.scrollHeight;
     };
 
+    // --- SSE message formatting ---
+
+    /**
+     * Format an SSE event using _eventCatalog and _roleCatalog.
+     * Falls back to log_line if catalog is unavailable.
+     */
+    function formatSSEEvent(data) {
+        if (!data.message_key || !window._eventCatalog) {
+            return {
+                text: data.log_line || "",
+                msg_class: data.msg_class || "",
+                ts: data.timestamp || "",
+            };
+        }
+
+        var template = window._eventCatalog[data.message_key] || data.message_key;
+        var params = data.params || {};
+
+        // Resolve staff_label from role + name.
+        if (params.staff_role && !params.staff_label) {
+            var title = params.staff_display_title || "";
+            if (!title && window._roleCatalog) {
+                title = window._roleCatalog[params.staff_role] || params.staff_role;
+            }
+            var name = params.staff_name || "";
+            params.staff_label = (title + " " + name).trim();
+        }
+
+        // Interpolate %(name)s placeholders.
+        var text = template.replace(/%\((\w+)\)s/g, function (m, key) {
+            return params[key] !== undefined ? params[key] : m;
+        });
+
+        return {
+            text: text,
+            msg_class: data.msg_class || "",
+            ts: data.timestamp || "",
+        };
+    }
+
     // Export
     window.TerminalLog = TerminalLog;
+    window.formatSSEEvent = formatSSEEvent;
 })();

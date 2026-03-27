@@ -10,6 +10,7 @@ from django.test import Client
 
 from menu.models import Category, Dish
 from orders.event_log import log_event
+from orders.event_messages import MESSAGES as EM
 from orders.models import Order, OrderEvent, OrderItem
 
 
@@ -36,12 +37,18 @@ def dish(category: Category) -> Dish:
 
 @pytest.mark.django_db
 def test_order_event_created() -> None:
-    """OrderEvent can be created with basic fields."""
+    """OrderEvent can be created with message_key and params."""
     order = Order.objects.create()
-    event = log_event(order, "Test event", actor_label="Тестер")
+    event = log_event(
+        order,
+        EM["order_cancelled"],
+        actor_label="Тестер",
+        msg_class="msg-cancelled",
+    )
     assert event.pk is not None
     assert event.order == order
-    assert event.message == "Test event"
+    assert event.message_key == EM["order_cancelled"]
+    assert event.msg_class == "msg-cancelled"
     assert event.actor_label == "Тестер"
     assert event.timestamp is not None
 
@@ -50,9 +57,9 @@ def test_order_event_created() -> None:
 def test_order_event_log_line_format() -> None:
     """log_line property formats timestamp + message."""
     order = Order.objects.create()
-    event = log_event(order, "Замовлення створено")
+    event = log_event(order, EM["order_cancelled"], msg_class="msg-cancelled")
     line = event.log_line
-    assert "Замовлення створено" in line
+    assert event.message in line
     assert "—" in line
 
 
@@ -60,8 +67,8 @@ def test_order_event_log_line_format() -> None:
 def test_order_event_ordering() -> None:
     """Events are ordered by timestamp (ascending)."""
     order = Order.objects.create()
-    e1 = log_event(order, "First")
-    e2 = log_event(order, "Second")
+    e1 = log_event(order, EM["order_cancelled"])
+    e2 = log_event(order, EM["all_ready"])
     events = list(order.events.all())
     assert events == [e1, e2]
 
@@ -71,7 +78,7 @@ def test_order_event_ordering() -> None:
 
 @pytest.mark.django_db
 def test_submit_order_creates_event(client: Client, dish: Dish) -> None:
-    """Submitting an order logs 'замовлення сформовано' event."""
+    """Submitting an order logs order_submitted event with message_key."""
     session = client.session
     session["festival_cart"] = [{"dish_id": dish.id, "quantity": 1}]
     session.save()
@@ -82,15 +89,15 @@ def test_submit_order_creates_event(client: Client, dish: Dish) -> None:
     assert order is not None
     events = list(order.events.all())
     assert len(events) == 1
-    assert "сформовано" in events[0].message.lower()
-    assert dish.title in events[0].message
+    assert events[0].message_key == EM["order_submitted"]
+    assert "items_summary" in events[0].params
 
 
 @pytest.mark.django_db
 def test_approve_order_creates_event(
     client: Client, dish: Dish, django_user_model: Any
 ) -> None:
-    """Approving an order logs event with waiter name."""
+    """Approving an order logs event with message_key."""
     order = Order.objects.create(status=Order.Status.SUBMITTED)
     OrderItem.objects.create(order=order, dish=dish, quantity=1)
 
@@ -104,15 +111,13 @@ def test_approve_order_creates_event(
     client.post(f"/waiter/order/{order.id}/approve/")
 
     events = list(order.events.all())
-    assert any(
-        "верифікував" in e.message.lower() or "перевірив" in e.message.lower()
-        for e in events
-    )
+    keys = [e.message_key for e in events]
+    assert EM["order_accepted"] in keys or EM["order_verified"] in keys
 
 
 @pytest.mark.django_db
 def test_deliver_order_creates_event(django_user_model: Any) -> None:
-    """Delivering an order logs event."""
+    """Delivering an order logs event with message_key."""
     from orders.services import deliver_order
 
     waiter = django_user_model.objects.create_user(
@@ -145,12 +150,13 @@ def test_deliver_order_creates_event(django_user_model: Any) -> None:
 
     deliver_order(order, waiter)
     events = list(order.events.all())
-    assert any("доставив" in e.message.lower() for e in events)
+    keys = [e.message_key for e in events]
+    assert EM["order_delivered"] in keys
 
 
 @pytest.mark.django_db
 def test_cash_payment_creates_event(django_user_model: Any) -> None:
-    """Confirming cash payment logs event."""
+    """Confirming cash payment logs event with message_key."""
     from orders.services import confirm_cash_payment
 
     waiter = django_user_model.objects.create_user(
@@ -167,15 +173,17 @@ def test_cash_payment_creates_event(django_user_model: Any) -> None:
 
     confirm_cash_payment(order, waiter=waiter)
     events = list(order.events.all())
-    assert any("оплату" in e.message.lower() for e in events)
+    keys = [e.message_key for e in events]
+    assert EM["cash_payment"] in keys
 
 
 @pytest.mark.django_db
 def test_online_payment_creates_event() -> None:
-    """Online payment stub logs event."""
+    """Online payment stub logs event with message_key."""
     from orders.services import confirm_online_payment_stub
 
     order = Order.objects.create(payment_status=Order.PaymentStatus.UNPAID)
     confirm_online_payment_stub(order)
     events = list(order.events.all())
-    assert any("онлайн" in e.message.lower() for e in events)
+    keys = [e.message_key for e in events]
+    assert EM["online_payment"] in keys

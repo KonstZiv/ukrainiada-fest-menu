@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-26 10:13+0000\n"
+"POT-Creation-Date: 2026-03-27 13:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,382 +18,663 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
+#: feedback/models.py:17
 msgid "❤️ Чудово"
 msgstr "❤️ Odlično"
 
+#: feedback/models.py:18
 msgid "😊 Добре"
 msgstr "😊 Dobro"
 
+#: feedback/models.py:19
 msgid "😐 Нормально"
 msgstr "😐 U redu"
 
+#: feedback/models.py:20
 msgid "😕 Не дуже"
 msgstr "😕 Nije baš dobro"
 
+#: feedback/models.py:26 templates/orders/cart.html:4
+#: templates/orders/cart.html:14 templates/orders/manager_dashboard.html:70
+#: templates/orders/waiter_order_detail.html:4
+#: templates/orders/waiter_order_detail.html:13
+#: templates/orders/waiter_order_list.html:100
 msgid "Замовлення"
 msgstr "Narudžba"
 
+#: feedback/models.py:31
 msgid "Ім'я відвідувача"
 msgstr "Ime gosta"
 
+#: feedback/models.py:36
 msgid "Настрій"
 msgstr "Raspoloženje"
 
+#: feedback/models.py:41 news/models.py:180
 msgid "Повідомлення"
 msgstr "Poruka"
 
+#: feedback/models.py:52
 msgid "Відгук"
 msgstr "Recenzija"
 
+#: feedback/models.py:53
 msgid "Відгуки"
 msgstr "Recenzije"
 
+#: feedback/views.py:35
 msgid "Дякуємо за відгук! 🙏"
 msgstr "Hvala na recenziji! 🙏"
 
+#: feedback/views.py:71
 msgid "Відгук опубліковано."
 msgstr "Recenzija je objavljena."
 
+#: feedback/views.py:74
 msgid "Відгук виділено і опубліковано."
 msgstr "Recenzija je istaknuta i objavljena."
 
+#: feedback/views.py:77
 msgid "Відгук видалено."
 msgstr "Recenzija je obrisana."
 
+#: kitchen/models.py:22
 msgid "Страва"
 msgstr "Jelo"
 
+#: kitchen/models.py:29 kitchen/models.py:74
 msgid "Кухар"
 msgstr "Kuhar"
 
+#: kitchen/models.py:34 kitchen/models.py:35
 msgid "Розподіл кухні"
 msgstr "Raspodjela u kuhinji"
 
+#: kitchen/models.py:52 translations/models.py:16
 msgid "Очікує"
 msgstr "Na čekanju"
 
+#: kitchen/models.py:53 orders/models.py:19 orders/views.py:247
 msgid "Готується"
 msgstr "Priprema se"
 
+#: kitchen/models.py:54 orders/models.py:20 orders/views.py:248
+#: templates/components/_waiter_order_accordion_item.html:57
+#: templates/components/_waiter_order_accordion_item.html:59
+#: templates/kitchen/_team_section.html:48
+#: templates/kitchen/_ticket_card.html:50 templates/kitchen/dashboard.html:79
+#: templates/kitchen/dashboard.html:145 templates/orders/order_detail.html:184
 msgid "Готово"
 msgstr "Spremno"
 
+#: kitchen/models.py:57 menu/models.py:72
 msgid "Немає"
 msgstr "Nema"
 
+#: kitchen/models.py:58 user/models.py:75
 msgid "Старший кухні"
 msgstr "Šef kuhinje"
 
+#: kitchen/models.py:59 orders/models.py:215 orders/models.py:281
+#: templates/orders/senior_waiter_dashboard.html:23 user/models.py:74
 msgid "Менеджер"
 msgstr "Menadžer"
 
+#: kitchen/models.py:65
 msgid "Позиція замовлення"
 msgstr "Stavka narudžbe"
 
+#: kitchen/models.py:104
 msgid "Тікет кухні"
 msgstr "Nalog za kuhinju"
 
+#: kitchen/models.py:105
 msgid "Тікети кухні"
 msgstr "Nalozi za kuhinju"
 
+#: kitchen/models.py:142 templates/kitchen/handoff_select_waiter.html:8
 msgid "Передача страви"
 msgstr "Prijenos jela"
 
+#: kitchen/models.py:143
 msgid "Передачі страв"
 msgstr "Prijenosi jela"
 
+#: kitchen/views.py:325
 #, python-brace-format
 msgid "'{dish_title}' — пропущено: {skipped}"
 msgstr "'{dish_title}' — preskočeno: {skipped}"
 
+#: kitchen/views.py:363
 msgid "Обраний офіціант не знайдений або не має відповідної ролі."
 msgstr "Odabrani konobar nije pronađen ili nema odgovarajuću ulogu."
 
+#: menu/forms.py:103 menu/forms.py:335
 msgid "Назва логотипу"
 msgstr "Naziv logotipa"
 
+#: menu/forms.py:262
 msgid "Оберіть хоча б один тег для страви."
 msgstr "Odaberite barem jednu oznaku za jelo."
 
+#: menu/forms.py:305 menu/forms.py:375 news/forms.py:60 news/forms.py:91
+#: news/models.py:138 news/models.py:156
 msgid "Назва зображення"
 msgstr "Naziv slike"
 
+#: menu/models.py:52
 msgid "Порядок у меню"
 msgstr "Redoslijed u meniju"
 
+#: menu/models.py:53
 msgid "Менше число — вище у списку"
 msgstr "Manji broj — viša pozicija na listi"
 
+#: menu/models.py:70
 msgid "В наявності"
 msgstr "Dostupno"
 
+#: menu/models.py:71
 msgid "Закінчується — уточнюйте у офіціанта"
 msgstr "Na izmaku — provjerite s konobarom"
 
+#: menu/models.py:88
 msgid "Алергени"
 msgstr "Alergeni"
 
+#: menu/models.py:95
 msgid "Наявність"
 msgstr "Dostupnost"
 
+#: menu/validators.py:97
 msgid "Файл не є валідним SVG. Завантажте файл у форматі SVG."
 msgstr "Datoteka nije ispravan SVG. Učitajte datoteku u SVG formatu."
 
+#: news/forms.py:26
 msgid "Заголовок статті"
 msgstr "Na početnu"
 
+#: news/forms.py:32
 msgid "Короткий опис для анонсу"
 msgstr "Kratak opis za najavu"
 
+#: news/forms.py:49
+msgid "Головний тег не може бути серед додаткових тегів."
+msgstr ""
+
+#: news/forms.py:77
 msgid "Ваш коментар..."
 msgstr "Komentar"
 
+#: news/models.py:31
+msgid "Назва"
+msgstr ""
+
+#: news/models.py:32
+msgid "Опис"
+msgstr ""
+
+#: news/models.py:36
+#, fuzzy
+#| msgid "До новин"
+msgid "Тег новин"
+msgstr "Osvježi"
+
+#: news/models.py:37
+#, fuzzy
+#| msgid "До новин"
+msgid "Теги новин"
+msgstr "Osvježi"
+
+#: news/models.py:57
+#, fuzzy
+#| msgid "Логотип тега"
+msgid "Логотип (SVG)"
+msgstr "Logo oznake"
+
+#: news/models.py:61 templates/menu/tag_form.html:60
+msgid "Логотип тега"
+msgstr "Logo oznake"
+
+#: news/models.py:62
+#, fuzzy
+#| msgid "Логотип тега"
+msgid "Логотипи тегів"
+msgstr "Logo oznake"
+
+#: news/models.py:72 orders/models.py:15
 msgid "Чернетка"
 msgstr "Nacrt"
 
+#: news/models.py:73
 msgid "Опублікована"
 msgstr "Objavi"
 
+#: news/models.py:74
 msgid "Архівована"
 msgstr "Verifikovano"
 
+#: news/models.py:76
 msgid "Заголовок"
 msgstr "Na početnu"
 
+#: news/models.py:79
 msgid "Короткий опис"
 msgstr "Kratak opis"
 
+#: news/models.py:80
 msgid "Анонс для списку новин"
 msgstr "Najava za listu vijesti"
 
+#: news/models.py:83
 msgid "Текст статті"
 msgstr "Tekst članka"
 
-msgid "Рубрика"
-msgstr "Rubrika"
+#: news/models.py:91
+#, fuzzy
+#| msgid "Новий тег"
+msgid "Головний тег"
+msgstr "Novi tag"
 
-msgid "Теги"
-msgstr "Tagovi"
+#: news/models.py:97
+#, fuzzy
+#| msgid "Додаткові фото"
+msgid "Додаткові теги"
+msgstr "Dodatne fotografije"
 
+#: news/models.py:104
 msgid "Автор"
 msgstr "Ponovi"
 
+#: news/models.py:111
 msgid "Статус"
 msgstr "Status:"
 
+#: news/models.py:115
 msgid "Термінова"
 msgstr "Hitno!"
 
+#: news/models.py:116
 msgid "Термінові новини надсилаються підписникам негайно"
 msgstr "Hitne vijesti se odmah šalju pretplatnicima"
 
+#: news/models.py:120
 msgid "В ротації"
 msgstr "U pripremi"
 
+#: news/models.py:121
 msgid "Показувати в каруселі на головній"
 msgstr "Prikaži u karuselu na početnoj stranici"
 
+#: news/models.py:128
 msgid "Стаття"
 msgstr "Status:"
 
+#: news/models.py:129
 msgid "Статті"
 msgstr "Status:"
 
+#: news/models.py:141 templates/menu/dish_form.html:72
+#: templates/news/article_form.html:34
 msgid "Головне зображення"
 msgstr "Glavna slika"
 
+#: news/models.py:159
 msgid "Додаткове зображення"
 msgstr "dodatna slika"
 
+#: news/models.py:179
 msgid "Мова"
 msgstr "Jezik"
 
+#: news/models.py:181
 msgid "Сторінка"
 msgstr "Stranica"
 
+#: news/models.py:192 templates/news/article_detail.html:123
 msgid "Зауваження до перекладу"
 msgstr "Odobravanje prijevoda"
 
+#: news/models.py:193
 msgid "Зауваження до перекладів"
 msgstr "Odobravanje prijevoda"
 
+#: news/models.py:203 templates/news/article_detail.html:72
 msgid "На розгляді"
 msgstr "Na čekanju"
 
+#: news/models.py:204
 msgid "Схвалений"
 msgstr "Odobren"
 
+#: news/models.py:205
 msgid "Відхилений"
 msgstr "Odbijen"
 
+#: news/models.py:219 orders/models.py:228
 msgid "Коментар"
 msgstr "Komentar"
 
+#: news/models.py:238
 msgid "Коментар до статті"
 msgstr "Komentar"
 
+#: news/models.py:239
 msgid "Коментарі до статей"
 msgstr "Spremne za dostavu"
 
+#: news/models.py:249
 msgid "Щоденно"
 msgstr "Dnevno"
 
+#: news/models.py:250
 msgid "Щотижня"
 msgstr "Sedmično"
 
+#: news/models.py:251
 msgid "Тільки термінові"
 msgstr "Hitno!"
 
+#: news/models.py:262 templates/news/subscription.html:25
 msgid "Частота"
 msgstr "Primijeni"
 
+#: news/models.py:264
 msgid "Активна"
 msgstr "Aktivne"
 
+#: news/models.py:269
 msgid "Підписка на дайджест"
 msgstr "Pretplata na sažetak"
 
+#: news/models.py:270
 msgid "Підписки на дайджести"
 msgstr "Pretplate na sažetke"
 
+#: news/views.py:274
 msgid "Дякуємо за зауваження!"
 msgstr "Hvala na recenziji!"
 
+#: news/views.py:297
 msgid "Коментар надіслано на модерацію."
 msgstr "Komentar je poslan na moderaciju."
 
+#: news/views.py:324
 msgid "Коментар схвалено."
 msgstr "Komentar"
 
+#: news/views.py:335
 msgid "Коментар відхилено."
 msgstr "Komentar"
 
+#: news/views.py:358
 msgid "Підписку оновлено."
 msgstr "Recenzija je obrisana."
 
+#: news/views.py:362
 msgid "Підписку деактивовано."
 msgstr "Recenzija je objavljena."
 
+#: news/views.py:366
 msgid "Підписку відновлено."
 msgstr "Recenzija je obrisana."
 
+#: orders/event_messages.py:12
+#, python-format
+msgid "Order submitted: %(items_summary)s"
+msgstr "Narudžba poslana: %(items_summary)s"
+
+#: orders/event_messages.py:13
+#, python-format
+msgid "%(staff_label)s accepted the order"
+msgstr "%(staff_label)s je prihvatio narudžbu"
+
+#: orders/event_messages.py:15
+#, python-format
+msgid "%(staff_label)s verified the order and sent it to the kitchen"
+msgstr "%(staff_label)s je potvrdio narudžbu i poslao je u kuhinju"
+
+#: orders/event_messages.py:18
+#, python-format
+msgid "Auto: %(staff_label)s skipped kitchen — %(count)s dishes auto-closed"
+msgstr ""
+"Auto: %(staff_label)s je preskočio kuhinju — %(count)s jela automatski "
+"zatvoreno"
+
+#: orders/event_messages.py:21
+#, python-format
+msgid "%(staff_label)s delivered the order"
+msgstr "%(staff_label)s je isporučio narudžbu"
+
+#: orders/event_messages.py:23
+#, python-format
+msgid ""
+"Auto: %(staff_label)s delivered %(dish_title)s (kitchen: %(old_status)s → "
+"Done)"
+msgstr ""
+"Auto: %(staff_label)s je isporučio %(dish_title)s (kuhinja: %(old_status)s "
+"→ Gotovo)"
+
+#: orders/event_messages.py:26
+#, python-format
+msgid "%(staff_label)s delivered %(dish_title)s"
+msgstr "%(staff_label)s je isporučio %(dish_title)s"
+
+#: orders/event_messages.py:28
+#, python-format
+msgid "%(staff_label)s delivered the order (all portions)"
+msgstr "%(staff_label)s je isporučio narudžbu (sve porcije)"
+
+#: orders/event_messages.py:31
+#, python-format
+msgid "Cash payment €%(price)s accepted by %(staff_label)s"
+msgstr "Gotovinsko plaćanje €%(price)s prihvatio je %(staff_label)s"
+
+#: orders/event_messages.py:33
+#, python-format
+msgid "Online payment €%(price)s — success"
+msgstr "Online plaćanje €%(price)s — uspješno"
+
+#: orders/event_messages.py:35
+#, python-format
+msgid "%(method_label)s payment €%(price)s confirmed by senior waiter"
+msgstr ""
+"Plaćanje putem %(method_label)s u iznosu €%(price)s potvrdio je stariji "
+"konobar"
+
+#: orders/event_messages.py:37
+#, python-format
+msgid "Order modified: %(summary)s"
+msgstr "Narudžba izmijenjena: %(summary)s"
+
+#: orders/event_messages.py:38
+msgid "Order cancelled"
+msgstr "Narudžba otkazana"
+
+#: orders/event_messages.py:40
+#, python-format
+msgid "Kitchen: %(staff_label)s started preparing %(dish_title)s"
+msgstr "Kuhinja: %(staff_label)s je započeo pripremu %(dish_title)s"
+
+#: orders/event_messages.py:43
+#, python-format
+msgid "Auto: %(staff_label)s skipped 'Take' step for %(dish_title)s"
+msgstr "Auto: %(staff_label)s je preskočio korak 'Uzmi' za %(dish_title)s"
+
+#: orders/event_messages.py:45
+#, python-format
+msgid "Kitchen: %(staff_label)s prepared %(dish_title)s"
+msgstr "Kuhinja: %(staff_label)s je pripremio %(dish_title)s"
+
+#: orders/event_messages.py:46
+msgid "All dishes ready! Waiting for waiter to deliver"
+msgstr "Sva jela spremna! Čeka se konobar da isporuči"
+
+#: orders/event_messages.py:48
+#, python-format
+msgid "Kitchen: %(staff_label)s handed off %(dish_title)s to waiter"
+msgstr "Kuhinja: %(staff_label)s je predao %(dish_title)s konobaru"
+
+#: orders/models.py:16 orders/views.py:244
 msgid "Створено"
 msgstr "Kreirano"
 
+#: orders/models.py:17 orders/views.py:245
 msgid "Прийнято"
 msgstr "Prihvaćeno"
 
+#: orders/models.py:18 orders/views.py:246 templates/user/channels.html:28
+#: templates/user/profile.html:88 user/models.py:234
 msgid "Верифіковано"
 msgstr "Verifikovano"
 
+#: orders/models.py:21 orders/views.py:249
+#: templates/components/_waiter_order_accordion_item.html:98
 msgid "Доставлено"
 msgstr "Dostavljeno"
 
+#: orders/models.py:22
 msgid "Скасовано"
 msgstr "Otkazano"
 
+#: orders/models.py:25
 msgid "Не оплачено"
 msgstr "Nije plaćeno"
 
+#: orders/models.py:26
 msgid "Оплачено"
 msgstr "Plaćeno"
 
+#: orders/models.py:29
 msgid "Не визначено"
 msgstr "Nedefinisano"
 
+#: orders/models.py:30 templates/orders/senior_waiter_dashboard.html:52
 msgid "Готівка"
 msgstr "Gotovina"
 
+#: orders/models.py:31 templates/orders/senior_waiter_dashboard.html:53
 msgid "Онлайн"
 msgstr "Online"
 
+#: orders/models.py:77
 msgid "Де вас знайти (необов'язково)"
 msgstr "Gdje da vas nađemo (opcionalno)"
 
+#: orders/models.py:207
 msgid "Довго чекаю"
 msgstr "Dugo čekam"
 
+#: orders/models.py:208
 msgid "Щось не те"
 msgstr "Nešto nije u redu"
 
+#: orders/models.py:209
 msgid "Маю питання"
 msgstr "Imam pitanje"
 
+#: orders/models.py:210
 msgid "Інше"
 msgstr "Ostalo"
 
+#: orders/models.py:213 templates/kitchen/handoff_select_waiter.html:25
+#: user/models.py:78
 msgid "Офіціант"
 msgstr "Konobar"
 
+#: orders/models.py:214 templates/orders/senior_waiter_dashboard.html:25
+#: user/models.py:77
 msgid "Старший офіціант"
 msgstr "Glavni konobar"
 
+#: orders/models.py:218
 msgid "Відкрита"
 msgstr "Otvorena"
 
+#: orders/models.py:219
 msgid "Побачено"
 msgstr "Viđeno"
 
+#: orders/models.py:220
 msgid "Вирішено"
 msgstr "Riješeno"
 
+#: orders/models.py:272
 msgid "Прийняття замовлення"
 msgstr "Prihvatanje narudžbe"
 
+#: orders/models.py:273
 msgid "Верифікація"
 msgstr "Verifikacija"
 
+#: orders/models.py:274
 msgid "Взяття тікета кухарем"
 msgstr "Preuzimanje narudžbe od strane kuhara"
 
+#: orders/models.py:275
 msgid "Приготування"
 msgstr "Priprema"
 
+#: orders/models.py:276
 msgid "Передача офіціанту"
 msgstr "Predaja konobaru"
 
+#: orders/models.py:277
 msgid "Оплата"
 msgstr "Plaćanje"
 
+#: orders/models.py:280
 msgid "Старший"
 msgstr "Glavni"
 
+#: orders/views.py:167
 msgid "Кошик порожній або страви недоступні."
 msgstr "Korpa je prazna ili jela nisu dostupna."
 
+#: orders/views.py:421
 msgid "Оплату підтверджено!"
 msgstr "Plaćanje potvrđeno!"
 
+#: orders/views.py:440
 msgid "Ваше звернення надіслано!"
 msgstr "Vaš zahtjev je poslan!"
 
+#: orders/waiter_views.py:332
 #, python-brace-format
 msgid "#{order_id} — пропущені кроки: {skipped}"
 msgstr "#{order_id} — preskočeni koraci: {skipped}"
 
+#: orders/waiter_views.py:387
 #, python-brace-format
 msgid "#{order_id} оплата — пропущені кроки: {skipped}"
 msgstr "#{order_id} plaćanje — preskočeni koraci: {skipped}"
 
+#: orders/waiter_views.py:409
 msgid "Цей QR-код призначений іншому офіціанту."
 msgstr "Ovaj QR kod je namijenjen drugom konobaru."
 
+#: orders/waiter_views.py:462
 msgid "Звернення позначено як побачене."
 msgstr "Zahtjev je označen kao viđen."
 
+#: orders/waiter_views.py:478
 msgid "Звернення вирішено."
 msgstr "Zahtjev je riješen."
 
+#: orders/waiter_views.py:535
 #, python-brace-format
 msgid "Оплату замовлення #{order_id} підтверджено."
 msgstr "Plaćanje za narudžbu #{order_id} je potvrđeno."
 
+#: templates/403.html:10
 msgid "Доступ заборонено"
 msgstr "Pristup odbijen"
 
+#: templates/403.html:11
 msgid "У вас немає доступу до цього замовлення."
 msgstr "Nemate pristup ovoj narudžbi."
 
+#: templates/403.html:12
 msgid ""
 "Якщо це ваше замовлення — скористайтесь посиланням з QR-коду або увійдіть до "
 "свого акаунту."
@@ -401,379 +682,690 @@ msgstr ""
 "Ako je ovo vaša narudžba — iskoristite link iz QR koda ili se prijavite na "
 "svoj račun."
 
+#: templates/403.html:15 templates/registration/password_change_done.html:31
+#: templates/registration/password_reset_done.html:38
 msgid "На головну"
 msgstr "Na početnu"
 
+#: templates/403.html:18 templates/account/login.html:57
+#: templates/account/password_reset_done.html:18
+#: templates/account/password_reset_from_key_done.html:18
+#: templates/account/signup.html:77 templates/registration/login.html:60
+#: templates/registration/password_reset_complete.html:28
+#: templates/registration/password_reset_done.html:35
+#: templates/user/sign_up.html:56
 msgid "Увійти"
 msgstr "Prijavi se"
 
+#: templates/account/login.html:5 templates/account/login.html:12
+#: templates/registration/login.html:18 templates/registration/login.html:26
 msgid "Вхід"
 msgstr "Prijava"
 
+#: templates/account/login.html:17 templates/registration/login.html:32
 msgid "Невірна електронна пошта або пароль. Спробуйте ще раз."
 msgstr "Pogrešan e-mail ili lozinka. Pokušajte ponovo."
 
+#: templates/account/login.html:32 templates/socialaccount/login.html:10
 #, python-format
 msgid "Увійти через %(name)s"
 msgstr "Prijavi se putem %(name)s"
 
+#: templates/account/login.html:36 templates/account/signup.html:30
 msgid "або"
 msgstr "Do"
 
+#: templates/account/login.html:45 templates/account/password_reset.html:27
+#: templates/account/signup.html:46 templates/registration/login.html:45
+#: templates/registration/password_reset_form.html:38 user/forms.py:30
+#: user/models.py:39
 msgid "Електронна пошта"
 msgstr "E-mail"
 
+#: templates/account/login.html:52 templates/registration/login.html:52
 msgid "Пароль"
 msgstr "Lozinka"
 
+#: templates/account/login.html:60 templates/account/logout.html:21
+#: templates/account/password_change.html:34
+#: templates/account/password_reset.html:37 templates/account/signup.html:70
+#: templates/menu/category_confirm_delete.html:70
+#: templates/menu/category_form.html:105
+#: templates/menu/dish_confirm_delete.html:70 templates/menu/dish_form.html:157
+#: templates/menu/tag_confirm_delete.html:61 templates/menu/tag_form.html:82
+#: templates/news/article_confirm_delete.html:23
+#: templates/news/article_detail.html:132 templates/news/article_form.html:76
+#: templates/orders/order_detail.html:250 templates/registration/login.html:63
+#: templates/registration/password_change_form.html:54
+#: templates/registration/password_reset_form.html:46
+#: templates/socialaccount/login.html:23 templates/socialaccount/signup.html:42
+#: templates/translations/edit.html:50 templates/user/profile_edit.html:50
+#: templates/user/sign_up.html:47
 msgid "Скасувати"
 msgstr "Otkaži"
 
+#: templates/account/login.html:66 templates/registration/login.html:70
 msgid "Ще не маєте акаунту?"
 msgstr "Nemate nalog?"
 
+#: templates/account/login.html:67 templates/account/signup.html:67
+#: templates/orders/order_history.html:18 templates/registration/login.html:71
+#: templates/socialaccount/signup.html:39 templates/user/profile.html:123
+#: templates/user/sign_up.html:44
 msgid "Зареєструватись"
 msgstr "Registrujte se"
 
+#: templates/account/login.html:70 templates/registration/login.html:74
 msgid "Забули пароль?"
 msgstr "Zaboravili ste lozinku?"
 
+#: templates/account/login.html:71 templates/registration/login.html:75
 msgid "Скинути пароль"
 msgstr "Resetovanje lozinke"
 
+#: templates/account/logout.html:4 templates/account/logout.html:10
+msgid "Вихід"
+msgstr ""
+
+#: templates/account/logout.html:13
+msgid "Ви впевнені, що хочете вийти?"
+msgstr ""
+
+#: templates/account/logout.html:18
+msgid "Вийти"
+msgstr ""
+
+#: templates/account/password_change.html:4
+#: templates/account/password_change.html:10
+#: templates/registration/password_change_form.html:15
+#: templates/registration/password_change_form.html:22
+msgid "Зміна пароля"
+msgstr "Promjena lozinke"
+
+#: templates/account/password_change.html:31
+#: templates/registration/password_change_form.html:51
+msgid "Змінити пароль"
+msgstr "Promijeni lozinku"
+
+#: templates/account/password_reset.html:4
+#: templates/account/password_reset.html:10
+#: templates/registration/password_reset_form.html:18
+#: templates/registration/password_reset_form.html:25
+msgid "Скидання пароля"
+msgstr "Resetovanje lozinke"
+
+#: templates/account/password_reset.html:14
+#, fuzzy
+#| msgid "Введіть електронну пошту, пов'язану з вашим акаунтом."
+msgid ""
+"Введіть електронну пошту, пов'язану з вашим акаунтом. Ми надішлемо посилання "
+"для скидання пароля."
+msgstr "Unesite e-mail adresu povezanu s vašim računom."
+
+#: templates/account/password_reset.html:34
+#: templates/registration/password_reset_form.html:43
+msgid "Надіслати посилання"
+msgstr "Pošalji link"
+
+#: templates/account/password_reset_done.html:4
+#, fuzzy
+#| msgid "Підтвердження пароля"
+msgid "Відновлення пароля"
+msgstr "Potvrda lozinke"
+
+#: templates/account/password_reset_done.html:10
+#: templates/registration/password_reset_done.html:12
+#: templates/registration/password_reset_done.html:19
+msgid "Посилання надіслано"
+msgstr "Link poslan"
+
+#: templates/account/password_reset_done.html:14
+msgid ""
+"Ми відправили вам електронного листа. Якщо ви його не отримали, перевірте "
+"папку «Спам»."
+msgstr ""
+
+#: templates/account/password_reset_from_key.html:4
+#: templates/account/password_reset_from_key.html:21
+#: templates/registration/password_reset_confirm.html:19
+#: templates/registration/password_reset_confirm.html:28
+msgid "Новий пароль"
+msgstr "Nova lozinka"
+
+#: templates/account/password_reset_from_key.html:11
+#: templates/registration/password_reset_confirm.html:55
+msgid "Посилання недійсне"
+msgstr "Link je nevažeći"
+
+#: templates/account/password_reset_from_key.html:14
+#, fuzzy
+#| msgid "Посилання для скидання пароля недійсне або вже було використане."
+msgid ""
+"Посилання для скидання пароля недійсне або вже було використане. Запросіть "
+"нове посилання."
+msgstr "Link za resetovanje lozinke je nevažeći ili je već iskorišten."
+
+#: templates/account/password_reset_from_key.html:17
+#: templates/registration/password_reset_confirm.html:65
+msgid "Надіслати повторно"
+msgstr "Pošalji ponovo"
+
+#: templates/account/password_reset_from_key.html:41
+#: templates/registration/password_reset_confirm.html:47
+msgid "Зберегти пароль"
+msgstr "Sačuvaj lozinku"
+
+#: templates/account/password_reset_from_key_done.html:4
+#: templates/account/password_reset_from_key_done.html:10
+#: templates/registration/password_change_done.html:12
+#: templates/registration/password_change_done.html:19
+#: templates/registration/password_reset_complete.html:12
+#: templates/registration/password_reset_complete.html:19
+msgid "Пароль змінено"
+msgstr "Lozinka promijenjena"
+
+#: templates/account/password_reset_from_key_done.html:14
+#: templates/registration/password_reset_complete.html:23
+msgid "Ваш пароль успішно змінено. Тепер ви можете увійти з новим паролем."
+msgstr ""
+"Vaša lozinka je uspješno promijenjena. Sada se možete prijaviti sa novom "
+"lozinkom.Vaša lozinka je uspješno promijenjena. Sada se možete prijaviti sa "
+"novom lozinkom.Vaša lozinka je uspješno promijenjena. Sada se možete "
+"prijaviti sa novom lozinkom."
+
+#: templates/account/signup.html:5 templates/account/signup.html:12
+#: templates/user/sign_up.html:15 templates/user/sign_up.html:23
 msgid "Реєстрація"
 msgstr "Registracija"
 
+#: templates/account/signup.html:26
 #, fuzzy, python-format
 msgid "Зареєструватись через %(name)s"
 msgstr "Registrujte se"
 
+#: templates/account/signup.html:54 user/forms.py:103
 msgid "Пароль (мінімум 8 символів, не лише цифри)"
 msgstr "Lozinka (minimalno 8 znakova, ne samo brojevi)"
 
+#: templates/account/signup.html:61 user/forms.py:111
 msgid "Підтвердження пароля"
 msgstr "Potvrda lozinke"
 
+#: templates/account/signup.html:76 templates/user/sign_up.html:55
 msgid "Вже маєте акаунт?"
 msgstr "Već imate račun?"
 
+#: templates/base.html:64
 msgid "Меню"
 msgstr "Meni"
 
+#: templates/base.html:111
 msgid ""
 "Цей сервіс є некомерційним проєктом Українського центру в Херцег-Нові для "
 "підтримки спільноти."
 msgstr ""
-"Ovaj servis je nekomercijalni projekat Ukrajinskog centra u Herceg Novom "
-"za podršku zajednici."
+"Ovaj servis je nekomercijalni projekat Ukrajinskog centra u Herceg Novom za "
+"podršku zajednici."
 
+#: templates/base.html:112 templates/legal/privacy.html:4
 msgid "Політика конфіденційності"
 msgstr "Politika privatnosti"
 
+#: templates/base.html:113 templates/legal/terms.html:4
 msgid "Умови використання"
 msgstr "Uslovi korištenja"
 
+#: templates/base.html:127 templates/orders/waiter_order_list.html:136
 msgid "Закрити"
 msgstr "Zatvori"
 
+#: templates/components/_back_button.html:7
+#: templates/menu/search_results.html:28
 msgid "Назад"
 msgstr "Nazad"
 
+#: templates/components/_install_pwa.html:7
 msgid "Встановити додаток"
 msgstr "Potvrdi plaćanje"
 
+#: templates/components/_install_pwa.html:12
 msgid "Натисніть"
 msgstr "Pritisnite za zvuk"
 
+#: templates/components/_install_pwa.html:14
 msgid "та оберіть «На Початковий екран»"
 msgstr "i odaberite «Na početni ekran»"
 
+#: templates/components/_nav_pills.html:33 templates/menu/category_list.html:29
 msgid "Категорії"
 msgstr "Kategorije"
 
+#: templates/components/_nav_pills.html:40 templates/menu/tag_list.html:25
+msgid "Теги"
+msgstr "Tagovi"
+
+#: templates/components/_navbar.html:54
 msgid "Оновити"
 msgstr "Osvježi"
 
+#: templates/components/_navbar.html:61 templates/components/_navbar.html:153
 msgid "ПЕРЕКЛАДИ"
 msgstr "PRIJEVODI"
 
+#: templates/components/_navbar.html:73
 msgid "АДМІНІСТРУВАННЯ"
 msgstr "ADMINISTRACIJA"
 
+#: templates/components/_navbar.html:76
 msgid "Створити"
 msgstr "Kreiraj"
 
+#: templates/components/_navbar.html:79 templates/menu/category_form.html:31
+#: templates/orders/manager_dashboard.html:92
 msgid "Нова категорія"
 msgstr "Nova kategorija"
 
+#: templates/components/_navbar.html:84 templates/menu/tag_form.html:26
+#: templates/orders/manager_dashboard.html:97
 msgid "Новий тег"
 msgstr "Novi tag"
 
+#: templates/components/_navbar.html:89 templates/menu/dish_form.html:30
+#: templates/orders/manager_dashboard.html:102
 msgid "Нова страва"
 msgstr "Novo jelo"
 
+#: templates/components/_navbar.html:132 templates/components/_navbar.html:184
+#: templates/components/_order_fab.html:6
 msgid "ЗАМОВЛЕННЯ"
 msgstr "NARUDŽBE"
 
+#: templates/components/_navbar.html:139
 msgid "КУХНЯ"
 msgstr "KUHINJA"
 
+#: templates/components/_navbar.html:146
 msgid "НОВИНИ"
 msgstr "VIJESTI"
 
+#: templates/components/_navbar.html:160
 msgid "МОНІТОРИНГ"
 msgstr "MONITORING"
 
+#: templates/components/_navbar.html:191
 msgid "УВІЙТИ"
 msgstr "PRIJAVI SE"
 
+#: templates/components/_navbar.html:196
 msgid "ЗАРЕЄСТРУВАТИСЬ"
 msgstr "REGISTRUJ SE"
 
+#: templates/components/_navbar.html:207
 msgid "Пошук страв..."
 msgstr "Pretraga jela..."
 
+#: templates/components/_period_filter.html:12
 msgid "Сьогодні"
 msgstr "Danas"
 
+#: templates/components/_period_filter.html:16
 msgid "Вчора"
 msgstr "Jučer"
 
+#: templates/components/_period_filter.html:20
 msgid "Тиждень"
 msgstr "Sedmica"
 
+#: templates/components/_period_filter.html:24
 msgid "Місяць"
 msgstr "Mjesec"
 
+#: templates/components/_period_filter.html:49
 msgid "Від"
 msgstr "Od"
 
+#: templates/components/_period_filter.html:54
 msgid "До"
 msgstr "Do"
 
+#: templates/components/_period_filter.html:59
 msgid "Застосувати"
 msgstr "Primijeni"
 
+#: templates/components/_team_stats_kitchen.html:15
+#: templates/kitchen/dashboard.html:6 templates/kitchen/dashboard.html:15
+#: templates/orders/manager_dashboard.html:75
 msgid "Кухня"
 msgstr "Kuhinja"
 
+#: templates/components/_team_stats_kitchen.html:20
+#: templates/menu/category_confirm_delete.html:48
 msgid "страв"
 msgstr "jela"
 
+#: templates/components/_team_stats_kitchen.html:23
+#: templates/components/_team_stats_kitchen.html:52
+#: templates/components/_team_stats_waiter.html:27
+#: templates/components/_team_stats_waiter.html:65
+#: templates/orders/waiter_order_list.html:80
 msgid "хв"
 msgstr "min"
 
+#: templates/components/_team_stats_kitchen.html:24
+#: templates/components/_team_stats_waiter.html:28
 msgid "сер. час"
 msgstr "prosj. vrij."
 
+#: templates/components/_team_stats_kitchen.html:35
+#: templates/components/_team_stats_waiter.html:41
+#: templates/components/_team_stats_waiter.html:44
 msgid "помилки"
 msgstr "greške"
 
+#: templates/components/_team_stats_waiter.html:15
 msgid "Офіціанти"
 msgstr "Konobari"
 
+#: templates/components/_team_stats_waiter.html:20
 msgid "замовлень"
 msgstr "narudžbi"
 
+#: templates/components/_team_stats_waiter.html:24
 msgid "сер. чек"
 msgstr "prosj. račun"
 
+#: templates/components/_team_stats_waiter.html:32
 msgid "виторг"
 msgstr "promet"
 
+#: templates/components/_team_stats_waiter.html:69
 msgid "готівка"
 msgstr "gotovina"
 
+#: templates/components/_team_stats_waiter.html:71
 msgid "онлайн"
 msgstr "online"
 
+#: templates/components/_waiter_order_accordion_item.html:13
+#: templates/kitchen/_team_section.html:29
 msgid "готово"
 msgstr "gotovo"
 
+#: templates/components/_waiter_order_accordion_item.html:16
 msgid "Забери!"
 msgstr "Preuzmi!"
 
+#: templates/components/_waiter_order_accordion_item.html:29
+#: templates/components/_waiter_order_detail_card.html:15
+#: templates/orders/order_detail.html:42
 msgid "Сплачено"
 msgstr "Plaćeno"
 
+#: templates/components/_waiter_order_accordion_item.html:31
+#: templates/components/_waiter_order_detail_card.html:17
+#: templates/orders/order_detail.html:44
+#: templates/orders/waiter_order_list.html:198
+#: templates/orders/waiter_order_list.html:278
 msgid "Не сплачено"
 msgstr "Nije plaćeno"
 
+#: templates/components/_waiter_order_accordion_item.html:55
 msgid "У вас — віднести клієнту"
 msgstr "Kod vas — odnesite gostu"
 
+#: templates/components/_waiter_order_accordion_item.html:57
 msgid "хв тому — забрати негайно!"
 msgstr "min prije — preuzmite odmah!"
 
+#: templates/components/_waiter_order_accordion_item.html:59
 msgid "хв — забрати!"
 msgstr "min — preuzmi!"
 
+#: templates/components/_waiter_order_accordion_item.html:61
+#: templates/orders/order_detail.html:182
 msgid "готує"
 msgstr "priprema se"
 
+#: templates/components/_waiter_order_accordion_item.html:63
 msgid "Готово на кухні — забрати!"
 msgstr "Spremno u kuhinji — preuzmi!"
 
+#: templates/components/_waiter_order_accordion_item.html:65
 msgid "В черзі на кухні"
 msgstr "U redu za kuhinju"
 
+#: templates/components/_waiter_order_accordion_item.html:77
 msgid "доставлено"
 msgstr "dostavljeno"
 
+#: templates/components/_waiter_order_accordion_item.html:91
 msgid "Верифікувати"
 msgstr "Potvrdi"
 
+#: templates/components/_waiter_order_accordion_item.html:106
 msgid "Оплату прийнято"
 msgstr "Plaćanje prihvaćeno"
 
+#: templates/components/_waiter_order_detail_card.html:23
+#: templates/orders/waiter_order_list.html:117
 msgid "Відвідувач:"
 msgstr "Gost:"
 
+#: templates/components/_waiter_order_detail_card.html:29
+#: templates/orders/order_detail.html:50
 msgid "Позиції"
 msgstr "Stavke"
 
+#: templates/components/_waiter_order_detail_card.html:54
+#: templates/orders/order_detail.html:78
 msgid "Скасувати замовлення"
 msgstr "Otkaži narudžbu"
 
+#: templates/components/_waiter_order_detail_card.html:59
+#: templates/orders/cart.html:53 templates/orders/order_detail.html:83
+#: templates/orders/waiter_order_list.html:133
 msgid "Разом:"
 msgstr "Ukupno:"
 
+#: templates/components/_waiter_order_detail_card.html:68
+#: templates/orders/waiter_order_list.html:140
 msgid "Взяти замовлення"
 msgstr "Preuzmi narudžbu"
 
+#: templates/components/_waiter_order_detail_card.html:76
 msgid "Верифікувати і передати на кухню"
 msgstr "Potvrdi i proslijedi u kuhinju"
 
+#: templates/components/_waiter_order_detail_card.html:84
 msgid "Доставлено клієнту"
 msgstr "Dostavljeno gostu"
 
+#: templates/components/_waiter_order_detail_card.html:94
+#: templates/orders/waiter_order_list.html:218
 msgid "Оплату прийнято (готівка)"
 msgstr "Plaćanje prihvaćeno (gotovina)"
 
+#: templates/components/_waiter_order_detail_card.html:104
 msgid "Позачергові дії"
 msgstr "Posebne radnje"
 
+#: templates/components/_waiter_order_detail_card.html:105
 msgid "Якщо стандартний flow не був виконаний — зафіксуйте фактичний стан"
 msgstr "Ako standardni tok nije ispoštovan — zabilježite stvarno stanje"
 
+#: templates/components/_waiter_order_detail_card.html:111
 msgid "Доставлено (без кухні)"
 msgstr "Dostavljeno (bez kuhinje)"
 
+#: templates/feedback/board.html:4
 msgid "Дошка відгуків"
 msgstr "Knjiga utisaka"
 
+#: templates/feedback/board.html:8
 msgid "Що кажуть наші гості"
 msgstr "Šta kažu naši gosti"
 
+#: templates/feedback/board.html:11
 msgid "Поки що відгуків немає. Будьте першим!"
 msgstr "Još uvijek nema recenzija. Budite prvi!"
 
+#: templates/feedback/board.html:26
 msgid "тому"
 msgstr "prije"
 
+#: templates/feedback/moderate.html:4 templates/feedback/moderate.html:8
 msgid "Модерація відгуків"
 msgstr "Moderacija recenzija"
 
+#: templates/feedback/moderate.html:10
 msgid "Очікують модерації"
 msgstr "Čekaju na moderaciju"
 
+#: templates/feedback/moderate.html:18
+#: templates/kitchen/handoff_select_waiter.html:15
+#: templates/orders/order_detail.html:28
 #, python-format
 msgid "Замовлення #%(order_id)s"
 msgstr "Narudžba #%(order_id)s"
 
+#: templates/feedback/moderate.html:23
 msgid "(без повідомлення)"
 msgstr "(bez obavještenja)"
 
+#: templates/feedback/moderate.html:30
 msgid "Опублікувати"
 msgstr "Objavi"
 
+#: templates/feedback/moderate.html:35
 msgid "Виділити"
 msgstr "Istakni"
 
+#: templates/feedback/moderate.html:40 templates/menu/category_list.html:96
+#: templates/menu/dish_detail.html:130 templates/menu/dish_detail.html:131
+#: templates/menu/tag_list.html:82 templates/news/article_detail.html:109
 msgid "Видалити"
 msgstr "Izbriši"
 
+#: templates/feedback/moderate.html:47
 msgid "Нових відгуків немає."
 msgstr "Nema novih recenzija."
 
+#: templates/kitchen/_column_content.html:11
+#: templates/kitchen/_column_content.html:13
+#: templates/kitchen/_column_content.html:15
 msgid "стр."
 msgstr "str."
 
+#: templates/kitchen/_team_section.html:25
 msgid "ескал."
 msgstr "eskal."
 
+#: templates/kitchen/_team_section.html:27
 msgid "черга"
 msgstr "red"
 
+#: templates/kitchen/_team_section.html:28
 msgid "в роб."
 msgstr "u radu"
 
+#: templates/kitchen/_team_section.html:40
+#: templates/orders/order_detail.html:186
 msgid "В черзі"
 msgstr "U redu"
 
+#: templates/kitchen/_team_section.html:44
 msgid "Готує"
 msgstr "Priprema"
 
+#: templates/kitchen/_team_section.html:58
 msgid "Немає кухарів у системі"
 msgstr "Nema kuhara u sistemu"
 
+#: templates/kitchen/_ticket_card.html:22
+#: templates/orders/waiter_order_list.html:72
+#: templates/orders/waiter_order_list.html:104
 msgid "Прострочено"
 msgstr "Isteklo"
 
+#: templates/kitchen/_ticket_card.html:24
+#: templates/orders/waiter_order_list.html:70
+#: templates/orders/waiter_order_list.html:102
 msgid "Терміново!"
 msgstr "Hitno!"
 
+#: templates/kitchen/_ticket_card.html:42
+#: templates/orders/waiter_order_list.html:86
 msgid "Взяти"
 msgstr "Preuzmi"
 
+#: templates/kitchen/dashboard.html:17
 msgid "Натисніть для звуку"
 msgstr "Pritisnite za zvuk"
 
+#: templates/kitchen/dashboard.html:39
 msgid "Ескалація"
 msgstr "Eskalacija"
 
+#: templates/kitchen/dashboard.html:65 templates/kitchen/dashboard.html:119
 msgid "Черга"
 msgstr "Red"
 
+#: templates/kitchen/dashboard.html:72 templates/kitchen/dashboard.html:132
 msgid "В роботі"
 msgstr "U pripremi"
 
+#: templates/kitchen/dashboard.html:87 templates/kitchen/dashboard.html:159
+#: templates/orders/waiter_order_list.html:50
 msgid "Команда"
 msgstr "Tim"
 
+#: templates/kitchen/handoff_select_waiter.html:23
 msgid "Оберіть офіціанта"
 msgstr "Odaberite konobara"
 
+#: templates/kitchen/handoff_select_waiter.html:34
 msgid "Згенерувати QR"
 msgstr "Generiši QR"
 
+#: templates/kitchen/handoff_select_waiter.html:39
 msgid "Повернутись"
 msgstr "Nazad"
 
+#: templates/landing.html:14
 msgid "Український культурний центр у Херцег-Нові, Чорногорія"
 msgstr "Ukrajinski kulturni centar u Herceg Novom, Crna Gora"
 
+#: templates/landing.html:27
 msgid "Фестивальне меню"
 msgstr "Idi na meni"
 
+#: templates/landing.html:37 templates/news/article_list.html:4
+#: templates/news/article_list.html:10
 msgid "Новини"
 msgstr "Novi tag"
 
+#: templates/landing.html:38
 msgid "Стрічка новин"
 msgstr "Novosti"
 
+#: templates/landing.html:48
 msgid "Бібліотека"
 msgstr "Biblioteka"
 
+#: templates/landing.html:49 templates/landing.html:60
+#: templates/user/channels.html:92
 msgid "Скоро"
 msgstr "Uskoro"
 
+#: templates/landing.html:59
 msgid "Розклад"
 msgstr "Prijevodi"
 
+#: templates/legal/privacy.html:9
 msgid "Політика конфіденційності та правила захисту даних"
 msgstr "Korpa je prazna ili jela nisu dostupna."
 
+#: templates/legal/privacy.html:11
 msgid ""
 "Громадська організація «Український центр у Херцег-Нові» з повагою ставиться "
 "до вашої конфіденційності. Цей документ пояснює, як ми обробляємо ваші "
@@ -782,18 +1374,21 @@ msgstr ""
 "Nevladina organizacija „Ukrajinski centar u Herceg Novom“ poštuje vašu "
 "privatnost. Ovaj dokument objašnjava kako obrađujemo vaše lične podatke."
 
+#: templates/legal/privacy.html:13
 msgid "1. Які дані ми збираємо"
 msgstr "1. Koje podatke prikupljamo"
 
+#: templates/legal/privacy.html:14
 msgid ""
 "При використанні сайту ми можемо збирати мінімально необхідні дані: ім'я, "
 "прізвище, контактний номер телефону або email (якщо ви заповнюєте форми "
 "зворотного зв'язку або реєстрації на заходи)."
 msgstr ""
-"Prilikom korištenja stranice, možemo prikupljati minimalno potrebne "
-"podatke: ime, prezime, kontakt telefon ili e-mail (ako popunjavate "
-"formulare za povratne informacije ili registraciju za događaje)."
+"Prilikom korištenja stranice, možemo prikupljati minimalno potrebne podatke: "
+"ime, prezime, kontakt telefon ili e-mail (ako popunjavate formulare za "
+"povratne informacije ili registraciju za događaje)."
 
+#: templates/legal/privacy.html:15
 msgid ""
 "Технічні дані (cookies, IP-адреса) для забезпечення коректної роботи веб-"
 "сервісу."
@@ -801,9 +1396,11 @@ msgstr ""
 "Tehnički podaci (cookies, IP adresa) za osiguranje ispravnog rada web "
 "servisa."
 
+#: templates/legal/privacy.html:17
 msgid "2. Мета збору даних"
 msgstr "2. Svrha prikupljanja podataka"
 
+#: templates/legal/privacy.html:18
 msgid ""
 "Ваші дані використовуються виключно для комунікації щодо діяльності Центру, "
 "координації благодійних проєктів та реєстрації на культурні заходи."
@@ -811,15 +1408,18 @@ msgstr ""
 "Vaši podaci se koriste isključivo za komunikaciju o aktivnostima Centra, "
 "koordinaciju dobrotvornih projekata i registraciju za kulturne događaje."
 
+#: templates/legal/privacy.html:19
 msgid ""
 "Ми не продаємо і не передаємо ваші дані третім особам у комерційних цілях."
 msgstr ""
 "Mi ne prodajemo i ne prenosimo vaše podatke trećim stranama u komercijalne "
 "svrhe."
 
+#: templates/legal/privacy.html:21
 msgid "3. Безпека платежів та внесків"
 msgstr "3. Sigurnost plaćanja i doprinosa"
 
+#: templates/legal/privacy.html:22
 msgid ""
 "Усі благодійні перерахування обробляються через захищені платіжні шлюзи "
 "банків-партнерів. Організація не зберігає дані вашої банківської картки."
@@ -827,16 +1427,19 @@ msgstr ""
 "Sve dobrotvorne donacije se obrađuju putem sigurnih platnih prolaza "
 "partnerskih banaka. Organizacija ne čuva podatke vaše bankovne kartice."
 
+#: templates/legal/privacy.html:23
 msgid ""
 "Відповідно до законодавства Чорногорії та статуту Організації, усі внески є "
 "безповоротними та спрямовуються на статутну діяльність."
 msgstr ""
-"U skladu sa zakonodavstvom Crne Gore i statutom Organizacije, svi "
-"doprinosi su nepovratni i usmjeravaju se na statutarne djelatnosti."
+"U skladu sa zakonodavstvom Crne Gore i statutom Organizacije, svi doprinosi "
+"su nepovratni i usmjeravaju se na statutarne djelatnosti."
 
+#: templates/legal/privacy.html:25
 msgid "4. Термін зберігання даних"
 msgstr "4. Period čuvanja podataka"
 
+#: templates/legal/privacy.html:26
 msgid ""
 "Ми зберігаємо дані лише стільки, скільки це необхідно для реалізації "
 "проєктів або відповідно до вимог чинного законодавства щодо звітності "
@@ -846,21 +1449,25 @@ msgstr ""
 "projekata ili u skladu sa zahtjevima važećeg zakonodavstva o izvještavanju "
 "nevladinih organizacija."
 
+#: templates/legal/privacy.html:28
 msgid "5. Ваші права"
 msgstr "Novo jelo"
 
+#: templates/legal/privacy.html:29
 msgid ""
 "Ви маєте право запитати доступ до своїх даних, вимагати їх виправлення або "
 "повного видалення з нашої бази, надіславши запит на офіційну електронну "
 "адресу Організації."
 msgstr ""
-"Imate pravo zatražiti pristup svojim podacima, zahtijevati njihovu "
-"ispravku ili potpuno brisanje iz naše baze, slanjem zahtjeva na zvaničnu "
-"elektronsku adresu Organizacije."
+"Imate pravo zatražiti pristup svojim podacima, zahtijevati njihovu ispravku "
+"ili potpuno brisanje iz naše baze, slanjem zahtjeva na zvaničnu elektronsku "
+"adresu Organizacije."
 
+#: templates/legal/privacy.html:31
 msgid "6. Контакти"
 msgstr "6. Kontakti"
 
+#: templates/legal/privacy.html:32
 msgid ""
 "Якщо у вас є питання щодо конфіденційності, будь ласка, зв'яжіться з нами "
 "через форму на сайті або за адресою:"
@@ -868,9 +1475,11 @@ msgstr ""
 "Ako imate pitanja u vezi s privatnošću, molimo kontaktirajte nas putem "
 "obrasca na web stranici ili na adresu:"
 
+#: templates/legal/terms.html:9
 msgid "Умови використання сервісу «Український центр у Херцег-Нові»"
 msgstr "Ukrajinski kulturni centar u Herceg Novom, Crna Gora"
 
+#: templates/legal/terms.html:11
 msgid ""
 "Ці Умови регулюють використання веб-ресурсу громадської організації "
 "«Український центр у Херцег-Нові» (далі — Організація). Користуючись цим "
@@ -880,9 +1489,11 @@ msgstr ""
 "Herceg Novom“ (u daljem tekstu – Organizacija). Korištenjem ove web "
 "stranice, slažete se sa niže navedenim pravilima."
 
+#: templates/legal/terms.html:13
 msgid "1. Загальні положення"
 msgstr "Dodatne slike"
 
+#: templates/legal/terms.html:14
 msgid ""
 "Сайт є некомерційним ресурсом, створеним для підтримки української громади в "
 "Чорногорії, збереження та популяризації української культури."
@@ -890,6 +1501,7 @@ msgstr ""
 "Sajt je nekomercijalni resurs, stvoren za podršku ukrajinskoj zajednici u "
 "Crnoj Gori, očuvanje i popularizaciju ukrajinske kulture."
 
+#: templates/legal/terms.html:15
 msgid ""
 "Використання матеріалів сайту дозволяється лише з метою ознайомлення та "
 "некомерційного поширення із обов'язковим посиланням на джерело."
@@ -897,12 +1509,15 @@ msgstr ""
 "Korištenje materijala sa sajta dozvoljeno je samo u svrhu informisanja i "
 "nekomercijalne distribucije, uz obavezno navođenje izvora."
 
+#: templates/legal/terms.html:17
 msgid "2. Статус Організації та внесків"
 msgstr "2. Status Organizacije i donacija"
 
+#: templates/legal/terms.html:18
 msgid "Організація не веде комерційної діяльності."
 msgstr "Organizacija se ne bavi komercijalnom djelatnošću."
 
+#: templates/legal/terms.html:19
 msgid ""
 "Усі платежі, здійснені через сайт (якщо передбачено), є добровільними "
 "благодійними внесками (Donations)."
@@ -910,31 +1525,35 @@ msgstr ""
 "Sva plaćanja izvršena putem web stranice (ukoliko je predviđeno) su "
 "dobrovoljne donacije (Donations)."
 
+#: templates/legal/terms.html:20
 msgid ""
 "Благодійні внески використовуються виключно для досягнення статутних цілей "
 "Організації: гуманітарної допомоги, культурних заходів та підтримки "
 "українців у Чорногорії."
 msgstr ""
-"Dobrotvorni prilozi se koriste isključivo za postizanje statutarnih "
-"ciljeva Organizacije: humanitarne pomoći, kulturnih događaja i podrške "
-"Ukrajincima u Crnoj Gori."
+"Dobrotvorni prilozi se koriste isključivo za postizanje statutarnih ciljeva "
+"Organizacije: humanitarne pomoći, kulturnih događaja i podrške Ukrajincima u "
+"Crnoj Gori."
 
+#: templates/legal/terms.html:22
 msgid "3. Відмова від відповідальності"
 msgstr "3. Odricanje od odgovornosti"
 
+#: templates/legal/terms.html:23
 msgid ""
 "Ми прагнемо надавати актуальну інформацію про заходи та сервіси, проте не "
 "несемо відповідальності за тимчасові технічні збої або наслідки використання "
 "інформації з третіх ресурсів, на які є посилання на нашому сайті."
 msgstr ""
-"Nastojimo pružati ažurne informacije o događajima i uslugama, ali ne "
-"snosimo odgovornost za privremene tehničke kvarove ili posljedice "
-"korištenja informacija sa resursa trećih strana na koje postoje linkovi na "
-"našem sajtu."
+"Nastojimo pružati ažurne informacije o događajima i uslugama, ali ne snosimo "
+"odgovornost za privremene tehničke kvarove ili posljedice korištenja "
+"informacija sa resursa trećih strana na koje postoje linkovi na našem sajtu."
 
+#: templates/legal/terms.html:25
 msgid "4. Зміни в умовах"
 msgstr "Promjena lozinke"
 
+#: templates/legal/terms.html:26
 msgid ""
 "Організація залишає за собою право змінювати ці умови в будь-який час. "
 "Продовження використання сайту після змін означає вашу згоду з новими "
@@ -944,12 +1563,18 @@ msgstr ""
 "Nastavak korištenja sajta nakon izmjena znači vašu saglasnost sa novim "
 "uslovima."
 
+#: templates/menu/category_confirm_delete.html:20
+#: templates/menu/category_confirm_delete.html:26
 msgid "Видалити категорію"
 msgstr "Izbriši kategoriju"
 
+#: templates/menu/category_confirm_delete.html:31
+#: templates/menu/dish_confirm_delete.html:27
+#: templates/menu/tag_confirm_delete.html:33
 msgid "Увага!"
 msgstr "Pažnja!"
 
+#: templates/menu/category_confirm_delete.html:31
 #, python-format
 msgid ""
 "Ви збираєтесь видалити категорію <strong>«%(title)s»</strong>. Це видалить "
@@ -958,37 +1583,52 @@ msgstr ""
 "Spremate se da izbrišete kategoriju <strong>«%(title)s»</strong>. Ovo će "
 "također izbrisati <strong>sva jela</strong> ove kategorije i njihove slike"
 
+#: templates/menu/category_confirm_delete.html:37
 msgid "Разом з категорією буде видалено:"
 msgstr "Zajedno s kategorijom će biti izbrisano:"
 
+#: templates/menu/category_confirm_delete.html:41
 #, python-format
 msgid "Логотип категорії: «%(title)s»"
 msgstr "Logo kategorije: «%(title)s»"
 
+#: templates/menu/category_confirm_delete.html:48
 msgid "страва"
 msgstr "jelo"
 
+#: templates/menu/category_confirm_delete.html:48
 msgid "страви"
 msgstr "jela"
 
+#: templates/menu/category_confirm_delete.html:56
 msgid "Страв у цій категорії немає."
 msgstr "Nema jela u ovoj kategoriji."
 
+#: templates/menu/category_confirm_delete.html:67
+#: templates/menu/dish_confirm_delete.html:67
+#: templates/menu/tag_confirm_delete.html:58
+#: templates/news/article_confirm_delete.html:20
 msgid "Так, видалити"
 msgstr "Da, izbriši"
 
+#: templates/menu/category_form.html:29 templates/menu/category_form.html:41
 msgid "Редагувати категорію"
 msgstr "Uredi kategoriju"
 
+#: templates/menu/category_form.html:43
 msgid "Створити категорію"
 msgstr "Kreiraj kategoriju"
 
+#: templates/menu/category_form.html:81
 msgid "Логотип категорії"
 msgstr "Logo kategorije"
 
+#: templates/menu/category_form.html:82 templates/menu/dish_form.html:102
+#: templates/menu/tag_form.html:61 templates/news/article_form.html:53
 msgid "необов'язково"
 msgstr "opcionalno"
 
+#: templates/menu/category_form.html:95
 msgid ""
 "Завантажте SVG-файл з логотипом категорії. Формат SVG дозволяє масштабування "
 "без втрати якості."
@@ -996,69 +1636,96 @@ msgstr ""
 "Učitajte SVG datoteku sa logotipom kategorije. SVG format omogućava "
 "skaliranje bez gubitka kvaliteta."
 
+#: templates/menu/category_form.html:102 templates/menu/dish_form.html:154
+#: templates/menu/tag_form.html:79 templates/news/article_form.html:73
+#: templates/news/subscription.html:32 templates/user/profile_edit.html:47
 msgid "Зберегти"
 msgstr "Spremi"
 
+#: templates/menu/category_list.html:92 templates/menu/dish_detail.html:126
+#: templates/menu/dish_detail.html:127 templates/menu/tag_list.html:78
+#: templates/news/article_detail.html:106 templates/translations/review.html:92
 msgid "Редагувати"
 msgstr "Uredi"
 
+#: templates/menu/category_list.html:173
 msgid "Страв у цій категорії поки немає."
 msgstr "Trenutno nema jela u ovoj kategoriji."
 
+#: templates/menu/dish_confirm_delete.html:16
+#: templates/menu/dish_confirm_delete.html:22
 msgid "Видалити страву"
 msgstr "Izbriši jelo"
 
+#: templates/menu/dish_confirm_delete.html:27
 #, python-format
 msgid ""
 "Ви збираєтесь видалити страву <strong>«%(title)s»</strong> (%(price)s EUR)."
-msgstr "Spremate se da izbrišete jelo <strong>«%(title)s»</strong> (%(price)s EUR)."
+msgstr ""
+"Spremate se da izbrišete jelo <strong>«%(title)s»</strong> (%(price)s EUR)."
 
+#: templates/menu/dish_confirm_delete.html:33
 msgid "Разом зі стравою буде видалено:"
 msgstr "Zajedno s jelom će biti izbrisano:"
 
+#: templates/menu/dish_confirm_delete.html:37
 #, python-format
 msgid "Головне зображення: «%(title)s»"
 msgstr "Glavna slika: «%(title)s»"
 
+#: templates/menu/dish_confirm_delete.html:45
 msgid "додаткове зображення"
 msgstr "dodatna slika"
 
+#: templates/menu/dish_confirm_delete.html:45
 msgid "додаткових зображення"
 msgstr "dodatne slike"
 
+#: templates/menu/dish_confirm_delete.html:45
 msgid "додаткових зображень"
 msgstr "dodatnih slika"
 
+#: templates/menu/dish_confirm_delete.html:56
 msgid "Зв'язки з тегами будуть видалені, але самі теги залишаться."
 msgstr "Veze s tagovima će biti izbrisane, ali sami tagovi će ostati."
 
+#: templates/menu/dish_detail.html:77
 msgid "Ціна"
 msgstr "Cijena"
 
+#: templates/menu/dish_detail.html:81
 msgid "г"
 msgstr "g"
 
+#: templates/menu/dish_detail.html:83
 msgid "Вага"
 msgstr "Težina"
 
+#: templates/menu/dish_detail.html:89
 msgid "ккал"
 msgstr "kcal"
 
+#: templates/menu/dish_detail.html:119
 msgid "Додати в замовлення"
 msgstr "Dodaj u narudžbu"
 
+#: templates/menu/dish_detail.html:146 templates/news/article_detail.html:48
 msgid "Додаткові фото"
 msgstr "Dodatne fotografije"
 
+#: templates/menu/dish_form.html:28 templates/menu/dish_form.html:40
 msgid "Редагувати страву"
 msgstr "Uredi jelo"
 
+#: templates/menu/dish_form.html:42
 msgid "Створити страву"
 msgstr "Kreiraj jelo"
 
+#: templates/menu/dish_form.html:73
 msgid "обов'язково"
 msgstr "obavezno"
 
+#: templates/menu/dish_form.html:86
 msgid ""
 "Завантажте зображення страви (JPEG, PNG або WebP). Рекомендований розмір: "
 "640×480 пікселів."
@@ -1066,39 +1733,51 @@ msgstr ""
 "Učitajte sliku jela (JPEG, PNG ili WebP). Preporučena veličina: 640×480 "
 "piksela."
 
+#: templates/menu/dish_form.html:101 templates/news/article_form.html:53
 msgid "Додаткові зображення"
 msgstr "Dodatne slike"
 
+#: templates/menu/dish_form.html:125
 msgid "Зображення"
 msgstr "Slika"
 
+#: templates/menu/dish_form.html:143
 msgid "Додати ще зображення"
 msgstr "Dodaj još slika"
 
+#: templates/menu/dish_form.html:147
 msgid "Завантажте додаткові фото страви. Порожні форми будуть пропущені."
 msgstr "Učitajte dodatne fotografije jela. Prazna polja će biti preskočena."
 
+#: templates/menu/dish_list.html:10
 msgid "Страви"
 msgstr "Jela"
 
+#: templates/menu/dish_list.html:17
 msgid "Усі страви"
 msgstr "Sva jela"
 
+#: templates/menu/dish_list.html:26
 msgid "Страв поки немає."
 msgstr "Još uvijek nema jela."
 
+#: templates/menu/index.html:29
 msgid "Головна"
 msgstr "Početna"
 
+#: templates/menu/index.html:61
 msgid "Попередній"
 msgstr "Prethodno"
 
+#: templates/menu/index.html:66
 msgid "Наступний"
 msgstr "Sljedeće"
 
+#: templates/menu/index.html:74
 msgid "Наше меню"
 msgstr "Naš jelovnik"
 
+#: templates/menu/index.html:76
 #, python-format
 msgid ""
 "%(dish_num)s страв у %(cat_num)s категоріях, класифікованих %(tag_num)s "
@@ -1107,57 +1786,71 @@ msgstr ""
 "%(dish_num)s jela u %(cat_num)s kategorijama, klasificiranih %(tag_num)s "
 "tagovima."
 
+#: templates/menu/search_results.html:21 templates/menu/search_results.html:50
 msgid "Пошук"
 msgstr "Pretraga"
 
+#: templates/menu/search_results.html:34
 msgid "Результати пошуку:"
 msgstr "Rezultati pretrage:"
 
+#: templates/menu/search_results.html:39
 msgid "Пошук страв"
 msgstr "Pretraga jela"
 
+#: templates/menu/search_results.html:48
 msgid "Назва страви або опис..."
 msgstr "Naziv jela ili opis..."
 
+#: templates/menu/search_results.html:52
 msgid "Знайти"
 msgstr "Pronađi"
 
+#: templates/menu/search_results.html:67
 #, python-format
 msgid "За запитом \"%(q)s\" нічого не знайдено."
 msgstr "Za upit \"%(q)s\" nije ništa pronađeno."
 
+#: templates/menu/search_results.html:68
 msgid "Спробуйте інший запит або перевірте правопис."
 msgstr "Pokušajte s drugim upitom ili provjerite pravopis."
 
+#: templates/menu/search_results.html:75
 msgid "Введіть назву страви або опис для пошуку."
 msgstr "Unesite naziv jela ili opis za pretragu."
 
+#: templates/menu/tag_confirm_delete.html:22
+#: templates/menu/tag_confirm_delete.html:28
 msgid "Видалити тег"
 msgstr "Izbriši oznaku"
 
+#: templates/menu/tag_confirm_delete.html:33
 #, python-format
 msgid "Ви збираєтесь видалити тег <strong>«%(title)s»</strong>."
 msgstr "Spremate se da izbrišete oznaku <strong>«%(title)s»</strong>."
 
+#: templates/menu/tag_confirm_delete.html:39
 msgid "Разом з тегом буде видалено:"
 msgstr "Zajedno sa oznakom bit će izbrisano:"
 
+#: templates/menu/tag_confirm_delete.html:42
 #, python-format
 msgid "Логотип тега: «%(title)s»"
 msgstr "Logo oznake: «%(title)s»"
 
+#: templates/menu/tag_confirm_delete.html:45
 msgid "Зв'язки зі стравами будуть видалені, але самі страви залишаться."
 msgstr "Veze s jelima će biti izbrisane, ali sama jela će ostati."
 
+#: templates/menu/tag_form.html:24 templates/menu/tag_form.html:35
 msgid "Редагувати тег"
 msgstr "Uredi oznaku"
 
+#: templates/menu/tag_form.html:37
 msgid "Створити тег"
 msgstr "Kreiraj oznaku"
 
-msgid "Логотип тега"
-msgstr "Logo oznake"
-
+#: templates/menu/tag_form.html:73
 msgid ""
 "Завантажте SVG-файл з логотипом тега. Валідатор перевірить не лише "
 "розширення, а й вміст файлу."
@@ -1165,277 +1858,375 @@ msgstr ""
 "Učitajte SVG datoteku s logotipom taga. Validator će provjeriti ne samo "
 "ekstenziju, već i sadržaj datoteke."
 
+#: templates/menu/tag_list.html:146
 msgid "Страв з цим тегом поки немає."
 msgstr "Još uvijek nema jela s ovom oznakom."
 
+#: templates/news/article_confirm_delete.html:4
+#: templates/news/article_confirm_delete.html:9
 msgid "Видалити статтю"
 msgstr "Izbriši jelo"
 
+#: templates/news/article_confirm_delete.html:13
 #, fuzzy, python-format
 msgid "Ви збираєтесь видалити статтю «%(title)s»"
 msgstr "Spremate se da izbrišete oznaku <strong>«%(title)s»</strong>."
 
+#: templates/news/article_detail.html:33
 msgid "Це автоматичний переклад. Можливі неточності."
 msgstr "Ovo je automatski prijevod. Moguće su netačnosti."
 
+#: templates/news/article_detail.html:36
 msgid "Повідомити про помилку"
 msgstr "Potvrdi plaćanje"
 
+#: templates/news/article_detail.html:61
 msgid "Коментарі"
 msgstr "Komentar"
 
+#: templates/news/article_detail.html:77
 msgid "Коментарів поки немає."
 msgstr "Još uvijek nema jela."
 
+#: templates/news/article_detail.html:86 templates/news/article_detail.html:133
+#: templates/orders/order_detail.html:251
 msgid "Надіслати"
 msgstr "Pošalji"
 
+#: templates/news/article_detail.html:92
 msgid "Для коментування потрібен верифікований канал комунікації."
 msgstr "Za komentarisanje je potreban verifikovan komunikacijski kanal."
 
+#: templates/news/article_detail.html:93
 msgid "Налаштувати"
 msgstr "Otkaži"
 
+#: templates/news/article_detail.html:97
 msgid "Увійдіть"
 msgstr "Prijavi se"
 
+#: templates/news/article_detail.html:97
 msgid "щоб залишити коментар."
 msgstr "Izbriši kategoriju"
 
+#: templates/news/article_detail.html:127
 msgid "Опишіть що саме перекладено неточно або некоректно."
 msgstr "Napišite nešto lijepo... ili korisno"
 
+#: templates/news/article_detail.html:129
 msgid "Ваше зауваження..."
 msgstr "Vaša poruka:"
 
+#: templates/news/article_form.html:5 templates/news/article_form.html:15
 msgid "Редагувати статтю"
 msgstr "Uredi jelo"
 
+#: templates/news/article_form.html:5 templates/news/article_form.html:17
+#: templates/news/article_list.html:13
 msgid "Нова стаття"
 msgstr "Novo jelo"
 
+#: templates/news/article_list.html:42
 msgid "Новин поки немає."
 msgstr "Još uvijek nema narudžbi."
 
+#: templates/news/moderate_comments.html:4
+#: templates/news/moderate_comments.html:10
 msgid "Модерація коментарів"
 msgstr "Moderacija recenzija"
 
+#: templates/news/moderate_comments.html:31
 msgid "Схвалити"
 msgstr "Izbriši"
 
+#: templates/news/moderate_comments.html:37
 msgid "Відхилити"
 msgstr "Istakni"
 
+#: templates/news/moderate_comments.html:46
 msgid "Немає коментарів для модерації."
 msgstr "Nema problematičnih narudžbi."
 
+#: templates/news/subscription.html:4 templates/news/subscription.html:10
 msgid "Дайджест новин"
 msgstr "Pregled novosti"
 
+#: templates/news/subscription.html:14
 msgid "Отримуйте підбірку новин на ваш верифікований канал комунікації."
 msgstr "Primajte izbor novosti na vaš verifikovani komunikacijski kanal."
 
+#: templates/news/subscription.html:20
 msgid "Підписка активна"
 msgstr "Pretplata je aktivna"
 
+#: templates/news/subscription.html:42
 msgid "Відписатись"
 msgstr "Nazad"
 
+#: templates/news/subscription.html:51
 msgid "Підписка неактивна"
 msgstr "Pretplata nije aktivna"
 
+#: templates/news/subscription.html:56
 msgid "Підписатись"
 msgstr "Nazad"
 
+#: templates/news/subscription.html:64
 msgid "До новин"
 msgstr "Osvježi"
 
+#: templates/offline.html:7 templates/offline.html:40
 msgid "Немає з'єднання"
 msgstr "Nema konekcije"
 
+#: templates/offline.html:41
 msgid "Перевірте інтернет і спробуйте знову."
 msgstr "Provjerite internet i pokušajte ponovo."
 
+#: templates/offline.html:42
 msgid "Якщо ви переглядали меню раніше — воно доступне в кеші."
 msgstr "Ako ste ranije pregledavali meni, dostupan je u keš memoriji."
 
+#: templates/offline.html:43
 msgid "Спробувати знову"
 msgstr "Pokušaj ponovo"
 
+#: templates/orders/cart.html:16
 msgid "Історія замовлень"
 msgstr "Historija narudžbi"
 
+#: templates/orders/cart.html:21
 msgid "Поточне замовлення"
 msgstr "Trenutna narudžba"
 
+#: templates/orders/cart.html:59
 msgid ""
 "Де вас шукати? Столик №, тераса, біля бару... (щоб офіціант міг вас знайти)"
 msgstr ""
 "Gdje se nalazite? Sto br., terasa, pored bara... (da vas konobar može "
 "pronaći)"
 
+#: templates/orders/cart.html:62
 msgid "Оформити замовлення"
 msgstr "Naručite"
 
+#: templates/orders/cart.html:68
 msgid "Ви ще нічого не обрали."
 msgstr "Još ništa niste odabrali."
 
+#: templates/orders/cart.html:69
 msgid "Перейти до меню"
 msgstr "Idi na meni"
 
+#: templates/orders/handoff_already_confirmed.html:9
 msgid "Вже підтверджено"
 msgstr "Već potvrđeno"
 
+#: templates/orders/handoff_already_confirmed.html:10
 msgid "Цю передачу вже було підтверджено раніше."
 msgstr "Ova predaja je već ranije potvrđena."
 
+#: templates/orders/handoff_already_confirmed.html:12
+#: templates/orders/handoff_expired.html:13
 msgid "Повернутись до dashboard"
 msgstr "Povratak na kontrolnu ploču"
 
+#: templates/orders/handoff_confirm.html:8
 msgid "Підтвердження прийому страви"
 msgstr "Potvrda preuzimanja jela"
 
+#: templates/orders/handoff_confirm.html:13
 msgid "Кількість:"
 msgstr "Količina:"
 
+#: templates/orders/handoff_confirm.html:14
 #, python-format
 msgid "Від: <strong>%(name)s</strong>"
 msgstr "Od: <strong>%(name)s</strong>"
 
+#: templates/orders/handoff_confirm.html:15
 #, python-format
 msgid "Замовлення: <strong>#%(order_id)s</strong>"
 msgstr "Narudžba: <strong>#%(order_id)s</strong>"
 
+#: templates/orders/handoff_confirm.html:22
 msgid "Підтверджую прийом"
 msgstr "Potvrđujem preuzimanje"
 
+#: templates/orders/handoff_confirm.html:27
 #, python-format
 msgid "QR дійсний ще ~%(ttl)s секунд"
 msgstr "QR kod važi još ~%(ttl)s sekundi"
 
+#: templates/orders/handoff_expired.html:9
 msgid "QR-код прострочений"
 msgstr "QR kod je istekao"
 
+#: templates/orders/handoff_expired.html:10
 msgid "Попросіть кухаря згенерувати новий QR-код."
 msgstr "Zamolite kuhara da generiše novi QR kod."
 
+#: templates/orders/handoff_expired.html:11
 msgid "Або скористайтесь ручним підтвердженням."
 msgstr "Ili koristite ručnu potvrdu."
 
+#: templates/orders/manager_dashboard.html:6
+#: templates/orders/manager_dashboard.html:12
 msgid "Панель менеджера"
 msgstr "Menadžerski panel"
 
+#: templates/orders/manager_dashboard.html:24
 msgid "Активних замовлень"
 msgstr "Aktivnih narudžbi"
 
+#: templates/orders/manager_dashboard.html:32
+#: templates/orders/waiter_order_list.html:182
 msgid "Очікують оплати"
 msgstr "Čekaju na plaćanje"
 
+#: templates/orders/manager_dashboard.html:40
 msgid "Відкриті ескалації"
 msgstr "Otvorene eskalacije"
 
+#: templates/orders/manager_dashboard.html:48
 msgid "Виторг"
 msgstr "Promet"
 
+#: templates/orders/manager_dashboard.html:80
 msgid "Оплати"
 msgstr "Plaćanja"
 
+#: templates/orders/manager_dashboard.html:87
 msgid "Адміністрування"
 msgstr "Administracija"
 
+#: templates/orders/manager_dashboard.html:108
 msgid "Адмін-панель"
 msgstr "Admin panel"
 
+#: templates/orders/order_detail.html:91
 msgid "Стан обробки замовлення"
 msgstr "Status obrade narudžbe"
 
+#: templates/orders/order_detail.html:118
+#: templates/orders/order_detail.html:120
 msgid "СПЛАЧЕНО"
 msgstr "PLAĆENO"
 
+#: templates/orders/order_detail.html:122
 msgid "ОЧІКУЄ ОПЛАТИ"
 msgstr "ČEKA SE PLAĆANJE"
 
+#: templates/orders/order_detail.html:153
 msgid "Замовлення створено"
 msgstr "Narudžba kreirana"
 
+#: templates/orders/order_detail.html:154
 msgid "Кількість позицій:"
 msgstr "Broj stavki:"
 
+#: templates/orders/order_detail.html:159
 msgid "Прийнято:"
 msgstr "Prihvaćeno:"
 
+#: templates/orders/order_detail.html:161
 msgid "Очікує на офіціанта..."
 msgstr "Čeka se konobar..."
 
+#: templates/orders/order_detail.html:166
 msgid "Верифіковано:"
 msgstr "Verifikovano:"
 
+#: templates/orders/order_detail.html:167
 msgid "Замовлення передано на кухню"
 msgstr "Narudžba proslijeđena u kuhinju"
 
+#: templates/orders/order_detail.html:169
 msgid "Очікує верифікації..."
 msgstr "Čeka se verifikacija..."
 
+#: templates/orders/order_detail.html:192
 msgid "Очікує передачі на кухню..."
 msgstr "Čeka se slanje u kuhinju..."
 
+#: templates/orders/order_detail.html:197
 msgid "Усі страви готові:"
 msgstr "Sva jela su spremna:"
 
+#: templates/orders/order_detail.html:199
 msgid "Страви ще готуються..."
 msgstr "Jela se još uvijek pripremaju..."
 
+#: templates/orders/order_detail.html:204
 msgid "Доставлено:"
 msgstr "Dostavljeno:"
 
+#: templates/orders/order_detail.html:206
 msgid "Очікує доставки..."
 msgstr "Čeka se dostava..."
 
+#: templates/orders/order_detail.html:221
 msgid "Маєш що сказати? Тисни тут"
 msgstr "Imate nešto za reći? Pritisnite ovdje"
 
+#: templates/orders/order_detail.html:228
 msgid "Що сталося?"
 msgstr "Šta se desilo?"
 
+#: templates/orders/order_detail.html:244
 msgid "Опишіть ситуацію..."
 msgstr "Opišite situaciju..."
 
+#: templates/orders/order_detail.html:261
 msgid "Ваше звернення:"
 msgstr "Vaša poruka:"
 
+#: templates/orders/order_detail.html:264
 msgid "побачено, працюємо"
 msgstr "viđeno, radimo na tome"
 
+#: templates/orders/order_detail.html:266
 msgid "надіслано"
 msgstr "poslano"
 
+#: templates/orders/order_detail.html:275
 msgid "Як вам сподобалось?"
 msgstr "Kako vam se svidjelo?"
 
+#: templates/orders/order_detail.html:287
 msgid "Ваше ім'я (необов'язково)"
 msgstr "Vaše ime (opcionalno)"
 
+#: templates/orders/order_detail.html:292
 msgid "Напишіть щось приємне... або корисне"
 msgstr "Napišite nešto lijepo... ili korisno"
 
+#: templates/orders/order_detail.html:298
 msgid "Надіслати відгук"
 msgstr "Pošalji recenziju"
 
+#: templates/orders/order_detail.html:305
 msgid "Дякуємо за відгук!"
 msgstr "Hvala na recenziji!"
 
+#: templates/orders/order_detail.html:315
 msgid "Покажіть QR-код або назвіть номер замовлення офіціанту"
 msgstr "Pokažite QR kod ili recite broj narudžbe konobaru"
 
+#: templates/orders/order_detail.html:318
 msgid "Приховати QR-код"
 msgstr "Sakrij QR kod"
 
+#: templates/orders/order_detail.html:318
+#: templates/orders/order_detail.html:319
 msgid "Показати QR-код"
 msgstr "Pokaži QR kod"
 
+#: templates/orders/order_history.html:4 templates/orders/order_history.html:12
 msgid "Мої замовлення"
 msgstr "Moje narudžbe"
 
+#: templates/orders/order_history.html:17
 msgid ""
 "Зареєструйтесь, щоб зберігати історію замовлень та отримувати бонуси "
 "програми лояльності!"
@@ -1443,147 +2234,158 @@ msgstr ""
 "Registrujte se, kako biste čuvali historiju narudžbi i dobijali bonuse "
 "programa lojalnosti"
 
+#: templates/orders/order_history.html:24
 msgid "Активні"
 msgstr "Aktivne"
 
+#: templates/orders/order_history.html:34
+#: templates/orders/waiter_order_list.html:78
 msgid "позицій"
 msgstr "stavki"
 
+#: templates/orders/order_history.html:44
 msgid "Завершені"
 msgstr "Završene"
 
+#: templates/orders/order_history.html:87
 msgid "Замовлень поки немає."
 msgstr "Još uvijek nema narudžbi."
 
+#: templates/orders/pay_online.html:8
 #, python-format
 msgid "Оплата замовлення #%(order_id)s"
 msgstr "Plaćanje narudžbe #%(order_id)s"
 
+#: templates/orders/pay_online.html:9
+#: templates/orders/senior_waiter_dashboard.html:38
 msgid "Сума:"
 msgstr "Iznos:"
 
+#: templates/orders/pay_online.html:14
 msgid "Демо-режим:"
 msgstr "Demo mod:"
 
+#: templates/orders/pay_online.html:15
 msgid "Реальна оплата ще не підключена. Кнопка симулює успішну оплату."
 msgstr "Stvarno plaćanje još nije omogućeno. Dugme simulira uspješno plaćanje."
 
+#: templates/orders/pay_online.html:21
 msgid "Оплатити онлайн (демо)"
 msgstr "Plati online (demo)"
 
+#: templates/orders/pay_online.html:27
 #, python-format
 msgid "Замовлення оплачено (%(method)s)"
 msgstr "Narudžba plaćena (%(method)s)"
 
+#: templates/orders/pay_online.html:30
 msgid "До замовлення"
 msgstr "Na narudžbu"
 
+#: templates/orders/senior_waiter_dashboard.html:8
 msgid "Ескальовані несплачені замовлення"
 msgstr "Eskalirane neplaćene narudžbe"
 
+#: templates/orders/senior_waiter_dashboard.html:12
 msgid "Немає проблемних замовлень."
 msgstr "Nema problematičnih narudžbi."
 
+#: templates/orders/senior_waiter_dashboard.html:30
 #, python-format
 msgid "Доставлено %(minutes)s хв тому"
 msgstr "Dostavljeno prije %(minutes)s min"
 
+#: templates/orders/senior_waiter_dashboard.html:35
 msgid "Офіціант:"
 msgstr "Konobar:"
 
+#: templates/orders/senior_waiter_dashboard.html:56
 msgid "Підтвердити оплату"
 msgstr "Potvrdi plaćanje"
 
+#: templates/orders/waiter_order_list.html:8
 msgid "Замовлення (офіціант)"
 msgstr "Narudžbe (konobar)"
 
+#: templates/orders/waiter_order_list.html:32
 msgid "Нові"
 msgstr "Nove"
 
+#: templates/orders/waiter_order_list.html:39
 msgid "Мої"
 msgstr "Moje"
 
+#: templates/orders/waiter_order_list.html:42
 msgid "Готові до доставки"
 msgstr "Spremne za dostavu"
 
+#: templates/orders/waiter_order_list.html:111
 msgid "хв тому"
 msgstr "minuta ranije"
 
+#: templates/orders/waiter_order_list.html:151
 msgid "Немає нових замовлень"
 msgstr "Nema novih narudžbi"
 
+#: templates/orders/waiter_order_list.html:162
 msgid "Готівка на руках:"
 msgstr "Gotovina pri ruci:"
 
+#: templates/orders/waiter_order_list.html:175
 msgid "У вас немає активних замовлень"
 msgstr "Nemate aktivnih narudžbi"
 
+#: templates/orders/waiter_order_list.html:253
 msgid "прострочено"
 msgstr "kasni"
 
+#: templates/orders/waiter_order_list.html:256
 msgid "не сплачено"
 msgstr "nije plaćeno"
 
+#: templates/orders/waiter_order_list.html:293
 msgid "Немає активних замовлень у команди"
 msgstr "Tim nema aktivnih narudžbi"
 
+#: templates/registration/_logout.html:8
 msgid "ВИЙТИ"
 msgstr "ODJAVA"
 
-msgid "Пароль змінено"
-msgstr "Lozinka promijenjena"
-
+#: templates/registration/password_change_done.html:23
 msgid "Ваш пароль успішно змінено."
 msgstr "Vaša lozinka je uspješno promijenjena."
 
+#: templates/registration/password_change_done.html:28
 msgid "Мій профіль"
 msgstr "Moj profil"
 
-msgid "Зміна пароля"
-msgstr "Promjena lozinke"
-
+#: templates/registration/password_change_form.html:27
 msgid "Будь ласка, виправте помилки нижче."
 msgstr "Molimo ispravite greške ispod."
 
+#: templates/registration/password_change_form.html:36
 msgid "Поточний пароль"
 msgstr "Trenutna lozinka"
 
+#: templates/registration/password_change_form.html:41
+#: templates/registration/password_reset_confirm.html:36
 msgid "Новий пароль (мінімум 8 символів, не лише цифри)"
 msgstr "Nova lozinka (minimalno 8 znakova, ne samo brojevi)"
 
+#: templates/registration/password_change_form.html:46
+#: templates/registration/password_reset_confirm.html:42
 msgid "Підтвердження нового пароля"
 msgstr "Potvrda nove lozinke"
 
-msgid "Змінити пароль"
-msgstr "Promijeni lozinku"
-
-msgid "Ваш пароль успішно змінено. Тепер ви можете увійти з новим паролем."
-msgstr "Vaša lozinka je uspješno promijenjena. Sada se možete prijaviti sa novom lozinkom."
-"Vaša lozinka je uspješno promijenjena. Sada se možete prijaviti sa novom "
-"lozinkom.Vaša lozinka je uspješno promijenjena. Sada se možete prijaviti sa "
-"novom lozinkom."
-
-msgid "Новий пароль"
-msgstr "Nova lozinka"
-
-msgid "Зберегти пароль"
-msgstr "Sačuvaj lozinku"
-
-msgid "Посилання недійсне"
-msgstr "Link je nevažeći"
-
+#: templates/registration/password_reset_confirm.html:59
 msgid "Посилання для скидання пароля недійсне або вже було використане."
 msgstr "Link za resetovanje lozinke je nevažeći ili je već iskorišten."
 
+#: templates/registration/password_reset_confirm.html:60
 msgid "Запросіть нове посилання."
 msgstr "Zatražite novi link."
 
-msgid "Надіслати повторно"
-msgstr "Pošalji ponovo"
-
-msgid "Посилання надіслано"
-msgstr "Link poslan"
-
+#: templates/registration/password_reset_done.html:23
 msgid ""
 "Якщо акаунт з вказаною адресою існує, ми надіслали посилання для скидання "
 "пароля."
@@ -1591,73 +2393,89 @@ msgstr ""
 "Ako nalog sa navedenom adresom postoji, poslali smo link za resetovanje "
 "lozinke."
 
+#: templates/registration/password_reset_done.html:24
 msgid "Перевірте вашу пошту."
 msgstr "Provjerite vaš e-mail."
 
+#: templates/registration/password_reset_done.html:29
 msgid "У dev-режимі лист виводиться у термінал сервера."
 msgstr "U dev modu, e-mail se prikazuje u terminalu servera."
 
+#: templates/registration/password_reset_done.html:30
 msgid "Скопіюйте посилання з консолі та вставте у браузер."
 msgstr "Kopirajte link iz konzole i zalijepite ga u pretraživač."
 
-msgid "Скидання пароля"
-msgstr "Resetovanje lozinke"
-
+#: templates/registration/password_reset_form.html:29
 msgid "Введіть електронну пошту, пов'язану з вашим акаунтом."
 msgstr "Unesite e-mail adresu povezanu s vašim računom."
 
+#: templates/registration/password_reset_form.html:30
 msgid "Ми надішлемо посилання для скидання пароля."
 msgstr "Poslat ćemo link za poništavanje lozinke."
 
-msgid "Надіслати посилання"
-msgstr "Pošalji link"
-
+#: templates/socialaccount/login.html:4
 msgid "Вхід через"
 msgstr "U redu"
 
+#: templates/socialaccount/login.html:14
 #, python-format
 msgid "Ви збираєтеся увійти, використовуючи обліковий запис %(name)s."
 msgstr "Spremate se da se prijavite koristeći nalog %(name)s."
 
+#: templates/socialaccount/login.html:20
 msgid "Продовжити"
 msgstr "Nastavite"
 
+#: templates/socialaccount/signup.html:4 templates/socialaccount/signup.html:10
 msgid "Завершення реєстрації"
 msgstr "Datum registracije:"
 
+#: templates/socialaccount/signup.html:14
 msgid "Ви майже зареєстровані. Будь ласка, перевірте дані нижче."
 msgstr "Skoro ste registrovani. Molimo provjerite podatke ispod."
 
+#: templates/translations/edit.html:4
 msgid "Редагувати переклад"
 msgstr "Uredi prijevod"
 
+#: templates/translations/edit.html:10 templates/translations/review.html:4
 msgid "Переклади"
 msgstr "Prijevodi"
 
+#: templates/translations/edit.html:21 templates/translations/review.html:36
 msgid "Оригінал (UK)"
 msgstr "Original (UK)"
 
+#: templates/translations/edit.html:47
 msgid "Зберегти і затвердити"
 msgstr "Spremi i odobri"
 
+#: templates/translations/review.html:8
 msgid "Переклади для перевірки"
 msgstr "Prijevodi za pregled"
 
+#: templates/translations/review.html:12
 msgid "Усі переклади затверджено."
 msgstr "Svi prijevodi su odobreni."
 
+#: templates/translations/review.html:28
 msgid "Затвердити все"
 msgstr "Odobri sve"
 
+#: templates/translations/review.html:85
 msgid "Затвердити"
 msgstr "Odobri"
 
+#: templates/translations/review.html:100
 msgid "Повторити"
 msgstr "Ponovi"
 
+#: templates/user/channels.html:4 templates/user/channels.html:10
+#: templates/user/profile.html:76 user/models.py:252
 msgid "Канали комунікації"
 msgstr "Komunikacijski kanali"
 
+#: templates/user/channels.html:14
 msgid ""
 "Канали використовуються для надсилання повідомлень, дайджестів та сповіщень. "
 "Верхній канал має найвищий пріоритет."
@@ -1665,161 +2483,215 @@ msgstr ""
 "Kanali se koriste za slanje poruka, sažetaka i obavještenja. Kanal na vrhu "
 "ima najviši prioritet."
 
+#: templates/user/channels.html:30 templates/user/profile.html:90
 msgid "Не верифіковано"
 msgstr "Verifikovano"
 
+#: templates/user/channels.html:40
 msgid "Вище"
 msgstr "Gore"
 
+#: templates/user/channels.html:50
 msgid "Нижче"
 msgstr "Dole"
 
+#: templates/user/channels.html:60 templates/user/profile.html:94
 msgid "Канали не налаштовані"
 msgstr "Kanali nisu postavljeni"
 
+#: templates/user/channels.html:68 templates/user/channels.html:91
 msgid "Підключити Telegram"
 msgstr "Povežite Telegram"
 
+#: templates/user/channels.html:69
 msgid "Отримуйте сповіщення та дайджести в Telegram"
 msgstr "Primajte obavijesti i preglede novosti u Telegramu"
 
+#: templates/user/channels.html:73
 msgid "Відкрити в Telegram"
 msgstr "Otvorena"
 
+#: templates/user/channels.html:75
 msgid "Натисніть Start у боті для підтвердження"
 msgstr "Ili koristite ručnu potvrdu."
 
+#: templates/user/channels.html:81
 msgid "Підключити"
 msgstr "Povežite"
 
+#: templates/user/channels.html:98
 msgid "До профілю"
 msgstr "Moj profil"
 
+#: templates/user/profile.html:15 templates/user/profile.html:23
 msgid "Профіль"
 msgstr "Profil"
 
+#: templates/user/profile.html:33 user/forms.py:44 user/models.py:86
 msgid "Аватар"
 msgstr "Avatar"
 
+#: templates/user/profile.html:56
 msgid "Дата реєстрації:"
 msgstr "Datum registracije:"
 
+#: templates/user/profile.html:60
 msgid "Останній вхід:"
 msgstr "Posljednja prijava:"
 
+#: templates/user/profile.html:65
 msgid "Статус:"
 msgstr "Status:"
 
+#: templates/user/profile.html:66
 msgid "Адміністратор"
 msgstr "Administrator"
 
+#: templates/user/profile.html:98
 msgid "Налаштувати канали"
 msgstr "Otkaži narudžbu"
 
+#: templates/user/profile.html:105 templates/user/profile_edit.html:15
+#: templates/user/profile_edit.html:22
 msgid "Редагувати профіль"
 msgstr "Uredi profil"
 
+#: templates/user/profile.html:108
 msgid "Замінити пароль"
 msgstr "Promijeni lozinku"
 
+#: templates/user/profile.html:111
 msgid "До меню"
 msgstr "Na meni"
 
+#: templates/user/profile.html:119
 msgid "Ви не увійшли в систему."
 msgstr "Niste prijavljeni."
 
+#: templates/user/profile_edit.html:28 templates/user/profile_edit.html:30
 msgid "Поточний аватар"
 msgstr "Trenutni avatar"
 
+#: translations/models.py:17
 msgid "Затверджено"
 msgstr "Odobreno"
 
+#: translations/models.py:18
 msgid "Помилка перекладу"
 msgstr "Greška u prijevodu"
 
+#: translations/models.py:83
 msgid "Затвердження перекладу"
 msgstr "Odobravanje prijevoda"
 
+#: translations/models.py:84
 msgid "Затвердження перекладів"
 msgstr "Odobravanje prijevoda"
 
+#: user/decorators.py:64
 msgid "Для цієї дії потрібен верифікований канал комунікації."
 msgstr "Za ovu akciju je potreban verifikovan komunikacijski kanal."
 
+#: user/forms.py:18
 msgid "Ім'я"
 msgstr "Ime"
 
+#: user/forms.py:24
 msgid "Прізвище"
 msgstr "Prezime"
 
+#: user/forms.py:71
 msgid "Електронна пошта (обов'язково)"
 msgstr "E-mail (obavezno)"
 
+#: user/forms.py:77
 msgid "Ім'я (необов'язково)"
 msgstr "Ime (opcionalno)"
 
+#: user/forms.py:83
 msgid "Прізвище (необов'язково)"
 msgstr "Prezime (opcionalno)"
 
+#: user/models.py:49
 msgid "Ім'я користувача"
 msgstr "Korisničko ime"
 
+#: user/models.py:76
 msgid "Виробництво"
 msgstr "Proizvodnja"
 
+#: user/models.py:79
 msgid "Редактор"
 msgstr "Uredi"
 
+#: user/models.py:80
 msgid "Коректор"
 msgstr "Korektor"
 
+#: user/models.py:81
 msgid "Відвідувач"
 msgstr "Posjetitelj"
 
+#: user/models.py:93
 msgid "Роль"
 msgstr "Uloga"
 
+#: user/models.py:99
 msgid "Посада для відвідувачів"
 msgstr "Pozicija za posjetioce"
 
+#: user/models.py:100
 msgid "Наприклад: Повариха, Бармен, Майстер десертів"
 msgstr "Na primjer: Kuharica, Barmen, Slastičar"
 
+#: user/models.py:106
 msgid "Публічне ім'я"
 msgstr "Javno ime"
 
+#: user/models.py:107
 msgid "Ім'я без прізвища для відвідувачів"
 msgstr "Ime bez prezimena za posjetioce"
 
+#: user/models.py:114
 msgid "Джерело реєстрації"
 msgstr "Datum registracije:"
 
+#: user/models.py:120
 msgid "Мови коректора"
 msgstr "Jezici korektora"
 
+#: user/models.py:121
 msgid "Коди мов для коректури: en, cnr, hr, bs, it, de"
 msgstr "Kodovi jezika za korekturu: en, cnr, hr, bs, it, de"
 
+#: user/models.py:214
 msgid "Email"
 msgstr "Email"
 
+#: user/models.py:215
 msgid "Telegram"
 msgstr "Telegram"
 
+#: user/models.py:225
 msgid "Тип каналу"
 msgstr "Tip kanala"
 
+#: user/models.py:229
 msgid "Адреса"
 msgstr "Adresa"
 
+#: user/models.py:230
 msgid "Email, Telegram chat ID, або номер телефону"
 msgstr "Email, Telegram chat ID ili broj telefona"
 
+#: user/models.py:238
 msgid "Пріоритет"
 msgstr "Ponovi"
 
+#: user/models.py:239
 msgid "Менше число — вищий пріоритет"
 msgstr "Manji broj — viša pozicija na listi"
 
+#: user/models.py:251
 msgid "Канал комунікації"
 msgstr "Kanal komunikacije"

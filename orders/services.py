@@ -24,12 +24,23 @@ from notifications.events import (
 from orders.cart import clear_cart, get_cart
 from orders.escalation_ownership import resolve_step_escalations
 from orders.event_log import log_event
+from orders.event_messages import MESSAGES as EM
+from orders.event_messages import MSG_CLASS as MC
 from orders.models import Order, OrderItem, StepEscalation
 
 if TYPE_CHECKING:
     from user.models import User
 
 logger = logging.getLogger("notifications")
+
+
+def _staff_params(user: User) -> dict[str, str]:
+    """Build staff params dict for log_event."""
+    return {
+        "staff_role": user.role,
+        "staff_name": user.public_name or user.first_name or user.email.split("@")[0],
+        "staff_display_title": user.display_title,
+    }
 
 
 def can_access_order(request: HttpRequest, order: Order) -> bool:
@@ -101,7 +112,12 @@ def submit_order_from_cart(request: HttpRequest) -> Order | None:
     items_summary = ", ".join(
         f"{dishes[i['dish_id']].title} x{i['quantity']}" for i in valid_items
     )
-    log_event(order, f"Замовлення сформовано і передано в систему: {items_summary}")
+    log_event(
+        order,
+        EM["order_submitted"],
+        params={"items_summary": items_summary},
+        msg_class=MC["order_submitted"],
+    )
     push_order_submitted(order.id)
 
     # Store access token in session for anonymous order tracking
@@ -140,9 +156,11 @@ def accept_order(order: Order, waiter: User) -> Order:
 
     log_event(
         order,
-        f"{waiter.staff_label} прийняв(ла) замовлення",
+        EM["order_accepted"],
+        params=_staff_params(waiter),
         actor_label=waiter.staff_label,
         actor=waiter,
+        msg_class=MC["order_accepted"],
     )
     push_visitor_event(
         order_id=order.id,
@@ -183,9 +201,11 @@ def verify_order(order: Order, waiter: User) -> Order:
 
     log_event(
         order,
-        f"{waiter.staff_label} верифікував(ла) замовлення і передав(ла) на кухню",
+        EM["order_verified"],
+        params=_staff_params(waiter),
         actor_label=waiter.staff_label,
         actor=waiter,
+        msg_class=MC["order_verified"],
     )
 
     push_order_approved(order_id=order.id)
@@ -273,11 +293,12 @@ def deliver_order(order: Order, waiter: User) -> tuple[Order, list[str]]:
     if skipped:
         log_event(
             order,
-            f"⚠️ Авто: {waiter.staff_label} пропустив(ла) кухонний процес — "
-            f"страви авто-закриті ({len(skipped)} шт.)",
+            EM["kitchen_skip"],
+            params={**_staff_params(waiter), "count": str(len(skipped))},
             actor_label=waiter.staff_label,
             actor=waiter,
             is_auto_skip=True,
+            msg_class=MC["kitchen_skip"],
         )
 
     # Set READY if not already
@@ -316,9 +337,11 @@ def deliver_order(order: Order, waiter: User) -> tuple[Order, list[str]]:
 
     log_event(
         order,
-        f"{waiter.staff_label} доставив(ла) замовлення",
+        EM["order_delivered"],
+        params=_staff_params(waiter),
         actor_label=waiter.staff_label,
         actor=waiter,
+        msg_class=MC["order_delivered"],
     )
 
     push_visitor_event(
@@ -373,11 +396,17 @@ def deliver_ticket(ticket: KitchenTicket, waiter: User) -> KitchenTicket:
         ticket.save(update_fields=["status", "taken_at", "done_at"])
         log_event(
             order,
-            f"⚠️ Авто: {waiter.staff_label} доставив(ла) {dish_title} "
-            f"(кухня: {old_status} → Готово)",
+            EM["ticket_delivered_auto"],
+            params={
+                **_staff_params(waiter),
+                "dish_title": dish_title,
+                "dish_id": str(ticket.order_item.dish_id),
+                "old_status": old_status,
+            },
             actor_label=waiter.staff_label,
             actor=waiter,
             is_auto_skip=True,
+            msg_class=MC["ticket_delivered_auto"],
         )
 
     ticket.is_delivered = True
@@ -388,9 +417,15 @@ def deliver_ticket(ticket: KitchenTicket, waiter: User) -> KitchenTicket:
 
     log_event(
         order,
-        f"{waiter.staff_label} доставив(ла) {dish_title}",
+        EM["ticket_delivered"],
+        params={
+            **_staff_params(waiter),
+            "dish_title": dish_title,
+            "dish_id": str(ticket.order_item.dish_id),
+        },
         actor_label=waiter.staff_label,
         actor=waiter,
+        msg_class=MC["ticket_delivered"],
     )
 
     push_ticket_delivered(
@@ -421,9 +456,11 @@ def deliver_ticket(ticket: KitchenTicket, waiter: User) -> KitchenTicket:
         order.save(update_fields=["status", "delivered_at"])
         log_event(
             order,
-            f"{waiter.staff_label} доставив(ла) замовлення (всі порції)",
+            EM["order_delivered_all"],
+            params=_staff_params(waiter),
             actor_label=waiter.staff_label,
             actor=waiter,
+            msg_class=MC["order_delivered_all"],
         )
         push_visitor_event(
             order_id=order.id,
@@ -484,9 +521,11 @@ def confirm_cash_payment(order: Order, waiter: User) -> tuple[Order, list[str]]:
 
     log_event(
         order,
-        f"Оплату готівкою €{order.total_price:.2f} прийняв(ла) {waiter.staff_label}",
+        EM["cash_payment"],
+        params={**_staff_params(waiter), "price": f"{order.total_price:.2f}"},
         actor_label=waiter.staff_label,
         actor=waiter,
+        msg_class=MC["cash_payment"],
     )
     push_visitor_event(
         order_id=order.id,
@@ -518,7 +557,12 @@ def confirm_online_payment_stub(order: Order) -> Order:
             "payment_escalation_level",
         ]
     )
-    log_event(order, f"Оплата онлайн €{order.total_price:.2f} — успішно 💳")
+    log_event(
+        order,
+        EM["online_payment"],
+        params={"price": f"{order.total_price:.2f}"},
+        msg_class=MC["online_payment"],
+    )
     push_visitor_event(
         order_id=order.id,
         event_type="order_paid",
@@ -567,7 +611,9 @@ def confirm_payment_by_senior(order: Order, method: str) -> Order:
     method_label = "готівкою" if method == "cash" else "онлайн"
     log_event(
         order,
-        f"Оплату {method_label} €{order.total_price:.2f} закрив(ла) старший офіціант",
+        EM["senior_payment"],
+        params={"method_label": method_label, "price": f"{order.total_price:.2f}"},
+        msg_class=MC["senior_payment"],
     )
     push_visitor_event(
         order_id=order.id,
@@ -677,9 +723,11 @@ def update_order_items(
 
     log_event(
         order,
-        f"Замовлення змінено: {'; '.join(summary_parts)}",
+        EM["order_modified"],
+        params={"summary": "; ".join(summary_parts)},
         actor_label=actor_label,
         actor=actor,
+        msg_class=MC["order_modified"],
     )
     push_order_updated(order.id, actor_id=actor.id if actor else None)
     push_visitor_event(
@@ -707,9 +755,10 @@ def cancel_order(order: Order, request: HttpRequest) -> Order:
 
     log_event(
         order,
-        "Замовлення скасовано",
+        EM["order_cancelled"],
         actor_label=actor_label,
         actor=actor,
+        msg_class=MC["order_cancelled"],
     )
     push_order_cancelled(order.id, actor_id=actor.id if actor else None)
     push_visitor_event(

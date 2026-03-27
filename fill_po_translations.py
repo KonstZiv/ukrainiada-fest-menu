@@ -255,7 +255,7 @@ def translate_single(string: str, lang_code: str) -> str:
     lang_name = LANG_NAMES[lang_code]
 
     prompt = (
-        f"Translate this Ukrainian UI string to {lang_name}:\n\n"
+        f"Translate this UI string to {lang_name}:\n\n"
         f'"{string}"\n\n'
         "Rules:\n"
         "- Restaurant menu system context (buttons, labels, messages).\n"

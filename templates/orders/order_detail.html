@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n static l10n %}
+{% load i18n static l10n order_extras %}
 
 {% block title %}Jadran Sun — Замовлення #{{ order.id }}{% endblock %}
 
@@ -85,7 +85,7 @@
   </div>
 
   {# --- Order tracking section --- #}
-  {% if event_log_lines %}
+  {% if order_events %}
   <div class="card mb-3">
     <div class="card-body">
       <h5 class="mb-3"><i class="bi bi-activity"></i> {% trans "Стан обробки замовлення" %}</h5>
@@ -134,7 +134,9 @@
     </div>
   </div>
   <script>
-    var _terminalInitLines = [{% for line in event_log_lines %}"{{ line|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}];
+    var _terminalInitLines = [{% for ev in order_events %}{"ts":"{{ ev.timestamp|date:'Y-m-d H:i:s' }}","text":"{{ ev|render_event|escapejs }}","msg_class":"{{ ev.msg_class }}"}{% if not forloop.last %},{% endif %}{% endfor %}];
+    var _eventCatalog = {{ event_catalog_json|safe }};
+    var _roleCatalog = {{ role_catalog_json|safe }};
   </script>
 
   {# --- Step detail modals --- #}
@@ -342,7 +344,7 @@
 {% if can_edit %}
 <script src="{% static 'js/order_edit.js' %}" defer></script>
 {% endif %}
-{% if event_log_lines %}
+{% if order_events %}
 <script src="{% static 'js/terminal_log.js' %}"></script>
 <script>
 (function () {
@@ -371,8 +373,12 @@
             try {
                 var data = JSON.parse(e.data);
                 console.log("[TerminalSSE] event:", data.type, data);
-                if (data.type === "order_log" && data.log_line) {
-                    term.addLine(data.log_line);
+                if (data.type === "order_log") {
+                    if (data.message_key && window.formatSSEEvent) {
+                        term.addLine(window.formatSSEEvent(data));
+                    } else if (data.log_line) {
+                        term.addLine(data.log_line);
+                    }
                 }
             } catch (err) { /* ignore keepalive */ }
         };

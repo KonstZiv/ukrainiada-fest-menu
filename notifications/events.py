@@ -126,13 +126,22 @@ def push_visitor_event(order_id: int, event_type: str, data: dict[str, Any]) -> 
     _push(visitor_order_channel(order_id), event_type, data)
 
 
-def push_order_log_event(order_id: int, log_line: str) -> None:
+def push_order_log_event(
+    order_id: int,
+    log_line: str,
+    message_key: str = "",
+    params: dict[str, object] | None = None,
+    msg_class: str = "",
+    timestamp: str = "",
+) -> None:
     """Push terminal log line to visitor watching this order."""
-    _push(
-        visitor_order_channel(order_id),
-        "order_log",
-        {"order_id": order_id, "log_line": log_line},
-    )
+    data: dict[str, object] = {"order_id": order_id, "log_line": log_line}
+    if message_key:
+        data["message_key"] = message_key
+        data["params"] = params or {}
+        data["msg_class"] = msg_class
+        data["timestamp"] = timestamp
+    _push(visitor_order_channel(order_id), "order_log", data)
 
 
 def push_staff_escalation(

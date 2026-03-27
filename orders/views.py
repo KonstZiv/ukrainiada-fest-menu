@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import json
 from decimal import Decimal
 from typing import TypedDict
 
@@ -355,7 +356,16 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
     # Event log for terminal display
     from orders.models import OrderEvent
 
-    event_log_lines = [e.log_line for e in OrderEvent.objects.filter(order=order)]
+    order_events = list(OrderEvent.objects.filter(order=order))
+
+    # Build JS event catalog for SSE real-time translation.
+    from django.utils.translation import gettext
+
+    from orders.event_messages import MESSAGES as EM
+    from user.models import User
+
+    event_catalog = {key: gettext(key) for key in EM.values()}
+    role_catalog = {val: str(label) for val, label in User.Role.choices}
 
     total_tickets = len(ticket_states)
     taken_count = sum(1 for ts in ticket_states if ts["status"] in ("taken", "done"))
@@ -391,7 +401,9 @@ def order_detail(request: HttpRequest, order_id: int) -> HttpResponse:
             "has_feedback": has_feedback,
             "feedback": feedback_obj,
             "mood_choices": GuestFeedback.Mood.choices if not has_feedback else [],
-            "event_log_lines": event_log_lines,
+            "order_events": order_events,
+            "event_catalog_json": json.dumps(event_catalog, ensure_ascii=False),
+            "role_catalog_json": json.dumps(role_catalog, ensure_ascii=False),
             "can_edit": can_edit_order(order, request),
         },
     )

@@ -18,6 +18,8 @@ from notifications.events import (
 )
 from orders.escalation_ownership import resolve_step_escalations
 from orders.event_log import log_event
+from orders.event_messages import MESSAGES as EM
+from orders.event_messages import MSG_CLASS as MC
 from orders.models import Order, StepEscalation
 
 if TYPE_CHECKING:
@@ -101,9 +103,19 @@ def take_ticket(ticket: KitchenTicket, kitchen_user: User) -> KitchenTicket:
 
     log_event(
         order,
-        f"Кухня: {kitchen_user.staff_label} прийняв(ла) в роботу {dish_title}",
+        EM["ticket_taken"],
+        params={
+            "staff_role": kitchen_user.role,
+            "staff_name": kitchen_user.public_name
+            or kitchen_user.first_name
+            or kitchen_user.email.split("@")[0],
+            "staff_display_title": kitchen_user.display_title,
+            "dish_title": dish_title,
+            "dish_id": str(ticket.order_item.dish_id),
+        },
         actor_label=kitchen_user.staff_label,
         actor=kitchen_user,
+        msg_class=MC["ticket_taken"],
     )
 
     waiter_id = order.waiter_id
@@ -184,11 +196,20 @@ def mark_ticket_done(
 
         log_event(
             order,
-            f"⚠️ Авто: {kitchen_user.staff_label} пропустив(ла) крок "
-            f"'Взяти' для {dish_title}",
+            EM["ticket_taken_auto"],
+            params={
+                "staff_role": kitchen_user.role,
+                "staff_name": kitchen_user.public_name
+                or kitchen_user.first_name
+                or kitchen_user.email.split("@")[0],
+                "staff_display_title": kitchen_user.display_title,
+                "dish_title": dish_title,
+                "dish_id": str(ticket.order_item.dish_id),
+            },
             actor_label=kitchen_user.staff_label,
             actor=kitchen_user,
             is_auto_skip=True,
+            msg_class=MC["ticket_taken_auto"],
         )
 
     ticket.status = KitchenTicket.Status.DONE
@@ -201,9 +222,19 @@ def mark_ticket_done(
     order = ticket.order_item.order
     log_event(
         order,
-        f"Кухня: {kitchen_user.staff_label} приготував(ла) {dish_title} ✅",
+        EM["ticket_done"],
+        params={
+            "staff_role": kitchen_user.role,
+            "staff_name": kitchen_user.public_name
+            or kitchen_user.first_name
+            or kitchen_user.email.split("@")[0],
+            "staff_display_title": kitchen_user.display_title,
+            "dish_title": dish_title,
+            "dish_id": str(ticket.order_item.dish_id),
+        },
         actor_label=kitchen_user.staff_label,
         actor=kitchen_user,
+        msg_class=MC["ticket_done"],
     )
 
     waiter_id = order.waiter_id
@@ -234,7 +265,7 @@ def mark_ticket_done(
         skipped,
     )
     if order_ready:
-        log_event(order, "Усі страви готові! Очікуємо офіціанта для доставки 🍽️")
+        log_event(order, EM["all_ready"], msg_class=MC["all_ready"])
         if waiter_id:
             push_order_ready(order_id=order.id, waiter_id=waiter_id)
 
@@ -302,9 +333,19 @@ def manual_handoff(ticket: KitchenTicket, kitchen_user: User) -> None:
         order = ticket.order_item.order
         log_event(
             order,
-            f"Кухня: {kitchen_user.staff_label} передав(ла) {dish_title} офіціанту",
+            EM["ticket_handoff"],
+            params={
+                "staff_role": kitchen_user.role,
+                "staff_name": kitchen_user.public_name
+                or kitchen_user.first_name
+                or kitchen_user.email.split("@")[0],
+                "staff_display_title": kitchen_user.display_title,
+                "dish_title": dish_title,
+                "dish_id": str(ticket.order_item.dish_id),
+            },
             actor_label=kitchen_user.staff_label,
             actor=kitchen_user,
+            msg_class=MC["ticket_handoff"],
         )
         push_visitor_event(
             order_id=order.id,
