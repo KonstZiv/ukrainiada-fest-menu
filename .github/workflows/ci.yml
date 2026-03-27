@@ -31,6 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - run: sudo apt-get install -y gettext
       - run: |
           for f in locale/*/LC_MESSAGES/*.po; do
             echo "Checking $f"
