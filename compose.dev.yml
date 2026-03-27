@@ -39,7 +39,7 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     command: >
-      uv run python manage.py runserver 0.0.0.0:8000
+      uv run uvicorn core_settings.asgi:application --host 0.0.0.0 --port 8000 --reload
     volumes:
       - .:/app
       - dev_venv:/app/.venv
@@ -49,6 +49,7 @@ services:
       - DJANGO_SETTINGS_MODULE=core_settings.settings.dev
       - DB_HOST=db
       - REDIS_URL=redis://redis:6379/0
+      - REDIS_HOST=redis
     ports:
       - "8001:8000"
     depends_on:

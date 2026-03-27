@@ -43,6 +43,6 @@ def channels_for_user(user: User) -> list[str]:
         return [kitchen_channel(user.id), "kitchen-broadcast"]
     if role in (UserModel.Role.WAITER, UserModel.Role.SENIOR_WAITER):
         return [waiter_channel(user.id), "waiter-broadcast"]
-    if role == UserModel.Role.MANAGER:
+    if role == UserModel.Role.MANAGER or user.is_superuser:
         return [manager_channel(), "kitchen-broadcast"]
     return []

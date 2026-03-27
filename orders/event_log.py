@@ -62,6 +62,17 @@ def resolve_params(params: dict[str, Any]) -> dict[str, Any]:
         except Dish.DoesNotExist:
             pass  # keep dish_title from params if present
 
+    # Resolve items_data to items_summary in active language.
+    if "items_data" in result:
+        from menu.models import Dish
+
+        items = result.pop("items_data")
+        dish_ids = [item["dish_id"] for item in items]
+        dishes = {str(d.pk): d.title for d in Dish.objects.filter(pk__in=dish_ids)}
+        result["items_summary"] = ", ".join(
+            f"{dishes.get(item['dish_id'], '?')} x{item['qty']}" for item in items
+        )
+
     return result
 
 

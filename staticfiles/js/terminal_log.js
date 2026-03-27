@@ -209,6 +209,15 @@
         var template = window._eventCatalog[data.message_key] || data.message_key;
         var params = data.params || {};
 
+        // items_data requires DB lookup — fall back to server-rendered log_line.
+        if (params.items_data && !params.items_summary) {
+            return {
+                text: data.log_line || "",
+                msg_class: data.msg_class || "",
+                ts: data.timestamp || "",
+            };
+        }
+
         // Resolve staff_label from role + name.
         if (params.staff_role && !params.staff_label) {
             var title = params.staff_display_title || "";

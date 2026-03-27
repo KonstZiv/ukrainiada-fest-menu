@@ -109,13 +109,13 @@ def submit_order_from_cart(request: HttpRequest) -> Order | None:
             ]
         )
 
-    items_summary = ", ".join(
-        f"{dishes[i['dish_id']].title} x{i['quantity']}" for i in valid_items
-    )
+    items_data = [
+        {"dish_id": str(i["dish_id"]), "qty": i["quantity"]} for i in valid_items
+    ]
     log_event(
         order,
         EM["order_submitted"],
-        params={"items_summary": items_summary},
+        params={"items_data": items_data},
         msg_class=MC["order_submitted"],
     )
     push_order_submitted(order.id)

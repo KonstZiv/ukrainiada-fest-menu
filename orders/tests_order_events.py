@@ -90,7 +90,7 @@ def test_submit_order_creates_event(client: Client, dish: Dish) -> None:
     events = list(order.events.all())
     assert len(events) == 1
     assert events[0].message_key == EM["order_submitted"]
-    assert "items_summary" in events[0].params
+    assert "items_data" in events[0].params
 
 
 @pytest.mark.django_db
