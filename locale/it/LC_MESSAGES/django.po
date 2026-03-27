@@ -197,7 +197,7 @@ msgstr ""
 
 #: news/forms.py:26
 msgid "Заголовок статті"
-msgstr "Principale"
+msgstr "Titolo articolo"
 
 #: news/forms.py:32
 msgid "Короткий опис для анонсу"
@@ -362,7 +362,7 @@ msgstr "Commento"
 
 #: news/models.py:238
 msgid "Коментар до статті"
-msgstr "Commento"
+msgstr "Commento all'articolo"
 
 #: news/models.py:239
 msgid "Коментарі до статей"
@@ -1885,12 +1885,12 @@ msgstr "Non ci sono ancora piatti con questo tag."
 #: templates/news/article_confirm_delete.html:4
 #: templates/news/article_confirm_delete.html:9
 msgid "Видалити статтю"
-msgstr "Elimina piatto"
+msgstr "Elimina articolo"
 
 #: templates/news/article_confirm_delete.html:13
 #, fuzzy, python-format
 msgid "Ви збираєтесь видалити статтю «%(title)s»"
-msgstr "Stai per eliminare il tag <strong>\"%(title)s\"</strong>."
+msgstr "Stai per eliminare l'articolo <strong>\"%(title)s\"</strong>."
 
 #: templates/news/article_detail.html:33
 msgid "Це автоматичний переклад. Можливі неточності."
@@ -1940,12 +1940,12 @@ msgstr "La tua richiesta:"
 
 #: templates/news/article_form.html:5 templates/news/article_form.html:15
 msgid "Редагувати статтю"
-msgstr "Modifica piatto"
+msgstr "Modifica articolo"
 
 #: templates/news/article_form.html:5 templates/news/article_form.html:17
 #: templates/news/article_list.html:13
 msgid "Нова стаття"
-msgstr "Nuovo piatto"
+msgstr "Nuovo articolo"
 
 #: templates/news/article_list.html:42
 msgid "Новин поки немає."

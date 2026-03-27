@@ -199,7 +199,7 @@ msgstr ""
 
 #: news/forms.py:26
 msgid "Заголовок статті"
-msgstr "Zur Startseite"
+msgstr "Artikeltitel"
 
 #: news/forms.py:32
 msgid "Короткий опис для анонсу"
@@ -364,7 +364,7 @@ msgstr "Kommentar"
 
 #: news/models.py:238
 msgid "Коментар до статті"
-msgstr "Kommentar"
+msgstr "Kommentar zum Artikel"
 
 #: news/models.py:239
 msgid "Коментарі до статей"
@@ -1916,12 +1916,12 @@ msgstr "Es gibt noch keine Gerichte mit diesem Tag."
 #: templates/news/article_confirm_delete.html:4
 #: templates/news/article_confirm_delete.html:9
 msgid "Видалити статтю"
-msgstr "Gericht löschen"
+msgstr "Artikel löschen"
 
 #: templates/news/article_confirm_delete.html:13
 #, fuzzy, python-format
 msgid "Ви збираєтесь видалити статтю «%(title)s»"
-msgstr "Sie sind dabei, den Tag <strong>„%(title)s“</strong> zu löschen."
+msgstr "Sie sind dabei, den Artikel <strong>„%(title)s\"</strong> zu löschen."
 
 #: templates/news/article_detail.html:33
 msgid "Це автоматичний переклад. Можливі неточності."
@@ -1971,12 +1971,12 @@ msgstr "Ihre Nachricht:"
 
 #: templates/news/article_form.html:5 templates/news/article_form.html:15
 msgid "Редагувати статтю"
-msgstr "Gericht bearbeiten"
+msgstr "Artikel bearbeiten"
 
 #: templates/news/article_form.html:5 templates/news/article_form.html:17
 #: templates/news/article_list.html:13
 msgid "Нова стаття"
-msgstr "Neues Gericht"
+msgstr "Neuer Artikel"
 
 #: templates/news/article_list.html:42
 msgid "Новин поки немає."

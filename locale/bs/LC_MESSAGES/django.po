@@ -192,7 +192,7 @@ msgstr "Datoteka nije ispravan SVG. Učitajte datoteku u SVG formatu."
 
 #: news/forms.py:26
 msgid "Заголовок статті"
-msgstr "Na početnu"
+msgstr "Naslov članka"
 
 #: news/forms.py:32
 msgid "Короткий опис для анонсу"
@@ -357,7 +357,7 @@ msgstr "Komentar"
 
 #: news/models.py:238
 msgid "Коментар до статті"
-msgstr "Komentar"
+msgstr "Komentar na članak"
 
 #: news/models.py:239
 msgid "Коментарі до статей"
@@ -1865,12 +1865,12 @@ msgstr "Još uvijek nema jela s ovom oznakom."
 #: templates/news/article_confirm_delete.html:4
 #: templates/news/article_confirm_delete.html:9
 msgid "Видалити статтю"
-msgstr "Izbriši jelo"
+msgstr "Izbriši članak"
 
 #: templates/news/article_confirm_delete.html:13
 #, fuzzy, python-format
 msgid "Ви збираєтесь видалити статтю «%(title)s»"
-msgstr "Spremate se da izbrišete oznaku <strong>«%(title)s»</strong>."
+msgstr "Spremate se da izbrišete članak <strong>«%(title)s»</strong>."
 
 #: templates/news/article_detail.html:33
 msgid "Це автоматичний переклад. Можливі неточності."
@@ -1919,12 +1919,12 @@ msgstr "Vaša poruka:"
 
 #: templates/news/article_form.html:5 templates/news/article_form.html:15
 msgid "Редагувати статтю"
-msgstr "Uredi jelo"
+msgstr "Uredi članak"
 
 #: templates/news/article_form.html:5 templates/news/article_form.html:17
 #: templates/news/article_list.html:13
 msgid "Нова стаття"
-msgstr "Novo jelo"
+msgstr "Novi članak"
 
 #: templates/news/article_list.html:42
 msgid "Новин поки немає."

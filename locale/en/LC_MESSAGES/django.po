@@ -191,7 +191,7 @@ msgstr "The file is not a valid SVG. Please upload an SVG file."
 
 #: news/forms.py:26
 msgid "Заголовок статті"
-msgstr "Go to home page"
+msgstr "Article title"
 
 #: news/forms.py:32
 msgid "Короткий опис для анонсу"
@@ -356,7 +356,7 @@ msgstr "Comment"
 
 #: news/models.py:238
 msgid "Коментар до статті"
-msgstr "Comment"
+msgstr "Comment on article"
 
 #: news/models.py:239
 msgid "Коментарі до статей"
@@ -1862,12 +1862,12 @@ msgstr "There are no dishes with this tag yet."
 #: templates/news/article_confirm_delete.html:4
 #: templates/news/article_confirm_delete.html:9
 msgid "Видалити статтю"
-msgstr "Delete dish"
+msgstr "Delete article"
 
 #: templates/news/article_confirm_delete.html:13
 #, fuzzy, python-format
 msgid "Ви збираєтесь видалити статтю «%(title)s»"
-msgstr "You are about to delete the tag <strong>\"%(title)s\"</strong>."
+msgstr "You are about to delete the article <strong>\"%(title)s\"</strong>."
 
 #: templates/news/article_detail.html:33
 msgid "Це автоматичний переклад. Можливі неточності."
@@ -1916,12 +1916,12 @@ msgstr "Your message:"
 
 #: templates/news/article_form.html:5 templates/news/article_form.html:15
 msgid "Редагувати статтю"
-msgstr "Edit dish"
+msgstr "Edit article"
 
 #: templates/news/article_form.html:5 templates/news/article_form.html:17
 #: templates/news/article_list.html:13
 msgid "Нова стаття"
-msgstr "New dish"
+msgstr "New article"
 
 #: templates/news/article_list.html:42
 msgid "Новин поки немає."
