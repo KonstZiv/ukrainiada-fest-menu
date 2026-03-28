@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 from core_settings.types import AuthenticatedHttpRequest
-from orders.models import Order, VisitorEscalation
+from orders.models import Order, StepEscalation, VisitorEscalation
 from orders.stats import PERIOD_LABELS, kitchen_stats, resolve_period, waiter_stats
 from user.decorators import role_required
 
@@ -39,12 +39,20 @@ def manager_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
         payment_status=Order.PaymentStatus.UNPAID,
     ).count()
 
-    open_escalations = VisitorEscalation.objects.filter(
+    visitor_escalations = VisitorEscalation.objects.filter(
         status__in=[
             VisitorEscalation.Status.OPEN,
             VisitorEscalation.Status.ACKNOWLEDGED,
         ],
     ).count()
+
+    step_escalations_qs = StepEscalation.objects.filter(
+        level=StepEscalation.Level.MANAGER,
+        resolved_at__isnull=True,
+    ).select_related("order", "ticket__order_item__dish", "owner", "caused_by")
+
+    step_escalations_count = step_escalations_qs.count()
+    open_escalations = visitor_escalations + step_escalations_count
 
     return render(
         request,
@@ -57,6 +65,7 @@ def manager_dashboard(request: AuthenticatedHttpRequest) -> HttpResponse:
             "active_orders": active_orders,
             "unpaid_orders": unpaid_orders,
             "open_escalations": open_escalations,
+            "step_escalations": step_escalations_qs,
             "current_period": period,
             "period_labels": PERIOD_LABELS,
             "date_from": date_from,

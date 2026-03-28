@@ -1,7 +1,7 @@
 /**
  * Kitchen dashboard AJAX — intercepts "Взяти" and "Готово" forms
- * to avoid full page reload. Removes ticket card with animation,
- * updates badge counts, and removes empty order groups.
+ * to avoid full page reload. Moves ticket card between kanban columns
+ * with animation, updates badge counts, and removes empty order groups.
  */
 (function () {
   "use strict";
@@ -20,6 +20,13 @@
       desktop: "#done-count",
       mobile: ".kitchen-tab-pills a[href='?tab=done'] .badge",
     },
+  };
+
+  // Desktop kanban column body selectors
+  var KANBAN_COL = {
+    pending: ".kitchen-kanban .kanban-col:nth-child(1) .card-body",
+    taken: ".kitchen-kanban .kanban-col:nth-child(2) .card-body",
+    done: ".kitchen-kanban .kanban-col:nth-child(3) .card-body",
   };
 
   function updateBadge(key, delta) {
@@ -53,21 +60,198 @@
     }
   }
 
-  function removeTicketCard(ticketId) {
+  /** Check if we are in desktop kanban layout. */
+  function isKanban() {
+    return !!document.querySelector(".kitchen-kanban");
+  }
+
+  /** Remove the "empty" placeholder from a column body if present. */
+  function removeEmptyPlaceholder(colBody) {
+    var ph = colBody.querySelector(".text-muted.text-center");
+    if (ph) ph.remove();
+  }
+
+  /** If column body has no ticket cards left, add an empty placeholder. */
+  function addEmptyPlaceholderIfNeeded(colBody, text) {
+    if (colBody.querySelectorAll("[data-ticket-id]").length === 0) {
+      var div = document.createElement("div");
+      div.className = "text-muted text-center py-4";
+      div.innerHTML = '<i class="bi bi-inbox"></i> ' + text;
+      colBody.appendChild(div);
+    }
+  }
+
+  /**
+   * Find or create an order group in the target column for the given order.
+   * Returns the .list-group element inside the group.
+   */
+  function getOrCreateOrderGroup(colBody, orderId, waiterLabel) {
+    // Look for existing group by matching order id in header text
+    var groups = colBody.querySelectorAll(".kitchen-order-group");
+    for (var i = 0; i < groups.length; i++) {
+      var header = groups[i].querySelector(".kitchen-order-group-header");
+      if (header && header.textContent.indexOf("#" + orderId) !== -1) {
+        return groups[i].querySelector(".list-group");
+      }
+    }
+    // Create new group
+    var group = document.createElement("div");
+    group.className = "kitchen-order-group";
+    group.innerHTML =
+      '<div class="kitchen-order-group-header d-flex justify-content-between align-items-center">' +
+        '<span>#' + orderId + ' \u00B7 ' + waiterLabel + '</span>' +
+        '<span class="badge bg-secondary">0 ' + gettext("стр.") + '</span>' +
+      '</div>' +
+      '<div class="list-group list-group-flush"></div>';
+    colBody.appendChild(group);
+    return group.querySelector(".list-group");
+  }
+
+  /** Update the ticket count badge inside an order group header. */
+  function updateGroupCount(group) {
+    if (!group) return;
+    var orderGroup = group.closest(".kitchen-order-group");
+    if (!orderGroup) return;
+    var count = orderGroup.querySelectorAll("[data-ticket-id]").length;
+    var badge = orderGroup.querySelector(".kitchen-order-group-header .badge");
+    if (badge) {
+      badge.textContent = count + " " + gettext("стр.");
+    }
+  }
+
+  /**
+   * Rebuild the action button inside a ticket card for the new column.
+   * "take" → "done", "done" → "handoff"
+   */
+  function rebuildButton(card, ticketId, newAction) {
+    var btnWrap = card.querySelector(".flex-shrink-0");
+    if (!btnWrap) return;
+
+    if (newAction === "done") {
+      btnWrap.innerHTML =
+        '<form method="post" action="/kitchen/ticket/' + ticketId + '/done/">' +
+          '<input type="hidden" name="csrfmiddlewaretoken" value="' + getCSRF() + '">' +
+          '<input type="hidden" name="tab" value="in_progress">' +
+          '<button type="submit" class="btn btn-success btn-sm" style="min-height: 44px; min-width: 70px;">' +
+            '<i class="bi bi-check-lg"></i> ' + gettext("Готово") +
+          '</button>' +
+        '</form>';
+    } else if (newAction === "handoff") {
+      btnWrap.innerHTML =
+        '<div class="d-flex gap-1">' +
+          '<a href="/kitchen/ticket/' + ticketId + '/handoff/" class="btn btn-outline-primary btn-sm" style="min-height: 44px;">' +
+            '<i class="bi bi-qr-code"></i>' +
+          '</a>' +
+          '<form method="post" action="/kitchen/ticket/' + ticketId + '/manual-handoff/" class="d-inline ajax-deliver">' +
+            '<input type="hidden" name="csrfmiddlewaretoken" value="' + getCSRF() + '">' +
+            '<input type="hidden" name="tab" value="done">' +
+            '<button type="submit" class="btn btn-outline-secondary btn-sm" style="min-height: 44px;">' +
+              '<i class="bi bi-hand-index"></i>' +
+            '</button>' +
+          '</form>' +
+        '</div>';
+    }
+  }
+
+  function getCSRF() {
+    var el = document.querySelector("[name=csrfmiddlewaretoken]");
+    return el ? el.value : "";
+  }
+
+  /**
+   * Extract order id and waiter label from the ticket card's text.
+   */
+  function getOrderInfo(card) {
+    var meta = card.querySelector(".text-muted[style]");
+    var text = meta ? meta.textContent : "";
+    // Format: "#123 · Офіціант Дмитро"
+    var m = text.match(/#(\d+)\s*·\s*(.*)/);
+    return {
+      orderId: m ? m[1] : "?",
+      waiterLabel: m ? m[2].trim() : "",
+    };
+  }
+
+  /**
+   * Move a ticket card from source column to target column with animation.
+   * Mobile: just remove (single tab view). Desktop kanban: move between columns.
+   */
+  function moveTicketCard(ticketId, sourceKey, targetKey) {
     var card = document.querySelector('[data-ticket-id="' + ticketId + '"]');
     if (!card) return;
-    // Fade out
+
+    var sourceGroup = card.closest(".kitchen-order-group");
+    var sourceList = card.closest(".list-group");
+
+    if (isKanban()) {
+      var targetColBody = document.querySelector(KANBAN_COL[targetKey]);
+      if (!targetColBody) { removeCardMobile(card, sourceGroup); return; }
+
+      var info = getOrderInfo(card);
+      var targetList = getOrCreateOrderGroup(targetColBody, info.orderId, info.waiterLabel);
+
+      // Reset card styling
+      card.classList.remove("kitchen-urgency-critical", "kitchen-urgency-warn",
+        "ticket-card-pending", "ticket-card-taken", "ticket-card-done");
+      card.classList.add("ticket-card-" + (targetKey === "taken" ? "taken" : "done"));
+      card.dataset.urgency = "normal";
+
+      // Rebuild button for new column
+      var newAction = targetKey === "taken" ? "done" : "handoff";
+      rebuildButton(card, ticketId, newAction);
+
+      // Fade out from source
+      card.style.transition = "opacity 0.25s";
+      card.style.opacity = "0";
+
+      setTimeout(function () {
+        // Move to target
+        card.remove();
+        cleanupSourceGroup(sourceGroup, sourceList, sourceKey);
+
+        removeEmptyPlaceholder(targetColBody);
+        targetList.appendChild(card);
+        updateGroupCount(targetList);
+
+        // Fade in
+        requestAnimationFrame(function () {
+          card.style.opacity = "0";
+          requestAnimationFrame(function () {
+            card.style.transition = "opacity 0.3s";
+            card.style.opacity = "1";
+          });
+        });
+      }, 250);
+    } else {
+      // Mobile: just fade out and remove
+      removeCardMobile(card, sourceGroup);
+    }
+  }
+
+  function removeCardMobile(card, group) {
     card.style.transition = "opacity 0.3s, max-height 0.3s";
     card.style.opacity = "0";
     card.style.overflow = "hidden";
     setTimeout(function () {
-      var group = card.closest(".kitchen-order-group");
       card.remove();
-      // If order group is now empty, remove it
       if (group && group.querySelectorAll("[data-ticket-id]").length === 0) {
         group.remove();
       }
     }, 300);
+  }
+
+  function cleanupSourceGroup(group, list, sourceKey) {
+    if (!group) return;
+    updateGroupCount(list);
+    if (group.querySelectorAll("[data-ticket-id]").length === 0) {
+      group.remove();
+    }
+    // Add placeholder if column is now empty
+    var colBody = document.querySelector(KANBAN_COL[sourceKey]);
+    if (colBody) {
+      var emptyTexts = { pending: gettext("Черга порожня"), taken: gettext("Нічого в роботі"), done: gettext("Ще нічого не приготовлено") };
+      addEmptyPlaceholderIfNeeded(colBody, emptyTexts[sourceKey] || "");
+    }
   }
 
   // Intercept take/done form submissions
@@ -99,11 +283,12 @@
       .then(function (data) {
         console.log("[KitchenAjax] response:", JSON.stringify(data));
         if (data.ok) {
-          removeTicketCard(data.ticket_id);
           if (isTake) {
+            moveTicketCard(data.ticket_id, "pending", "taken");
             updateBadge("pending", -1);
             updateBadge("taken", +1);
           } else if (isDone) {
+            moveTicketCard(data.ticket_id, "taken", "done");
             updateBadge("taken", -1);
             updateBadge("done", +1);
           }

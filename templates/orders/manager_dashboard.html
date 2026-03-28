@@ -52,6 +52,46 @@
   </div>
 
   {# ================================================================== #}
+  {# Step escalations (level 2 — manager responsibility)                 #}
+  {# ================================================================== #}
+  {% if step_escalations %}
+  <div class="card border-danger mb-3">
+    <div class="card-header bg-danger text-white py-2">
+      <i class="bi bi-exclamation-triangle"></i> {% trans "Системні ескалації" %}
+      <span class="badge bg-light text-danger ms-1">{{ step_escalations|length }}</span>
+    </div>
+    <div class="list-group list-group-flush">
+      {% for esc in step_escalations %}
+      <div class="list-group-item py-2 px-3">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <strong>{{ esc.get_step_display }}</strong>
+            {% if esc.order %}
+              <span class="text-muted">— {% trans "Замовлення" %} #{{ esc.order_id }}</span>
+            {% elif esc.ticket %}
+              <span class="text-muted">— {{ esc.ticket.order_item.dish.title }} (#{{ esc.ticket.order_item.order_id }})</span>
+            {% endif %}
+          </div>
+          <span class="badge bg-danger">{{ esc.get_level_display }}</span>
+        </div>
+        <div class="small text-muted mt-1">
+          {% if esc.owner %}
+            {% trans "Відповідальний" %}: {{ esc.owner.staff_label }}
+          {% elif esc.owner_role %}
+            {% trans "Відповідальний" %}: {{ esc.owner_role }}
+          {% endif %}
+          {% if esc.caused_by %}
+            · {% trans "Не вирішив" %}: {{ esc.caused_by.staff_label }}
+          {% endif %}
+          · {{ esc.created_at|timesince }} {% trans "тому" %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# ================================================================== #}
   {# Waiter team stats (reusable partial)                                #}
   {# ================================================================== #}
   {% include "components/_team_stats_waiter.html" with team_stats_details=waiter_details team_stats_totals=waiter_totals %}
