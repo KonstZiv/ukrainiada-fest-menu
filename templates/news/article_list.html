@@ -19,21 +19,51 @@
   <div class="row g-3">
     {% for article in articles %}
     <div class="col-12 col-md-6">
-      <a href="{% url 'news:article_detail' article.pk %}" class="card text-decoration-none h-100" style="border: 1px solid var(--brand-border); border-radius: var(--radius-precise);">
-        {% if article.main_image %}
-        <img src="{{ article.main_image.image.url }}" alt="{{ article.title }}"
-             class="card-img-top" style="height: 200px; object-fit: cover;">
-        {% endif %}
-        <div class="card-body">
-          <span class="badge text-bg-primary mb-1">{{ article.primary_tag.title }}</span>
-          {% for tag in article.tags.all %}
-          <span class="badge text-bg-secondary mb-1">{{ tag.title }}</span>
-          {% endfor %}
-          <h6 class="card-title fw-semibold text-body">{{ article.title }}</h6>
-          <p class="card-text text-muted small mb-2">{{ article.description }}</p>
-          <small class="text-muted">{{ article.created_at|date:"d.m.Y" }}</small>
+      <div class="card h-100 {% if article.status == 'draft' %}opacity-75{% endif %}" style="border: 1px solid var(--brand-border); border-radius: var(--radius-precise);">
+        <a href="{% url 'news:article_detail' article.pk %}" class="text-decoration-none">
+          {% if article.main_image %}
+          <img src="{{ article.main_image.image.url }}" alt="{{ article.title }}"
+               class="card-img-top" style="height: 200px; object-fit: cover;">
+          {% endif %}
+          <div class="card-body pb-1">
+            {% if is_editor and article.status == 'draft' %}
+            <span class="badge text-bg-warning mb-1">{% trans "Чернетка" %}</span>
+            {% endif %}
+            <span class="badge text-bg-primary mb-1">{{ article.primary_tag.title }}</span>
+            {% for tag in article.tags.all %}
+            <span class="badge text-bg-secondary mb-1">{{ tag.title }}</span>
+            {% endfor %}
+            <h6 class="card-title fw-semibold text-body">{{ article.title }}</h6>
+            <p class="card-text text-muted small mb-2">{{ article.description }}</p>
+            <small class="text-muted">{{ article.created_at|date:"d.m.Y" }}</small>
+          </div>
+        </a>
+        {% if is_editor %}
+        <div class="card-footer bg-transparent border-top-0 pt-0 pb-2 px-3 d-flex gap-2">
+          <a href="{% url 'news:article_update' article.pk %}" class="btn btn-sm btn-outline-primary" title="{% trans 'Редагувати' %}">
+            <i class="bi bi-pencil"></i>
+          </a>
+          {% if article.status == 'draft' %}
+          <form method="post" action="{% url 'news:article_toggle_status' article.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-success" title="{% trans 'Опублікувати' %}">
+              <i class="bi bi-eye"></i>
+            </button>
+          </form>
+          {% else %}
+          <form method="post" action="{% url 'news:article_toggle_status' article.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-warning" title="{% trans 'Приховати' %}">
+              <i class="bi bi-eye-slash"></i>
+            </button>
+          </form>
+          {% endif %}
+          <a href="{% url 'news:article_delete' article.pk %}" class="btn btn-sm btn-outline-danger ms-auto" title="{% trans 'Видалити' %}">
+            <i class="bi bi-trash"></i>
+          </a>
         </div>
-      </a>
+        {% endif %}
+      </div>
     </div>
     {% endfor %}
   </div>

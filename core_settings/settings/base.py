@@ -238,6 +238,8 @@ CKEDITOR_5_CONFIGS = {
     },
 }
 
+CKEDITOR_5_USER_LANGUAGE = True
+
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # ---------------------------------------------------------------------------

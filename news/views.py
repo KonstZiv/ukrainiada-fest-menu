@@ -41,16 +41,20 @@ _EDITOR_ROLES = ("editor", "manager")
 
 
 def article_list(request: HttpRequest) -> HttpResponse:
-    """Public list of published articles."""
-    articles = (
-        Article.objects.filter(status=Article.Status.PUBLISHED)
-        .select_related("main_image", "primary_tag", "author")
-        .prefetch_related("tags")
-    )
+    """Public list of published articles; editors see all statuses."""
+    qs = Article.objects.select_related(
+        "main_image", "primary_tag", "author"
+    ).prefetch_related("tags")
+
+    user = request.user
+    is_editor = user.is_authenticated and cast(User, user).role in _EDITOR_ROLES
+    if not is_editor:
+        qs = qs.filter(status=Article.Status.PUBLISHED)
+
     return render(
         request,
         "news/article_list.html",
-        {"articles": articles, "show_search": False},
+        {"articles": qs, "is_editor": is_editor, "show_search": False},
     )
 
 
@@ -111,6 +115,25 @@ def article_detail(request: HttpRequest, pk: int) -> HttpResponse:
 # ---------------------------------------------------------------------------
 # Editor CRUD
 # ---------------------------------------------------------------------------
+
+
+@role_required(*_EDITOR_ROLES)
+def toggle_article_status(request: HttpRequest, pk: int) -> HttpResponse:
+    """Toggle article between draft and published."""
+    if request.method != "POST":
+        return redirect("news:article_list")
+
+    article = get_object_or_404(Article, pk=pk)
+    if article.status == Article.Status.DRAFT:
+        article.status = Article.Status.PUBLISHED
+        article.save(update_fields=["status"])
+        messages.success(request, _("Статтю опубліковано."))
+    elif article.status == Article.Status.PUBLISHED:
+        article.status = Article.Status.DRAFT
+        article.save(update_fields=["status"])
+        messages.info(request, _("Статтю приховано."))
+
+    return redirect("news:article_list")
 
 
 class ArticleCreateView(generic.CreateView):  # type: ignore[type-arg]

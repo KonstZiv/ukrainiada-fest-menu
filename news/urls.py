@@ -11,6 +11,11 @@ urlpatterns = [
     path("<int:pk>/", views.article_detail, name="article_detail"),
     path("create/", views.ArticleCreateView.as_view(), name="article_create"),
     path("<int:pk>/edit/", views.ArticleUpdateView.as_view(), name="article_update"),
+    path(
+        "<int:pk>/toggle-status/",
+        views.toggle_article_status,
+        name="article_toggle_status",
+    ),
     path("<int:pk>/delete/", views.ArticleDeleteView.as_view(), name="article_delete"),
     path(
         "<int:pk>/translation-feedback/",
